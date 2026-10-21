@@ -1,0 +1,69 @@
+[gd_resource type="Resource" script_class="WeaponStats" load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://src/weapons/weapon_stats.gd" id="1_stats"]
+[ext_resource type="Script" path="res://src/weapons/weapon_level.gd" id="2_level"]
+[ext_resource type="Script" path="res://src/weapons/sewing_pin_sniper.gd" id="3_behaviour"]
+
+[sub_resource type="Resource" id="Resource_level1"]
+script = ExtResource("2_level")
+damage = 15.0
+cooldown = 1.2
+reach = 900.0
+count = 1
+speed = 1100.0
+pierce = 2
+spread_degrees = 8.0
+card_text = "Fires a pin towards your cursor by itself. Goes through 2 zombies."
+
+[sub_resource type="Resource" id="Resource_level2"]
+script = ExtResource("2_level")
+damage = 22.0
+cooldown = 1.2
+reach = 900.0
+count = 1
+speed = 1100.0
+pierce = 2
+spread_degrees = 8.0
+card_text = "Damage 15 → 22."
+
+[sub_resource type="Resource" id="Resource_level3"]
+script = ExtResource("2_level")
+damage = 22.0
+cooldown = 1.2
+reach = 900.0
+count = 1
+speed = 1100.0
+pierce = 4
+spread_degrees = 8.0
+card_text = "Goes through 2 → 4 zombies."
+
+[sub_resource type="Resource" id="Resource_level4"]
+script = ExtResource("2_level")
+damage = 22.0
+cooldown = 0.9
+reach = 900.0
+count = 1
+speed = 1100.0
+pierce = 4
+spread_degrees = 8.0
+card_text = "Fires faster: every 1.2 s → 0.9 s."
+
+[sub_resource type="Resource" id="Resource_level5"]
+script = ExtResource("2_level")
+damage = 22.0
+cooldown = 0.9
+reach = 900.0
+count = 2
+speed = 1100.0
+pierce = 4
+spread_degrees = 8.0
+card_text = "Fires 2 pins in a narrow spread."
+
+[resource]
+script = ExtResource("1_stats")
+id = &"sewing_pin_sniper"
+display_name = "Sewing-Pin Sniper"
+behaviour = ExtResource("3_behaviour")
+knockback = 80.0
+hit_radius = 6.0
+levels = Array[ExtResource("2_level")]([SubResource("Resource_level1"), SubResource("Resource_level2"), SubResource("Resource_level3"), SubResource("Resource_level4"), SubResource("Resource_level5")])

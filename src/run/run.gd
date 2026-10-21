@@ -51,6 +51,7 @@ func _ready() -> void:
 	hud.follow_player(first)
 	camera.set_bounds(arena.outer_rect())
 	camera.snap_to_players()
+	Crosshair.use()
 	hud.show_time(elapsed, rules.goal_seconds)
 
 

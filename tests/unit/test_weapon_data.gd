@@ -1,6 +1,7 @@
 extends GutTest
 
 const BOOMERANG: WeaponStats = preload("res://data/weapons/peel_boomerang.tres")
+const SNIPER: WeaponStats = preload("res://data/weapons/sewing_pin_sniper.tres")
 
 
 func test_boomerang_has_five_levels_with_card_text() -> void:
@@ -38,3 +39,20 @@ func test_levels_never_get_worse() -> void:
 func test_at_level_clamps() -> void:
 	assert_eq(BOOMERANG.at_level(0), BOOMERANG.at_level(1))
 	assert_eq(BOOMERANG.at_level(99), BOOMERANG.at_level(5))
+
+
+func test_sniper_level_one_matches_the_spec() -> void:
+	var first: WeaponLevel = SNIPER.at_level(1)
+	assert_eq(SNIPER.max_level(), 5)
+	assert_eq(first.damage, 15.0)
+	assert_eq(first.cooldown, 1.2)
+	assert_eq(first.pierce, 2)
+
+
+func test_ac9_sniper_levels_add_what_their_cards_say() -> void:
+	assert_gt(SNIPER.at_level(2).damage, SNIPER.at_level(1).damage, "L2: more damage")
+	assert_gt(SNIPER.at_level(3).pierce, SNIPER.at_level(2).pierce, "L3: more pierce")
+	assert_lt(SNIPER.at_level(4).cooldown, SNIPER.at_level(3).cooldown, "L4: faster")
+	assert_eq(SNIPER.at_level(5).count, 2, "L5: two pins")
+	assert_string_contains(SNIPER.at_level(3).card_text, "4")
+	assert_string_contains(SNIPER.at_level(4).card_text, "0.9")
