@@ -1,0 +1,79 @@
+[gd_resource type="Resource" script_class="WeaponStats" load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://src/weapons/weapon_stats.gd" id="1_stats"]
+[ext_resource type="Script" path="res://src/weapons/weapon_level.gd" id="2_level"]
+[ext_resource type="Script" path="res://src/weapons/stuffing_cloud.gd" id="3_behaviour"]
+
+[sub_resource type="Resource" id="Resource_level1"]
+script = ExtResource("2_level")
+damage = 3.0
+cooldown = 0.4
+reach = 0.0
+count = 1
+speed = 0.0
+pierce = 0
+area = 55.0
+duration = 0.0
+spread_degrees = 0.0
+card_text = "A soft cloud around you hurts every zombie inside it, 2–3 times a second."
+
+[sub_resource type="Resource" id="Resource_level2"]
+script = ExtResource("2_level")
+damage = 3.0
+cooldown = 0.4
+reach = 0.0
+count = 1
+speed = 0.0
+pierce = 0
+area = 70.0
+duration = 0.0
+spread_degrees = 0.0
+card_text = "Bigger cloud."
+
+[sub_resource type="Resource" id="Resource_level3"]
+script = ExtResource("2_level")
+damage = 5.0
+cooldown = 0.4
+reach = 0.0
+count = 1
+speed = 0.0
+pierce = 0
+area = 70.0
+duration = 0.0
+spread_degrees = 0.0
+card_text = "Damage 3 → 5."
+
+[sub_resource type="Resource" id="Resource_level4"]
+script = ExtResource("2_level")
+damage = 5.0
+cooldown = 0.3
+reach = 0.0
+count = 1
+speed = 0.0
+pierce = 0
+area = 70.0
+duration = 0.0
+spread_degrees = 0.0
+card_text = "Puffs faster: every 0.4 → 0.3 seconds."
+
+[sub_resource type="Resource" id="Resource_level5"]
+script = ExtResource("2_level")
+damage = 6.0
+cooldown = 0.3
+reach = 0.0
+count = 1
+speed = 0.0
+pierce = 0
+area = 85.0
+duration = 0.0
+spread_degrees = 0.0
+card_text = "Even bigger cloud, and damage 5 → 6."
+
+[resource]
+script = ExtResource("1_stats")
+id = &"stuffing_cloud"
+display_name = "Stuffing Cloud"
+behaviour = ExtResource("3_behaviour")
+knockback = 40.0
+hit_radius = 0.0
+levels = Array[ExtResource("2_level")]([SubResource("Resource_level1"), SubResource("Resource_level2"), SubResource("Resource_level3"), SubResource("Resource_level4"), SubResource("Resource_level5")])

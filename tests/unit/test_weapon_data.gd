@@ -4,6 +4,9 @@ const BOOMERANG: WeaponStats = preload("res://data/weapons/peel_boomerang.tres")
 const SNIPER: WeaponStats = preload("res://data/weapons/sewing_pin_sniper.tres")
 const NEEDLES: WeaponStats = preload("res://data/weapons/orbiting_needles.tres")
 const SHOTGUN: WeaponStats = preload("res://data/weapons/button_shotgun.tres")
+const CLOUD: WeaponStats = preload("res://data/weapons/stuffing_cloud.tres")
+const YARN: WeaponStats = preload("res://data/weapons/bouncy_yarn_ball.tres")
+const MORTAR: WeaponStats = preload("res://data/weapons/thimble_mortar.tres")
 
 
 func test_boomerang_has_five_levels_with_card_text() -> void:
@@ -74,6 +77,7 @@ func _assert_never_worse(weapon: WeaponStats) -> void:
 		assert_true(after.count >= before.count, "count at " + label)
 		assert_true(after.pierce >= before.pierce, "pierce at " + label)
 		assert_true(after.duration >= before.duration, "duration at " + label)
+		assert_true(after.area >= before.area, "area at " + label)
 
 
 func test_ac2_needles_levels_add_what_their_cards_say() -> void:
@@ -98,3 +102,43 @@ func test_ac2_shotgun_levels_add_what_their_cards_say() -> void:
 	assert_eq(SHOTGUN.at_level(4).pierce, 1, "L4: goes through 1 zombie")
 	assert_eq(SHOTGUN.at_level(5).count, 7, "L5: 7 buttons")
 	assert_eq(SHOTGUN.at_level(5).cooldown, 1.2, "L5: faster")
+
+
+func test_ac2_cloud_levels_add_what_their_cards_say() -> void:
+	_assert_never_worse(CLOUD)
+	assert_gt(CLOUD.at_level(1).area, 0.0, "the cloud has a size")
+	assert_lt(CLOUD.at_level(1).cooldown, 0.5, "it hurts a few times a second")
+	assert_gt(CLOUD.at_level(2).area, CLOUD.at_level(1).area, "L2: bigger cloud")
+	assert_eq(CLOUD.at_level(3).damage, 5.0, "L3: damage 3 → 5")
+	assert_eq(CLOUD.at_level(4).cooldown, 0.3, "L4: puffs every 0.3 seconds")
+	assert_gt(CLOUD.at_level(5).area, CLOUD.at_level(4).area, "L5: even bigger")
+	assert_eq(CLOUD.at_level(5).damage, 6.0, "L5: damage 5 → 6")
+	assert_string_contains(CLOUD.at_level(3).card_text, "3 → 5")
+	assert_string_contains(CLOUD.at_level(4).card_text, "0.4 → 0.3")
+
+
+func test_ac2_yarn_levels_add_what_their_cards_say() -> void:
+	_assert_never_worse(YARN)
+	var first: WeaponLevel = YARN.at_level(1)
+	assert_eq(first.pierce + 1, 4, "L1: bounces between 4 zombies")
+	assert_gt(first.duration, 0.0, "a ball doesn't bounce forever")
+	assert_eq(YARN.at_level(2).pierce + 1, 6, "L2: 6 zombies")
+	assert_eq(YARN.at_level(3).damage, 12.0, "L3: damage 8 → 12")
+	assert_eq(YARN.at_level(4).count, 2, "L4: 2 balls")
+	assert_eq(YARN.at_level(5).pierce + 1, 8, "L5: 8 zombies")
+	assert_eq(YARN.at_level(5).cooldown, 1.6, "L5: faster")
+	assert_string_contains(first.card_text, "4 zombies")
+	assert_string_contains(YARN.at_level(2).card_text, "6 zombies")
+	assert_string_contains(YARN.at_level(5).card_text, "8 zombies")
+
+
+func test_ac2_mortar_levels_add_what_their_cards_say() -> void:
+	_assert_never_worse(MORTAR)
+	assert_eq(MORTAR.at_level(1).count, 1)
+	assert_gt(MORTAR.at_level(1).area, 0.0, "it lands with an area hit")
+	assert_eq(MORTAR.at_level(2).count, 2, "L2: 2 thimbles")
+	assert_gt(MORTAR.at_level(3).area, MORTAR.at_level(2).area, "L3: bigger blast")
+	assert_eq(MORTAR.at_level(4).damage, 20.0, "L4: damage 14 → 20")
+	assert_eq(MORTAR.at_level(5).count, 3, "L5: 3 thimbles")
+	assert_eq(MORTAR.at_level(5).cooldown, 2.0, "L5: faster")
+	assert_string_contains(MORTAR.at_level(4).card_text, "14 → 20")
