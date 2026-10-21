@@ -1,0 +1,74 @@
+[gd_resource type="Resource" script_class="WeaponStats" load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://src/weapons/weapon_stats.gd" id="1_stats"]
+[ext_resource type="Script" path="res://src/weapons/weapon_level.gd" id="2_level"]
+[ext_resource type="Script" path="res://src/weapons/button_shotgun.gd" id="3_behaviour"]
+
+[sub_resource type="Resource" id="Resource_level1"]
+script = ExtResource("2_level")
+damage = 6.0
+cooldown = 1.5
+reach = 200.0
+count = 3
+speed = 600.0
+pierce = 0
+spread_degrees = 14.0
+duration = 0.0
+card_text = "Fires 3 buttons at the nearest zombie, up close. Pushes zombies back."
+
+[sub_resource type="Resource" id="Resource_level2"]
+script = ExtResource("2_level")
+damage = 6.0
+cooldown = 1.5
+reach = 200.0
+count = 5
+speed = 600.0
+pierce = 0
+spread_degrees = 14.0
+duration = 0.0
+card_text = "5 buttons instead of 3."
+
+[sub_resource type="Resource" id="Resource_level3"]
+script = ExtResource("2_level")
+damage = 9.0
+cooldown = 1.5
+reach = 200.0
+count = 5
+speed = 600.0
+pierce = 0
+spread_degrees = 14.0
+duration = 0.0
+card_text = "Damage 6 → 9."
+
+[sub_resource type="Resource" id="Resource_level4"]
+script = ExtResource("2_level")
+damage = 9.0
+cooldown = 1.5
+reach = 200.0
+count = 5
+speed = 600.0
+pierce = 1
+spread_degrees = 14.0
+duration = 0.0
+card_text = "Each button goes through 1 zombie."
+
+[sub_resource type="Resource" id="Resource_level5"]
+script = ExtResource("2_level")
+damage = 9.0
+cooldown = 1.2
+reach = 200.0
+count = 7
+speed = 600.0
+pierce = 1
+spread_degrees = 14.0
+duration = 0.0
+card_text = "7 buttons, and fires every 1.5 → 1.2 seconds."
+
+[resource]
+script = ExtResource("1_stats")
+id = &"button_shotgun"
+display_name = "Button Shotgun"
+behaviour = ExtResource("3_behaviour")
+knockback = 280.0
+hit_radius = 9.0
+levels = Array[ExtResource("2_level")]([SubResource("Resource_level1"), SubResource("Resource_level2"), SubResource("Resource_level3"), SubResource("Resource_level4"), SubResource("Resource_level5")])

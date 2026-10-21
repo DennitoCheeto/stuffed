@@ -11,6 +11,8 @@ extends Resource
 @export var knockback: float = 120.0
 ## Radius of the projectile's hit area, in pixels.
 @export var hit_radius: float = 14.0
+## Seconds before one lasting shot (an orbiting needle) can hurt the same zombie again.
+@export var hit_interval: float = 0.5
 ## Level 1 first.
 @export var levels: Array[WeaponLevel] = []
 
