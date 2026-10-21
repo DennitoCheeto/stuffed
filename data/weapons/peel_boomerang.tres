@@ -1,0 +1,69 @@
+[gd_resource type="Resource" script_class="WeaponStats" load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://src/weapons/weapon_stats.gd" id="1_stats"]
+[ext_resource type="Script" path="res://src/weapons/weapon_level.gd" id="2_level"]
+[ext_resource type="Script" path="res://src/weapons/peel_boomerang.gd" id="3_behaviour"]
+
+[sub_resource type="Resource" id="Resource_level1"]
+script = ExtResource("2_level")
+damage = 8.0
+cooldown = 1.4
+reach = 250.0
+count = 1
+speed = 450.0
+pierce = 0
+spread_degrees = 25.0
+card_text = "Throws a peel at the nearest zombie. It flies back and hits again."
+
+[sub_resource type="Resource" id="Resource_level2"]
+script = ExtResource("2_level")
+damage = 8.0
+cooldown = 1.4
+reach = 250.0
+count = 2
+speed = 450.0
+pierce = 0
+spread_degrees = 25.0
+card_text = "Throws 2 peels at once."
+
+[sub_resource type="Resource" id="Resource_level3"]
+script = ExtResource("2_level")
+damage = 12.0
+cooldown = 1.4
+reach = 250.0
+count = 2
+speed = 450.0
+pierce = 0
+spread_degrees = 25.0
+card_text = "Damage 8 → 12."
+
+[sub_resource type="Resource" id="Resource_level4"]
+script = ExtResource("2_level")
+damage = 12.0
+cooldown = 1.4
+reach = 330.0
+count = 2
+speed = 450.0
+pierce = 0
+spread_degrees = 25.0
+card_text = "Flies further: range 250 → 330."
+
+[sub_resource type="Resource" id="Resource_level5"]
+script = ExtResource("2_level")
+damage = 12.0
+cooldown = 1.0
+reach = 330.0
+count = 2
+speed = 450.0
+pierce = 0
+spread_degrees = 25.0
+card_text = "Throws faster: every 1.4 s → 1.0 s."
+
+[resource]
+script = ExtResource("1_stats")
+id = &"peel_boomerang"
+display_name = "Peel Boomerang"
+behaviour = ExtResource("3_behaviour")
+knockback = 120.0
+hit_radius = 14.0
+levels = Array[ExtResource("2_level")]([SubResource("Resource_level1"), SubResource("Resource_level2"), SubResource("Resource_level3"), SubResource("Resource_level4"), SubResource("Resource_level5")])

@@ -6,10 +6,12 @@ const SHAMBLER: EnemyStats = preload("res://data/enemies/shambler.tres")
 var run: Run
 
 
-## A run with the automatic spawner off, so each scenario places its own zombies.
+## A run with the automatic spawner off and Banane unarmed, so each scenario places its own
+## zombies and they stay alive.
 func _quiet_run() -> Run:
 	run = await start_run()
 	run.spawner.active = false
+	disarm(first_player())
 	return run
 
 

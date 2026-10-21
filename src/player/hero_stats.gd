@@ -16,3 +16,5 @@ extends Resource
 @export var hurt_invulnerability: float = 0.5
 ## Radius of the real hitbox (smaller than the drawing).
 @export var hitbox_radius: float = 12.0
+## The weapon the hero starts every run with.
+@export var starting_weapon: WeaponStats

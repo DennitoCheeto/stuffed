@@ -19,3 +19,5 @@ script = ExtResource("3_puppet")
 
 [node name="Overlay" type="Node2D" parent="."]
 script = ExtResource("4_overlay")
+
+[node name="Weapons" type="Node2D" parent="."]

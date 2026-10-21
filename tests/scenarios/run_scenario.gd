@@ -35,6 +35,13 @@ func first_player() -> Player:
 	return Players.all(get_tree())[0]
 
 
+## Takes all weapons away (for scenarios that need zombies to stay alive).
+func disarm(player: Player) -> void:
+	for weapon: Weapon in player.weapons():
+		weapon.get_parent().remove_child(weapon)
+		weapon.free()
+
+
 ## Holds an action for `frames` physics frames, then releases it.
 func hold_action(action: String, frames: int) -> void:
 	sender.action_down(action)
