@@ -1,34 +1,21 @@
-extends GutTest
-## Scenario: the player starts the game.
-
-const MAIN_SCENE: PackedScene = preload("res://src/main/main.tscn")
-
-var _main: Control
-var _sender: GutInputSender
-
-
-func before_each() -> void:
-	_main = MAIN_SCENE.instantiate()
-	_main.set("quit_on_cancel", false)
-	add_child_autofree(_main)
-	_sender = GutInputSender.new(Input)
-	await wait_physics_frames(2)
-
-
-func after_each() -> void:
-	_sender.release_all()
-	_sender.clear()
+extends "res://tests/scenarios/run_scenario.gd"
+## Scenario: the player starts the game and sees the title screen.
 
 
 func test_start_screen_shows_title_and_version() -> void:
-	var title: Label = _main.get_node("%TitleLabel")
-	var version: Label = _main.get_node("%VersionLabel")
-	assert_eq(title.text, "STUFFED")
-	assert_eq(version.text, GameInfo.version_label())
+	var title: TitleScreen = main.current_screen as TitleScreen
+	assert_not_null(title, "the game opens on the title screen")
+	assert_eq(title.title_label.text, "STUFFED")
+	assert_eq(title.version_label.text, GameInfo.version_label())
 
 
-func test_pressing_esc_asks_to_quit() -> void:
-	watch_signals(_main)
-	_sender.action_down("ui_cancel").hold_for(0.05)
-	await wait_for_signal(_sender.idle, 1)
-	assert_signal_emitted(_main, "quit_requested")
+func test_start_run_button_has_keyboard_focus() -> void:
+	var title: TitleScreen = main.current_screen as TitleScreen
+	assert_true(title.start_button.has_focus())
+
+
+func test_quit_button_quits() -> void:
+	var title: TitleScreen = main.current_screen as TitleScreen
+	watch_signals(main)
+	title.quit_button.pressed.emit()
+	assert_signal_emitted(main, "quit_requested")
