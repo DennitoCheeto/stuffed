@@ -28,6 +28,8 @@ jobs:
 
   test:
     name: Typecheck and tests
+    # A hung test run (e.g. the engine not exiting) fails fast instead of blocking for hours.
+    timeout-minutes: 12
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

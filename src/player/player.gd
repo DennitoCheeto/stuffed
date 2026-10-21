@@ -22,6 +22,8 @@ var max_health: float = 0.0
 var facing: Vector2 = Vector2.RIGHT
 ## Name of whatever hit the hero last (shown on the end screen later).
 var last_hit_by: String = ""
+## Developer menu: nothing can hurt the hero.
+var invincible: bool = false
 ## Multiplies how fast all weapons attack (Quick Hands raises it).
 var attack_speed: float = 1.0
 ## XP buttons closer than this fly to the hero (Magnet Pocket raises it).
@@ -199,7 +201,7 @@ func is_dead() -> bool:
 
 ## Contact damage. Ignored while dashing or right after another hit. Returns true if it hurt.
 func take_hit(amount: float, source: String) -> bool:
-	if is_dead() or is_invulnerable():
+	if is_dead() or is_invulnerable() or invincible:
 		return false
 	health = maxf(health - amount, 0.0)
 	last_hit_by = source

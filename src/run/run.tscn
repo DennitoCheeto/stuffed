@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3]
+[gd_scene load_steps=17 format=3]
 
 [ext_resource type="Script" path="res://src/run/run.gd" id="1_run"]
 [ext_resource type="Resource" path="res://data/run_rules.tres" id="2_rules"]
@@ -15,6 +15,7 @@
 [ext_resource type="PackedScene" path="res://src/ui/goal_screen.tscn" id="13_goal"]
 [ext_resource type="PackedScene" path="res://src/ui/pause_menu.tscn" id="14_pause"]
 [ext_resource type="Script" path="res://src/effects/damage_numbers.gd" id="15_numbers"]
+[ext_resource type="Script" path="res://src/ui/dev_menu.gd" id="16_dev"]
 
 [node name="Run" type="Node2D"]
 script = ExtResource("1_run")
@@ -54,3 +55,6 @@ script = ExtResource("4_camera")
 [node name="GoalScreen" parent="." instance=ExtResource("13_goal")]
 
 [node name="PauseMenu" parent="." instance=ExtResource("14_pause")]
+
+[node name="DevMenu" type="CanvasLayer" parent="."]
+script = ExtResource("16_dev")
