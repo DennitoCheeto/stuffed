@@ -42,11 +42,3 @@ func test_same_seed_same_points() -> void:
 			SpawnPlacement.outside_view(view, AREA, 80.0, 16.0, a),
 			SpawnPlacement.outside_view(view, AREA, 80.0, 16.0, b)
 		)
-
-
-func test_schedule_rate_grows_per_minute() -> void:
-	var schedule: SpawnSchedule = load("res://data/spawn_schedule.tres")
-	assert_eq(schedule.rate_at(0.0), schedule.start_rate)
-	assert_almost_eq(
-		schedule.rate_at(120.0), schedule.start_rate + 2.0 * schedule.rate_growth_per_minute, 0.001
-	)

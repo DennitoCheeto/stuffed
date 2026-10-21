@@ -78,7 +78,7 @@ static func bake(host: Node) -> void:
 ## Every felt part of the game, freshly built.
 static func _all_pieces() -> Dictionary[StringName, FeltPiece]:
 	var pieces: Dictionary[StringName, FeltPiece] = {}
-	pieces.merge(ZombiePuppet.make_parts())
+	pieces.merge(ZombieLook.all_parts())
 	pieces.merge(XpButtonLook.make_parts())
 	return pieces
 
