@@ -3,14 +3,6 @@ extends CanvasLayer
 ## Run information on top of the game: the timer with the goal, player 1's health, XP, level,
 ## and their weapons and items as two rows of icons with levels (spec 02 §11).
 
-@onready var timer_label: Label = %TimerLabel
-@onready var health_bar: ProgressBar = %HealthBar
-@onready var health_label: Label = %HealthLabel
-@onready var xp_bar: ProgressBar = %XpBar
-@onready var level_label: Label = %LevelLabel
-@onready var weapon_row: HBoxContainer = %WeaponRow
-@onready var item_row: HBoxContainer = %ItemRow
-
 ## Upgrade cards by id, for the icons of owned weapons and items.
 var pool: UpgradePool
 ## Player 1's weapon slots, left to right, in the order they were picked.
@@ -19,6 +11,14 @@ var weapon_slots: Array[LoadoutSlot] = []
 var item_slots: Array[LoadoutSlot] = []
 
 var _player: Player
+
+@onready var timer_label: Label = %TimerLabel
+@onready var health_bar: ProgressBar = %HealthBar
+@onready var health_label: Label = %HealthLabel
+@onready var xp_bar: ProgressBar = %XpBar
+@onready var level_label: Label = %LevelLabel
+@onready var weapon_row: HBoxContainer = %WeaponRow
+@onready var item_row: HBoxContainer = %ItemRow
 
 
 func show_time(elapsed: float, goal: float) -> void:
