@@ -110,7 +110,7 @@ func test_ac18_boosts_and_snack_do_what_they_say() -> void:
 	var banane: Player = first_player()
 	banane.take_hit(50.0, "Shambler")
 	for upgrade: UpgradeDef in POOL.upgrades:
-		if upgrade.kind == UpgradeDef.Kind.BOOST:
+		if upgrade.kind == UpgradeDef.Kind.ITEM:
 			banane.apply_upgrade(UpgradeOffer.new(upgrade, 1))
 	assert_almost_eq(banane.move_speed(), banane.stats.move_speed * 1.1, 0.01, "Quick Feet")
 	assert_eq(banane.max_health, 120.0, "Extra Stuffing: +20 max health")

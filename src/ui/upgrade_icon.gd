@@ -5,7 +5,8 @@ extends Control
 const BACK_COLOR: Color = Color("#2a2633")
 const RING_COLOR: Color = Color("#4a4358")
 
-## Which icon to draw: boomerang, pin, feet, stuffing, magnet, hands, snack.
+## Which icon to draw: boomerang, pin, feet, stuffing, magnet, hands, scissors, thread, spool,
+## felt, snack. "" draws only the empty round back (an empty HUD slot).
 var icon: StringName = &"":
 	set(value):
 		icon = value
@@ -42,6 +43,14 @@ func _draw() -> void:
 			draw_circle(Vector2(4, 0), 15.0, Color("#f2b52e"))
 			for y: float in [-10.0, 0.0, 10.0]:
 				draw_line(Vector2(-28, y), Vector2(-14, y), Color("#f2b52e"), 3.0)
+		&"scissors":
+			_scissors()
+		&"thread":
+			_thread()
+		&"spool":
+			_spool()
+		&"felt":
+			_felt()
 
 
 func _peel(color: Color, tilt: float) -> void:
@@ -56,3 +65,43 @@ func _peel(color: Color, tilt: float) -> void:
 
 func _ellipse(center: Vector2, radii: Vector2, color: Color) -> void:
 	draw_colored_polygon(FeltShapes.ellipse(center, radii, 16), color)
+
+
+func _scissors() -> void:
+	var blade: Color = Color("#d9d6e3")
+	var handle: Color = Color("#4fc3a1")
+	draw_line(Vector2(-6, 6), Vector2(20, -22), blade, 5.0)
+	draw_line(Vector2(6, 6), Vector2(-20, -22), blade, 5.0)
+	draw_arc(Vector2(-11, 15), 8.0, 0.0, TAU, 16, handle, 4.0)
+	draw_arc(Vector2(11, 15), 8.0, 0.0, TAU, 16, handle, 4.0)
+	draw_circle(Vector2(0, -1), 2.5, Color("#4a4358"))
+
+
+func _thread() -> void:
+	var color: Color = Color("#e0475b")
+	var points: PackedVector2Array = []
+	for i: int in 25:
+		var t: float = i / 24.0
+		points.append(Vector2(lerpf(-24, 24, t), sin(t * TAU * 1.5) * 10.0))
+	draw_polyline(points, color, 4.0, true)
+	draw_line(Vector2(24, 0), Vector2(30, -6), Color("#d9d6e3"), 3.0)
+
+
+func _spool() -> void:
+	var wood: Color = Color("#c98a4b")
+	draw_rect(Rect2(-18, -22, 36, 7), wood)
+	draw_rect(Rect2(-18, 15, 36, 7), wood)
+	draw_rect(Rect2(-13, -15, 26, 30), Color("#9b6ad6"))
+	for y: float in [-9.0, -2.0, 5.0, 12.0]:
+		draw_line(Vector2(-13, y), Vector2(13, y - 3.0), Color("#c6a3f0"), 2.0)
+
+
+func _felt() -> void:
+	var shape: PackedVector2Array = FeltShapes.points(
+		PackedFloat32Array([-20, -16, 0, -22, 20, -16, 18, 8, 0, 24, -18, 8])
+	)
+	draw_colored_polygon(shape, Color("#7aa5d9"))
+	var stitch: Color = Color("#f4f1e8")
+	for i: int in 5:
+		var y: float = -12.0 + i * 7.0
+		draw_line(Vector2(-6, y), Vector2(6, y), stitch, 2.0)

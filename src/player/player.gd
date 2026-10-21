@@ -8,8 +8,12 @@ signal dashed(from_position: Vector2, direction: Vector2)
 signal died(player: Player)
 ## A level-up moment: Banane quacks with sunglasses on.
 signal celebrated
+## Weapons or items were added or levelled up (the HUD redraws its icons).
+signal loadout_changed
 
 const GROUP: StringName = &"players"
+## Thick Felt never makes the hero take less than this share of a hit.
+const MIN_DAMAGE_TAKEN: float = 0.2
 
 @export var stats: HeroStats
 @export var xp_rules: XpRules
@@ -32,8 +36,20 @@ var pickup_range: float = 0.0
 var progress: LevelProgress
 ## Multiplies the hero's move speed (Quick Feet raises it).
 var move_speed_multiplier: float = 1.0
-## Levels of the boosts picked this run (weapons keep their own level).
-var boost_levels: Dictionary[StringName, int] = {}
+## Multiplies all weapon damage (Sharp Scissors raises it).
+var damage_multiplier: float = 1.0
+## Multiplies weapon reach and duration (Long Thread raises it).
+var range_multiplier: float = 1.0
+## Multiplies weapon areas and shot size (Big Spool raises it).
+var area_multiplier: float = 1.0
+## Multiplies damage the hero takes (Thick Felt lowers it).
+var damage_taken_multiplier: float = 1.0
+## Goes up whenever a weapon bonus changes, so weapons know to recompute their numbers.
+var bonus_version: int = 0
+## Items picked this run, in the order they were first picked.
+var items: Array[UpgradeDef] = []
+## Level of each item picked this run, by id (weapons keep their own level).
+var item_levels: Dictionary[StringName, int] = {}
 ## Every card picked this run, in order, e.g. "Quick Feet 2" (for the end screen and run log).
 var picked_upgrades: PackedStringArray = []
 
@@ -114,9 +130,9 @@ func heal(amount: float) -> void:
 	health_changed.emit(health, max_health)
 
 
-## Current level of every upgrade the hero has (weapons and boosts), for rolling cards.
+## Current level of every upgrade the hero has (weapons and items), for rolling cards.
 func upgrade_levels() -> Dictionary[StringName, int]:
-	var levels: Dictionary[StringName, int] = boost_levels.duplicate()
+	var levels: Dictionary[StringName, int] = item_levels.duplicate()
 	for owned: Weapon in weapons():
 		levels[owned.stats.id] = owned.level
 	return levels
@@ -132,12 +148,15 @@ func apply_upgrade(offer: UpgradeOffer) -> void:
 				add_weapon(upgrade.weapon)
 			else:
 				owned.level_up()
-		UpgradeDef.Kind.BOOST:
-			boost_levels[upgrade.id] = boost_levels.get(upgrade.id, 0) + 1
-			_apply_boost(upgrade)
+		UpgradeDef.Kind.ITEM:
+			if not item_levels.has(upgrade.id):
+				items.append(upgrade)
+			item_levels[upgrade.id] = item_levels.get(upgrade.id, 0) + 1
+			_apply_item(upgrade)
 		UpgradeDef.Kind.SNACK:
 			heal(max_health * upgrade.amount)
 	picked_upgrades.append("%s %d" % [upgrade.display_name, offer.next_level])
+	loadout_changed.emit()
 
 
 ## Gives this hero a weapon (level 1). It attacks on its own from now on.
@@ -145,6 +164,7 @@ func add_weapon(weapon_stats: WeaponStats) -> Weapon:
 	var weapon: Weapon = weapon_stats.behaviour.new() as Weapon
 	weapon.setup(weapon_stats, self)
 	_weapons.add_child(weapon)
+	loadout_changed.emit()
 	return weapon
 
 
@@ -199,10 +219,12 @@ func is_dead() -> bool:
 	return health <= 0.0
 
 
-## Contact damage. Ignored while dashing or right after another hit. Returns true if it hurt.
+## Damage from a zombie or a bullet (Thick Felt makes it smaller). Ignored while dashing or right
+## after another hit. Returns true if it hurt.
 func take_hit(amount: float, source: String) -> bool:
 	if is_dead() or is_invulnerable() or invincible:
 		return false
+	amount *= damage_taken_multiplier
 	health = maxf(health - amount, 0.0)
 	last_hit_by = source
 	_hurt_invulnerable_left = stats.hurt_invulnerability
@@ -213,17 +235,28 @@ func take_hit(amount: float, source: String) -> bool:
 	return true
 
 
-func _apply_boost(upgrade: UpgradeDef) -> void:
-	match upgrade.boost:
-		UpgradeDef.Boost.MOVE_SPEED:
+func _apply_item(upgrade: UpgradeDef) -> void:
+	match upgrade.effect:
+		UpgradeDef.Effect.MOVE_SPEED:
 			move_speed_multiplier += upgrade.amount
-		UpgradeDef.Boost.MAX_HEALTH:
+		UpgradeDef.Effect.MAX_HEALTH:
 			max_health += upgrade.amount
 			heal(upgrade.amount)
-		UpgradeDef.Boost.PICKUP_RANGE:
+		UpgradeDef.Effect.PICKUP_RANGE:
 			pickup_range += stats.pickup_range * upgrade.amount
-		UpgradeDef.Boost.ATTACK_SPEED:
+		UpgradeDef.Effect.ATTACK_SPEED:
 			attack_speed += upgrade.amount
+		UpgradeDef.Effect.DAMAGE:
+			damage_multiplier += upgrade.amount
+		UpgradeDef.Effect.DURATION_AND_RANGE:
+			range_multiplier += upgrade.amount
+		UpgradeDef.Effect.AREA:
+			area_multiplier += upgrade.amount
+		UpgradeDef.Effect.DAMAGE_TAKEN:
+			damage_taken_multiplier = maxf(
+				damage_taken_multiplier - upgrade.amount, MIN_DAMAGE_TAKEN
+			)
+	bonus_version += 1
 
 
 func _move_dash(delta: float) -> void:

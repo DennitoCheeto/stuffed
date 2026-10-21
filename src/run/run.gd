@@ -96,7 +96,7 @@ func _ready() -> void:
 	dev_menu.setup(self)
 	dev_menu.restart_requested.connect(restart_requested.emit)
 	var first: Player = spawn_player(0, arena.center())
-	hud.follow_player(first)
+	hud.follow_player(first, upgrade_pool)
 	camera.set_bounds(arena.outer_rect())
 	camera.snap_to_players()
 	Crosshair.use()
