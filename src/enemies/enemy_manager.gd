@@ -7,6 +7,8 @@ extends Node
 
 signal zombie_killed(zombie: Zombie)
 
+## Weapons find the manager through this group.
+const GROUP: StringName = &"enemy_manager"
 const GRID_CELL: float = 48.0
 ## How strongly overlapping zombies push each other apart (0..1 per frame).
 const SEPARATION: float = 0.5
@@ -27,6 +29,10 @@ var zombies: Array[Zombie] = []
 var _grid: SpatialGrid = SpatialGrid.new(GRID_CELL)
 ## Only for looks (shamble phase, burst directions), so it doesn't change the seeded run.
 var _cosmetic_rng: RandomNumberGenerator = RandomNumberGenerator.new()
+
+
+func _ready() -> void:
+	add_to_group(GROUP)
 
 
 func setup(actors_node: Node2D, effects_node: Node2D, area: Rect2, max_count: int) -> void:

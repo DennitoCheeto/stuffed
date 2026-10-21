@@ -19,6 +19,8 @@ var max_health: float = 0.0
 var facing: Vector2 = Vector2.RIGHT
 ## Name of whatever hit the hero last (shown on the end screen later).
 var last_hit_by: String = ""
+## Multiplies how fast all weapons attack (Quick Hands raises it).
+var attack_speed: float = 1.0
 
 var _input: PlayerInput
 var _dash_left: float = 0.0
@@ -27,6 +29,7 @@ var _dash_cooldown_left: float = 0.0
 var _hurt_invulnerable_left: float = 0.0
 
 @onready var _hitbox: CollisionShape2D = $Hitbox
+@onready var _weapons: Node2D = $Weapons
 
 
 func _ready() -> void:
@@ -37,6 +40,8 @@ func _ready() -> void:
 	var shape: CircleShape2D = CircleShape2D.new()
 	shape.radius = stats.hitbox_radius
 	_hitbox.shape = shape
+	if stats.starting_weapon != null:
+		add_weapon(stats.starting_weapon)
 
 
 func _physics_process(delta: float) -> void:
@@ -55,6 +60,26 @@ func _physics_process(delta: float) -> void:
 	else:
 		velocity = direction * stats.move_speed
 		move_and_slide()
+
+
+## Gives this hero a weapon (level 1). It attacks on its own from now on.
+func add_weapon(weapon_stats: WeaponStats) -> Weapon:
+	var weapon: Weapon = weapon_stats.behaviour.new() as Weapon
+	weapon.setup(weapon_stats, self)
+	_weapons.add_child(weapon)
+	return weapon
+
+
+## The weapon with this id, or null if the hero doesn't have it.
+func weapon(id: StringName) -> Weapon:
+	return _weapons.get_node_or_null(NodePath(String(id))) as Weapon
+
+
+func weapons() -> Array[Weapon]:
+	var result: Array[Weapon] = []
+	for child: Node in _weapons.get_children():
+		result.append(child as Weapon)
+	return result
 
 
 ## Starts a dash in the facing direction. Returns false while the dash is cooling down.
