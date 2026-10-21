@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene load_steps=16 format=3]
 
 [ext_resource type="Script" path="res://src/run/run.gd" id="1_run"]
 [ext_resource type="Resource" path="res://data/run_rules.tres" id="2_rules"]
@@ -14,6 +14,7 @@
 [ext_resource type="PackedScene" path="res://src/ui/level_up_screen.tscn" id="12_level_up"]
 [ext_resource type="PackedScene" path="res://src/ui/goal_screen.tscn" id="13_goal"]
 [ext_resource type="PackedScene" path="res://src/ui/pause_menu.tscn" id="14_pause"]
+[ext_resource type="Script" path="res://src/effects/damage_numbers.gd" id="15_numbers"]
 
 [node name="Run" type="Node2D"]
 script = ExtResource("1_run")
@@ -32,6 +33,9 @@ rules = ExtResource("10_xp")
 y_sort_enabled = true
 
 [node name="Effects" type="Node2D" parent="."]
+
+[node name="DamageNumbers" type="Node2D" parent="."]
+script = ExtResource("15_numbers")
 
 [node name="Enemies" type="Node" parent="."]
 script = ExtResource("6_enemies")

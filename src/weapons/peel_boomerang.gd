@@ -19,6 +19,7 @@ func attack() -> bool:
 	if target == null:
 		return false
 	var aim: Vector2 = player.global_position.direction_to(target.position)
+	Sfx.play(&"throw")
 	for i: int in numbers.count:
 		var projectile: BoomerangProjectile = BoomerangProjectile.new()
 		projectile.top_level = true

@@ -38,6 +38,7 @@ func _physics_process(delta: float) -> void:
 		var target: Vector2 = _weapon.player.global_position
 		if global_position.distance_to(target) <= step + CATCH_DISTANCE:
 			_weapon.peel_caught.emit()
+			Sfx.play(&"throw", 0.8)
 			queue_free()
 			return
 		_direction = global_position.direction_to(target)

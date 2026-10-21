@@ -6,6 +6,8 @@ extends Node
 ## Zombies live under the `actors` node, which sits at the world origin.
 
 signal zombie_killed(zombie: Zombie)
+## A zombie took damage (damage numbers, hit sound).
+signal zombie_hit(zombie: Zombie, amount: float)
 
 ## Weapons find the manager through this group.
 const GROUP: StringName = &"enemy_manager"
@@ -65,6 +67,7 @@ func spawn(stats: EnemyStats, at: Vector2) -> Zombie:
 func damage(zombie: Zombie, amount: float, push: Vector2 = Vector2.ZERO) -> bool:
 	if not is_instance_valid(zombie) or zombie.dead:
 		return false
+	zombie_hit.emit(zombie, amount)
 	if zombie.take_damage(amount, push):
 		_remove(zombie, true)
 		return true
