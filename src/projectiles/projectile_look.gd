@@ -1,8 +1,8 @@
 class_name ProjectileLook
 extends RefCounted
 ## The felt shots (banana peel, sewing pin, needle, button, cloud, yarn ball, thimble and its
-## shadow) and the zombies' stuffing ball, drawn once into the FeltAtlas. Shapes are in "atlas
-## units": three times the on-screen size, for a sharp bake.
+## shadow, yarn burst, whip lash, zipper beam) and the zombies' stuffing ball, drawn once into
+## the FeltAtlas. Shapes are in "atlas units": three times the on-screen size, for a sharp bake.
 ## Players' shots are soft and quiet; enemy bullets are bright with a dark outline (vision §6.1).
 
 const DRAW_SCALE: float = 1.0 / 3.0
@@ -15,6 +15,9 @@ const CLOUD: StringName = &"shot/cloud"
 const YARN: StringName = &"shot/yarn"
 const THIMBLE: StringName = &"shot/thimble"
 const SHADOW: StringName = &"shot/shadow"
+const BURST: StringName = &"shot/burst"
+const WHIP: StringName = &"shot/whip"
+const ZIPPER: StringName = &"shot/zipper"
 const BULLET: StringName = &"bullet/stuffing"
 ## On-screen radius of the stuffing ball part; bigger bullets scale it.
 const BULLET_RADIUS: float = 8.0
@@ -41,6 +44,15 @@ const THIMBLE_DOT_COLOR: Color = Color("#8d8676")
 const SHADOW_RADIUS: float = 30.0
 const SHADOW_COLOR: Color = Color("#1a1620")
 const SHADOW_RIM_COLOR: Color = Color("#d8d0c0")
+## On-screen sizes the burst, the whip's arc and the zipper are drawn at; weapons scale them.
+const BURST_RADIUS: float = 40.0
+const WHIP_RADIUS: float = 100.0
+## Width of the whip's arc in degrees (the weapon's spread is drawn at this width).
+const WHIP_ARC: float = 120.0
+const WHIP_COLOR: Color = Color("#f0d78c")
+const ZIPPER_LENGTH: float = 400.0
+const ZIPPER_COLOR: Color = Color("#8fc4d9")
+const ZIPPER_TEETH_COLOR: Color = Color("#dfeef4")
 const BULLET_COLOR: Color = Color("#ff3d6e")
 const BULLET_CORE_COLOR: Color = Color("#ffe1ea")
 const BULLET_OUTLINE_COLOR: Color = Color("#14101a")
@@ -56,6 +68,9 @@ static func make_parts() -> Dictionary[StringName, FeltPiece]:
 		YARN: _yarn(),
 		THIMBLE: _thimble(),
 		SHADOW: _shadow(),
+		BURST: _burst(),
+		WHIP: _whip(),
+		ZIPPER: _zipper(),
 		BULLET: _bullet(),
 	}
 
@@ -175,6 +190,68 @@ static func _shadow() -> FeltPiece:
 	shadow.outline_width = 2.0 * UNITS
 	shadow.outline_color = SHADOW_RIM_COLOR
 	return shadow
+
+
+## A round puff of yarn with loose strands sticking out; fills BURST_RADIUS.
+static func _burst() -> FeltPiece:
+	var burst: FeltPiece = FeltPiece.new()
+	burst.soft = false
+	var radius: float = BURST_RADIUS * UNITS
+	burst.polygon = FeltShapes.circle(Vector2.ZERO, radius * 0.85, 28)
+	burst.color = YARN_COLOR
+	for i: int in 9:
+		var angle: float = TAU * i / 9.0
+		var root: Vector2 = Vector2.from_angle(angle) * radius * 0.5
+		var tip: Vector2 = Vector2.from_angle(angle + 0.2) * radius
+		burst.add_line([root, tip], YARN_STRAND_COLOR, 2.0 * UNITS)
+	return burst
+
+
+## A crescent of thread around the pivot, centred on +x, WHIP_ARC wide; thickest in the middle.
+static func _whip() -> FeltPiece:
+	var whip: FeltPiece = FeltPiece.new()
+	whip.soft = false
+	var radius: float = WHIP_RADIUS * UNITS
+	var half: float = deg_to_rad(WHIP_ARC) / 2.0
+	var outer: PackedVector2Array = []
+	var inner: PackedVector2Array = []
+	for i: int in 25:
+		var t: float = i / 24.0
+		var angle: float = lerpf(-half, half, t)
+		outer.append(Vector2.from_angle(angle) * radius)
+		inner.append(Vector2.from_angle(angle) * radius * (1.0 - 0.2 * sin(PI * t)))
+	inner.reverse()
+	outer.append_array(inner)
+	whip.polygon = outer
+	whip.color = WHIP_COLOR
+	return whip
+
+
+## A zipper from the pivot along +x, ZIPPER_LENGTH long, with teeth and a pull tab at the end.
+static func _zipper() -> FeltPiece:
+	var zipper: FeltPiece = FeltPiece.new()
+	zipper.soft = false
+	var length: float = ZIPPER_LENGTH * UNITS
+	var half_width: float = 5.0 * UNITS
+	zipper.polygon = FeltShapes.points(
+		PackedFloat32Array([0, -half_width, length, -half_width, length, half_width, 0, half_width])
+	)
+	zipper.color = ZIPPER_COLOR
+	var tooth: float = 4.0 * UNITS
+	for i: int in int(length / (tooth * 2.0)):
+		var x: float = i * tooth * 2.0 + (tooth if i % 2 == 1 else 0.0)
+		var side: float = -1.0 if i % 2 == 0 else 1.0
+		var box: Rect2 = Rect2(x, minf(0.0, side * half_width * 0.8), tooth, half_width * 0.8)
+		zipper.add_layer(_rect_points(box), ZIPPER_TEETH_COLOR)
+	var tab: PackedVector2Array = FeltShapes.ellipse(Vector2(length, 0.0), Vector2(4, 7) * UNITS)
+	zipper.add_layer(tab, ZIPPER_TEETH_COLOR)
+	return zipper
+
+
+static func _rect_points(box: Rect2) -> PackedVector2Array:
+	var top_right: Vector2 = Vector2(box.end.x, box.position.y)
+	var bottom_left: Vector2 = Vector2(box.position.x, box.end.y)
+	return [box.position, top_right, box.end, bottom_left]
 
 
 static func _bullet() -> FeltPiece:

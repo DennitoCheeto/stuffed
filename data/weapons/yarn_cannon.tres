@@ -1,0 +1,79 @@
+[gd_resource type="Resource" script_class="WeaponStats" load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://src/weapons/weapon_stats.gd" id="1_stats"]
+[ext_resource type="Script" path="res://src/weapons/weapon_level.gd" id="2_level"]
+[ext_resource type="Script" path="res://src/weapons/yarn_cannon.gd" id="3_behaviour"]
+
+[sub_resource type="Resource" id="Resource_level1"]
+script = ExtResource("2_level")
+damage = 20.0
+cooldown = 2.0
+reach = 600.0
+count = 1
+speed = 280.0
+pierce = 0
+area = 60.0
+duration = 0.0
+spread_degrees = 0.0
+card_text = "Fires a slow, heavy yarn ball towards your cursor by itself. It bursts on the first zombie it hits."
+
+[sub_resource type="Resource" id="Resource_level2"]
+script = ExtResource("2_level")
+damage = 20.0
+cooldown = 2.0
+reach = 600.0
+count = 1
+speed = 280.0
+pierce = 0
+area = 75.0
+duration = 0.0
+spread_degrees = 0.0
+card_text = "Bigger burst."
+
+[sub_resource type="Resource" id="Resource_level3"]
+script = ExtResource("2_level")
+damage = 30.0
+cooldown = 2.0
+reach = 600.0
+count = 1
+speed = 280.0
+pierce = 0
+area = 75.0
+duration = 0.0
+spread_degrees = 0.0
+card_text = "Damage 20 → 30."
+
+[sub_resource type="Resource" id="Resource_level4"]
+script = ExtResource("2_level")
+damage = 30.0
+cooldown = 1.6
+reach = 600.0
+count = 1
+speed = 280.0
+pierce = 0
+area = 75.0
+duration = 0.0
+spread_degrees = 0.0
+card_text = "Fires every 2 → 1.6 seconds."
+
+[sub_resource type="Resource" id="Resource_level5"]
+script = ExtResource("2_level")
+damage = 30.0
+cooldown = 1.6
+reach = 600.0
+count = 2
+speed = 280.0
+pierce = 0
+area = 75.0
+duration = 0.0
+spread_degrees = 18.0
+card_text = "2 yarn balls."
+
+[resource]
+script = ExtResource("1_stats")
+id = &"yarn_cannon"
+display_name = "Yarn Cannon"
+behaviour = ExtResource("3_behaviour")
+knockback = 220.0
+hit_radius = 16.0
+levels = Array[ExtResource("2_level")]([SubResource("Resource_level1"), SubResource("Resource_level2"), SubResource("Resource_level3"), SubResource("Resource_level4"), SubResource("Resource_level5")])

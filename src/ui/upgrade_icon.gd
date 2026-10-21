@@ -5,9 +5,9 @@ extends Control
 const BACK_COLOR: Color = Color("#2a2633")
 const RING_COLOR: Color = Color("#4a4358")
 
-## Which icon to draw: boomerang, pin, needles, buttons, cloud, yarn, thimble, feet, stuffing,
-## magnet, hands, scissors, thread, spool, felt, snack. "" draws only the empty round back (an
-## empty HUD slot).
+## Which icon to draw: boomerang, pin, needles, buttons, cloud, yarn, thimble, cannon, whip,
+## zipper, feet, stuffing, magnet, hands, scissors, thread, spool, felt, snack. "" draws only the
+## empty round back (an empty HUD slot).
 var icon: StringName = &"":
 	set(value):
 		icon = value
@@ -54,6 +54,12 @@ func _draw() -> void:
 			_yarn()
 		&"thimble":
 			_thimble()
+		&"cannon":
+			_cannon()
+		&"whip":
+			_whip()
+		&"zipper":
+			_zipper()
 		&"scissors":
 			_scissors()
 		&"thread":
@@ -157,3 +163,23 @@ func _thimble() -> void:
 		for x: float in [-6.0, 0.0, 6.0]:
 			draw_circle(Vector2(x, y), 2.0, Color("#8d8676"))
 	draw_rect(Rect2(-18, 14, 36, 6), Color("#aaa395"))
+
+
+func _cannon() -> void:
+	draw_rect(Rect2(-24, -6, 30, 18), Color("#8d8676"))
+	draw_circle(Vector2(-24, 3), 9.0, Color("#6f6a80"))
+	draw_circle(Vector2(18, -6), 13.0, Color("#e98aa8"))
+	draw_arc(Vector2(14, -6), 13.0, -0.9, 0.9, 10, Color("#b65a7c"), 2.5)
+
+
+func _whip() -> void:
+	draw_arc(Vector2(-14, 6), 30.0, -1.3, 0.5, 20, Color("#f0d78c"), 5.0)
+	draw_line(Vector2(-22, 26), Vector2(-14, 6), Color("#8d6a4f"), 6.0)
+
+
+func _zipper() -> void:
+	draw_line(Vector2(-26, 20), Vector2(22, -20), Color("#8fc4d9"), 9.0)
+	for i: int in 6:
+		var at: Vector2 = Vector2(-22, 17).lerp(Vector2(18, -17), i / 5.0)
+		draw_line(at + Vector2(-4, -4), at + Vector2(4, 4), Color("#dfeef4"), 2.5)
+	draw_circle(Vector2(24, -22), 6.0, Color("#dfeef4"))
