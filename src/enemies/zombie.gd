@@ -8,6 +8,10 @@ const KNOCKBACK_DECAY: float = 8.0
 var stats: EnemyStats
 ## Set for elites (bigger, tougher, own attack, drops a gift box); null for normal zombies.
 var elite: EliteRules
+## Set for the mini-boss and the boss (own patterns, health bar, drops a gift box).
+var boss: BossDef
+## The boss's patterns (bosses only).
+var brain: BossBrain
 ## Shown on the end screen as what hit Banane (e.g. "Elite Shambler").
 var display_name: String = ""
 ## Its ranged attack (a spitter's spit or an elite's ring); null = it only hurts by touching.
@@ -44,16 +48,19 @@ var _since_hit: float = INF
 var _stars: StunStars
 
 
-## `phase` (0..1) keeps zombies from shambling in perfect sync. `elite_rules` makes it an elite.
+## `phase` (0..1) keeps zombies from shambling in perfect sync. `elite_rules` makes it an elite,
+## `boss_def` a boss (its body is `boss_def.enemy`, `enemy_stats` is ignored).
 func setup(
 	enemy_stats: EnemyStats,
 	health_scale: float,
 	damage_scale: float,
 	phase: float,
-	elite_rules: EliteRules = null
+	elite_rules: EliteRules = null,
+	boss_def: BossDef = null
 ) -> void:
-	stats = enemy_stats
+	stats = boss_def.enemy if boss_def != null else enemy_stats
 	elite = elite_rules
+	boss = boss_def
 	display_name = stats.display_name
 	attack = stats.attack
 	max_health = stats.max_health * health_scale
@@ -66,6 +73,11 @@ func setup(
 		max_health *= elite.health_multiplier
 		contact_damage *= elite.contact_damage_multiplier
 		move_speed *= elite.move_speed_multiplier
+	if boss != null:
+		size = boss.size
+		brain = boss.make_brain()
+		brain.telegraph = BossTelegraph.new()
+		add_child(brain.telegraph)
 	health = max_health
 	if attack != null:
 		attack_cooldown = attack.first_delay_seconds
@@ -101,6 +113,10 @@ func knockback_taken() -> float:
 
 func is_elite() -> bool:
 	return elite != null
+
+
+func is_boss() -> bool:
+	return boss != null
 
 
 ## Which XP button it drops when killed.
@@ -154,7 +170,9 @@ func tick(delta: float) -> void:
 		slow_amount = 0.0
 	knockback = knockback.lerp(Vector2.ZERO, minf(KNOCKBACK_DECAY * delta, 1.0))
 	puppet.animate(_time, heading != Vector2.ZERO, _since_hit, heading.x < 0.0)
-	if attack != null:
+	if brain != null:
+		puppet.puff(brain.puff_amount())
+	elif attack != null:
 		puppet.puff(windup_progress())
 	if _stars != null:
 		_stars.visible = is_stunned()

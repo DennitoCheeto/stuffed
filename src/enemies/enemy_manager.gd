@@ -16,6 +16,10 @@ signal zombie_winding_up(zombie: Zombie)
 signal zombie_spat(zombie: Zombie, balls: int)
 ## A killed zombie burst into a cloud that hurts players (the bloater).
 signal zombie_burst(zombie: Zombie, cloud: EnemyCloud)
+## A boss shows the telegraph of `pattern` (e.g. &"charge", &"stomp"): it attacks soon.
+signal boss_telegraphed(boss: Zombie, pattern: StringName)
+## A boss's `pattern` happens now (the charge starts, the stomp fires).
+signal boss_attacked(boss: Zombie, pattern: StringName)
 
 ## Weapons find the manager through this group.
 const GROUP: StringName = &"enemy_manager"
@@ -65,9 +69,27 @@ func alive_count() -> int:
 func spawn(stats: EnemyStats, at: Vector2, elite: EliteRules = null) -> Zombie:
 	if zombies.size() >= max_alive:
 		return null
+	return _add(stats, at, elite, null)
+
+
+## Adds the boss `boss` at `at` (always, even when the maximum number of zombies is alive).
+func spawn_boss(boss: BossDef, at: Vector2) -> Zombie:
+	return _add(boss.enemy, at, null, boss)
+
+
+## Living bosses (mini-boss and boss).
+func bosses() -> Array[Zombie]:
+	var result: Array[Zombie] = []
+	for zombie: Zombie in zombies:
+		if zombie.is_boss():
+			result.append(zombie)
+	return result
+
+
+func _add(stats: EnemyStats, at: Vector2, elite: EliteRules, boss: BossDef) -> Zombie:
 	var zombie: Zombie = Zombie.new()
 	zombie.position = at
-	zombie.setup(stats, health_scale, damage_scale, _cosmetic_rng.randf(), elite)
+	zombie.setup(stats, health_scale, damage_scale, _cosmetic_rng.randf(), elite, boss)
 	actors.add_child(zombie)
 	zombies.append(zombie)
 	_grid.insert(zombie, at)
@@ -146,9 +168,14 @@ func _physics_process(delta: float) -> void:
 		if calm:
 			zombie.heading = Vector2.ZERO
 			zombie.windup_left = -1.0
+			if zombie.brain != null:
+				zombie.brain.calm_down()
 		else:
 			var target: Player = _nearest_player(zombie.position, players)
-			_move(zombie, target, delta)
+			if zombie.brain != null:
+				_move_boss(zombie, target, delta)
+			else:
+				_move(zombie, target, delta)
 			_touch_players(zombie, players)
 			if zombie.attack != null:
 				_attack(zombie, target, delta)
@@ -169,6 +196,15 @@ func _move(zombie: Zombie, target: Player, delta: float) -> void:
 	var step: Vector2 = (walk + zombie.knockback) * delta + _separation(zombie)
 	var edge: float = zombie.radius()
 	var inside: Rect2 = play_rect.grow(-edge)
+	zombie.position = (zombie.position + step).clamp(inside.position, inside.end)
+
+
+## A boss goes where its brain says. The crowd doesn't push it: it pushes the crowd.
+func _move_boss(zombie: Zombie, target: Player, delta: float) -> void:
+	var walk: Vector2 = zombie.brain.step(zombie, target, self, delta)
+	zombie.heading = walk.normalized()
+	var inside: Rect2 = play_rect.grow(-zombie.radius())
+	var step: Vector2 = (walk + zombie.knockback) * delta
 	zombie.position = (zombie.position + step).clamp(inside.position, inside.end)
 
 
@@ -277,18 +313,27 @@ func _spit(zombie: Zombie, target: Player, attack: SpitAttack) -> void:
 	zombie.volleys += 1
 	zombie.attack_cooldown = attack.cooldown_seconds
 	var aim: Vector2 = zombie.position.direction_to(target.global_position)
-	var mouth: Vector2 = zombie.position + aim * zombie.radius()
+	fire_volley(zombie, aim, attack, balls, zombie.spit_damage)
+	zombie_spat.emit(zombie, balls)
+
+
+## Fires `balls` stuffing balls of `attack` from the edge of `zombie`'s body, fanned around
+## `aim`, each hurting `damage`.
+func fire_volley(
+	zombie: Zombie, aim: Vector2, attack: SpitAttack, balls: int, damage: float
+) -> void:
+	if projectiles == null:
+		return
 	for direction: Vector2 in attack.directions(aim, balls):
 		var ball: EnemyBullet = projectiles.spawn(EnemyBullet) as EnemyBullet
 		ball.launch(
-			mouth,
+			zombie.position + direction * zombie.radius(),
 			direction * attack.bullet_speed,
-			zombie.spit_damage,
+			damage,
 			attack.bullet_radius,
 			attack.bullet_lifetime,
 			zombie.display_name
 		)
-	zombie_spat.emit(zombie, balls)
 
 
 ## A killed bloater leaves its stuffing cloud where it died (not while calm: nothing hurts then).
