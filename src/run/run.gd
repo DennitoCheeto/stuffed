@@ -64,6 +64,7 @@ var _freeze_reasons: Dictionary[StringName, bool] = {}
 @onready var actors: Node2D = $Actors
 @onready var effects: Node2D = $Effects
 @onready var enemies: EnemyManager = $Enemies
+@onready var projectiles: ProjectileManager = $Projectiles
 @onready var spawner: Spawner = $Spawner
 @onready var camera: PlayersCamera = $Camera
 @onready var hud: Hud = $Hud
@@ -81,6 +82,7 @@ func _ready() -> void:
 	rng.seed = seed_value
 	upgrade_rng.seed = seed_value * 31 + 7
 	enemies.setup(actors, effects, arena.play_rect(), rules.max_enemies_alive)
+	projectiles.setup(enemies, arena.play_rect())
 	enemies.zombie_killed.connect(_on_zombie_killed)
 	enemies.zombie_hit.connect(_on_zombie_hit)
 	pickups.collected.connect(_on_pickup_collected)
@@ -215,6 +217,7 @@ func _reach_goal() -> void:
 	spawner.active = false
 	enemies.calm = true
 	_drops_enabled = false
+	projectiles.clear_hostile()
 	goal_reached.emit()
 	Sfx.play(&"goal")
 	var players: Array[Player] = Players.all(get_tree())

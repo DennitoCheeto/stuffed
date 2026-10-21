@@ -80,6 +80,7 @@ static func _all_pieces() -> Dictionary[StringName, FeltPiece]:
 	var pieces: Dictionary[StringName, FeltPiece] = {}
 	pieces.merge(ZombieLook.all_parts())
 	pieces.merge(XpButtonLook.make_parts())
+	pieces.merge(ProjectileLook.make_parts())
 	return pieces
 
 

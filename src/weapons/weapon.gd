@@ -1,7 +1,7 @@
 class_name Weapon
 extends Node2D
 ## A weapon that belongs to one player and attacks on its own (no buttons). Subclasses decide
-## what an attack is. Projectiles are children with `top_level` so they move freely in the world.
+## what an attack is. Its shots live in the run's ProjectileManager, not under the weapon.
 
 signal fired
 
@@ -38,6 +38,10 @@ func level_up() -> void:
 
 func enemies() -> EnemyManager:
 	return get_tree().get_first_node_in_group(EnemyManager.GROUP) as EnemyManager
+
+
+func projectiles() -> ProjectileManager:
+	return get_tree().get_first_node_in_group(ProjectileManager.GROUP) as ProjectileManager
 
 
 func _physics_process(delta: float) -> void:

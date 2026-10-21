@@ -27,9 +27,8 @@ func _boomerang() -> PeelBoomerang:
 
 func _projectiles() -> Array[BoomerangProjectile]:
 	var result: Array[BoomerangProjectile] = []
-	for child: Node in _boomerang().get_children():
-		if child is BoomerangProjectile and not child.is_queued_for_deletion():
-			result.append(child as BoomerangProjectile)
+	for shot: Projectile in run.projectiles.fired_by(_boomerang()):
+		result.append(shot as BoomerangProjectile)
 	return result
 
 
@@ -73,7 +72,7 @@ func test_ac7_peel_returns_to_banane_and_follows_him() -> void:
 	assert_true(peel.returning, "turned around at its reach")
 	await wait_physics_frames(50)
 	sender.action_up("p1_move_down")
-	# The peel frees itself when caught, so we only look at the weapon from here on.
+	# The caught peel goes back to the pool (and may fly again), so we look at the weapon.
 	assert_signal_emitted(_boomerang(), "peel_caught", "caught by Banane after he moved")
 
 

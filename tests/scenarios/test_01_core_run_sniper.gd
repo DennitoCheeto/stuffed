@@ -38,9 +38,8 @@ func _point_mouse_at(world: Vector2) -> void:
 
 func _pins(weapon: SewingPinSniper) -> Array[PinProjectile]:
 	var result: Array[PinProjectile] = []
-	for child: Node in weapon.get_children():
-		if child is PinProjectile and not child.is_queued_for_deletion():
-			result.append(child as PinProjectile)
+	for shot: Projectile in run.projectiles.fired_by(weapon):
+		result.append(shot as PinProjectile)
 	return result
 
 
