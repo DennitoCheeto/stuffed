@@ -89,6 +89,9 @@ func _ready() -> void:
 	spawner.setup(enemies, camera, rng)
 	spawner.goal_seconds = rules.goal_seconds
 	level_up_screen.picked.connect(_on_upgrade_picked)
+	level_up_screen.reroll_requested.connect(_on_reroll_requested)
+	level_up_screen.skip_requested.connect(_on_skip_requested)
+	level_up_screen.banish_requested.connect(_on_banish_requested)
 	goal_screen.end_chosen.connect(_on_end_chosen)
 	goal_screen.endless_chosen.connect(_on_endless_chosen)
 	pause_menu.resumed.connect(unfreeze.bind(&"pause"))
@@ -142,6 +145,7 @@ func spawn_player(index: int, at: Vector2) -> Player:
 	var player: Player = PLAYER_SCENE.instantiate()
 	player.player_index = index
 	player.position = at
+	player.card_controls = CardControls.new(upgrade_pool)
 	player.died.connect(_on_player_died)
 	player.hurt.connect(_on_player_hurt)
 	player.dashed.connect(func(_from: Vector2, _direction: Vector2) -> void: Sfx.play(&"dash"))
@@ -200,13 +204,64 @@ func _show_next_level_up(with_moment: bool) -> void:
 	var player: Player = _level_up_queue[0]
 	if with_moment:
 		player.celebrate()
-	level_up_screen.open(upgrade_pool.roll(player.upgrade_levels(), upgrade_rng), with_moment)
+	var controls: CardControls = player.card_controls
+	level_up_screen.show_controls(controls)
+	var offers: Array[UpgradeOffer] = upgrade_pool.roll(
+		player.upgrade_levels(), upgrade_rng, controls.banished
+	)
+	level_up_screen.open(offers, with_moment)
 
 
 func _on_upgrade_picked(offer: UpgradeOffer) -> void:
 	var player: Player = _level_up_queue.pop_front()
 	player.apply_upgrade(offer)
 	_show_next_level_up(false)
+
+
+## Reroll: 3 new cards, avoiding the ones on screen while others are left.
+func _on_reroll_requested() -> void:
+	var player: Player = _level_up_queue[0]
+	var controls: CardControls = player.card_controls
+	if not controls.use_reroll():
+		return
+	var offers: Array[UpgradeOffer] = upgrade_pool.roll(
+		player.upgrade_levels(), upgrade_rng, controls.banished, _ids_on_screen()
+	)
+	level_up_screen.show_controls(controls)
+	level_up_screen.show_offers(offers)
+
+
+## Skip: no card, a small heal instead.
+func _on_skip_requested() -> void:
+	var player: Player = _level_up_queue[0]
+	if not player.card_controls.use_skip():
+		return
+	_level_up_queue.pop_front()
+	player.heal(player.max_health * upgrade_pool.skip_heal)
+	_show_next_level_up(false)
+
+
+## Banish: card `index` never comes up again this run; its slot gets a new card that differs
+## from the other cards on screen. The snack can't be banished.
+func _on_banish_requested(index: int) -> void:
+	var player: Player = _level_up_queue[0]
+	var controls: CardControls = player.card_controls
+	var offers: Array[UpgradeOffer] = level_up_screen.offers.duplicate()
+	var banished_card: UpgradeDef = offers[index].upgrade
+	if banished_card.kind == UpgradeDef.Kind.SNACK or not controls.banish(banished_card.id):
+		return
+	var excluded: Array[StringName] = controls.banished.duplicate()
+	excluded.append_array(_ids_on_screen())
+	offers[index] = upgrade_pool.roll(player.upgrade_levels(), upgrade_rng, excluded, [], 1)[0]
+	level_up_screen.show_controls(controls)
+	level_up_screen.show_offers(offers)
+
+
+func _ids_on_screen() -> Array[StringName]:
+	var ids: Array[StringName] = []
+	for offer: UpgradeOffer in level_up_screen.offers:
+		ids.append(offer.upgrade.id)
+	return ids
 
 
 ## Goal reached: spawning stops, the horde pops in a chain, a short celebration, then the run

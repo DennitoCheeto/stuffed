@@ -52,6 +52,8 @@ var items: Array[UpgradeDef] = []
 var item_levels: Dictionary[StringName, int] = {}
 ## Every card picked this run, in order, e.g. "Quick Feet 2" (for the end screen and run log).
 var picked_upgrades: PackedStringArray = []
+## Rerolls, skips and banishes left this run (the run sets it up when it spawns the player).
+var card_controls: CardControls
 
 var _controls: PlayerInput
 var _dash_left: float = 0.0
