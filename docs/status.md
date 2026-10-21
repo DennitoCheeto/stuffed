@@ -17,8 +17,8 @@ _Last updated: 2026-10-21 (spec 01 drafted, waiting for product owner approval)_
 
 ## Next step
 
-- Product owner reviews the spec 01 PR, answers its 3 open questions (§16) and merges it.
-- Then: fold the answers into the spec, create the 12 tickets from spec §15 as GitHub issues, start with ticket 1.
+- Product owner reviews the spec 01 PR (#2; open questions already answered and folded in) and merges it.
+- Then: create the 13 tickets from spec §15 as GitHub issues, start with ticket 1.
 
 ## Gotchas
 

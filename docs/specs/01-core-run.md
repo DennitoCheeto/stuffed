@@ -9,8 +9,12 @@ Based on: [`00-product-vision.md`](00-product-vision.md) §5 (Combat, Enemies, H
 One question for this milestone: **is a 5-minute run fun?**
 
 The player starts the game, is dropped straight into a run as Banane, moves and dashes through a horde of zombie
-plushies, collects XP buttons, picks upgrades, and either dies or survives 5 minutes. Then they press
+plushies, collects XP buttons, picks upgrades, and either dies or reaches the goal: survive 5 minutes. Then they
+can stop with a win, or **keep going endlessly** to see how far their build carries them. Afterwards they press
 "Try again" and want to go once more.
+
+5 minutes is the length of this *first* run. Later areas get harder and longer (vision: 8–12 min), and their goal
+becomes a boss; the "keep going" choice stays.
 
 No town, no materials, no saving yet: those come in M3. Everything here is the foundation the rest of the game
 stands on, so it has to *feel* good, not just work.
@@ -24,8 +28,11 @@ stands on, so it has to *feel* good, not just work.
 4. Killed zombies pop into stuffing and drop **XP buttons**. Buttons fly into Banane when he gets close.
 5. A full XP bar → the game pauses, Banane quacks deadpan with sunglasses on, and **3 upgrade cards** appear.
    Pick one, the game continues.
-6. Banane dies → **"Banane got stuffed"** screen with run stats and **Try again**.
-   Banane survives 5:00 → the remaining zombies pop, **"You survived!"** screen, same stats.
+6. Banane survives 5:00 → **goal reached**: the remaining zombies pop, the game pauses and asks:
+   **"You survived! End run"** or **"Keep going (endless)"**.
+7. **Endless:** the timer keeps running and the horde keeps getting tougher, until Banane falls.
+8. The run ends (death, or "End run") → end screen with run stats and **Try again**: **"You survived!"** if the
+   goal was reached (plus how long Banane lasted in endless), **"Banane got stuffed"** if he died before 5:00.
 
 ## 3. Controls
 
@@ -34,7 +41,10 @@ stands on, so it has to *feel* good, not just work.
 | Move | W A S D | 8 directions, diagonal not faster than straight |
 | Dash | Space | Short burst in the move direction (or facing direction when standing still) |
 | Aim | Mouse cursor | Only used by aimed weapons; cursor is shown as a small crosshair |
-| Pick upgrade | Mouse click, or keys 1 / 2 / 3 | |
+| Pick upgrade | Keys 1 / 2 / 3 (mouse click also works) | |
+
+**Weapons always fire on their own.** Some are aimed with the cursor, but playing never needs a mouse button.
+Mouse clicks are only used in menus, and every menu also works with the keyboard.
 | Pause | Esc | Resume, toggle damage numbers, volume, Quit to title |
 | Fullscreen | F11 / Alt+Enter | Toggles windowed ↔ fullscreen |
 | Developer menu | F1 | See §9 |
@@ -70,7 +80,7 @@ Both weapons have **5 levels**; each level-up card says exactly what the next le
 
 ### 5.2 Sewing-Pin Sniper (aimed)
 
-- Fires a long sewing pin **towards the mouse cursor** on its own rhythm (no clicking needed: you aim, it shoots).
+- Fires a long sewing pin **towards the mouse cursor** on its own rhythm (no clicking: you aim, it shoots).
 - Fast, hits hard, **pierces** through a few zombies in a line. A reward for lining shots up.
 - Levels add: more damage, more pierce, faster firing, two pins in a narrow spread.
 
@@ -93,12 +103,16 @@ Enemies always have the **strongest contrast** on screen; Banane's own effects a
 
 - **Arena:** one bedroom floor (felt carpet with a simple pattern so movement is readable), about 4 × 4 screens,
   bounded by toy-block walls. The camera follows Banane smoothly and stops at the walls.
-- **Length:** 5:00. A timer is shown at the top.
+- **Goal:** survive 5:00. A timer is shown at the top, with the goal marked ("3:12 / 5:00").
 - **Pacing (waves with breathers, vision §5 Enemies):** spawning ramps up over the run. About every minute there is
   a **surge** (many more zombies for ~20 s), followed by a **breather** (~10 s, few spawns) to collect buttons.
-  The last 30 seconds are the biggest surge.
-- **End of the run at 5:00:** spawning stops, all zombies pop at once (a satisfying chain of pops), then the
-  "You survived!" screen. In M2 this moment becomes the boss.
+  The last 30 seconds before the goal are the biggest surge.
+- **Goal reached at 5:00:** spawning stops, all zombies pop at once (a satisfying chain of pops), a short
+  celebration, then the choice **End run** / **Keep going (endless)**. In M2 this moment becomes the boss fight.
+- **Endless (after the goal):** the run continues with no time limit. The surge/breather rhythm goes on, and every
+  minute the horde gets tougher: more zombies per surge (up to the maximum alive) and more zombie health and damage,
+  so even a great build eventually falls. The timer now counts the endless time ("Endless +2:41"). Level-ups,
+  weapons and the developer menu work as before. Dying in endless still counts as a win (the goal was reached).
 - **Randomness is seedable:** each run has a seed (shown on the end screen), so a run can be replayed for tuning and
   tests are deterministic.
 
@@ -136,8 +150,9 @@ unless "pause" is ticked.
 - Restart run (same seed / new seed)
 
 **Run log:** at the end of every run, one line is appended to a local file
-(`%APPDATA%\Godot\app_userdata\Stuffed\run_log.jsonl`): date, seed, time survived, level, kills, what killed
-Banane, and which upgrades were picked in which order. This is for tuning, not shown in the game.
+(`%APPDATA%\Godot\app_userdata\Stuffed\run_log.jsonl`): date, seed, time survived, goal reached yes/no, endless
+time, level, kills, what killed Banane, and which upgrades were picked in which order. This is for tuning, not
+shown in the game.
 
 ## 10. Game feel and sound (from day one, vision §5 Combat)
 
@@ -159,11 +174,15 @@ small damage numbers (can be turned off in the pause menu).
 | Banane hurt | squeaky "honk" |
 | Level-up | deadpan "quack" |
 | Death | sad deflating squeak |
-| Survived | short happy jingle |
+| Goal reached | short happy jingle |
 
 Many identical sounds at once (100 pops) are limited and slightly varied in pitch so it doesn't become noise.
-A master volume slider and a separate effects/music slider are in the pause menu. **Music:** see open
-question 3.
+
+**Music:** one looping track during the run and a calm one on the title screen. Free CC0 (public domain) music,
+or a simple track generated in code; the licence is recorded in `docs/art/credits.md`. The music is a little
+quieter than the effects, and it keeps playing (muffled) while paused. Replaced or refined in M6.
+
+The pause menu has three volume sliders: **Master**, **Effects**, **Music**.
 
 ## 11. Balance lives in data (hard rule 8)
 
@@ -181,6 +200,8 @@ restart the run, and see the effect in under a minute.
 | Sewing-Pin Sniper L1: damage / every / pierce | 15 / 1.2 s / 2 |
 | Shambler: HP / speed / contact damage / XP | 10 / 45 px/s / 5 / small |
 | Runner: HP / speed / contact damage / XP | 5 / 125 px/s / 4 / medium |
+| Run goal | 5:00 |
+| Endless: growth per minute | +15% zombie health and damage, +10% spawns |
 | XP to level 2, growth per level | 5, +40% per level (rounded) |
 | Pickup range | 60 px |
 | Max zombies alive | 500 |
@@ -214,8 +235,8 @@ time) unless marked *(unit)*. "Playtest" items can only be judged by playing.
 **Weapons**
 - **AC-7** The Peel Boomerang fires automatically at the nearest zombie, returns to Banane, and can damage the same
   zombie once on the way out and once on the way back.
-- **AC-8** The Sewing-Pin Sniper (once picked) fires towards the mouse cursor and passes through up to its pierce
-  count of zombies in a line.
+- **AC-8** The Sewing-Pin Sniper (once picked) fires on its own, without any mouse button, towards the mouse
+  cursor, and passes through up to its pierce count of zombies in a line.
 - **AC-9** Weapon levels change the weapon as their card describes (e.g. Boomerang L2 throws two). *(unit for the
   numbers, scenario for one visible change)*
 
@@ -238,23 +259,30 @@ time) unless marked *(unit)*. "Playtest" items can only be judged by playing.
 - **AC-21** Two level-ups from one big pickup show two card screens one after another.
 
 **End of run**
-- **AC-22** At 0 HP the run stops and the death screen shows time survived, level, kills, what killed Banane, the
-  upgrades picked, and the seed.
-- **AC-23** Surviving to 5:00 stops spawning, pops all remaining zombies and shows "You survived!" with the same stats.
-- **AC-24** **Try again** starts a fresh run (full health, level 1, timer 0:00, only the Peel Boomerang).
-- **AC-25** Each finished run appends one line to the run log with the fields from §9.
+- **AC-22** At 0 HP before the goal, the run stops and the "Banane got stuffed" screen shows time survived, level,
+  kills, what killed Banane, the upgrades picked, and the seed.
+- **AC-23** Surviving to 5:00 stops spawning, pops all remaining zombies, pauses, and offers **End run** and
+  **Keep going (endless)** (keys and mouse).
+- **AC-24** **End run** shows the "You survived!" screen with the same stats.
+- **AC-25** **Keep going** continues the run: zombies spawn again, the timer shows endless time, and each endless
+  minute makes zombies tougher as set in the data file. *(unit for the scaling, scenario for continuing)*
+- **AC-26** Dying in endless shows "You survived!" with the endless time added to the stats.
+- **AC-27** **Try again** starts a fresh run (full health, level 1, timer 0:00, only the Peel Boomerang).
+- **AC-28** Each finished run appends one line to the run log with the fields from §9.
 
 **Pause, menu, developer menu**
-- **AC-26** Esc pauses the run (zombies and timer stop) and Esc / Resume continues it; Quit returns to the title.
-- **AC-27** The damage-number toggle and volume sliders in the pause menu take effect immediately.
-- **AC-28** F1 opens the developer menu; "Spawn 100 shamblers", "Level up now", "Kill all" and "Jump to 4:30" do
+- **AC-29** Esc pauses the run (zombies and timer stop) and Esc / Resume continues it; Quit returns to the title.
+- **AC-30** The damage-number toggle and the Master / Effects / Music sliders in the pause menu take effect
+  immediately.
+- **AC-31** Music plays on the title screen and during the run.
+- **AC-32** F1 opens the developer menu; "Spawn 100 shamblers", "Level up now", "Kill all" and "Jump to 4:30" do
   what they say.
 
 **Data, randomness and co-op readiness**
-- **AC-29** Changing a value in a balance `.tres` (e.g. Banane's speed) changes the game without code changes.
+- **AC-33** Changing a value in a balance `.tres` (e.g. Banane's speed) changes the game without code changes.
   *(unit: systems read their numbers from the resources)*
-- **AC-30** The same seed gives the same spawn sequence and the same upgrade cards. *(unit)*
-- **AC-31** With a second player spawned in code, zombies chase whichever player is nearer, XP flies to the nearer
+- **AC-34** The same seed gives the same spawn sequence and the same upgrade cards. *(unit)*
+- **AC-35** With a second player spawned in code, zombies chase whichever player is nearer, XP flies to the nearer
   player, and the run only ends when both are down.
 
 **Playtest (product owner, not automatable)**
@@ -263,6 +291,7 @@ time) unless marked *(unit)*. "Playtest" items can only be judged by playing.
 - **P-3** You can always see where the danger is, and you always know why you died.
 - **P-4** Hits, pops, pickups and level-ups feel and sound satisfying, not noisy.
 - **P-5** With "Spawn 500" in the developer menu and FPS shown, the game stays smooth (target 60 fps) on your PC.
+- **P-6** Reaching the goal feels like a win, and with a good build, endless is tempting and gets hard in a fair way.
 
 ## 14. Not in this spec
 
@@ -283,18 +312,16 @@ Each becomes a GitHub issue and one PR, roughly in this order:
 5. XP buttons, pickup, XP curve — AC-14, 16, 20
 6. Level-up screen, upgrade pool, boosts — AC-17–19, 21
 7. Sewing-Pin Sniper + weapon levels — AC-8, 9
-8. Runners, spawn schedule with surges and breathers, 5:00 end — AC-11, 12, 23
-9. Slippery passive — AC-6
-10. Title, pause, death / survived screens, Try again, run log — AC-22, 24–27
-11. Game feel pass + generated sounds
-12. Developer menu, seeds, data checks, co-op readiness test — AC-28–31
+8. Runners, spawn schedule with surges and breathers, goal at 5:00 — AC-11, 12, 23
+9. Endless mode after the goal — AC-24–26
+10. Slippery passive — AC-6
+11. Title, pause, end screens, Try again, run log — AC-22, 27–30
+12. Game feel pass + generated sounds + music — AC-31
+13. Developer menu, seeds, data checks, co-op readiness test — AC-32–35
 
-## 16. Open questions for the product owner
+## 16. Decisions (product owner, 2026-10-21)
 
-1. **Aimed weapon firing:** the Sewing-Pin Sniper fires on its own towards the cursor (you only aim).
-   Alternative: it fires only while you hold the left mouse button. *Recommendation: on its own, so moving and
-   dodging stay the main skill and your fingers stay free.*
-2. **Run length and ending:** 5 minutes, then "You survived!". Alternative: endless until you die.
-   *Recommendation: 5 minutes, it answers the milestone question and gives a clear win.*
-3. **Music:** none in M1 (sound effects only), music added in M6. Alternative: one simple CC0 loop now.
-   *Recommendation: one simple CC0 loop now if it's quick, because music helps a lot with "is it fun?". Your call.*
+1. **Weapons always fire on their own.** Some can be aimed with the cursor; gameplay never uses mouse buttons.
+2. **Every run has a goal, then the player chooses** to end with a win or keep going endlessly. The first run's
+   goal is 5:00; later areas are harder and longer, and their goal is a boss.
+3. **Music in M1:** one simple track for the title and one for the run.
