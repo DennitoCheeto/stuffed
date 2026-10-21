@@ -7,6 +7,7 @@ signal quit_requested
 
 const TITLE_SCENE: PackedScene = preload("res://src/title/title_screen.tscn")
 const RUN_SCENE: PackedScene = preload("res://src/run/run.tscn")
+const END_SCENE: PackedScene = preload("res://src/ui/end_screen.tscn")
 
 ## Tests turn this off so "Quit" doesn't close the test runner.
 var quit_enabled: bool = true
@@ -35,16 +36,18 @@ func show_title() -> void:
 
 func start_run() -> void:
 	var run: Run = RUN_SCENE.instantiate()
-	run.all_players_down.connect(_on_all_players_down)
-	run.ended_with_win.connect(_on_all_players_down)
+	run.finished.connect(show_end)
 	_switch_to(run)
 
 
-## Until the end screens exist (M1-11): a short moment, then back to the title.
-func _on_all_players_down() -> void:
-	await get_tree().create_timer(2.0).timeout
-	if current_screen is Run:
-		show_title()
+## The end screen for a finished run.
+func show_end(result: RunResult) -> void:
+	Crosshair.stop()
+	var end: EndScreen = END_SCENE.instantiate()
+	end.show_result(result)
+	end.try_again_requested.connect(start_run)
+	end.title_requested.connect(show_title)
+	_switch_to(end)
 
 
 func quit() -> void:

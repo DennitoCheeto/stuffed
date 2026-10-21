@@ -12,3 +12,8 @@ static func clock(seconds: float) -> String:
 ## The run timer at the top of the screen: "3:12 / 5:00".
 static func run_timer(elapsed: float, goal: float) -> String:
 	return "%s / %s" % [clock(elapsed), clock(goal)]
+
+
+## The timer after the goal: "Endless +2:41".
+static func endless(seconds: float) -> String:
+	return "Endless +%s" % clock(seconds)

@@ -4,6 +4,9 @@ extends "res://tests/scenarios/run_scenario.gd"
 const SHAMBLER: EnemyStats = preload("res://data/enemies/shambler.tres")
 
 var run: Run
+## Filled by the run's signals (no signal watchers: the run is freed when it ends).
+var finished_results: Array[RunResult] = []
+var endless_starts: int = 0
 
 
 ## A run where Banane can't die and the spawner uses a fixed seed.
@@ -67,7 +70,10 @@ func _reach_goal_with_zombies() -> void:
 	for i: int in 12:
 		run.enemies.spawn(SHAMBLER, banane.global_position + Vector2.from_angle(i * 0.5) * 300.0)
 	run.elapsed = run.rules.goal_seconds - 0.2
-	watch_signals(run)
+	finished_results.clear()
+	endless_starts = 0
+	run.finished.connect(func(result: RunResult) -> void: finished_results.append(result))
+	run.endless_started.connect(func() -> void: endless_starts += 1)
 	await wait_for_signal(run.goal_reached, 2.0)
 
 
@@ -95,14 +101,17 @@ func test_ac23_key_1_ends_the_run_with_a_win() -> void:
 	sender.action_down("pick_card_1")
 	await wait_process_frames(2)
 	sender.action_up("pick_card_1")
-	assert_signal_emitted(run, "ended_with_win")
+	assert_eq(finished_results.size(), 1, "the run finished")
+	var result: RunResult = finished_results[0]
+	assert_true(result.won, "a win")
+	assert_eq(result.ending, "ended")
 
 
 func test_ac23_click_keep_going_continues_the_run() -> void:
 	await _reach_goal_with_zombies()
 	await wait_seconds(Run.POP_CHAIN_TIME + Run.CELEBRATION_TIME + GoalScreen.INPUT_DELAY + 0.3)
 	run.goal_screen.endless_button.pressed.emit()
-	assert_signal_emitted(run, "endless_started")
+	assert_eq(endless_starts, 1, "endless started")
 	assert_false(run.is_frozen(), "running again")
 	assert_true(run.spawner.active, "zombies come again")
 	var time_before: float = run.elapsed

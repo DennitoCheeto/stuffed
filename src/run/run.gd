@@ -3,20 +3,20 @@ extends Node2D
 ## One run: the arena, the players, the zombies, the camera and the HUD. Counts the run time and
 ## runs the level-up flow.
 
-## Every player is down.
-signal all_players_down
+## The run is over (death, or End run after the goal). Main shows the end screen.
+signal finished(result: RunResult)
 ## The goal time was reached (zombies pop, then the choice appears).
 signal goal_reached
 ## The player chose "Keep going (endless)".
 signal endless_started
-## The player chose "End run" after reaching the goal.
-signal ended_with_win
 
 const PLAYER_SCENE: PackedScene = preload("res://src/player/player.tscn")
 ## How long the chain of pops takes when the goal is reached.
 const POP_CHAIN_TIME: float = 1.0
 ## A short moment to enjoy the empty floor before the choice appears.
 const CELEBRATION_TIME: float = 1.2
+## A moment to see Banane fall before the end screen.
+const DEATH_PAUSE: float = 1.5
 
 @export var rules: RunRules
 @export var upgrade_pool: UpgradePool
@@ -35,6 +35,8 @@ var over: bool = false
 var goal_done: bool = false
 ## Playing on after the goal.
 var endless: bool = false
+## Endless minutes so far (the horde gets tougher each one).
+var endless_minute: int = 0
 
 ## False while the goal pops the horde (those zombies drop no XP).
 var _drops_enabled: bool = true
@@ -74,7 +76,7 @@ func _ready() -> void:
 	camera.set_bounds(arena.outer_rect())
 	camera.snap_to_players()
 	Crosshair.use()
-	hud.show_time(elapsed, rules.goal_seconds)
+	_show_clock()
 
 
 func _physics_process(delta: float) -> void:
@@ -84,8 +86,10 @@ func _physics_process(delta: float) -> void:
 	if not goal_done and elapsed >= rules.goal_seconds:
 		elapsed = rules.goal_seconds
 		_reach_goal()
+	if endless:
+		_update_endless_scaling()
 	spawner.tick(elapsed, delta)
-	hud.show_time(elapsed, rules.goal_seconds)
+	_show_clock()
 
 
 ## Adds a hero for player `index` (0 = player 1) at `at`.
@@ -161,9 +165,48 @@ func _reach_goal() -> void:
 	goal_screen.open()
 
 
+## Seconds played after the goal.
+func endless_seconds() -> float:
+	return maxf(elapsed - rules.goal_seconds, 0.0) if endless else 0.0
+
+
+## A summary of the run so far, for the end screen and the run log.
+func make_result(ending: String) -> RunResult:
+	var result: RunResult = RunResult.new()
+	var first: Player = Players.all(get_tree())[0]
+	result.won = goal_done
+	result.ending = ending
+	result.survived_seconds = elapsed
+	result.endless_seconds = endless_seconds()
+	result.level = first.progress.level
+	result.kills = enemies.kills
+	result.killed_by = first.last_hit_by if first.is_dead() else ""
+	result.upgrades = first.picked_upgrades
+	result.seed_value = seed_value
+	return result
+
+
+func _show_clock() -> void:
+	if endless:
+		hud.show_endless_time(endless_seconds())
+	else:
+		hud.show_time(elapsed, rules.goal_seconds)
+
+
+## Every endless minute makes new zombies tougher and more frequent (numbers in the rules).
+func _update_endless_scaling() -> void:
+	var minute: int = floori(endless_seconds() / 60.0)
+	if minute == endless_minute:
+		return
+	endless_minute = minute
+	enemies.health_scale = rules.endless_health_scale(minute)
+	enemies.damage_scale = rules.endless_damage_scale(minute)
+	spawner.rate_scale = rules.endless_spawn_scale(minute)
+
+
 func _on_end_chosen() -> void:
 	over = true
-	ended_with_win.emit()
+	finished.emit(make_result("ended"))
 
 
 func _on_endless_chosen() -> void:
@@ -186,4 +229,10 @@ func _on_player_died(_player: Player) -> void:
 			return
 	over = true
 	spawner.active = false
-	all_players_down.emit()
+	enemies.calm = true
+	# A timer connection (not await) so nothing fires if the run is closed meanwhile.
+	get_tree().create_timer(DEATH_PAUSE).timeout.connect(_finish_after_death)
+
+
+func _finish_after_death() -> void:
+	finished.emit(make_result("died"))

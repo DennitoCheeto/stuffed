@@ -4,7 +4,7 @@ extends Node2D
 ## moved in code. Shapes and motion follow docs/art/felt-style-concept.html and
 ## animation-concept.html.
 
-enum State { IDLE, WALK, DASH, HIT, QUACK }
+enum State { IDLE, WALK, DASH, HIT, QUACK, DOWN }
 
 const FELT_SHADER: Shader = preload("res://src/puppet/felt.gdshader")
 ## The concept drawing is about 220 units tall; this makes Banane about 75 px tall.
@@ -66,6 +66,7 @@ func _ready() -> void:
 		_player.dashed.connect(_on_dashed)
 		_player.hurt.connect(_on_hurt)
 		_player.celebrated.connect(_on_celebrated)
+		_player.died.connect(_on_died)
 
 
 func _process(delta: float) -> void:
@@ -92,6 +93,11 @@ func _on_celebrated() -> void:
 	_enter(State.QUACK)
 
 
+## Banane deflates when he falls (sad squeak in M1-12).
+func _on_died(_player_who_died: Player) -> void:
+	_enter(State.DOWN)
+
+
 func _enter(new_state: State) -> void:
 	state = new_state
 	_state_time = 0.0
@@ -99,6 +105,8 @@ func _enter(new_state: State) -> void:
 
 func _update_state() -> void:
 	match state:
+		State.DOWN:
+			pass
 		State.QUACK:
 			if _state_time >= QUACK_TIME:
 				process_mode = Node.PROCESS_MODE_INHERIT
@@ -158,6 +166,12 @@ func _pose() -> Pose:
 			pose.eye_open = 0.1 if t < 0.35 else 1.0
 		State.QUACK:
 			_quack_pose(pose, t)
+		State.DOWN:
+			var sag: float = minf(t / 0.5, 1.0)
+			pose.squash = Vector2(1.0 + 0.3 * sag, 1.0 - 0.45 * sag)
+			pose.flap = 30.0 * sag
+			pose.head_tilt = 12.0 * sag
+			pose.eye_open = 0.1
 	return pose
 
 
