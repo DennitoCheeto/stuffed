@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-21 (spec 02 approved, M2 issues #32–#46, M2-01 projectile base)_
+_Last updated: 2026-10-21 (M2-01, M2-02, M2-03 merged)_
 
 ## Where we are
 
@@ -14,11 +14,11 @@ _Last updated: 2026-10-21 (spec 02 approved, M2 issues #32–#46, M2-01 projecti
 | Art direction | ✅ felt style "B — Soft", puppet animation (`docs/art/`) |
 | M0 Factory setup | ✅ done (PR #1) |
 | M1 Core run | ✅ accepted 2026-10-21 (PRs #17–#29; playtest P-1 … P-6 passed, 144 fps on the PO's PC) |
-| M2 Build variety | 🔨 spec 02 approved; issues #32–#46 (milestone "M2 — Build variety"); M2-01 in PR |
+| M2 Build variety | 🔨 spec 02 approved; issues #32–#46 (milestone "M2 — Build variety"); M2-01…M2-03 merged (PRs #47–#49) |
 
 ## Next step
 
-- Merge M2-01 (#32) when CI is green, then M2-02 item system (#33), then the tickets in order.
+- Start M2-04 (#35): Stuffing Cloud + Bouncy Yarn Ball + Thimble Mortar. Then M2-05 (#36) and the rest in order.
 
 ## Playtest notes (M1)
 
@@ -37,6 +37,15 @@ _Last updated: 2026-10-21 (spec 02 approved, M2 issues #32–#46, M2-01 projecti
   `ProjectileLook`). New weapons: subclass `Projectile`, `projectiles().spawn(MyShot)`, then `launch`. Never `new()`
   shots under the weapon. Enemy bullets: `EnemyBullet` (drawn on the top layer). Real-GPU fps check:
   `Godot_v4.7.2-stable_win64.exe --path . -s tools/benchmark.gd` (M2-01: 500 zombies + 1000 shots → ~190 fps).
+- Items: `UpgradeDef.Kind.ITEM` + `Effect`. Weapons must read numbers via `Weapon.current()` (item bonuses applied:
+  damage, reach, duration, area) and `Weapon.hit_radius()`, never `stats.at_level()` directly. Lasting shots use
+  `WeaponLevel.duration` and `WeaponStats.hit_interval`; `Projectile.size_to(weapon.area_scale())` for Big Spool.
+  New weapon = `.tres` in `data/weapons/` + entry in `upgrade_pool.tres` + icon in `UpgradeIcon` + shot look in
+  `ProjectileLook`. Look up pool cards with `pool.find(id)`, not by index.
+- gdlint `class-definitions-order`: signals, consts, plain vars, then `@onready` vars, and all consts at the top of
+  test files too. gdformat joins a call or dictionary onto one line whenever it fits in 100 chars.
+- CI checks can show "pending" forever after all steps finished (GitHub glitch): re-run that job
+  (`gh run rerun <run> --job <job>`), don't merge on pending.
 - Performance: felt parts are baked once into `FeltAtlas` and drawn as sprites. Never draw hundreds of shapes per
   frame with `draw_*` (500 zombies went from 6 fps / 30k draw calls to 60 fps / ~600).
 - Pausing: the run **freezes itself** (`Run.freeze(reason)`, process mode disabled) instead of `get_tree().paused`,
