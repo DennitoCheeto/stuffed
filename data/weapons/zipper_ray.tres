@@ -1,0 +1,80 @@
+[gd_resource type="Resource" script_class="WeaponStats" load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://src/weapons/weapon_stats.gd" id="1_stats"]
+[ext_resource type="Script" path="res://src/weapons/weapon_level.gd" id="2_level"]
+[ext_resource type="Script" path="res://src/weapons/zipper_ray.gd" id="3_behaviour"]
+
+[sub_resource type="Resource" id="Resource_level1"]
+script = ExtResource("2_level")
+damage = 6.0
+cooldown = 3.0
+reach = 500.0
+count = 1
+speed = 0.0
+pierce = 0
+area = 0.0
+duration = 0.6
+spread_degrees = 0.0
+card_text = "Every 3 seconds, a zipper beam towards your cursor hurts everything in its line."
+
+[sub_resource type="Resource" id="Resource_level2"]
+script = ExtResource("2_level")
+damage = 9.0
+cooldown = 3.0
+reach = 500.0
+count = 1
+speed = 0.0
+pierce = 0
+area = 0.0
+duration = 0.6
+spread_degrees = 0.0
+card_text = "Damage 6 → 9."
+
+[sub_resource type="Resource" id="Resource_level3"]
+script = ExtResource("2_level")
+damage = 9.0
+cooldown = 3.0
+reach = 500.0
+count = 1
+speed = 0.0
+pierce = 0
+area = 0.0
+duration = 0.9
+spread_degrees = 0.0
+card_text = "The beam lasts 0.6 → 0.9 seconds."
+
+[sub_resource type="Resource" id="Resource_level4"]
+script = ExtResource("2_level")
+damage = 9.0
+cooldown = 3.0
+reach = 650.0
+count = 1
+speed = 0.0
+pierce = 0
+area = 0.0
+duration = 0.9
+spread_degrees = 0.0
+card_text = "Longer beam."
+
+[sub_resource type="Resource" id="Resource_level5"]
+script = ExtResource("2_level")
+damage = 9.0
+cooldown = 2.2
+reach = 650.0
+count = 1
+speed = 0.0
+pierce = 0
+area = 0.0
+duration = 0.9
+spread_degrees = 0.0
+card_text = "A beam every 3 → 2.2 seconds."
+
+[resource]
+script = ExtResource("1_stats")
+id = &"zipper_ray"
+display_name = "Zipper Ray"
+behaviour = ExtResource("3_behaviour")
+knockback = 30.0
+hit_radius = 12.0
+hit_interval = 0.2
+levels = Array[ExtResource("2_level")]([SubResource("Resource_level1"), SubResource("Resource_level2"), SubResource("Resource_level3"), SubResource("Resource_level4"), SubResource("Resource_level5")])

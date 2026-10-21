@@ -7,6 +7,9 @@ const SHOTGUN: WeaponStats = preload("res://data/weapons/button_shotgun.tres")
 const CLOUD: WeaponStats = preload("res://data/weapons/stuffing_cloud.tres")
 const YARN: WeaponStats = preload("res://data/weapons/bouncy_yarn_ball.tres")
 const MORTAR: WeaponStats = preload("res://data/weapons/thimble_mortar.tres")
+const CANNON: WeaponStats = preload("res://data/weapons/yarn_cannon.tres")
+const WHIP: WeaponStats = preload("res://data/weapons/thread_whip.tres")
+const RAY: WeaponStats = preload("res://data/weapons/zipper_ray.tres")
 
 
 func test_boomerang_has_five_levels_with_card_text() -> void:
@@ -142,3 +145,43 @@ func test_ac2_mortar_levels_add_what_their_cards_say() -> void:
 	assert_eq(MORTAR.at_level(5).count, 3, "L5: 3 thimbles")
 	assert_eq(MORTAR.at_level(5).cooldown, 2.0, "L5: faster")
 	assert_string_contains(MORTAR.at_level(4).card_text, "14 → 20")
+
+
+func test_ac2_cannon_levels_add_what_their_cards_say() -> void:
+	_assert_never_worse(CANNON)
+	var first: WeaponLevel = CANNON.at_level(1)
+	assert_gt(first.area, 0.0, "it bursts")
+	assert_lt(first.speed, SNIPER.at_level(1).speed / 2.0, "slow")
+	assert_gt(first.damage, SNIPER.at_level(1).damage, "heavy")
+	assert_gt(CANNON.at_level(2).area, first.area, "L2: bigger burst")
+	assert_eq(CANNON.at_level(3).damage, 30.0, "L3: damage 20 → 30")
+	assert_eq(CANNON.at_level(4).cooldown, 1.6, "L4: every 1.6 seconds")
+	assert_eq(CANNON.at_level(5).count, 2, "L5: 2 balls")
+	assert_string_contains(CANNON.at_level(3).card_text, "20 → 30")
+	assert_string_contains(CANNON.at_level(4).card_text, "2 → 1.6")
+
+
+func test_ac2_whip_levels_add_what_their_cards_say() -> void:
+	_assert_never_worse(WHIP)
+	var first: WeaponLevel = WHIP.at_level(1)
+	assert_gte(first.spread_degrees, 90.0, "a wide arc")
+	assert_eq(WHIP.at_level(2).damage, 18.0, "L2: damage 12 → 18")
+	assert_gt(WHIP.at_level(3).area, WHIP.at_level(2).area, "L3: longer lash")
+	assert_eq(WHIP.at_level(4).count, 2, "L4: behind too")
+	assert_eq(WHIP.at_level(5).damage, 24.0, "L5: damage 18 → 24")
+	assert_eq(WHIP.at_level(5).cooldown, 1.0, "L5: every second")
+	assert_string_contains(WHIP.at_level(5).card_text, "1.3 → 1")
+
+
+func test_ac2_ray_levels_add_what_their_cards_say() -> void:
+	_assert_never_worse(RAY)
+	var first: WeaponLevel = RAY.at_level(1)
+	assert_gt(first.duration, 0.0, "the beam lasts a moment")
+	assert_lt(first.duration, 1.0, "a short moment")
+	assert_eq(first.cooldown, 3.0, "every few seconds")
+	assert_eq(RAY.at_level(2).damage, 9.0, "L2: damage 6 → 9")
+	assert_eq(RAY.at_level(3).duration, 0.9, "L3: 0.6 → 0.9 seconds")
+	assert_gt(RAY.at_level(4).reach, RAY.at_level(3).reach, "L4: longer beam")
+	assert_eq(RAY.at_level(5).cooldown, 2.2, "L5: every 2.2 seconds")
+	assert_string_contains(RAY.at_level(3).card_text, "0.6 → 0.9")
+	assert_string_contains(RAY.at_level(5).card_text, "3 → 2.2")
