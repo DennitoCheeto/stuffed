@@ -10,6 +10,7 @@ signal died(player: Player)
 const GROUP: StringName = &"players"
 
 @export var stats: HeroStats
+@export var xp_rules: XpRules
 ## 0 = player 1. Decides which input actions this hero listens to.
 @export var player_index: int = 0
 
@@ -21,6 +22,10 @@ var facing: Vector2 = Vector2.RIGHT
 var last_hit_by: String = ""
 ## Multiplies how fast all weapons attack (Quick Hands raises it).
 var attack_speed: float = 1.0
+## XP buttons closer than this fly to the hero (Magnet Pocket raises it).
+var pickup_range: float = 0.0
+## Level and XP in this run.
+var progress: LevelProgress
 
 var _input: PlayerInput
 var _dash_left: float = 0.0
@@ -37,6 +42,8 @@ func _ready() -> void:
 	_input = PlayerInput.new(player_index)
 	max_health = stats.max_health
 	health = max_health
+	pickup_range = stats.pickup_range
+	progress = LevelProgress.new(xp_rules)
 	var shape: CircleShape2D = CircleShape2D.new()
 	shape.radius = stats.hitbox_radius
 	_hitbox.shape = shape
@@ -60,6 +67,11 @@ func _physics_process(delta: float) -> void:
 	else:
 		velocity = direction * stats.move_speed
 		move_and_slide()
+
+
+## Adds collected XP. Returns how many levels were gained.
+func add_xp(amount: int) -> int:
+	return progress.add_xp(amount)
 
 
 ## Gives this hero a weapon (level 1). It attacks on its own from now on.

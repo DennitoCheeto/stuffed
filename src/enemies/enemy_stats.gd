@@ -3,7 +3,7 @@ extends Resource
 ## Balance numbers for one zombie type. Tune them in data/enemies/*.tres, not in code.
 
 enum Look { SHAMBLER, RUNNER }
-enum XpButton { SMALL, MEDIUM, BIG }
+enum XpSize { SMALL, MEDIUM, BIG }
 
 @export var display_name: String = "Zombie"
 ## Which felt puppet is drawn.
@@ -14,7 +14,7 @@ enum XpButton { SMALL, MEDIUM, BIG }
 ## Damage when it touches a hero.
 @export var contact_damage: float = 5.0
 ## Which XP button it drops when killed.
-@export var xp_button: XpButton = XpButton.SMALL
+@export var xp_button: XpSize = XpSize.SMALL
 ## Body radius in pixels, for crowding and touching.
 @export var radius: float = 16.0
 ## 1 = normal knockback, 0 = can't be pushed.

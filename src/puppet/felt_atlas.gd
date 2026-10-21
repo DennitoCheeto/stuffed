@@ -24,16 +24,21 @@ static var _atlas_size: Vector2i = Vector2i.ZERO
 ## A sprite showing part `key` (e.g. "shambler/body") with the part's pivot at the sprite's
 ## position, sized in concept units.
 static func make_sprite(key: StringName) -> Sprite2D:
+	var sprite: Sprite2D = Sprite2D.new()
+	show_part(sprite, key)
+	return sprite
+
+
+## Makes an existing sprite show part `key` (same rules as `make_sprite`).
+static func show_part(sprite: Sprite2D, key: StringName) -> void:
 	_ensure_layout()
 	var atlas_part: AtlasPart = _parts[key]
-	var sprite: Sprite2D = Sprite2D.new()
 	sprite.texture = texture
 	sprite.region_enabled = true
 	sprite.region_rect = atlas_part.region
 	sprite.centered = false
 	sprite.offset = -atlas_part.origin
 	sprite.scale = Vector2.ONE / BAKE_SCALE
-	return sprite
 
 
 static func has_part(key: StringName) -> bool:
@@ -74,6 +79,7 @@ static func bake(host: Node) -> void:
 static func _all_pieces() -> Dictionary[StringName, FeltPiece]:
 	var pieces: Dictionary[StringName, FeltPiece] = {}
 	pieces.merge(ZombiePuppet.make_parts())
+	pieces.merge(XpButtonLook.make_parts())
 	return pieces
 
 
