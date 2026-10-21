@@ -60,13 +60,14 @@ func alive_count() -> int:
 	return zombies.size()
 
 
-## Adds a zombie at `at`. Returns null when the maximum number of zombies is already alive.
-func spawn(stats: EnemyStats, at: Vector2) -> Zombie:
+## Adds a zombie at `at` (an elite with `elite`). Returns null when the maximum number of zombies
+## is already alive.
+func spawn(stats: EnemyStats, at: Vector2, elite: EliteRules = null) -> Zombie:
 	if zombies.size() >= max_alive:
 		return null
 	var zombie: Zombie = Zombie.new()
 	zombie.position = at
-	zombie.setup(stats, health_scale, damage_scale, _cosmetic_rng.randf())
+	zombie.setup(stats, health_scale, damage_scale, _cosmetic_rng.randf(), elite)
 	actors.add_child(zombie)
 	zombies.append(zombie)
 	_grid.insert(zombie, at)
@@ -149,7 +150,7 @@ func _physics_process(delta: float) -> void:
 			var target: Player = _nearest_player(zombie.position, players)
 			_move(zombie, target, delta)
 			_touch_players(zombie, players)
-			if zombie.stats.attack != null:
+			if zombie.attack != null:
 				_attack(zombie, target, delta)
 		zombie.tick(delta)
 
@@ -207,7 +208,7 @@ func _touch_players(zombie: Zombie, players: Array[Player]) -> void:
 	for player: Player in players:
 		var reach: float = zombie.radius() + player.stats.hitbox_radius
 		if zombie.position.distance_squared_to(player.global_position) <= reach * reach:
-			player.take_hit(zombie.contact_damage, zombie.stats.display_name)
+			player.take_hit(zombie.contact_damage, zombie.display_name)
 
 
 func _remove(zombie: Zombie, with_burst: bool) -> void:
@@ -232,7 +233,7 @@ func _walk(zombie: Zombie, target: Player) -> Vector2:
 	if target == null or zombie.stun_left > 0.0:
 		return Vector2.ZERO
 	var toward: Vector2 = zombie.position.direction_to(target.global_position) * zombie.move_speed
-	var attack: SpitAttack = zombie.stats.attack
+	var attack: SpitAttack = zombie.attack
 	if attack == null:
 		return toward
 	if zombie.is_winding_up():
@@ -248,7 +249,7 @@ func _walk(zombie: Zombie, target: Player) -> Vector2:
 ## A ranged zombie's turn: count down, wind up when a player is in range, spit when the wind-up
 ## is over. Being stunned cancels the wind-up.
 func _attack(zombie: Zombie, target: Player, delta: float) -> void:
-	var attack: SpitAttack = zombie.stats.attack
+	var attack: SpitAttack = zombie.attack
 	zombie.attack_cooldown -= delta
 	if zombie.is_stunned():
 		zombie.windup_left = -1.0
@@ -284,7 +285,7 @@ func _spit(zombie: Zombie, target: Player, attack: SpitAttack) -> void:
 			zombie.spit_damage,
 			attack.bullet_radius,
 			attack.bullet_lifetime,
-			zombie.stats.display_name
+			zombie.display_name
 		)
 	zombie_spat.emit(zombie, balls)
 
@@ -296,6 +297,6 @@ func _burst_into_cloud(zombie: Zombie) -> void:
 		return
 	var cloud: EnemyCloud = projectiles.spawn(EnemyCloud) as EnemyCloud
 	var damage_amount: float = cloud_stats.damage * damage_scale
-	var source: String = zombie.stats.display_name
+	var source: String = zombie.display_name
 	cloud.launch(zombie.position, cloud_stats.radius, cloud_stats.duration, damage_amount, source)
 	zombie_burst.emit(zombie, cloud)

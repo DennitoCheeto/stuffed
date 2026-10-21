@@ -30,6 +30,8 @@ const MUFFLING: Array[StringName] = [&"pause", &"level_up", &"goal"]
 
 @export var rules: RunRules
 @export var upgrade_pool: UpgradePool
+## What gift boxes give and how they open.
+@export var gift_box_rules: GiftBoxRules
 
 ## Seconds since the run started.
 var elapsed: float = 0.0
@@ -49,6 +51,8 @@ var endless: bool = false
 var endless_minute: int = 0
 ## Big-hit freezes so far.
 var hit_stops: int = 0
+## The gift box moment (built in code, on top of the run).
+var gift_screen: GiftBoxScreen = GiftBoxScreen.new()
 
 ## False while the goal pops the horde (those zombies drop no XP).
 var _drops_enabled: bool = true
@@ -56,11 +60,14 @@ var _drops_enabled: bool = true
 var _at_goal: bool = false
 ## Players waiting to pick a card (one entry per level gained).
 var _level_up_queue: Array[Player] = []
+## Opened gift boxes waiting for their moment (their contents are already given).
+var _gift_queue: Array[GiftContents] = []
 ## Why the run is frozen right now (level-up, pause, ...). Empty = running.
 var _freeze_reasons: Dictionary[StringName, bool] = {}
 
 @onready var arena: Arena = $Arena
 @onready var pickups: PickupManager = $Pickups
+@onready var floor_items: Node2D = $FloorItems
 @onready var actors: Node2D = $Actors
 @onready var effects: Node2D = $Effects
 @onready var enemies: EnemyManager = $Enemies
@@ -96,6 +103,8 @@ func _ready() -> void:
 	level_up_screen.reroll_requested.connect(_on_reroll_requested)
 	level_up_screen.skip_requested.connect(_on_skip_requested)
 	level_up_screen.banish_requested.connect(_on_banish_requested)
+	add_child(gift_screen)
+	gift_screen.finished.connect(_on_gift_moment_finished)
 	goal_screen.end_chosen.connect(_on_end_chosen)
 	goal_screen.endless_chosen.connect(_on_endless_chosen)
 	pause_menu.resumed.connect(unfreeze.bind(&"pause"))
@@ -195,7 +204,7 @@ func is_frozen() -> bool:
 
 func _on_leveled_up(_new_level: int, player: Player) -> void:
 	_level_up_queue.append(player)
-	if not level_up_screen.is_open():
+	if not level_up_screen.is_open() and not gift_screen.is_open():
 		_show_next_level_up(true)
 
 
@@ -203,6 +212,7 @@ func _show_next_level_up(with_moment: bool) -> void:
 	if _level_up_queue.is_empty():
 		level_up_screen.close()
 		unfreeze(&"level_up")
+		_show_next_gift()
 		return
 	freeze(&"level_up")
 	var player: Player = _level_up_queue[0]
@@ -284,7 +294,7 @@ func _reach_goal() -> void:
 		player.celebrate()
 	await enemies.pop_all_in_chain(Players.centroid(get_tree()), POP_CHAIN_TIME)
 	await get_tree().create_timer(CELEBRATION_TIME).timeout
-	while not _level_up_queue.is_empty():
+	while not _level_up_queue.is_empty() or not _gift_queue.is_empty() or gift_screen.is_open():
 		await get_tree().process_frame
 	_drops_enabled = true
 	freeze(&"goal")
@@ -372,7 +382,9 @@ func _on_player_hurt(_amount: float) -> void:
 func _on_zombie_killed(zombie: Zombie) -> void:
 	Sfx.play(&"pop")
 	if _drops_enabled:
-		pickups.drop(zombie.stats.xp_button, zombie.position)
+		pickups.drop(zombie.xp_button(), zombie.position)
+		if zombie.is_elite():
+			drop_gift_box(zombie.position)
 
 
 func _on_player_died(_player: Player) -> void:
@@ -389,3 +401,43 @@ func _on_player_died(_player: Player) -> void:
 
 func _finish_after_death() -> void:
 	finished.emit(make_result("died"))
+
+
+## Puts a gift box on the floor at `at`; it opens for the first player who touches it.
+func drop_gift_box(at: Vector2) -> GiftBox:
+	var box: GiftBox = GiftBox.new()
+	box.position = at
+	box.setup(gift_box_rules)
+	box.touched.connect(_on_gift_box_touched)
+	floor_items.add_child(box)
+	return box
+
+
+## The box opens for `player`: its contents are given right away, then the moment plays.
+func _on_gift_box_touched(box: GiftBox, player: Player) -> void:
+	var gift: GiftContents = gift_box_rules.contents(
+		player.upgrade_levels(), upgrade_pool, upgrade_rng
+	)
+	gift.player = player
+	gift.apply_to(player)
+	box.queue_free()
+	_gift_queue.append(gift)
+	if not level_up_screen.is_open() and not gift_screen.is_open():
+		_show_next_gift()
+
+
+func _show_next_gift() -> void:
+	if _gift_queue.is_empty():
+		return
+	var gift: GiftContents = _gift_queue.pop_front()
+	freeze(&"gift_box")
+	gift.player.celebrate()
+	gift_screen.open(gift, gift_box_rules)
+
+
+func _on_gift_moment_finished() -> void:
+	unfreeze(&"gift_box")
+	if not _level_up_queue.is_empty():
+		_show_next_level_up(true)
+	else:
+		_show_next_gift()

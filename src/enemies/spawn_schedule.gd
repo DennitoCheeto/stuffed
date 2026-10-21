@@ -18,6 +18,14 @@ enum Phase { NORMAL, SURGE, BREATHER, FINAL_SURGE }
 ## How far outside the visible screen zombies appear, in pixels.
 @export var view_margin: float = 80.0
 
+@export_group("Elites")
+## What makes a zombie an elite.
+@export var elite_rules: EliteRules
+## Elites before the boss, in time order (about 3-4 per run).
+@export var elites: Array[EliteSpawn] = []
+## After the last one, another elite every this many seconds (endless), cycling through the types.
+@export var elite_repeat_seconds: float = 75.0
+
 @export_group("Surges and breathers")
 ## Length of one surge/breather rhythm.
 @export var cycle_seconds: float = 60.0
@@ -81,3 +89,26 @@ func enemy_at(seconds: float, rng: RandomNumberGenerator) -> EnemyStats:
 			return entry.enemy
 		roll -= chance
 	return shambler
+
+
+## When elite number `index` (0 = the first) comes. INF without elites.
+func elite_time(index: int) -> float:
+	if elites.is_empty():
+		return INF
+	if index < elites.size():
+		return elites[index].at_seconds
+	var after_last: int = index - elites.size() + 1
+	return elites[elites.size() - 1].at_seconds + elite_repeat_seconds * after_last
+
+
+## Which zombie type elite number `index` is an elite of.
+func elite_enemy(index: int) -> EnemyStats:
+	return elites[index % elites.size()].enemy
+
+
+## How many elites come before `seconds` into the run.
+func elites_before(seconds: float) -> int:
+	var count: int = 0
+	while elite_time(count) < seconds:
+		count += 1
+	return count

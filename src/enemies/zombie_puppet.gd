@@ -22,16 +22,23 @@ var eye: Sprite2D
 ## White silhouette shown for a moment when the zombie is hit.
 var flash: Sprite2D
 
+## Gold patch and crown of stitches (elites only).
+var elite_marks: Array[Sprite2D] = []
+
 var _phase: float = 0.0
 var _side: float = 1.0
+## Elites are drawn bigger.
+var _size: float = 1.0
 
 
-## Builds the sprites. `phase` (0..1) keeps zombies from moving in perfect step.
-func build(zombie_look: ZombieLook, phase: float) -> void:
+## Builds the sprites. `phase` (0..1) keeps zombies from moving in perfect step; `size` draws it
+## bigger (elites).
+func build(zombie_look: ZombieLook, phase: float, size: float = 1.0) -> void:
 	look = zombie_look
 	_phase = phase * TAU
+	_size = size
 	origin = Node2D.new()
-	origin.scale = Vector2.ONE * look.draw_scale
+	origin.scale = Vector2.ONE * look.draw_scale * _size
 	add_child(origin)
 	_sprite(origin, "shadow", look.shadow_pivot - look.anchor)
 	root = Node2D.new()
@@ -55,7 +62,7 @@ func animate(time: float, moving: bool, since_hit: float, facing_left: bool) -> 
 		_side = -1.0
 	elif moving:
 		_side = 1.0
-	origin.scale = Vector2(look.draw_scale * _side, look.draw_scale)
+	origin.scale = Vector2(look.draw_scale * _side, look.draw_scale) * _size
 	var p: float = time * TAU * look.steps_per_second + _phase
 	var sway: float = sin(p) if moving else 0.3 * sin(p * 0.3)
 	root.rotation_degrees = look.sway_degrees * sway
@@ -97,3 +104,18 @@ func _sprite(parent: Node2D, part: String, at: Vector2) -> Sprite2D:
 	sprite.position = at
 	parent.add_child(sprite)
 	return sprite
+
+
+## Sews on the elite marks: a gold patch on the belly and a crown of stitches on the head.
+func add_elite_marks() -> void:
+	var patch: Sprite2D = FeltAtlas.make_sprite(EliteLook.PATCH)
+	patch.position = body.position + Vector2(-12.0, 4.0)
+	root.add_child(patch)
+	root.move_child(patch, body.get_index() + 1)
+	# The crown sits on the highest of head and body (the pig's head is only its face).
+	var crown: Sprite2D = FeltAtlas.make_sprite(EliteLook.CROWN)
+	var head_top: float = head.position.y + FeltAtlas.part_bounds(look.key("head")).position.y
+	var body_top: float = body.position.y + FeltAtlas.part_bounds(look.key("body")).position.y
+	crown.position = Vector2(0.0, minf(head_top, body_top) - head.position.y + 16.0)
+	head.add_child(crown)
+	elite_marks = [patch, crown]

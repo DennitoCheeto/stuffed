@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3]
+[gd_scene load_steps=19 format=3]
 
 [ext_resource type="Script" path="res://src/run/run.gd" id="1_run"]
 [ext_resource type="Resource" path="res://data/run_rules.tres" id="2_rules"]
@@ -17,11 +17,13 @@
 [ext_resource type="Script" path="res://src/effects/damage_numbers.gd" id="15_numbers"]
 [ext_resource type="Script" path="res://src/ui/dev_menu.gd" id="16_dev"]
 [ext_resource type="Script" path="res://src/projectiles/projectile_manager.gd" id="17_projectiles"]
+[ext_resource type="Resource" path="res://data/gift_box_rules.tres" id="18_gift"]
 
 [node name="Run" type="Node2D"]
 script = ExtResource("1_run")
 rules = ExtResource("2_rules")
 upgrade_pool = ExtResource("11_pool")
+gift_box_rules = ExtResource("18_gift")
 
 [node name="Arena" parent="." instance=ExtResource("3_arena")]
 
