@@ -2,7 +2,7 @@ class_name EnemyStats
 extends Resource
 ## Balance numbers for one zombie type. Tune them in data/enemies/*.tres, not in code.
 
-enum Look { SHAMBLER, RUNNER }
+enum Look { SHAMBLER, RUNNER, FROG }
 enum XpSize { SMALL, MEDIUM, BIG }
 
 @export var display_name: String = "Zombie"
@@ -19,3 +19,5 @@ enum XpSize { SMALL, MEDIUM, BIG }
 @export var radius: float = 16.0
 ## 1 = normal knockback, 0 = can't be pushed.
 @export var knockback_taken: float = 1.0
+## Ranged attack (the spitter); none = it only hurts by touching.
+@export var attack: SpitAttack
