@@ -5,12 +5,16 @@ extends GutTest
 const MAIN_SCENE: PackedScene = preload("res://src/main/main.tscn")
 ## Physics frames per second (project default).
 const FPS: float = 60.0
+const TEST_LOG: String = "user://test_run_log.jsonl"
 
 var main: Main
 var sender: GutInputSender
 
 
 func before_each() -> void:
+	# Never touch the player's real run log.
+	RunLog.path = TEST_LOG
+	DirAccess.remove_absolute(TEST_LOG)
 	main = MAIN_SCENE.instantiate()
 	main.quit_enabled = false
 	add_child_autofree(main)

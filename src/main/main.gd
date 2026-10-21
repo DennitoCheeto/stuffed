@@ -37,17 +37,24 @@ func show_title() -> void:
 func start_run() -> void:
 	var run: Run = RUN_SCENE.instantiate()
 	run.finished.connect(show_end)
+	run.quit_to_title.connect(_on_quit_to_title)
 	_switch_to(run)
 
 
-## The end screen for a finished run.
+## The end screen for a finished run (which is also written to the run log).
 func show_end(result: RunResult) -> void:
+	RunLog.append(result)
 	Crosshair.stop()
 	var end: EndScreen = END_SCENE.instantiate()
 	end.show_result(result)
 	end.try_again_requested.connect(start_run)
 	end.title_requested.connect(show_title)
 	_switch_to(end)
+
+
+func _on_quit_to_title(result: RunResult) -> void:
+	RunLog.append(result)
+	show_title()
 
 
 func quit() -> void:

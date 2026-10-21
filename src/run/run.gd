@@ -9,6 +9,8 @@ signal finished(result: RunResult)
 signal goal_reached
 ## The player chose "Keep going (endless)".
 signal endless_started
+## The player quit from the pause menu (the result is still logged).
+signal quit_to_title(result: RunResult)
 
 const PLAYER_SCENE: PackedScene = preload("res://src/player/player.tscn")
 ## How long the chain of pops takes when the goal is reached.
@@ -57,6 +59,7 @@ var _freeze_reasons: Dictionary[StringName, bool] = {}
 @onready var hud: Hud = $Hud
 @onready var level_up_screen: LevelUpScreen = $LevelUpScreen
 @onready var goal_screen: GoalScreen = $GoalScreen
+@onready var pause_menu: PauseMenu = $PauseMenu
 
 
 func _ready() -> void:
@@ -71,6 +74,8 @@ func _ready() -> void:
 	level_up_screen.picked.connect(_on_upgrade_picked)
 	goal_screen.end_chosen.connect(_on_end_chosen)
 	goal_screen.endless_chosen.connect(_on_endless_chosen)
+	pause_menu.resumed.connect(unfreeze.bind(&"pause"))
+	pause_menu.quit_requested.connect(_on_quit_requested)
 	var first: Player = spawn_player(0, arena.center())
 	hud.follow_player(first)
 	camera.set_bounds(arena.outer_rect())
@@ -90,6 +95,22 @@ func _physics_process(delta: float) -> void:
 		_update_endless_scaling()
 	spawner.tick(elapsed, delta)
 	_show_clock()
+
+
+## Esc pauses a running run (the pause menu closes itself with Esc or Resume).
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed(&"pause") and can_pause():
+		get_viewport().set_input_as_handled()
+		pause()
+
+
+func can_pause() -> bool:
+	return not over and not _at_goal and not is_frozen()
+
+
+func pause() -> void:
+	freeze(&"pause")
+	pause_menu.open()
 
 
 ## Adds a hero for player `index` (0 = player 1) at `at`.
@@ -207,6 +228,11 @@ func _update_endless_scaling() -> void:
 func _on_end_chosen() -> void:
 	over = true
 	finished.emit(make_result("ended"))
+
+
+func _on_quit_requested() -> void:
+	over = true
+	quit_to_title.emit(make_result("quit"))
 
 
 func _on_endless_chosen() -> void:
