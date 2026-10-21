@@ -35,7 +35,7 @@ var boost_levels: Dictionary[StringName, int] = {}
 ## Every card picked this run, in order, e.g. "Quick Feet 2" (for the end screen and run log).
 var picked_upgrades: PackedStringArray = []
 
-var _input: PlayerInput
+var _controls: PlayerInput
 var _dash_left: float = 0.0
 var _dash_direction: Vector2 = Vector2.ZERO
 var _dash_cooldown_left: float = 0.0
@@ -47,7 +47,7 @@ var _hurt_invulnerable_left: float = 0.0
 
 func _ready() -> void:
 	add_to_group(GROUP)
-	_input = PlayerInput.new(player_index)
+	_controls = PlayerInput.new(player_index)
 	max_health = stats.max_health
 	health = max_health
 	pickup_range = stats.pickup_range
@@ -65,16 +65,25 @@ func _physics_process(delta: float) -> void:
 	if is_dead():
 		velocity = Vector2.ZERO
 		return
-	var direction: Vector2 = _input.move_vector()
+	var direction: Vector2 = _controls.move_vector()
 	if direction != Vector2.ZERO:
 		facing = direction.normalized()
-	if not is_dashing() and _input.is_just_pressed("dash"):
+	if not is_dashing() and _controls.is_just_pressed("dash"):
 		try_dash()
 	if is_dashing():
 		_move_dash(delta)
 	else:
 		velocity = direction * move_speed()
 		move_and_slide()
+
+
+func _input(event: InputEvent) -> void:
+	_controls.observe(event)
+
+
+## Where this player aims (the mouse cursor for player 1, else straight ahead), in the world.
+func aim_point() -> Vector2:
+	return _controls.aim_point(get_viewport(), global_position + facing * 200.0)
 
 
 func move_speed() -> float:

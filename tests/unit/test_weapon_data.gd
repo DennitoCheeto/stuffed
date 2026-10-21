@@ -38,3 +38,22 @@ func test_levels_never_get_worse() -> void:
 func test_at_level_clamps() -> void:
 	assert_eq(BOOMERANG.at_level(0), BOOMERANG.at_level(1))
 	assert_eq(BOOMERANG.at_level(99), BOOMERANG.at_level(5))
+
+
+func test_sniper_level_one_matches_the_spec() -> void:
+	var sniper: WeaponStats = load("res://data/weapons/sewing_pin_sniper.tres")
+	var first: WeaponLevel = sniper.at_level(1)
+	assert_eq(sniper.max_level(), 5)
+	assert_eq(first.damage, 15.0)
+	assert_eq(first.cooldown, 1.2)
+	assert_eq(first.pierce, 2)
+
+
+func test_ac9_sniper_levels_add_what_their_cards_say() -> void:
+	var sniper: WeaponStats = load("res://data/weapons/sewing_pin_sniper.tres")
+	assert_gt(sniper.at_level(2).damage, sniper.at_level(1).damage, "L2: more damage")
+	assert_gt(sniper.at_level(3).pierce, sniper.at_level(2).pierce, "L3: more pierce")
+	assert_lt(sniper.at_level(4).cooldown, sniper.at_level(3).cooldown, "L4: faster")
+	assert_eq(sniper.at_level(5).count, 2, "L5: two pins")
+	assert_string_contains(sniper.at_level(3).card_text, "4")
+	assert_string_contains(sniper.at_level(4).card_text, "0.9")

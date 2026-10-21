@@ -25,3 +25,4 @@ func set_bounds(bounds: Rect2) -> void:
 func snap_to_players() -> void:
 	global_position = Players.centroid(get_tree())
 	reset_smoothing()
+	force_update_scroll()

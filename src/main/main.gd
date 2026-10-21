@@ -26,6 +26,7 @@ func _input(event: InputEvent) -> void:
 
 
 func show_title() -> void:
+	Crosshair.stop()
 	var title: TitleScreen = TITLE_SCENE.instantiate()
 	title.start_requested.connect(start_run)
 	title.quit_requested.connect(quit)
