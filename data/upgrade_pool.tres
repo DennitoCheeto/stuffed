@@ -215,3 +215,7 @@ snack = SubResource("Resource_snack")
 cards_per_level_up = 3
 max_weapons = 6
 max_items = 6
+rerolls_per_run = 3
+skips_per_run = 3
+banishes_per_run = 2
+skip_heal = 0.1

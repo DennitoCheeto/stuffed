@@ -12,27 +12,45 @@ extends Resource
 ## Item slots per player. With all of them used, only owned items are offered.
 @export var max_items: int = 6
 
+@export_group("Control over bad luck (per run)")
+## Reroll (R): 3 new cards.
+@export var rerolls_per_run: int = 3
+## Skip (S): no card, a small heal instead.
+@export var skips_per_run: int = 3
+## Banish (B, then 1/2/3): that card never shows up again this run.
+@export var banishes_per_run: int = 2
+## A skip heals this share of max health (0.1 = 10%).
+@export var skip_heal: float = 0.1
 
-## Picks the cards for one level-up. `levels` maps upgrade id → current level (0 or missing =
-## not owned). Cards are all different, maxed upgrades are left out, new ones only while a slot
-## is free, the chance of each card follows its weight, and missing slots become the snack.
-func roll(levels: Dictionary[StringName, int], rng: RandomNumberGenerator) -> Array[UpgradeOffer]:
-	var weapons_full: bool = owned_count(levels, UpgradeDef.Kind.WEAPON) >= max_weapons
-	var items_full: bool = owned_count(levels, UpgradeDef.Kind.ITEM) >= max_items
-	var open: Array[UpgradeDef] = []
-	for upgrade: UpgradeDef in upgrades:
-		var level: int = levels.get(upgrade.id, 0)
-		if level >= upgrade.top_level() or upgrade.weight <= 0.0:
+
+## Picks `count` cards (-1 = a full level-up) for one level-up. `levels` maps upgrade id →
+## current level (0 or missing = not owned). Cards are all different, maxed upgrades are left
+## out, new ones only while a slot is free, the chance of each card follows its weight, and
+## missing slots become the snack. Upgrades in `excluded` never come up (banished cards);
+## those in `avoid` only when nothing else is left (a reroll avoids the cards it replaces).
+func roll(
+	levels: Dictionary[StringName, int],
+	rng: RandomNumberGenerator,
+	excluded: Array[StringName] = [],
+	avoid: Array[StringName] = [],
+	count: int = -1
+) -> Array[UpgradeOffer]:
+	var wanted: int = cards_per_level_up if count < 0 else count
+	var fresh: Array[UpgradeDef] = []
+	var repeats: Array[UpgradeDef] = []
+	for upgrade: UpgradeDef in _open(levels):
+		if excluded.has(upgrade.id):
 			continue
-		var full: bool = weapons_full if upgrade.kind == UpgradeDef.Kind.WEAPON else items_full
-		if level == 0 and full:
-			continue
-		open.append(upgrade)
+		if avoid.has(upgrade.id):
+			repeats.append(upgrade)
+		else:
+			fresh.append(upgrade)
 	var offers: Array[UpgradeOffer] = []
-	while offers.size() < cards_per_level_up and not open.is_empty():
-		var picked: UpgradeDef = open.pop_at(_weighted_index(open, rng))
-		offers.append(UpgradeOffer.new(picked, int(levels.get(picked.id, 0)) + 1))
-	while offers.size() < cards_per_level_up:
+	for choices: Array[UpgradeDef] in [fresh, repeats]:
+		while offers.size() < wanted and not choices.is_empty():
+			var picked: UpgradeDef = choices.pop_at(_weighted_index(choices, rng))
+			offers.append(UpgradeOffer.new(picked, int(levels.get(picked.id, 0)) + 1))
+	while offers.size() < wanted:
 		offers.append(UpgradeOffer.new(snack, 1))
 	return offers
 
@@ -52,6 +70,23 @@ func find(id: StringName) -> UpgradeDef:
 		if upgrade.id == id:
 			return upgrade
 	return null
+
+
+## Upgrades that could be offered at `levels`: not maxed, weighted, and new ones only while a
+## slot of their kind is free.
+func _open(levels: Dictionary[StringName, int]) -> Array[UpgradeDef]:
+	var weapons_full: bool = owned_count(levels, UpgradeDef.Kind.WEAPON) >= max_weapons
+	var items_full: bool = owned_count(levels, UpgradeDef.Kind.ITEM) >= max_items
+	var open: Array[UpgradeDef] = []
+	for upgrade: UpgradeDef in upgrades:
+		var level: int = levels.get(upgrade.id, 0)
+		if level >= upgrade.top_level() or upgrade.weight <= 0.0:
+			continue
+		var full: bool = weapons_full if upgrade.kind == UpgradeDef.Kind.WEAPON else items_full
+		if level == 0 and full:
+			continue
+		open.append(upgrade)
+	return open
 
 
 func _weighted_index(choices: Array[UpgradeDef], rng: RandomNumberGenerator) -> int:
