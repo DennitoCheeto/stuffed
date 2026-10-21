@@ -1,6 +1,6 @@
 # 02 — Build variety: the Bedroom, complete (M2)
 
-Status: **DRAFT**, waiting for product owner approval.
+Status: **APPROVED** by the product owner, 2026-10-21.
 Milestone: **M2 — Build variety** (vision §10).
 Based on: [`00-product-vision.md`](00-product-vision.md) §5 (Enemies, Combat, Banane), §6; builds on
 [`01-core-run.md`](01-core-run.md) (accepted 2026-10-21).

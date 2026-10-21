@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-21 (M1 accepted, spec 02 drafted)_
+_Last updated: 2026-10-21 (spec 02 approved, M2 issues #32–#46, M2-01 projectile base)_
 
 ## Where we are
 
@@ -14,12 +14,11 @@ _Last updated: 2026-10-21 (M1 accepted, spec 02 drafted)_
 | Art direction | ✅ felt style "B — Soft", puppet animation (`docs/art/`) |
 | M0 Factory setup | ✅ done (PR #1) |
 | M1 Core run | ✅ accepted 2026-10-21 (PRs #17–#29; playtest P-1 … P-6 passed, 144 fps on the PO's PC) |
-| M2 Build variety | 📝 spec 02 drafted (`docs/specs/02-build-variety.md`), **waiting for product owner approval** |
+| M2 Build variety | 🔨 spec 02 approved; issues #32–#46 (milestone "M2 — Build variety"); M2-01 in PR |
 
 ## Next step
 
-- Product owner reviews and merges the spec 02 PR (or asks for changes; open questions in spec 02 §19).
-- After approval: create the 15 GitHub issues from spec 02 §18 and start with ticket 1 (projectile performance base).
+- Merge M2-01 (#32) when CI is green, then M2-02 item system (#33), then the tickets in order.
 
 ## Playtest notes (M1)
 
@@ -34,6 +33,10 @@ _Last updated: 2026-10-21 (M1 accepted, spec 02 drafted)_
   style. gdlint also rejects loading the same file twice in one script (`duplicated-load`): use one `preload` const.
 - Watch the screen without a monitor: a scratch `extends SceneTree` script run with
   `-s <script> --write-movie out.png --fixed-fps 60` (call `FeltAtlas.bake(root)` first) writes PNG frames.
+- Shots and enemy bullets live in the run's `ProjectileManager` (pooled, one physics loop, sprites from
+  `ProjectileLook`). New weapons: subclass `Projectile`, `projectiles().spawn(MyShot)`, then `launch`. Never `new()`
+  shots under the weapon. Enemy bullets: `EnemyBullet` (drawn on the top layer). Real-GPU fps check:
+  `Godot_v4.7.2-stable_win64.exe --path . -s tools/benchmark.gd` (M2-01: 500 zombies + 1000 shots → ~190 fps).
 - Performance: felt parts are baked once into `FeltAtlas` and drawn as sprites. Never draw hundreds of shapes per
   frame with `draw_*` (500 zombies went from 6 fps / 30k draw calls to 60 fps / ~600).
 - Pausing: the run **freezes itself** (`Run.freeze(reason)`, process mode disabled) instead of `get_tree().paused`,

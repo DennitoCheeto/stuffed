@@ -6,7 +6,8 @@ extends Weapon
 
 func attack() -> bool:
 	var manager: EnemyManager = enemies()
-	if manager == null:
+	var shots: ProjectileManager = projectiles()
+	if manager == null or shots == null:
 		return false
 	var numbers: WeaponLevel = current()
 	var aim: Vector2 = player.global_position.direction_to(player.aim_point())
@@ -16,8 +17,6 @@ func attack() -> bool:
 	var spread: float = deg_to_rad(numbers.spread_degrees)
 	for i: int in numbers.count:
 		var offset: float = (i - (numbers.count - 1) / 2.0) * spread
-		var pin: PinProjectile = PinProjectile.new()
-		pin.top_level = true
-		add_child(pin)
-		pin.launch(self, manager, aim.rotated(offset))
+		var pin: PinProjectile = shots.spawn(PinProjectile) as PinProjectile
+		pin.launch(self, aim.rotated(offset))
 	return true

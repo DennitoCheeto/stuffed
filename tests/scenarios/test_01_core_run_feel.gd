@@ -88,10 +88,8 @@ func test_hit_stop_when_a_pin_goes_through_three_zombies() -> void:
 		zombie.max_health = 1000.0
 		zombie.health = 1000.0
 	var sniper: SewingPinSniper = banane.add_weapon(SNIPER) as SewingPinSniper
-	var pin: PinProjectile = PinProjectile.new()
-	pin.top_level = true
-	sniper.add_child(pin)
-	pin.launch(sniper, run.enemies, Vector2.RIGHT)
+	var pin: PinProjectile = run.projectiles.spawn(PinProjectile) as PinProjectile
+	pin.launch(sniper, Vector2.RIGHT)
 	await wait_physics_frames(20)
 	assert_eq(run.hit_stops, 1, "one heavy hit")
 	assert_false(run.is_frozen(), "the hit-stop is over quickly")

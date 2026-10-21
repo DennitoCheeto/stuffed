@@ -12,7 +12,8 @@ const SEARCH_FACTOR: float = 2.0
 
 func attack() -> bool:
 	var manager: EnemyManager = enemies()
-	if manager == null:
+	var shots: ProjectileManager = projectiles()
+	if manager == null or shots == null:
 		return false
 	var numbers: WeaponLevel = current()
 	var target: Zombie = manager.nearest(player.global_position, numbers.reach * SEARCH_FACTOR)
@@ -21,10 +22,8 @@ func attack() -> bool:
 	var aim: Vector2 = player.global_position.direction_to(target.position)
 	Sfx.play(&"throw")
 	for i: int in numbers.count:
-		var projectile: BoomerangProjectile = BoomerangProjectile.new()
-		projectile.top_level = true
-		add_child(projectile)
-		projectile.launch(self, manager, aim.rotated(_fan_angle(i, numbers)))
+		var peel: BoomerangProjectile = shots.spawn(BoomerangProjectile) as BoomerangProjectile
+		peel.launch(self, aim.rotated(_fan_angle(i, numbers)))
 	return true
 
 
