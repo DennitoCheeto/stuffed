@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-21 (M2-01 … M2-04 merged; M2-05 in progress)_
+_Last updated: 2026-10-21 (M2-01 … M2-06 merged)_
 
 ## Where we are
 
@@ -14,11 +14,11 @@ _Last updated: 2026-10-21 (M2-01 … M2-04 merged; M2-05 in progress)_
 | Art direction | ✅ felt style "B — Soft", puppet animation (`docs/art/`) |
 | M0 Factory setup | ✅ done (PR #1) |
 | M1 Core run | ✅ accepted 2026-10-21 (PRs #17–#29; playtest P-1 … P-6 passed, 144 fps on the PO's PC) |
-| M2 Build variety | 🔨 spec 02 approved; issues #32–#46 (milestone "M2 — Build variety"); M2-01…M2-04 merged (PRs #47–#49, #51) |
+| M2 Build variety | 🔨 spec 02 approved; issues #32–#46 (milestone "M2 — Build variety"); M2-01…M2-06 merged (PRs #47–#49, #51–#53) |
 
 ## Next step
 
-- M2-05 (#36) PR open, merge on green. Then M2-06 (#37, reroll/skip/banish) and the rest in order.
+- Next: M2-07 (#38, spitters + enemy bullets, AC-13), then the rest of M2 in order (spec 02 §18 list).
 
 ## Playtest notes (M1)
 
@@ -46,6 +46,9 @@ _Last updated: 2026-10-21 (M2-01 … M2-04 merged; M2-05 in progress)_
   test files too. gdformat joins a call or dictionary onto one line whenever it fits in 100 chars.
 - The Linux CI test job can hang at exit after all tests passed (M2-04: 12-min timeout). Re-run the failed job
   once (`gh run rerun <run> --failed`); if it hangs again, look for a real cause.
+- Level-up screen: Reroll (R) / Skip (S) / Banish (B, then 1/2/3). Counts per run + skip heal in `upgrade_pool.tres`,
+  per player in `Player.card_controls` (`CardControls`). `UpgradePool.roll(levels, rng, excluded, avoid, count)`:
+  banished ids go in `excluded`. S is also "move down": watch for accidental skips in the playtest.
 - `Player.apply_upgrade` adds one level per card: tests that need level N apply N-1 cards in a loop.
 - CI checks can show "pending" forever after all steps finished (GitHub glitch): re-run that job
   (`gh run rerun <run> --job <job>`), don't merge on pending.
