@@ -86,7 +86,7 @@ The zombie plushies need variety, and some of them bring the actual bullet hell:
 - **Move with WASD, dash on Space.** Moving is the main skill.
 - **Two kinds of weapons**, and the upgrade decides which:
   - **Auto weapons** fire by themselves at the nearest / strongest enemy (orbiting needles, button shotgun, stuffing clouds).
-  - **Aimed weapons** fire towards the mouse cursor (yarn cannon, sewing-pin sniper, thread whip). Stronger or more precise, as a reward for aiming.
+  - **Aimed weapons** fire on their own too, but towards the mouse cursor (yarn cannon, sewing-pin sniper, thread whip). Stronger or more precise, as a reward for aiming. No mouse buttons needed.
 - Weapons combine or evolve (e.g. needle + thread → "Sewing Storm"). Recipes are visible in the game, so nobody needs a wiki.
 - One reward moment per run: the **gift box** (our version of the treasure chest), short and spectacular.
 - **Control over bad luck:** randomness ruining runs is a top complaint (Enter the Gungeon, Megabonk). Players get a few **rerolls** (new choices), **skips** and **banishes** (this item never shows up again this run) per run, and more can be unlocked in the town.
@@ -139,6 +139,11 @@ Each hero is one of the girlfriend's real stuffed animals. More will be added as
 - **Equipment progression:** items sewn onto the plushies, crafted in the town; town upgrades unlock new equipment (details in §5).
 - **Local co-op:** yes, for 2 players on one PC (keyboard + mouse and a controller, or two controllers). Not in the MVP, but the code supports a second player from M1, and co-op is the first milestone after the MVP.
 - **Art and sound: made from scratch, nothing bought.** See §8.1.
+- **Weapons always fire on their own** (added 2026-10-21, spec 01): some can be aimed with the mouse cursor, but
+  gameplay never needs mouse buttons.
+- **Every run has a goal, and then the player may go endless** (added 2026-10-21, spec 01): reaching the goal
+  (survive the timer, later: beat the boss) is a win; the player then chooses to end the run or keep going for as
+  long as their build holds. Runs get longer as areas get harder (short first runs, 8–12 min later).
 
 ## 8. Tech (approved)
 
@@ -172,7 +177,8 @@ Each hero is one of the girlfriend's real stuffed animals. More will be added as
 - Steam release, achievements, store page.
 - Story / dialogue system.
 - Controller support (later), Mac/Linux builds.
-- Endless mode, difficulty levels beyond normal.
+- Difficulty levels beyond normal. (Endless *is* in: after reaching a run's goal the player may keep going,
+  see the decision of 2026-10-21 in §7.)
 - Final polish of the art. The felt style is used from M1 in a simple form and refined in M6.
 
 ## 10. Milestones (proposal)
