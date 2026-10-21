@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-21 (M0 done with PR #1, next: spec 01)_
+_Last updated: 2026-10-21 (spec 01 drafted, waiting for product owner approval)_
 
 ## Where we are
 
@@ -13,13 +13,12 @@ _Last updated: 2026-10-21 (M0 done with PR #1, next: spec 01)_
 | Vision | ✅ approved 2026-10-21 (`docs/specs/00-product-vision.md`) |
 | Art direction | ✅ felt style "B — Soft", puppet animation (`docs/art/`) |
 | M0 Factory setup | ✅ done (PR #1): Godot 4.7.2, GUT, CI (lint, typecheck, tests, Windows export), PR build comments, "latest" release |
-| M1 Core run | ⏳ next: draft `docs/specs/01-core-run.md` for product owner approval |
+| M1 Core run | ⏳ spec `docs/specs/01-core-run.md` drafted (spec PR), waiting for product owner approval |
 
 ## Next step
 
-- Draft spec 01 (Banane's first run: movement + dash, Peel Boomerang + one aimed weapon, shamblers + runners,
-  XP buttons, level-up pick 1 of 3, death screen, basic game feel + sounds, dev menu, balance in data files,
-  code ready for a second player). Spec PR is merged by the product owner.
+- Product owner reviews the spec 01 PR, answers its 3 open questions (§16) and merges it.
+- Then: fold the answers into the spec, create the 12 tickets from spec §15 as GitHub issues, start with ticket 1.
 
 ## Gotchas
 
