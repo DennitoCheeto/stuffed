@@ -31,9 +31,7 @@ const BULLET_OUTLINE_COLOR: Color = Color("#14101a")
 
 
 static func make_parts() -> Dictionary[StringName, FeltPiece]:
-	return {
-		PEEL: _peel(), PIN: _pin(), NEEDLE: _needle(), BUTTON: _button(), BULLET: _bullet()
-	}
+	return {PEEL: _peel(), PIN: _pin(), NEEDLE: _needle(), BUTTON: _button(), BULLET: _bullet()}
 
 
 ## Makes `sprite` show part `key` at its on-screen size (times `size_factor`).
