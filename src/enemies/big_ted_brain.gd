@@ -34,28 +34,31 @@ func step(zombie: Zombie, target: Player, manager: EnemyManager, delta: float) -
 		return Vector2.ZERO
 	if state != State.WALK:
 		state_left -= delta
-	match state:
-		State.CHARGE_AIM:
-			telegraph.set_progress(_progress(_ted.charge_windup_seconds))
-			if state_left <= 0.0:
-				_start_charging(zombie, manager)
-			return Vector2.ZERO
-		State.CHARGE:
-			return _charge_step(zombie, delta)
-		State.DAZED:
-			if state_left <= 0.0:
-				_back_to_walking()
-			return Vector2.ZERO
-		State.STOMP_WINDUP:
-			telegraph.set_progress(_progress(_ted.stomp.windup_seconds))
-			if state_left <= 0.0:
-				_stomp(zombie, target, manager)
-			return Vector2.ZERO
+		return _pattern_step(zombie, target, manager, delta)
 	pattern_cooldown -= delta
 	if pattern_cooldown <= 0.0 and _in_range(zombie, target):
 		_start_pattern(zombie, target, manager)
 		return Vector2.ZERO
 	return super.step(zombie, target, manager, delta)
+
+
+## One frame of the pattern going on. He stands still, except while charging.
+func _pattern_step(zombie: Zombie, target: Player, manager: EnemyManager, delta: float) -> Vector2:
+	match state:
+		State.CHARGE_AIM:
+			telegraph.set_progress(_progress(_ted.charge_windup_seconds))
+			if state_left <= 0.0:
+				_start_charging(zombie, manager)
+		State.CHARGE:
+			return _charge_step(zombie, delta)
+		State.DAZED:
+			if state_left <= 0.0:
+				_back_to_walking()
+		State.STOMP_WINDUP:
+			telegraph.set_progress(_progress(_ted.stomp.windup_seconds))
+			if state_left <= 0.0:
+				_stomp(zombie, target, manager)
+	return Vector2.ZERO
 
 
 func calm_down() -> void:
