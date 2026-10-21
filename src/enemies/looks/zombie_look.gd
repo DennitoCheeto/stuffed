@@ -54,6 +54,7 @@ static func all_parts() -> Dictionary[StringName, FeltPiece]:
 	parts.merge(FrogLook.make_parts())
 	parts.merge(PigLook.make_parts())
 	parts.merge(ElephantLook.make_parts())
+	parts.merge(EliteLook.make_parts())
 	return parts
 
 

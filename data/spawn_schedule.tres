@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="SpawnSchedule" load_steps=12 format=3]
+[gd_resource type="Resource" script_class="SpawnSchedule" load_steps=19 format=3]
 
 [ext_resource type="Script" path="res://src/enemies/spawn_schedule.gd" id="1_schedule"]
 [ext_resource type="Script" path="res://src/enemies/spawn_entry.gd" id="2_entry"]
@@ -7,6 +7,8 @@
 [ext_resource type="Resource" path="res://data/enemies/spitter.tres" id="5_spitter"]
 [ext_resource type="Resource" path="res://data/enemies/bloater.tres" id="6_bloater"]
 [ext_resource type="Resource" path="res://data/enemies/tank.tres" id="7_tank"]
+[ext_resource type="Script" path="res://src/enemies/elite_spawn.gd" id="8_elite_spawn"]
+[ext_resource type="Resource" path="res://data/elite_rules.tres" id="9_elite_rules"]
 
 [sub_resource type="Resource" id="Resource_runner"]
 script = ExtResource("2_entry")
@@ -40,6 +42,26 @@ share = 0.05
 share_growth_per_minute = 0.01
 share_max = 0.08
 
+[sub_resource type="Resource" id="Resource_elite_1"]
+script = ExtResource("8_elite_spawn")
+enemy = ExtResource("3_shambler")
+at_seconds = 105.0
+
+[sub_resource type="Resource" id="Resource_elite_2"]
+script = ExtResource("8_elite_spawn")
+enemy = ExtResource("4_runner")
+at_seconds = 195.0
+
+[sub_resource type="Resource" id="Resource_elite_3"]
+script = ExtResource("8_elite_spawn")
+enemy = ExtResource("6_bloater")
+at_seconds = 315.0
+
+[sub_resource type="Resource" id="Resource_elite_4"]
+script = ExtResource("8_elite_spawn")
+enemy = ExtResource("7_tank")
+at_seconds = 405.0
+
 [resource]
 script = ExtResource("1_schedule")
 shambler = ExtResource("3_shambler")
@@ -47,6 +69,9 @@ entries = Array[ExtResource("2_entry")]([SubResource("Resource_runner"), SubReso
 start_rate = 0.8
 rate_growth_per_minute = 0.4
 view_margin = 80.0
+elite_rules = ExtResource("9_elite_rules")
+elites = Array[ExtResource("8_elite_spawn")]([SubResource("Resource_elite_1"), SubResource("Resource_elite_2"), SubResource("Resource_elite_3"), SubResource("Resource_elite_4")])
+elite_repeat_seconds = 75.0
 cycle_seconds = 60.0
 surge_starts_at = 30.0
 surge_seconds = 20.0

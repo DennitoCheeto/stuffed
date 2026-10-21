@@ -41,6 +41,13 @@ static func show_part(sprite: Sprite2D, key: StringName) -> void:
 	sprite.scale = Vector2.ONE / BAKE_SCALE
 
 
+## What part `key` covers, in concept units around its pivot (where to sew something onto it).
+static func part_bounds(key: StringName) -> Rect2:
+	_ensure_layout()
+	var atlas_part: AtlasPart = _parts[key]
+	return Rect2(-atlas_part.origin / BAKE_SCALE, atlas_part.region.size / BAKE_SCALE)
+
+
 static func has_part(key: StringName) -> bool:
 	_ensure_layout()
 	return _parts.has(key)
@@ -81,6 +88,7 @@ static func _all_pieces() -> Dictionary[StringName, FeltPiece]:
 	pieces.merge(ZombieLook.all_parts())
 	pieces.merge(XpButtonLook.make_parts())
 	pieces.merge(ProjectileLook.make_parts())
+	pieces.merge(GiftBoxLook.make_parts())
 	return pieces
 
 

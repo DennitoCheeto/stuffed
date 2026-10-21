@@ -82,6 +82,7 @@ func _build() -> void:
 			labels.append("%d %ss" % [count, stats.display_name.to_lower()])
 			actions.append(_spawn.bind(stats, count))
 		_row(column, labels, actions)
+	_row(column, ["Spawn elite", "Drop gift box"], [_spawn_elite, _drop_gift_box])
 	_row(column, ["Kill all"], [_kill_all])
 	var late: float = run.rules.goal_seconds - 30.0
 	var jump_label: String = "Jump to %s" % TimeFormat.clock(late)
@@ -140,6 +141,18 @@ func _level_up() -> void:
 func _spawn(stats: EnemyStats, count: int) -> void:
 	for i: int in count:
 		run.spawner.spawn_one(stats)
+
+
+## An elite of a random type from the schedule's elites.
+func _spawn_elite() -> void:
+	var schedule: SpawnSchedule = run.spawner.schedule
+	var index: int = randi_range(0, schedule.elites.size() - 1)
+	run.spawner.spawn_elite(schedule.elite_enemy(index))
+
+
+## A gift box a few steps to the right of player 1.
+func _drop_gift_box() -> void:
+	run.drop_gift_box(_player().global_position + Vector2(80.0, 0.0))
 
 
 func _kill_all() -> void:
