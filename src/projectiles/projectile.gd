@@ -9,6 +9,8 @@ extends Sprite2D
 var weapon: Weapon
 var manager: ProjectileManager
 
+var _look_scale: Vector2 = Vector2.ZERO
+
 
 ## Enemy bullets are drawn above everything and hurt players instead of zombies.
 func is_hostile() -> bool:
@@ -19,6 +21,13 @@ func is_hostile() -> bool:
 func reset() -> void:
 	weapon = null
 	rotation = 0.0
+
+
+## Draws the shot `factor` times its normal size (Big Spool).
+func size_to(factor: float) -> void:
+	if _look_scale == Vector2.ZERO:
+		_look_scale = scale
+	scale = _look_scale * factor
 
 
 ## Moves the shot by one physics frame. Returns false when it is done (back to the pool).

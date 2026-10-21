@@ -34,6 +34,7 @@ func launch(from: PeelBoomerang, direction: Vector2) -> void:
 	_numbers = from.current()
 	_direction = direction
 	global_position = from.player.global_position
+	size_to(from.area_scale())
 
 
 func advance(delta: float) -> bool:
@@ -57,7 +58,7 @@ func advance(delta: float) -> bool:
 func _hit_zombies() -> void:
 	var already_hit: Dictionary[int, bool] = _hit_back if returning else _hit_out
 	var push: Vector2 = _direction * _boomerang.stats.knockback
-	var radius: float = _boomerang.stats.hit_radius
+	var radius: float = _boomerang.hit_radius()
 	for zombie: Zombie in manager.enemies.query_circle(global_position, radius):
 		var id: int = zombie.get_instance_id()
 		if already_hit.has(id):

@@ -14,6 +14,10 @@ extends Resource
 @export var speed: float = 450.0
 ## How many zombies one projectile passes through (0 = stops at the first).
 @export var pierce: int = 0
+## Radius of an area hit (clouds, bursts, arcs), in pixels; 0 for weapons without one.
+@export var area: float = 0.0
+## How long a lasting effect stays (clouds, beams, orbits), in seconds; 0 if none.
+@export var duration: float = 0.0
 ## Angle between projectiles of one attack, in degrees.
 @export var spread_degrees: float = 0.0
 @export_multiline var card_text: String = ""

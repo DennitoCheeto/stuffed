@@ -31,6 +31,7 @@ func launch(from: Weapon, direction: Vector2) -> void:
 	_numbers = from.current()
 	_direction = direction
 	global_position = from.player.global_position
+	size_to(from.area_scale())
 	rotation = direction.angle()
 
 
@@ -53,7 +54,7 @@ func advance(delta: float) -> bool:
 
 func _hit_zombies(point: Vector2) -> void:
 	var push: Vector2 = _direction * weapon.stats.knockback
-	for zombie: Zombie in manager.enemies.query_circle(point, weapon.stats.hit_radius):
+	for zombie: Zombie in manager.enemies.query_circle(point, weapon.hit_radius()):
 		var id: int = zombie.get_instance_id()
 		if _already_hit.has(id) or hits >= max_hits():
 			continue

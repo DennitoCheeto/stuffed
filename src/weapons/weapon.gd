@@ -15,6 +15,8 @@ var level: int = 1
 var player: Player
 
 var _cooldown_left: float = FIRST_ATTACK_DELAY
+var _current: WeaponLevel
+var _current_key: Vector2i = Vector2i(-1, -1)
 
 
 func setup(weapon_stats: WeaponStats, owner_player: Player) -> void:
@@ -23,9 +25,24 @@ func setup(weapon_stats: WeaponStats, owner_player: Player) -> void:
 	name = String(stats.id)
 
 
-## The numbers for the current level.
+## The numbers for the current level, with the owner's items applied (Sharp Scissors, Long
+## Thread, Big Spool). Use these, not `stats`, for anything an item can change.
 func current() -> WeaponLevel:
-	return stats.at_level(level)
+	var key: Vector2i = Vector2i(level, player.bonus_version if player != null else 0)
+	if _current == null or key != _current_key:
+		_current = _with_bonuses(stats.at_level(level))
+		_current_key = key
+	return _current
+
+
+## Radius of one shot's hit area (Big Spool makes it bigger).
+func hit_radius() -> float:
+	return stats.hit_radius * area_scale()
+
+
+## How much bigger areas and shots are than their data (1 = as in the data).
+func area_scale() -> float:
+	return player.area_multiplier if player != null else 1.0
 
 
 func is_maxed() -> bool:
@@ -60,3 +77,14 @@ func _physics_process(delta: float) -> void:
 ## One attack. Returns false if there was nothing to attack (then it tries again soon).
 func attack() -> bool:
 	return false
+
+
+func _with_bonuses(base: WeaponLevel) -> WeaponLevel:
+	var numbers: WeaponLevel = base.duplicate() as WeaponLevel
+	if player == null:
+		return numbers
+	numbers.damage *= player.damage_multiplier
+	numbers.reach *= player.range_multiplier
+	numbers.duration *= player.range_multiplier
+	numbers.area *= player.area_multiplier
+	return numbers
