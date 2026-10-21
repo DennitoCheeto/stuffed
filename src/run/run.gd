@@ -18,6 +18,7 @@ var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var over: bool = false
 
 @onready var arena: Arena = $Arena
+@onready var pickups: PickupManager = $Pickups
 @onready var actors: Node2D = $Actors
 @onready var effects: Node2D = $Effects
 @onready var enemies: EnemyManager = $Enemies
@@ -31,6 +32,7 @@ func _ready() -> void:
 		seed_value = randi_range(1, 2_147_483_647)
 	rng.seed = seed_value
 	enemies.setup(actors, effects, arena.play_rect(), rules.max_enemies_alive)
+	enemies.zombie_killed.connect(_on_zombie_killed)
 	spawner.setup(enemies, camera, rng)
 	var first: Player = spawn_player(0, arena.center())
 	hud.follow_player(first)
@@ -55,6 +57,10 @@ func spawn_player(index: int, at: Vector2) -> Player:
 	player.died.connect(_on_player_died)
 	actors.add_child(player)
 	return player
+
+
+func _on_zombie_killed(zombie: Zombie) -> void:
+	pickups.drop(zombie.stats.xp_button, zombie.position)
 
 
 func _on_player_died(_player: Player) -> void:
