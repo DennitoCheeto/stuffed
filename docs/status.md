@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-21 (M2-01 … M2-06 merged)_
+_Last updated: 2026-10-21 (M2-01 … M2-08 merged)_
 
 ## Where we are
 
@@ -14,11 +14,13 @@ _Last updated: 2026-10-21 (M2-01 … M2-06 merged)_
 | Art direction | ✅ felt style "B — Soft", puppet animation (`docs/art/`) |
 | M0 Factory setup | ✅ done (PR #1) |
 | M1 Core run | ✅ accepted 2026-10-21 (PRs #17–#29; playtest P-1 … P-6 passed, 144 fps on the PO's PC) |
-| M2 Build variety | 🔨 spec 02 approved; issues #32–#46 (milestone "M2 — Build variety"); M2-01…M2-06 merged (PRs #47–#49, #51–#53) |
+| M2 Build variety | 🔨 spec 02 approved; issues #32–#46 (milestone "M2 — Build variety"); M2-01…M2-08 merged (PRs #47–#49, #51–#55) |
 
 ## Next step
 
-- Next: M2-07 (#38, spitters + enemy bullets, AC-13), then the rest of M2 in order (spec 02 §18 list).
+- Next: M2-09 (#40, elites + gift box, AC-6, AC-8), then the rest of M2 in order (spec 02 §18 list).
+- The PO has not played M2 yet (wants more features first). The run is now 8:00; the goal still works as in
+  M1 until the boss arrives (M2-12).
 
 ## Playtest notes (M1)
 
@@ -63,6 +65,11 @@ _Last updated: 2026-10-21 (M2-01 … M2-06 merged)_
   window coordinates (`get_canvas_transform()`, then `get_screen_transform()`) before sending mouse motion.
 - Don't touch DisplayServer/Input (e.g. the cursor) in `_exit_tree` of long-lived nodes: the Linux test run hung
   at exit once (PR #29). The CI test job now times out after 12 minutes.
+- Enemies: types are `EnemyStats` .tres + a look (`ZombieLook.for_look`, parts merged in `all_parts`). Ranged:
+  `EnemyStats.attack` (`SpitAttack`, wind-up/puff in `EnemyManager._attack`). Burst on death:
+  `EnemyStats.death_cloud` (`EnemyCloud`, hostile, pooled). Schedule = `SpawnSchedule.entries` (`SpawnEntry`);
+  tests find a type with `schedule.entry_named("Runner")`. Dev menu builds in `setup` (needs `run.rules`).
+- GUT `wait_physics_frames(1)` in a loop is not exactly one frame per call: measure time with `run.elapsed`.
 - Scenario tests write the run log to `user://test_run_log.jsonl`, never the real `run_log.jsonl`.
 - `docs/` has a `.gdignore`; shell scripts need the executable bit in git (`git update-index --chmod=+x`).
 - Optional later: `@claude` GitHub workflow (as in Tastey) needs the `CLAUDE_CODE_OAUTH_TOKEN` repo secret.
