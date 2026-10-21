@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1_rules")
-goal_seconds = 300.0
+goal_seconds = 480.0
 max_enemies_alive = 500
 endless_health_growth_per_minute = 0.15
 endless_damage_growth_per_minute = 0.15

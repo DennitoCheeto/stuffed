@@ -1,8 +1,8 @@
 class_name ZombieLook
 extends RefCounted
 ## How one zombie type is put together (where its parts hang, in concept units) and how it moves.
-## Each look (ShamblerLook, RunnerLook, FrogLook) fills one of these and draws its parts for the
-## FeltAtlas.
+## Each look (ShamblerLook, RunnerLook, FrogLook, PigLook, ElephantLook) fills one of these and
+## draws its parts for the FeltAtlas.
 
 ## Atlas keys are "<prefix>/<part>": shadow, limb_left, limb_right, body, head, eye, flash.
 var prefix: String = ""
@@ -40,6 +40,10 @@ static func for_look(look: EnemyStats.Look) -> ZombieLook:
 			return RunnerLook.spec()
 		EnemyStats.Look.FROG:
 			return FrogLook.spec()
+		EnemyStats.Look.PIG:
+			return PigLook.spec()
+		EnemyStats.Look.ELEPHANT:
+			return ElephantLook.spec()
 	return ShamblerLook.spec()
 
 
@@ -48,6 +52,8 @@ static func all_parts() -> Dictionary[StringName, FeltPiece]:
 	var parts: Dictionary[StringName, FeltPiece] = ShamblerLook.make_parts()
 	parts.merge(RunnerLook.make_parts())
 	parts.merge(FrogLook.make_parts())
+	parts.merge(PigLook.make_parts())
+	parts.merge(ElephantLook.make_parts())
 	return parts
 
 

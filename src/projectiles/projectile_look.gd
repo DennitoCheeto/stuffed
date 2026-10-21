@@ -1,8 +1,9 @@
 class_name ProjectileLook
 extends RefCounted
 ## The felt shots (banana peel, sewing pin, needle, button, cloud, yarn ball, thimble and its
-## shadow, yarn burst, whip lash, zipper beam) and the zombies' stuffing ball, drawn once into
-## the FeltAtlas. Shapes are in "atlas units": three times the on-screen size, for a sharp bake.
+## shadow, yarn burst, whip lash, zipper beam), the zombies' stuffing ball and the bloater's
+## cloud, drawn once into the FeltAtlas. Shapes are in "atlas units": three times the on-screen
+## size, for a sharp bake.
 ## Players' shots are soft and quiet; enemy bullets are bright with a dark outline (vision §6.1).
 
 const DRAW_SCALE: float = 1.0 / 3.0
@@ -19,8 +20,11 @@ const BURST: StringName = &"shot/burst"
 const WHIP: StringName = &"shot/whip"
 const ZIPPER: StringName = &"shot/zipper"
 const BULLET: StringName = &"bullet/stuffing"
+const HAZARD: StringName = &"bullet/cloud"
 ## On-screen radius of the stuffing ball part; bigger bullets scale it.
 const BULLET_RADIUS: float = 8.0
+## On-screen radius the bloater cloud is drawn at; bigger clouds scale it.
+const HAZARD_RADIUS: float = 40.0
 ## The peel is drawn a little bigger than its outline numbers.
 const PEEL_SIZE: float = 1.3
 const PEEL_COLOR: Color = Color("#efe3a0")
@@ -72,6 +76,7 @@ static func make_parts() -> Dictionary[StringName, FeltPiece]:
 		WHIP: _whip(),
 		ZIPPER: _zipper(),
 		BULLET: _bullet(),
+		HAZARD: _hazard(),
 	}
 
 
@@ -265,3 +270,27 @@ static func _bullet() -> FeltPiece:
 	var core: PackedVector2Array = FeltShapes.circle(Vector2(-0.2, -0.2) * radius, radius * 0.45)
 	ball.add_layer(core, BULLET_CORE_COLOR)
 	return ball
+
+
+## The bloater's cloud: a see-through red haze with stuffing puffs, and a bright rim with a dark
+## edge exactly at the hit radius (never as soft as the players' own Stuffing Cloud).
+static func _hazard() -> FeltPiece:
+	var cloud: FeltPiece = FeltPiece.new()
+	cloud.soft = false
+	var radius: float = HAZARD_RADIUS * UNITS
+	cloud.polygon = FeltShapes.circle(Vector2.ZERO, radius, 40)
+	cloud.color = Color(BULLET_COLOR, 0.28)
+	var edge: PackedVector2Array = _closed_circle(Vector2.ZERO, radius * 0.97, 48)
+	cloud.add_line(edge, BULLET_OUTLINE_COLOR, radius * 0.1)
+	cloud.add_line(_closed_circle(Vector2.ZERO, radius * 0.95, 48), BULLET_COLOR, radius * 0.05)
+	var puff_color: Color = Color(BULLET_CORE_COLOR, 0.6)
+	for i: int in 5:
+		var at: Vector2 = Vector2.from_angle(TAU * i / 5.0 + 0.4) * radius * 0.45
+		cloud.add_line(_closed_circle(at, radius * 0.2, 16), puff_color, radius * 0.03)
+	return cloud
+
+
+static func _closed_circle(center: Vector2, radius: float, segments: int) -> PackedVector2Array:
+	var ring: PackedVector2Array = FeltShapes.circle(center, radius, segments)
+	ring.append(ring[0])
+	return ring

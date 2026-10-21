@@ -88,6 +88,7 @@ func _ready() -> void:
 	enemies.zombie_hit.connect(_on_zombie_hit)
 	enemies.zombie_winding_up.connect(func(_zombie: Zombie) -> void: Sfx.play(&"puff"))
 	enemies.zombie_spat.connect(func(_zombie: Zombie, _balls: int) -> void: Sfx.play(&"spit"))
+	enemies.zombie_burst.connect(_on_zombie_burst)
 	pickups.collected.connect(_on_pickup_collected)
 	spawner.setup(enemies, camera, rng)
 	spawner.goal_seconds = rules.goal_seconds
@@ -346,6 +347,11 @@ func _on_endless_chosen() -> void:
 	spawner.active = true
 	unfreeze(&"goal")
 	endless_started.emit()
+
+
+func _on_zombie_burst(_zombie: Zombie, _cloud: EnemyCloud) -> void:
+	Sfx.play(&"burst")
+	camera.shake(0.2)
 
 
 func _on_zombie_hit(zombie: Zombie, amount: float) -> void:

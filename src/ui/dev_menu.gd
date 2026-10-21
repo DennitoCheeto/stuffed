@@ -10,6 +10,8 @@ const PANEL_COLOR: Color = Color(0.1, 0.09, 0.13, 0.92)
 const SHAMBLER: EnemyStats = preload("res://data/enemies/shambler.tres")
 const RUNNER: EnemyStats = preload("res://data/enemies/runner.tres")
 const SPITTER: EnemyStats = preload("res://data/enemies/spitter.tres")
+const BLOATER: EnemyStats = preload("res://data/enemies/bloater.tres")
+const TANK: EnemyStats = preload("res://data/enemies/tank.tres")
 
 var run: Run
 ## Everything the menu can do, by button text (tests press them by name).
@@ -23,7 +25,6 @@ func _ready() -> void:
 	visible = false
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	layer = 40
-	_build()
 
 
 func setup(owner_run: Run) -> void:
@@ -31,6 +32,7 @@ func setup(owner_run: Run) -> void:
 	_hitboxes = HitboxOverlay.new()
 	_hitboxes.visible = false
 	run.add_child(_hitboxes)
+	_build()
 
 
 func toggle() -> void:
@@ -73,7 +75,7 @@ func _build() -> void:
 	panel.add_child(column)
 	_title(column, "Developer menu (F1)")
 	_row(column, ["Give 10 XP", "Level up now"], [_give_xp, _level_up])
-	for stats: EnemyStats in [SHAMBLER, RUNNER, SPITTER]:
+	for stats: EnemyStats in [SHAMBLER, RUNNER, SPITTER, BLOATER, TANK]:
 		var labels: Array[String] = []
 		var actions: Array[Callable] = []
 		for count: int in [10, 100, 500]:
@@ -81,7 +83,9 @@ func _build() -> void:
 			actions.append(_spawn.bind(stats, count))
 		_row(column, labels, actions)
 	_row(column, ["Kill all"], [_kill_all])
-	_row(column, ["+30 s", "Jump to 4:30"], [_skip_time.bind(30.0), _jump_to.bind(270.0)])
+	var late: float = run.rules.goal_seconds - 30.0
+	var jump_label: String = "Jump to %s" % TimeFormat.clock(late)
+	_row(column, ["+30 s", jump_label], [_skip_time.bind(30.0), _jump_to.bind(late)])
 	_row(column, ["0.5x", "1x", "2x"], [_speed.bind(0.5), _speed.bind(1.0), _speed.bind(2.0)])
 	_check(column, "Invincible", _set_invincible)
 	_check(column, "Pause", _set_paused)

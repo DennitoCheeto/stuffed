@@ -43,13 +43,13 @@ func test_ac32_kill_all() -> void:
 	assert_eq(run.enemies.alive_count(), 0)
 
 
-func test_ac32_jump_to_4_30() -> void:
+func test_ac32_jump_to_half_a_minute_before_the_goal() -> void:
 	await _run_with_menu()
-	run.dev_menu.press("Jump to 4:30")
+	run.dev_menu.press("Jump to 7:30")
 	await wait_physics_frames(2)
-	assert_string_starts_with(run.hud.timer_label.text, "4:30 / 5:00")
+	assert_string_starts_with(run.hud.timer_label.text, "7:30 / 8:00")
 	run.dev_menu.press("+30 s")
-	assert_gt(run.elapsed, 299.0)
+	assert_gt(run.elapsed, 479.0)
 
 
 func test_invincible_pause_and_speed() -> void:
