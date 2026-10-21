@@ -3,8 +3,6 @@ extends Node2D
 ## One thrown banana peel. Out to its reach, then back to its player; every zombie it touches is
 ## hurt once on the way out and once on the way back.
 
-signal came_back
-
 const SPIN_SPEED: float = 16.0
 const PEEL_COLOR: Color = Color("#efe3a0")
 const PEEL_EDGE_COLOR: Color = Color("#b9a85a")
@@ -12,7 +10,7 @@ const CATCH_DISTANCE: float = 10.0
 
 var returning: bool = false
 
-var _weapon: Weapon
+var _weapon: PeelBoomerang
 var _enemies: EnemyManager
 var _numbers: WeaponLevel
 var _direction: Vector2 = Vector2.RIGHT
@@ -22,7 +20,7 @@ var _hit_back: Dictionary[int, bool] = {}
 var _shape: PackedVector2Array = []
 
 
-func launch(weapon: Weapon, manager: EnemyManager, direction: Vector2) -> void:
+func launch(weapon: PeelBoomerang, manager: EnemyManager, direction: Vector2) -> void:
 	_weapon = weapon
 	_enemies = manager
 	_numbers = weapon.current()
@@ -39,7 +37,7 @@ func _physics_process(delta: float) -> void:
 	if returning:
 		var target: Vector2 = _weapon.player.global_position
 		if global_position.distance_to(target) <= step + CATCH_DISTANCE:
-			came_back.emit()
+			_weapon.peel_caught.emit()
 			queue_free()
 			return
 		_direction = global_position.direction_to(target)

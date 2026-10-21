@@ -67,13 +67,14 @@ func test_ac7_peel_returns_to_banane_and_follows_him() -> void:
 	_dummy(banane.global_position + Vector2(400, 0))
 	await wait_for_signal(_boomerang().fired, 2.0)
 	var peel: BoomerangProjectile = _projectiles()[0]
-	watch_signals(peel)
+	watch_signals(_boomerang())
 	sender.action_down("p1_move_down")
 	await wait_physics_frames(40)
 	assert_true(peel.returning, "turned around at its reach")
 	await wait_physics_frames(50)
 	sender.action_up("p1_move_down")
-	assert_signal_emitted(peel, "came_back", "caught by Banane after he moved")
+	# The peel frees itself when caught, so we only look at the weapon from here on.
+	assert_signal_emitted(_boomerang(), "peel_caught", "caught by Banane after he moved")
 
 
 func test_ac7_hits_the_same_zombie_once_out_and_once_back() -> void:
@@ -81,11 +82,10 @@ func test_ac7_hits_the_same_zombie_once_out_and_once_back() -> void:
 	var banane: Player = first_player()
 	var zombie: Zombie = _dummy(banane.global_position + Vector2(150, 0))
 	await wait_for_signal(_boomerang().fired, 2.0)
-	var peel: BoomerangProjectile = _projectiles()[0]
 	var damage: float = _boomerang().current().damage
 	await wait_physics_frames(30)
 	assert_eq(zombie.health, 1000.0 - damage, "one hit on the way out")
-	await wait_for_signal(peel.came_back, 2.0)
+	await wait_for_signal(_boomerang().peel_caught, 2.0)
 	assert_eq(zombie.health, 1000.0 - 2.0 * damage, "one more on the way back, no more")
 
 

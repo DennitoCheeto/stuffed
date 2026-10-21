@@ -3,6 +3,9 @@ extends Weapon
 ## Banane's starting weapon: throws a banana peel at the nearest zombie. It flies out to its
 ## reach, turns, and flies back to Banane (following him), hurting each zombie once per way.
 
+## A thrown peel came back and Banane caught it.
+signal peel_caught
+
 ## Only throws at zombies this many times the reach away (roughly: on screen).
 const SEARCH_FACTOR: float = 2.0
 
