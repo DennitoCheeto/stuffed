@@ -18,6 +18,15 @@ var heading: Vector2 = Vector2.ZERO
 var stun_left: float = 0.0
 var dead: bool = false
 var puppet: ZombiePuppet
+## Ranged zombies (stats.attack): seconds left in the wind-up, while it puffs up; below 0 = not
+## winding up.
+var windup_left: float = -1.0
+## Seconds until it may start its next wind-up.
+var attack_cooldown: float = 0.0
+## Volleys spat so far (picks the next one from the attack pattern).
+var volleys: int = 0
+## Damage of one of its stuffing balls (endless mode scales it like touching).
+var spit_damage: float = 0.0
 
 var _time: float = 0.0
 var _since_hit: float = INF
@@ -31,6 +40,9 @@ func setup(enemy_stats: EnemyStats, health_scale: float, damage_scale: float, ph
 	health = max_health
 	contact_damage = stats.contact_damage * damage_scale
 	move_speed = stats.move_speed
+	if stats.attack != null:
+		attack_cooldown = stats.attack.first_delay_seconds
+		spit_damage = stats.attack.bullet_damage * damage_scale
 	puppet = ZombiePuppet.new()
 	add_child(puppet)
 	puppet.build(ZombieLook.for_look(stats.look), phase)
@@ -66,6 +78,17 @@ func is_stunned() -> bool:
 	return stun_left > 0.0
 
 
+func is_winding_up() -> bool:
+	return windup_left >= 0.0
+
+
+## How far the wind-up is: 0 = not puffed up, 1 = about to spit.
+func windup_progress() -> float:
+	if not is_winding_up() or stats.attack == null:
+		return 0.0
+	return clampf(1.0 - windup_left / maxf(stats.attack.windup_seconds, 0.001), 0.0, 1.0)
+
+
 ## Advances its timers and animation by one frame.
 func tick(delta: float) -> void:
 	_time += delta
@@ -73,6 +96,8 @@ func tick(delta: float) -> void:
 	stun_left = maxf(stun_left - delta, 0.0)
 	knockback = knockback.lerp(Vector2.ZERO, minf(KNOCKBACK_DECAY * delta, 1.0))
 	puppet.animate(_time, heading != Vector2.ZERO, _since_hit, heading.x < 0.0)
+	if stats.attack != null:
+		puppet.puff(windup_progress())
 	if _stars != null:
 		_stars.visible = is_stunned()
 		puppet.spin(stun_left)

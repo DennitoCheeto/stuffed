@@ -5,6 +5,10 @@ extends Node2D
 ## Its Zombie calls `animate` every frame.
 
 const FLASH_TIME: float = 0.08
+## How much bigger it gets at the end of a wind-up (x, y).
+const PUFF_SIZE: Vector2 = Vector2(0.4, 0.3)
+## Colour it glows towards while puffing up (the colour of the stuffing ball it will spit).
+const PUFF_TINT: Color = Color(1.8, 0.7, 0.9)
 
 var look: ZombieLook
 var origin: Node2D
@@ -65,6 +69,14 @@ func animate(time: float, moving: bool, since_hit: float, facing_left: bool) -> 
 		squish = exp(-7.0 * since_hit) * cos(TAU * 3.0 * since_hit)
 	root.scale = Vector2(1.0 + 0.18 * squish, 1.0 - 0.22 * squish)
 	flash.visible = since_hit < FLASH_TIME
+
+
+## Puffs up before spitting (call after `animate`): 0 = normal, 1 = fully puffed, about to spit.
+## The body swells and glows, so you see a shot coming.
+func puff(amount: float) -> void:
+	var swell: float = clampf(amount, 0.0, 1.0)
+	root.scale *= Vector2.ONE + PUFF_SIZE * swell
+	root.modulate = Color.WHITE.lerp(PUFF_TINT, swell)
 
 
 ## While stunned the zombie spins around (call after `animate`); 0 = not stunned.

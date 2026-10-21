@@ -15,6 +15,8 @@ const LENGTHS: Dictionary[StringName, float] = {
 	&"quack": 0.45,
 	&"death": 0.9,
 	&"goal": 1.1,
+	&"puff": 0.5,
+	&"spit": 0.2,
 }
 
 
@@ -41,6 +43,10 @@ static func make(sound: StringName) -> AudioStreamWAV:
 			voice = _quack
 		&"death":
 			voice = _death
+		&"puff":
+			voice = _puff
+		&"spit":
+			voice = _spit
 		_:
 			voice = _goal
 	return Synth.render(LENGTHS[sound], voice)
@@ -125,3 +131,16 @@ static func _goal(t: float) -> float:
 			var bell: float = Synth.sine(hz * local) + 0.3 * Synth.sine(hz * 2.0 * local)
 			value += bell * exp(-5.0 * local)
 	return 0.16 * value
+
+
+## Spitter wind-up: a rising, wobbly "bwuuup" as the frog puffs up.
+static func _puff(t: float) -> float:
+	var wobble: float = 3.0 * sin(TAU * 14.0 * t)
+	var tone: float = Synth.sine(Synth.sweep(t, 140.0, 420.0, 0.5) + wobble * t)
+	return 0.3 * tone * minf(t / 0.05, 1.0) * clampf((0.5 - t) / 0.08, 0.0, 1.0)
+
+
+## Spitter shot: a wet little "ptoo".
+static func _spit(t: float) -> float:
+	var pop: float = Synth.sine(Synth.sweep(t, 700.0, 220.0, 0.12)) * exp(-20.0 * t)
+	return 0.4 * pop + 0.2 * Synth.noise(t) * exp(-45.0 * t)

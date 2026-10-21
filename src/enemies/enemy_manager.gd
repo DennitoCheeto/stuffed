@@ -2,12 +2,17 @@ class_name EnemyManager
 extends Node
 ## Owns all zombies of a run and moves them together each physics frame: walk towards the
 ## nearest player, push each other apart a little (a crowd, not a blob), hurt players they touch.
+## Ranged zombies (spitters) keep their distance instead and spit after a visible wind-up.
 ## Weapons ask it for zombies near a point and deal damage through it.
 ## Zombies live under the `actors` node, which sits at the world origin.
 
 signal zombie_killed(zombie: Zombie)
 ## A zombie took damage (damage numbers, hit sound).
 signal zombie_hit(zombie: Zombie, amount: float)
+## A ranged zombie starts puffing up (a shot is coming).
+signal zombie_winding_up(zombie: Zombie)
+## A ranged zombie spat `balls` stuffing balls.
+signal zombie_spat(zombie: Zombie, balls: int)
 
 ## Weapons find the manager through this group.
 const GROUP: StringName = &"enemy_manager"
@@ -19,6 +24,8 @@ const MAX_BURSTS: int = 60
 
 var actors: Node2D
 var effects: Node2D
+## Where ranged zombies put their stuffing balls.
+var projectiles: ProjectileManager
 ## Zombies never leave this area (the arena floor).
 var play_rect: Rect2 = Rect2()
 var max_alive: int = 500
@@ -133,9 +140,13 @@ func _physics_process(delta: float) -> void:
 	for zombie: Zombie in zombies:
 		if calm:
 			zombie.heading = Vector2.ZERO
+			zombie.windup_left = -1.0
 		else:
-			_move(zombie, players, delta)
+			var target: Player = _nearest_player(zombie.position, players)
+			_move(zombie, target, delta)
 			_touch_players(zombie, players)
+			if zombie.stats.attack != null:
+				_attack(zombie, target, delta)
 		zombie.tick(delta)
 
 
@@ -147,11 +158,8 @@ func _alive_players() -> Array[Player]:
 	return result
 
 
-func _move(zombie: Zombie, players: Array[Player], delta: float) -> void:
-	var walk: Vector2 = Vector2.ZERO
-	var target: Player = _nearest_player(zombie.position, players)
-	if target != null and zombie.stun_left <= 0.0:
-		walk = zombie.position.direction_to(target.global_position) * zombie.move_speed
+func _move(zombie: Zombie, target: Player, delta: float) -> void:
+	var walk: Vector2 = _walk(zombie, target)
 	zombie.heading = walk.normalized()
 	var step: Vector2 = (walk + zombie.knockback) * delta + _separation(zombie)
 	var edge: float = zombie.radius()
@@ -212,3 +220,66 @@ func _remove(zombie: Zombie, with_burst: bool) -> void:
 		burst.global_position = zombie.global_position
 		burst.launch(zombie.puppet, _cosmetic_rng)
 	zombie.queue_free()
+
+
+## Where a zombie wants to go: straight at its target, or (ranged zombies) to a spot at their
+## keep distance. A ranged zombie stands still while it winds up.
+func _walk(zombie: Zombie, target: Player) -> Vector2:
+	if target == null or zombie.stun_left > 0.0:
+		return Vector2.ZERO
+	var toward: Vector2 = zombie.position.direction_to(target.global_position) * zombie.move_speed
+	var attack: SpitAttack = zombie.stats.attack
+	if attack == null:
+		return toward
+	if zombie.is_winding_up():
+		return Vector2.ZERO
+	var distance: float = zombie.position.distance_to(target.global_position)
+	if distance > attack.keep_distance + attack.distance_band:
+		return toward
+	if distance < attack.keep_distance - attack.distance_band:
+		return -toward
+	return Vector2.ZERO
+
+
+## A ranged zombie's turn: count down, wind up when a player is in range, spit when the wind-up
+## is over. Being stunned cancels the wind-up.
+func _attack(zombie: Zombie, target: Player, delta: float) -> void:
+	var attack: SpitAttack = zombie.stats.attack
+	zombie.attack_cooldown -= delta
+	if zombie.is_stunned():
+		zombie.windup_left = -1.0
+		return
+	if zombie.is_winding_up():
+		zombie.windup_left -= delta
+		if zombie.windup_left <= 0.0:
+			zombie.windup_left = -1.0
+			if target != null:
+				_spit(zombie, target, attack)
+		return
+	if zombie.attack_cooldown > 0.0 or target == null or projectiles == null:
+		return
+	var reach: float = attack.fire_range
+	if zombie.position.distance_squared_to(target.global_position) > reach * reach:
+		return
+	zombie.windup_left = attack.windup_seconds
+	zombie_winding_up.emit(zombie)
+
+
+## The next volley of its pattern (one ball or a fan), aimed at where the target is now.
+func _spit(zombie: Zombie, target: Player, attack: SpitAttack) -> void:
+	var balls: int = attack.balls_in_volley(zombie.volleys)
+	zombie.volleys += 1
+	zombie.attack_cooldown = attack.cooldown_seconds
+	var aim: Vector2 = zombie.position.direction_to(target.global_position)
+	var mouth: Vector2 = zombie.position + aim * zombie.radius()
+	for direction: Vector2 in attack.directions(aim, balls):
+		var ball: EnemyBullet = projectiles.spawn(EnemyBullet) as EnemyBullet
+		ball.launch(
+			mouth,
+			direction * attack.bullet_speed,
+			zombie.spit_damage,
+			attack.bullet_radius,
+			attack.bullet_lifetime,
+			zombie.stats.display_name
+		)
+	zombie_spat.emit(zombie, balls)

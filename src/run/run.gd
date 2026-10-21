@@ -83,8 +83,11 @@ func _ready() -> void:
 	upgrade_rng.seed = seed_value * 31 + 7
 	enemies.setup(actors, effects, arena.play_rect(), rules.max_enemies_alive)
 	projectiles.setup(enemies, arena.play_rect())
+	enemies.projectiles = projectiles
 	enemies.zombie_killed.connect(_on_zombie_killed)
 	enemies.zombie_hit.connect(_on_zombie_hit)
+	enemies.zombie_winding_up.connect(func(_zombie: Zombie) -> void: Sfx.play(&"puff"))
+	enemies.zombie_spat.connect(func(_zombie: Zombie, _balls: int) -> void: Sfx.play(&"spit"))
 	pickups.collected.connect(_on_pickup_collected)
 	spawner.setup(enemies, camera, rng)
 	spawner.goal_seconds = rules.goal_seconds

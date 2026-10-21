@@ -9,6 +9,7 @@ signal restart_requested(seed_value: int)
 const PANEL_COLOR: Color = Color(0.1, 0.09, 0.13, 0.92)
 const SHAMBLER: EnemyStats = preload("res://data/enemies/shambler.tres")
 const RUNNER: EnemyStats = preload("res://data/enemies/runner.tres")
+const SPITTER: EnemyStats = preload("res://data/enemies/spitter.tres")
 
 var run: Run
 ## Everything the menu can do, by button text (tests press them by name).
@@ -72,7 +73,7 @@ func _build() -> void:
 	panel.add_child(column)
 	_title(column, "Developer menu (F1)")
 	_row(column, ["Give 10 XP", "Level up now"], [_give_xp, _level_up])
-	for stats: EnemyStats in [SHAMBLER, RUNNER]:
+	for stats: EnemyStats in [SHAMBLER, RUNNER, SPITTER]:
 		var labels: Array[String] = []
 		var actions: Array[Callable] = []
 		for count: int in [10, 100, 500]:
