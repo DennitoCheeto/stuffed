@@ -50,4 +50,3 @@ static func _lid() -> FeltPiece:
 		var center: Vector2 = Vector2(side * loop.x, -h - loop.y * 0.8)
 		lid.add_layer(FeltShapes.ellipse(center, loop), RIBBON_COLOR)
 	return lid
-
