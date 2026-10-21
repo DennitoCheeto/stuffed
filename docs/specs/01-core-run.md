@@ -1,6 +1,6 @@
 # 01 — Core run: Banane's first run (M1)
 
-Status: **DRAFT**, waiting for product owner approval.
+Status: **APPROVED** by the product owner, 2026-10-21. **Accepted** (M1 playtest P-1 … P-6 passed), 2026-10-21.
 Milestone: **M1 — Core run** (vision §10).
 Based on: [`00-product-vision.md`](00-product-vision.md) §5 (Combat, Enemies, Heroes → Banane), §6, §8.1.
 
