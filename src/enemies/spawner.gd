@@ -5,6 +5,8 @@ extends Node
 
 @export var schedule: SpawnSchedule
 
+## The run goal (for the final surge); 0 = none.
+var goal_seconds: float = 0.0
 ## Turned off when the goal is reached.
 var active: bool = true
 var enemies: EnemyManager
@@ -25,7 +27,7 @@ func setup(manager: EnemyManager, view_camera: Camera2D, run_rng: RandomNumberGe
 func tick(run_time: float, delta: float) -> void:
 	if not active:
 		return
-	_owed += schedule.rate_at(run_time) * delta
+	_owed += schedule.rate_at(run_time, goal_seconds) * delta
 	while _owed >= 1.0:
 		_owed -= 1.0
 		spawn_one(schedule.enemy_at(run_time, rng))

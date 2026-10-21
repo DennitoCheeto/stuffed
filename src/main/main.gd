@@ -36,10 +36,11 @@ func show_title() -> void:
 func start_run() -> void:
 	var run: Run = RUN_SCENE.instantiate()
 	run.all_players_down.connect(_on_all_players_down)
+	run.ended_with_win.connect(_on_all_players_down)
 	_switch_to(run)
 
 
-## Until the end screen exists (M1-11): a short moment, then back to the title.
+## Until the end screens exist (M1-11): a short moment, then back to the title.
 func _on_all_players_down() -> void:
 	await get_tree().create_timer(2.0).timeout
 	if current_screen is Run:

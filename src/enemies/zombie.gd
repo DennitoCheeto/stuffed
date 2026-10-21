@@ -32,7 +32,7 @@ func setup(enemy_stats: EnemyStats, health_scale: float, damage_scale: float, ph
 	move_speed = stats.move_speed
 	puppet = ZombiePuppet.new()
 	add_child(puppet)
-	puppet.build(phase)
+	puppet.build(ZombieLook.for_look(stats.look), phase)
 
 
 ## Takes damage and a push. Returns true if this hit killed it.

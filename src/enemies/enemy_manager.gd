@@ -25,6 +25,8 @@ var health_scale: float = 1.0
 var damage_scale: float = 1.0
 var kills: int = 0
 var zombies: Array[Zombie] = []
+## While calm (goal reached), zombies stand still and can't hurt anyone.
+var calm: bool = false
 
 var _grid: SpatialGrid = SpatialGrid.new(GRID_CELL)
 ## Only for looks (shamble phase, burst directions), so it doesn't change the seeded run.
@@ -69,11 +71,30 @@ func damage(zombie: Zombie, amount: float, push: Vector2 = Vector2.ZERO) -> bool
 	return false
 
 
-## Pops every zombie at once (goal reached, developer menu).
+## Pops every zombie at once (developer menu).
 func kill_all() -> void:
 	for zombie: Zombie in zombies.duplicate():
 		zombie.dead = true
 		_remove(zombie, true)
+
+
+## Pops every zombie, nearest to `center` first, spread over `duration` seconds: a satisfying
+## chain of pops (goal reached). Awaitable.
+func pop_all_in_chain(center: Vector2, duration: float) -> void:
+	var queue: Array[Zombie] = zombies.duplicate()
+	queue.sort_custom(
+		func(a: Zombie, b: Zombie) -> bool:
+			return a.position.distance_squared_to(center) < b.position.distance_squared_to(center)
+	)
+	var frames: int = maxi(roundi(duration * Engine.physics_ticks_per_second), 1)
+	var per_frame: int = ceili(float(queue.size()) / frames)
+	while not queue.is_empty():
+		for i: int in mini(per_frame, queue.size()):
+			var zombie: Zombie = queue.pop_front()
+			if is_instance_valid(zombie) and not zombie.dead:
+				zombie.dead = true
+				_remove(zombie, true)
+		await get_tree().physics_frame
 
 
 ## Living zombies whose body touches the circle.
@@ -107,8 +128,11 @@ func _physics_process(delta: float) -> void:
 	for zombie: Zombie in zombies:
 		_grid.insert(zombie, zombie.position)
 	for zombie: Zombie in zombies:
-		_move(zombie, players, delta)
-		_touch_players(zombie, players)
+		if calm:
+			zombie.heading = Vector2.ZERO
+		else:
+			_move(zombie, players, delta)
+			_touch_players(zombie, players)
 		zombie.tick(delta)
 
 
