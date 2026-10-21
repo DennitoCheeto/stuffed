@@ -83,6 +83,7 @@ func _build() -> void:
 			actions.append(_spawn.bind(stats, count))
 		_row(column, labels, actions)
 	_row(column, ["Spawn elite", "Drop gift box"], [_spawn_elite, _drop_gift_box])
+	_row(column, ["Spawn Big Ted", "Jump to Big Ted"], [_spawn_mini_boss, _jump_to_mini_boss])
 	var evolutions: Array[EvolutionDef] = run.upgrade_pool.evolutions
 	for first: int in range(0, evolutions.size(), 2):
 		var labels: Array[String] = []
@@ -156,6 +157,15 @@ func _spawn_elite() -> void:
 	var schedule: SpawnSchedule = run.spawner.schedule
 	var index: int = randi_range(0, schedule.elites.size() - 1)
 	run.spawner.spawn_elite(schedule.elite_enemy(index))
+
+
+func _spawn_mini_boss() -> void:
+	run.spawner.spawn_boss(run.spawner.schedule.mini_boss)
+
+
+## A second before the mini-boss arrives (if he hasn't come yet).
+func _jump_to_mini_boss() -> void:
+	_jump_to(run.spawner.schedule.mini_boss.at_seconds - 1.0)
 
 
 ## A gift box a few steps to the right of player 1.

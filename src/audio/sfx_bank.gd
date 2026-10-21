@@ -18,6 +18,8 @@ const LENGTHS: Dictionary[StringName, float] = {
 	&"puff": 0.5,
 	&"spit": 0.2,
 	&"burst": 0.45,
+	&"boss_banner": 1.2,
+	&"stomp": 0.5,
 }
 
 
@@ -48,6 +50,10 @@ static func make(sound: StringName) -> AudioStreamWAV:
 			voice = _puff
 		&"spit":
 			voice = _spit
+		&"boss_banner":
+			voice = _boss_banner
+		&"stomp":
+			voice = _stomp
 		&"burst":
 			voice = _burst
 		_:
@@ -155,3 +161,19 @@ static func _burst(t: float) -> float:
 	var thump: float = Synth.sine(Synth.sweep(t, 220.0, 60.0, 0.2)) * exp(-10.0 * t)
 	var hiss: float = Synth.noise(t) * 0.25 * clampf((0.45 - t) / 0.3, 0.0, 1.0)
 	return 0.35 * bang + 0.4 * thump + 0.12 * hiss
+
+
+## Boss arrives: a low, wobbly felt horn, two notes going down.
+static func _boss_banner(t: float) -> float:
+	var hz: float = Synth.midi_hz(45.0) if t < 0.45 else Synth.midi_hz(40.0)
+	var local: float = t if t < 0.45 else t - 0.45
+	var phase: float = hz * local + 0.8 * sin(TAU * 5.0 * t)
+	var horn: float = 0.6 * Synth.saw(phase) + 0.4 * Synth.square(phase * 0.5)
+	var shape: float = minf(local / 0.04, 1.0) * clampf((1.2 - t) / 0.4, 0.0, 1.0)
+	return 0.22 * horn * shape
+
+
+## Big Ted's stomp: a heavy, soft "thoom".
+static func _stomp(t: float) -> float:
+	var thump: float = Synth.sine(Synth.sweep(t, 110.0, 35.0, 0.4)) * exp(-7.0 * t)
+	return 0.6 * thump + 0.2 * Synth.noise(t) * exp(-25.0 * t)

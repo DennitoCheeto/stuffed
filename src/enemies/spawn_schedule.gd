@@ -26,6 +26,10 @@ enum Phase { NORMAL, SURGE, BREATHER, FINAL_SURGE }
 ## After the last one, another elite every this many seconds (endless), cycling through the types.
 @export var elite_repeat_seconds: float = 75.0
 
+@export_group("Bosses")
+## Big Ted, in the middle of the run (spec 02 §9). Its own data says when.
+@export var mini_boss: BossDef
+
 @export_group("Surges and breathers")
 ## Length of one surge/breather rhythm.
 @export var cycle_seconds: float = 60.0

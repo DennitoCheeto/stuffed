@@ -1,0 +1,50 @@
+[gd_resource type="Resource" script_class="BigTedDef" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://src/enemies/big_ted_def.gd" id="1_def"]
+[ext_resource type="Script" path="res://src/enemies/enemy_stats.gd" id="2_stats"]
+[ext_resource type="Script" path="res://src/enemies/spit_attack.gd" id="3_spit"]
+
+[sub_resource type="Resource" id="Resource_body"]
+script = ExtResource("2_stats")
+display_name = "Big Ted"
+look = 0
+max_health = 2400.0
+move_speed = 40.0
+contact_damage = 20.0
+xp_button = 2
+radius = 18.0
+knockback_taken = 0.0
+
+[sub_resource type="Resource" id="Resource_stomp"]
+script = ExtResource("3_spit")
+keep_distance = 0.0
+distance_band = 0.0
+fire_range = 0.0
+windup_seconds = 0.9
+cooldown_seconds = 0.0
+first_delay_seconds = 0.0
+pattern = Array[int]([16])
+fan_step_degrees = 22.5
+bullet_speed = 120.0
+bullet_damage = 10.0
+bullet_radius = 10.0
+bullet_lifetime = 5.0
+
+[resource]
+script = ExtResource("1_def")
+charge_windup_seconds = 1.0
+charge_speed = 420.0
+charge_distance = 520.0
+charge_recover_seconds = 0.8
+stomp = SubResource("Resource_stomp")
+stomp_ring_radius = 150.0
+enemy = SubResource("Resource_body")
+size = 3.0
+at_seconds = 240.0
+banner = "Big Ted!"
+banner_subtitle = "Mini-boss"
+banner_seconds = 2.5
+spawn_rate_scale = 0.4
+first_pattern_delay = 2.0
+pattern_gap_seconds = 2.5
+pattern_range = 520.0

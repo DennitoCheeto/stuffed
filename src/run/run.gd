@@ -96,6 +96,11 @@ func _ready() -> void:
 	enemies.zombie_winding_up.connect(func(_zombie: Zombie) -> void: Sfx.play(&"puff"))
 	enemies.zombie_spat.connect(func(_zombie: Zombie, _balls: int) -> void: Sfx.play(&"spit"))
 	enemies.zombie_burst.connect(_on_zombie_burst)
+	enemies.boss_telegraphed.connect(
+		func(_boss: Zombie, _pattern: StringName) -> void: Sfx.play(&"puff")
+	)
+	enemies.boss_attacked.connect(_on_boss_attacked)
+	spawner.boss_spawned.connect(_on_boss_spawned)
 	pickups.collected.connect(_on_pickup_collected)
 	spawner.setup(enemies, camera, rng)
 	spawner.goal_seconds = rules.goal_seconds
@@ -365,6 +370,22 @@ func _on_zombie_burst(_zombie: Zombie, _cloud: EnemyCloud) -> void:
 	camera.shake(0.2)
 
 
+## A boss arrives: banner, sound, and its health bar at the top.
+func _on_boss_spawned(boss: Zombie) -> void:
+	hud.show_boss(boss)
+	hud.show_banner(boss.boss.banner, boss.boss.banner_subtitle, boss.boss.banner_seconds)
+	Sfx.play(&"boss_banner")
+	camera.shake(0.4)
+
+
+func _on_boss_attacked(_boss: Zombie, pattern: StringName) -> void:
+	if pattern == BigTedBrain.STOMP:
+		Sfx.play(&"stomp")
+		camera.shake(0.35)
+	else:
+		Sfx.play(&"dash")
+
+
 func _on_zombie_hit(zombie: Zombie, amount: float) -> void:
 	damage_numbers.show_damage(amount, zombie.position)
 	Sfx.play(&"hit")
@@ -384,8 +405,10 @@ func _on_zombie_killed(zombie: Zombie) -> void:
 	Sfx.play(&"pop")
 	if _drops_enabled:
 		pickups.drop(zombie.xp_button(), zombie.position)
-		if zombie.is_elite():
+		if zombie.is_elite() or zombie.is_boss():
 			drop_gift_box(zombie.position)
+	if zombie.is_boss():
+		camera.shake(0.6)
 
 
 func _on_player_died(_player: Player) -> void:
