@@ -18,9 +18,7 @@ _Last updated: 2026-10-21 (M2-01 … M2-04 merged; M2-05 in progress)_
 
 ## Next step
 
-- Finish M2-05 (#36) on branch `feat/36-cannon-whip-ray` (code, data, icons, unit + scenario tests done and passing
-  locally, proven to fail once; whip arc thickened after a visual check). Left: run the full suite, open the PR,
-  merge on green. Then M2-06 (#37, reroll/skip/banish) and the rest in order.
+- M2-05 (#36) PR open, merge on green. Then M2-06 (#37, reroll/skip/banish) and the rest in order.
 
 ## Playtest notes (M1)
 

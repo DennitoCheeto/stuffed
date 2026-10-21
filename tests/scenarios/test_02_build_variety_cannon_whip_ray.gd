@@ -60,7 +60,8 @@ func _level_up(id: StringName, to_level: int) -> void:
 ## coordinates, so the point goes world → game canvas → window.
 func _point_mouse(offset: Vector2) -> void:
 	var viewport: Viewport = run.get_viewport()
-	var canvas: Vector2 = viewport.get_canvas_transform() * (first_player().global_position + offset)
+	var target: Vector2 = first_player().global_position + offset
+	var canvas: Vector2 = viewport.get_canvas_transform() * target
 	sender.mouse_motion(viewport.get_screen_transform() * canvas)
 	await wait_process_frames(2)
 
