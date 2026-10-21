@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-21 (M2-01 … M2-08 merged)_
+_Last updated: 2026-10-21 (M2-01 … M2-10 merged)_
 
 ## Where we are
 
@@ -14,11 +14,13 @@ _Last updated: 2026-10-21 (M2-01 … M2-08 merged)_
 | Art direction | ✅ felt style "B — Soft", puppet animation (`docs/art/`) |
 | M0 Factory setup | ✅ done (PR #1) |
 | M1 Core run | ✅ accepted 2026-10-21 (PRs #17–#29; playtest P-1 … P-6 passed, 144 fps on the PO's PC) |
-| M2 Build variety | 🔨 spec 02 approved; issues #32–#46 (milestone "M2 — Build variety"); M2-01…M2-08 merged (PRs #47–#49, #51–#55) |
+| M2 Build variety | 🔨 spec 02 approved; issues #32–#46 (milestone "M2 — Build variety"); M2-01…M2-10 merged (PRs #47–#49, #51–#55, #57, #58) |
 
 ## Next step
 
-- Next: M2-09 (#40, elites + gift box, AC-6, AC-8), then the rest of M2 in order (spec 02 §18 list).
+- Next: M2-11 (#42, mini-boss Big Ted, AC-17), then the rest of M2 in order (spec 02 §18 list).
+  Big Ted drops a gift box: use `run.drop_gift_box(at)` (spec §6 says the boss box gives more: add a
+  bonus to `GiftBoxRules.contents` then).
 - The PO has not played M2 yet (wants more features first). The run is now 8:00; the goal still works as in
   M1 until the boss arrives (M2-12).
 
@@ -73,3 +75,16 @@ _Last updated: 2026-10-21 (M2-01 … M2-08 merged)_
 - Scenario tests write the run log to `user://test_run_log.jsonl`, never the real `run_log.jsonl`.
 - `docs/` has a `.gdignore`; shell scripts need the executable bit in git (`git update-index --chmod=+x`).
 - Optional later: `@claude` GitHub workflow (as in Tastey) needs the `CLAUDE_CODE_OAUTH_TOKEN` repo secret.
+- Elites: `EliteRules` (`data/elite_rules.tres`) on top of any type: `enemies.spawn(stats, at, elite)` /
+  `spawner.spawn_elite(stats)`. Read `zombie.attack`, `zombie.display_name`, `zombie.radius()`,
+  `zombie.xp_button()`, never `zombie.stats.*` for those. Elite times: `SpawnSchedule.elites` / `elite_time(i)`.
+- Gift box: `run.drop_gift_box(at)`; contents from `GiftBoxRules.contents` (evolution first, else 1-3
+  level-ups, else heal), given at touch; the moment is `run.gift_screen` (freeze reason `gift_box`). Level-ups
+  and gift moments wait for each other. Scenario tests: clear `run.pickups.buttons` before walking onto a box
+  (the elite's XP button would open a level-up first).
+- Evolutions: `UpgradePool.evolutions` (`EvolutionDef`) + evolved weapon `.tres` with `evolved_from` and one
+  level; `Player.evolve`. `upgrade_levels()` reports the old weapon at `Player.EVOLVED_LEVEL` so it is never
+  offered again. `RecipeBook.seen` is static (per session; tests clear it). Maxed boomerang + Quick Feet is
+  now a Banana Split: gift box tests that need "all maxed" must avoid recipe pairs.
+- gdformat wants exactly one newline at the end of a file. Bash heredocs containing apostrophes broke in this
+  tool twice: write files with the Write tool instead.
