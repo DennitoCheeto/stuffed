@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Felt Style Concept</title>
+<style>
+  body { margin: 0; background: #1d1a24; color: #eee; font-family: system-ui, sans-serif; }
+  h1 { font-size: 20px; margin: 16px 24px 4px; }
+  p.lead { margin: 0 24px 12px; color: #aaa; font-size: 14px; }
+  .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; padding: 0 24px 24px; }
+  .col { background: #2a2633; border-radius: 12px; padding: 12px; }
+  .col h2 { font-size: 16px; margin: 0 0 2px; }
+  .col p { font-size: 12px; color: #aaa; margin: 0 0 8px; min-height: 32px; }
+  .chars { display: flex; justify-content: space-around; }
+  svg.scene { width: 100%; height: auto; border-radius: 8px; display: block; margin-top: 8px; }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<h1>Felt style: how much depth?</h1>
+<p class="lead">Same shapes, three levels of depth. Everything is drawn in code, without image files. In Godot the depth would come from real 2D lights and generated normal maps, so it can even react to explosions and lamps.</p>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <!-- A: flat felt -->
+    <filter id="f-flat" x="-15%" y="-15%" width="130%" height="130%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="3" result="wobble"/>
+      <feDisplacementMap in="SourceGraphic" in2="wobble" scale="4" result="shape"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" seed="7" result="fuzz"/>
+      <feColorMatrix in="fuzz" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -0.7 0.42" result="dark"/>
+      <feComposite in="dark" in2="shape" operator="in" result="grain"/>
+      <feMerge><feMergeNode in="shape"/><feMergeNode in="grain"/></feMerge>
+    </filter>
+
+    <!-- B: soft - rounded edges, light from top-left -->
+    <filter id="f-soft" x="-15%" y="-15%" width="130%" height="130%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="3" result="wobble"/>
+      <feDisplacementMap in="SourceGraphic" in2="wobble" scale="4" result="shape"/>
+      <feGaussianBlur in="shape" stdDeviation="4" result="h"/>
+      <feDiffuseLighting in="h" surfaceScale="4" diffuseConstant="1.25" lighting-color="#fff" result="light">
+        <feDistantLight azimuth="225" elevation="55"/>
+      </feDiffuseLighting>
+      <feComposite in="light" in2="shape" operator="in" result="lightIn"/>
+      <feBlend in="shape" in2="lightIn" mode="multiply" result="shaded"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" seed="7" result="fuzz"/>
+      <feColorMatrix in="fuzz" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -0.6 0.36" result="dark"/>
+      <feComposite in="dark" in2="shape" operator="in" result="grain"/>
+      <feMerge><feMergeNode in="shaded"/><feMergeNode in="grain"/></feMerge>
+    </filter>
+
+    <!-- C: puffy - every piece is a stuffed cushion, with a soft sheen -->
+    <filter id="f-puffy" x="-15%" y="-15%" width="130%" height="130%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="3" result="wobble"/>
+      <feDisplacementMap in="SourceGraphic" in2="wobble" scale="4" result="shape"/>
+      <feGaussianBlur in="shape" stdDeviation="9" result="h"/>
+      <feDiffuseLighting in="h" surfaceScale="10" diffuseConstant="1.22" lighting-color="#fff" result="light">
+        <feDistantLight azimuth="225" elevation="50"/>
+      </feDiffuseLighting>
+      <feComposite in="light" in2="shape" operator="in" result="lightIn"/>
+      <feBlend in="shape" in2="lightIn" mode="multiply" result="shaded"/>
+      <feSpecularLighting in="h" surfaceScale="9" specularConstant="0.16" specularExponent="6" lighting-color="#fff6e8" result="spec">
+        <feDistantLight azimuth="225" elevation="50"/>
+      </feSpecularLighting>
+      <feComposite in="spec" in2="shape" operator="in" result="specIn"/>
+      <feComposite in="shaded" in2="specIn" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" result="lit"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" seed="7" result="fuzz"/>
+      <feColorMatrix in="fuzz" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -0.6 0.34" result="dark"/>
+      <feComposite in="dark" in2="shape" operator="in" result="grain"/>
+      <feMerge><feMergeNode in="lit"/><feMergeNode in="grain"/></feMerge>
+    </filter>
+
+    <filter id="blur3"><feGaussianBlur stdDeviation="3"/></filter>
+    <filter id="blur6"><feGaussianBlur stdDeviation="6"/></filter>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="floor">
+      <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="3" seed="2"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.12  0 0 0 0 0.11  0 0 0 0 0.15  0 0 0 0.5 0.25"/>
+    </filter>
+  </defs>
+</svg>
+
+<div class="grid" id="grid"></div>
+
+<script>
+// Each character is a list of felt pieces; every piece gets the variant's filter on its own,
+// so each piece is stuffed separately (like real sewn panels).
+const piece = (d, fill, f) => `<path d="${d}" fill="${fill}" filter="url(#${f})"/>`;
+const ell = (cx, cy, rx, ry, fill, f, extra = '') => `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="${fill}" filter="url(#${f})" ${extra}/>`;
+
+// Seams: a dark groove under the stitches for the deeper variants
+function seam(d, stitchColor, depth) {
+  const groove = depth > 0 ? `<path d="${d}" fill="none" stroke="rgba(0,0,0,${0.18 * depth})" stroke-width="${3 + 2 * depth}" filter="url(#blur3)"/>` : '';
+  return groove + `<path d="${d}" fill="none" stroke="${stitchColor}" stroke-width="2" stroke-dasharray="5 5" stroke-linecap="round"/>`;
+}
+
+function shadow(cx, cy, rx, depth) {
+  if (depth === 0) return '';
+  return `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${rx * 0.22}" fill="rgba(0,0,0,${0.25 + 0.12 * depth})" filter="url(#blur6)"/>`;
+}
+
+function banane(f, depth) {
+  return `
+    ${shadow(100, 244, 62, depth)}
+    ${piece('M78 222 l-6 20 h22 l-4 -20z', '#f08a3c', f)}
+    ${piece('M112 222 l-4 20 h22 l-6 -20z', '#f08a3c', f)}
+    ${ell(100, 182, 60, 50, '#f2b52e', f)}
+    ${piece('M60 150 C52 85 64 28 100 24 C136 28 148 85 140 150 C125 136 75 136 60 150z', '#f7f3ea', f)}
+    ${piece('M60 142 C46 160 46 190 56 206 C66 190 72 165 78 144z', '#f2ede2', f)}
+    ${piece('M122 144 C128 165 134 190 144 206 C154 190 154 160 140 142z', '#f2ede2', f)}
+    ${piece('M90 140 C88 160 93 176 100 184 C107 176 112 160 110 140z', '#f4efe5', f)}
+    ${piece('M118 88 C140 82 160 90 158 102 C150 112 128 110 116 104z', '#f47a3a', f)}
+    ${seam('M66 145 C58 88 70 34 100 30 C130 34 142 88 134 145', '#cfc6b4', depth)}
+    ${seam('M60 196 C70 230 130 230 140 196', '#c98d17', depth)}
+    ${seam('M100 144 V178', '#d8d0bf', depth)}
+    <circle cx="108" cy="78" r="5" fill="#4a2e1a"/>
+    <circle cx="109.5" cy="76.5" r="1.6" fill="#fff" opacity=".8"/>
+    <path d="M120 99 C135 101 148 100 156 98" stroke="#c75a22" stroke-width="1.5" fill="none"/>`;
+}
+
+function zombie(f, depth) {
+  return `
+    ${shadow(100, 238, 58, depth)}
+    ${ell(62, 48, 18, 18, '#7d8a6a', f)}
+    ${ell(138, 48, 18, 18, '#6f7c5e', f)}
+    ${ell(55, 160, 16, 22, '#6f7c5e', f, 'transform="rotate(-25 55 160)"')}
+    ${ell(145, 160, 16, 22, '#6f7c5e', f, 'transform="rotate(25 145 160)"')}
+    ${ell(100, 175, 50, 55, '#76825f', f)}
+    ${ell(100, 90, 50, 50, '#83906c', f)}
+    ${ell(100, 108, 22, 16, '#a9b08c', f)}
+    <g transform="rotate(-8 129 173)">
+      <rect x="115" y="160" width="28" height="26" rx="3" fill="#8a5a7a" filter="url(#${f})"/>
+      <rect x="118" y="163" width="22" height="20" fill="none" stroke="#e6c7dc" stroke-width="1.5" stroke-dasharray="3 3"/>
+    </g>
+    ${ell(78, 196, 8, 8, '#f4f1e8', f)}${ell(88, 203, 6, 6, '#f4f1e8', f)}${ell(70, 205, 5, 5, '#f4f1e8', f)}
+    <path d="M62 188 l10 8 l-4 6 l12 4" stroke="#3d4530" stroke-width="2" fill="none"/>
+    ${seam('M100 135 V225', '#5c6649', depth)}
+    <circle cx="80" cy="82" r="9" fill="#2a2a2a"/>
+    <circle cx="77.5" cy="79.5" r="3" fill="#fff" opacity="${depth ? 0.25 : 0}"/>
+    <circle cx="77" cy="80" r="1.6" fill="#666"/><circle cx="83" cy="80" r="1.6" fill="#666"/>
+    <circle cx="77" cy="85" r="1.6" fill="#666"/><circle cx="83" cy="85" r="1.6" fill="#666"/>
+    <path d="M113 75 l14 14 M127 75 l-14 14" stroke="#2a2a2a" stroke-width="3" stroke-linecap="round"/>
+    <path d="M88 116 h24 M92 111 v10 M100 111 v10 M108 111 v10" stroke="#3d4530" stroke-width="2"/>`;
+}
+
+const spit = (x, y) => `<g transform="translate(${x} ${y})"><circle r="8" fill="#ff3d6e" filter="url(#glow)"/><circle r="8" fill="none" stroke="#1d1a24" stroke-width="2"/><circle r="3" fill="#ffd1dd"/></g>`;
+const xp = (x, y) => `<g transform="translate(${x} ${y})"><circle r="6" fill="#4fc3f7"/><circle cx="-2" cy="-2" r="1.2" fill="#0b3b52"/><circle cx="2" cy="-2" r="1.2" fill="#0b3b52"/><circle cx="-2" cy="2" r="1.2" fill="#0b3b52"/><circle cx="2" cy="2" r="1.2" fill="#0b3b52"/></g>`;
+const peel = (x, y, r, f) => `<g transform="translate(${x} ${y}) rotate(${r})"><path d="M-14 6 C-8 -10 8 -10 14 6 C6 -2 -6 -2 -14 6z" fill="#efe3a0" filter="url(#${f})"/></g>`;
+
+function scene(f, depth) {
+  const z = (x, y, s) => `<g transform="translate(${x} ${y}) scale(${s})">${zombie(f, depth)}</g>`;
+  return `<svg class="scene" viewBox="0 0 560 260">
+    <rect width="560" height="260" fill="#221f29"/><rect width="560" height="260" filter="url(#floor)"/>
+    ${z(40, 30, .32)}${z(90, 150, .32)}${z(420, 40, .32)}${z(470, 150, .32)}${z(360, 170, .32)}${z(150, 20, .3)}
+    ${xp(200, 200)}${xp(215, 212)}${xp(330, 90)}
+    ${spit(380, 120)}${spit(350, 130)}${spit(320, 140)}${spit(170, 95)}${spit(190, 110)}
+    ${peel(330, 175, 30, f)}${peel(200, 60, -40, f)}
+    <g transform="translate(240 80) scale(.42)">${banane(f, depth)}</g>
+    <circle cx="282" cy="160" r="4" fill="#fff" stroke="#1d1a24" stroke-width="1.5"/>
+  </svg>`;
+}
+
+const variants = [
+  { id: 'f-flat',  depth: 0, title: 'A — Flat',   text: 'Cut-out felt, no lighting. Cleanest and most readable, but flat.' },
+  { id: 'f-soft',  depth: 1, title: 'B — Soft',   text: 'Rounded edges, light from the top-left, floor shadow. A bit of volume, still clean.' },
+  { id: 'f-puffy', depth: 2, title: 'C — Puffy',  text: 'Each piece is stuffed like a cushion: seams pinch in, soft sheen on top.' },
+];
+
+document.getElementById('grid').innerHTML = variants.map(v => `
+  <div class="col">
+    <h2>${v.title}</h2><p>${v.text}</p>
+    <div class="chars">
+      <svg width="45%" viewBox="0 0 200 255">${banane(v.id, v.depth)}</svg>
+      <svg width="45%" viewBox="0 0 200 255">${zombie(v.id, v.depth)}</svg>
+    </div>
+    ${scene(v.id, v.depth)}
+  </div>`).join('');
+</script>
+</body>
+</html>

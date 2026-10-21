@@ -1,0 +1,9 @@
+# Always use LF line endings, also on Windows.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.ogg binary
+*.wav binary
+*.zip binary
+*.exe binary

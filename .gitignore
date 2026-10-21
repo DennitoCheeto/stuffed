@@ -1,0 +1,15 @@
+# Godot
+.godot/
+*.import.tmp
+/android/
+
+# Builds
+/build/
+
+# Test output
+/test-results/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.tmp

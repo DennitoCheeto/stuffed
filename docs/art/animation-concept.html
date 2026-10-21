@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Plushie Animation Concept</title>
+<style>
+  body { margin: 0; background: #1d1a24; color: #eee; font-family: system-ui, sans-serif; }
+  h1 { font-size: 20px; margin: 16px 24px 4px; }
+  .lead { margin: 0 24px 12px; color: #aaa; font-size: 14px; max-width: 900px; }
+  .lead li { margin: 2px 0; }
+  .row { display: flex; flex-wrap: wrap; gap: 16px; padding: 0 24px 24px; }
+  .panel { background: #2a2633; border-radius: 12px; padding: 12px; width: 420px; max-width: 100%; }
+  .panel h2 { font-size: 16px; margin: 0 0 8px; }
+  .stage { width: 100%; height: auto; border-radius: 8px; display: block; background: #221f29; }
+  .btns { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  button { background: #3a3446; color: #eee; border: 1px solid #4a4358; border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 13px; }
+  button.on { background: #f2b52e; color: #1d1a24; border-color: #f2b52e; }
+  .state { font-size: 12px; color: #aaa; margin-top: 6px; }
+</style>
+</head>
+<body>
+<h1>How the plushies move</h1>
+<ul class="lead">
+  <li><b>Plushies are built from separate pieces</b> (feet, body, hood, flaps, beak). We move the pieces like a puppet; no frame-by-frame drawing.</li>
+  <li><b>Walking:</b> the body waddles side to side and bobs, the feet step one after another, and the floppy parts (peel flaps, arms) swing a moment <i>later</i> than the body, which makes them feel soft.</li>
+  <li><b>Squash and stretch:</b> plushies squish when they land or get hit and stretch when they dash. Stuffed animals are soft, so they can exaggerate this.</li>
+  <li><b>Zombies fall apart:</b> because they're made of pieces, a dead zombie can burst into its pieces plus a cloud of stuffing.</li>
+</ul>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <filter id="f-soft" x="-15%" y="-15%" width="130%" height="130%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="3" result="wobble"/>
+      <feDisplacementMap in="SourceGraphic" in2="wobble" scale="4" result="shape"/>
+      <feGaussianBlur in="shape" stdDeviation="4" result="h"/>
+      <feDiffuseLighting in="h" surfaceScale="4" diffuseConstant="1.25" lighting-color="#fff" result="light">
+        <feDistantLight azimuth="225" elevation="55"/>
+      </feDiffuseLighting>
+      <feComposite in="light" in2="shape" operator="in" result="lightIn"/>
+      <feBlend in="shape" in2="lightIn" mode="multiply" result="shaded"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" seed="7" result="fuzz"/>
+      <feColorMatrix in="fuzz" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -0.6 0.36" result="dark"/>
+      <feComposite in="dark" in2="shape" operator="in" result="grain"/>
+      <feMerge><feMergeNode in="shaded"/><feMergeNode in="grain"/></feMerge>
+    </filter>
+    <filter id="blur3"><feGaussianBlur stdDeviation="3"/></filter>
+    <filter id="blur6"><feGaussianBlur stdDeviation="6"/></filter>
+    <filter id="floor">
+      <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="3" seed="2"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.12  0 0 0 0 0.11  0 0 0 0 0.15  0 0 0 0.5 0.25"/>
+    </filter>
+  </defs>
+</svg>
+
+<div class="row">
+  <div class="panel">
+    <h2>Banane</h2>
+    <svg class="stage" viewBox="-60 -10 320 280">
+      <rect x="-60" y="-10" width="320" height="280" filter="url(#floor)"/>
+      <g id="b-peels"></g>
+      <ellipse id="b-shadow" cx="100" cy="244" rx="62" ry="13" fill="rgba(0,0,0,.4)" filter="url(#blur6)"/>
+      <g id="b-root">
+        <g id="b-footL"><path d="M78 222 l-6 20 h22 l-4 -20z" fill="#f08a3c" filter="url(#f-soft)"/></g>
+        <g id="b-footR"><path d="M112 222 l-4 20 h22 l-6 -20z" fill="#f08a3c" filter="url(#f-soft)"/></g>
+        <g id="b-body">
+          <ellipse cx="100" cy="182" rx="60" ry="50" fill="#f2b52e" filter="url(#f-soft)"/>
+          <path d="M60 196 C70 230 130 230 140 196" fill="none" stroke="rgba(0,0,0,.18)" stroke-width="5" filter="url(#blur3)"/>
+          <path d="M60 196 C70 230 130 230 140 196" fill="none" stroke="#c98d17" stroke-width="2" stroke-dasharray="5 5" stroke-linecap="round"/>
+          <g id="b-head">
+            <path d="M60 150 C52 85 64 28 100 24 C136 28 148 85 140 150 C125 136 75 136 60 150z" fill="#f7f3ea" filter="url(#f-soft)"/>
+            <path d="M66 145 C58 88 70 34 100 30 C130 34 142 88 134 145" fill="none" stroke="rgba(0,0,0,.18)" stroke-width="5" filter="url(#blur3)"/>
+            <path d="M66 145 C58 88 70 34 100 30 C130 34 142 88 134 145" fill="none" stroke="#cfc6b4" stroke-width="2" stroke-dasharray="5 5" stroke-linecap="round"/>
+            <g id="b-beakLow"><path d="M116 98 C128 100 140 100 157 99 C150 110 128 110 116 104z" fill="#e8692c" filter="url(#f-soft)"/></g>
+            <path d="M118 88 C140 82 160 90 158 99 C140 101 128 101 116 98z" fill="#f47a3a" filter="url(#f-soft)"/>
+            <g id="b-eye"><circle cx="108" cy="78" r="5" fill="#4a2e1a"/><circle cx="109.5" cy="76.5" r="1.6" fill="#fff" opacity=".8"/></g>
+            <g id="b-shades" opacity="0">
+              <path d="M70 76 L98 74" stroke="#111" stroke-width="3"/>
+              <rect x="97" y="70" width="24" height="13" rx="5" fill="#111"/>
+              <path d="M101 73 l6 0" stroke="#fff" stroke-width="2" opacity=".5"/>
+            </g>
+          </g>
+          <g id="b-flapL"><path d="M60 142 C46 160 46 190 56 206 C66 190 72 165 78 144z" fill="#f2ede2" filter="url(#f-soft)"/></g>
+          <g id="b-flapR"><path d="M122 144 C128 165 134 190 144 206 C154 190 154 160 140 142z" fill="#f2ede2" filter="url(#f-soft)"/></g>
+          <g id="b-flapM"><path d="M90 140 C88 160 93 176 100 184 C107 176 112 160 110 140z" fill="#f4efe5" filter="url(#f-soft)"/></g>
+        </g>
+      </g>
+      <text id="b-quack" x="150" y="40" fill="#f2b52e" font-size="22" font-weight="800" opacity="0">QUACK.</text>
+    </svg>
+    <div class="btns" id="b-btns"></div>
+    <div class="state" id="b-state"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Zombie teddy</h2>
+    <svg class="stage" viewBox="-60 -10 320 280">
+      <rect x="-60" y="-10" width="320" height="280" filter="url(#floor)"/>
+      <ellipse id="z-shadow" cx="100" cy="238" rx="58" ry="12" fill="rgba(0,0,0,.4)" filter="url(#blur6)"/>
+      <g id="z-root">
+        <g id="z-all">
+          <g id="z-armL"><ellipse cx="55" cy="160" rx="16" ry="22" fill="#6f7c5e" filter="url(#f-soft)" transform="rotate(-25 55 160)"/></g>
+          <g id="z-armR"><ellipse cx="145" cy="160" rx="16" ry="22" fill="#6f7c5e" filter="url(#f-soft)" transform="rotate(25 145 160)"/></g>
+          <g id="z-body">
+            <ellipse cx="100" cy="175" rx="50" ry="55" fill="#76825f" filter="url(#f-soft)"/>
+            <g transform="rotate(-8 129 173)">
+              <rect x="115" y="160" width="28" height="26" rx="3" fill="#8a5a7a" filter="url(#f-soft)"/>
+              <rect x="118" y="163" width="22" height="20" fill="none" stroke="#e6c7dc" stroke-width="1.5" stroke-dasharray="3 3"/>
+            </g>
+            <circle cx="78" cy="196" r="8" fill="#f4f1e8" filter="url(#f-soft)"/><circle cx="88" cy="203" r="6" fill="#f4f1e8" filter="url(#f-soft)"/><circle cx="70" cy="205" r="5" fill="#f4f1e8" filter="url(#f-soft)"/>
+            <path d="M62 188 l10 8 l-4 6 l12 4" stroke="#3d4530" stroke-width="2" fill="none"/>
+            <path d="M100 135 V225" fill="none" stroke="rgba(0,0,0,.18)" stroke-width="5" filter="url(#blur3)"/>
+            <path d="M100 135 V225" fill="none" stroke="#5c6649" stroke-width="2" stroke-dasharray="5 5"/>
+          </g>
+          <g id="z-head">
+            <circle cx="62" cy="48" r="18" fill="#7d8a6a" filter="url(#f-soft)"/>
+            <circle cx="138" cy="48" r="18" fill="#6f7c5e" filter="url(#f-soft)"/>
+            <circle cx="100" cy="90" r="50" fill="#83906c" filter="url(#f-soft)"/>
+            <ellipse cx="100" cy="108" rx="22" ry="16" fill="#a9b08c" filter="url(#f-soft)"/>
+            <path d="M113 75 l14 14 M127 75 l-14 14" stroke="#2a2a2a" stroke-width="3" stroke-linecap="round"/>
+            <path d="M88 116 h24 M92 111 v10 M100 111 v10 M108 111 v10" stroke="#3d4530" stroke-width="2"/>
+          </g>
+          <g id="z-eye">
+            <circle cx="80" cy="82" r="9" fill="#2a2a2a"/>
+            <circle cx="77" cy="80" r="1.6" fill="#666"/><circle cx="83" cy="80" r="1.6" fill="#666"/>
+            <circle cx="77" cy="85" r="1.6" fill="#666"/><circle cx="83" cy="85" r="1.6" fill="#666"/>
+          </g>
+        </g>
+      </g>
+      <g id="z-fluff"></g>
+    </svg>
+    <div class="btns" id="z-btns"></div>
+    <div class="state" id="z-state"></div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const set = (id, t) => $(id).setAttribute('transform', t);
+const TAU = Math.PI * 2;
+// Scale around a pivot point
+const scaleAt = (px, py, sx, sy) => `translate(${px} ${py}) scale(${sx} ${sy}) translate(${-px} ${-py})`;
+// Damped spring: 1 at t=0, settles to 0
+const spring = (t, freq = 3, decay = 6) => Math.exp(-decay * t) * Math.cos(TAU * freq * t);
+
+/* ---------------- Banane ---------------- */
+const B = { loop: 'walk', state: 'walk', t: 0, auto: true, autoT: 0, autoI: 0, peels: [] };
+const bOneShots = { dash: 0.5, hit: 0.6, quack: 1.4 };
+const bAuto = [['walk', 2.5], ['dash'], ['walk', 2], ['hit'], ['idle', 2.2], ['quack'], ['walk', 1.5]];
+
+function bSet(s, fromUser) {
+  if (fromUser) B.auto = false;
+  if (bOneShots[s]) { B.state = s; } else { B.loop = s; B.state = s; }
+  B.t = 0;
+  if (s === 'dash') B.peels.push({ x: 60, age: 0 });
+  renderButtons();
+}
+
+function bFrame(dt) {
+  B.t += dt;
+  const t = B.t, s = B.state;
+  let rootX = 0, rootY = 0, tilt = 0, sx = 1, sy = 1, footL = [0, 0], footR = [0, 0];
+  let flap = 0, headTilt = 0, beak = 0, blink = 1, shades = 0, quack = 0, flash = 0;
+  const g = performance.now() / 1000;
+
+  if (s === 'walk' || s === 'idle') {
+    if (s === 'walk') {
+      const p = g * TAU * 2.2;               // 2.2 steps per second
+      tilt = 6 * Math.sin(p);                 // waddle
+      rootY = -Math.abs(Math.sin(p)) * 6;     // bob
+      footL = [3 * Math.cos(p), -Math.max(0, Math.sin(p)) * 9];
+      footR = [-3 * Math.cos(p), -Math.max(0, -Math.sin(p)) * 9];
+      flap = -9 * Math.sin(p - 0.9);          // flaps lag behind the body
+      headTilt = -2.5 * Math.sin(p - 0.5);
+      sy = 1 - 0.035 * Math.cos(2 * p); sx = 2 - sy;
+    } else {
+      const p = g * TAU * 0.5;                // slow breathing
+      sy = 1 + 0.025 * Math.sin(p); sx = 2 - sy;
+      flap = 2 * Math.sin(p - 0.8);
+      headTilt = 1.5 * Math.sin(p * 0.5);
+    }
+    if ((g % 3.2) < 0.12) blink = 0.1;        // blink every few seconds
+  } else if (s === 'dash') {
+    const k = Math.sin(Math.min(t / 0.5, 1) * Math.PI);
+    sx = 1 + 0.3 * k; sy = 1 - 0.22 * k;     // stretch
+    tilt = 14 * k;                             // lean forward
+    rootX = 40 * k;
+    flap = -25 * k;
+    footL = [-8 * k, -4 * k]; footR = [-10 * k, -6 * k];
+  } else if (s === 'hit') {
+    const sp = spring(t, 3, 7);
+    sy = 1 - 0.22 * sp; sx = 1 + 0.18 * sp;   // squish, wobble back
+    rootX = -12 * Math.exp(-8 * t);           // knockback
+    flap = 18 * sp;
+    flash = t < 0.09 ? 1 : 0;                 // white flash
+    blink = t < 0.35 ? 0.1 : 1;               // eyes squeezed shut
+  } else if (s === 'quack') {
+    const jump = t < 0.5 ? Math.sin(t / 0.5 * Math.PI) : 0;
+    rootY = -34 * jump;
+    if (t < 0.5) { sy = 1 + 0.15 * jump; sx = 1 - 0.1 * jump; }
+    else { const sp = spring(t - 0.5, 3, 7); sy = 1 - 0.15 * sp; sx = 1 + 0.12 * sp; }
+    beak = t > 0.15 && t < 0.75 ? 22 : 0;
+    flap = 20 * jump;
+    quack = t > 0.15 ? Math.min(1, (1.4 - t) * 3) : 0;
+    shades = Math.min(1, Math.max(0, (t - 0.55) * 4));
+  }
+
+  set('b-root', `translate(${rootX} ${rootY}) rotate(${tilt} 100 242) ${scaleAt(100, 242, sx, sy)}`);
+  set('b-footL', `translate(${footL[0] - rootX * 0.3} ${footL[1] - rootY})`);
+  set('b-footR', `translate(${footR[0] - rootX * 0.3} ${footR[1] - rootY})`);
+  set('b-head', `rotate(${headTilt} 100 140)`);
+  set('b-flapL', `rotate(${flap} 68 144)`);
+  set('b-flapR', `rotate(${flap * 0.8} 132 144)`);
+  set('b-flapM', `rotate(${flap * 0.6} 100 140)`);
+  set('b-beakLow', `rotate(${beak} 117 99)`);
+  set('b-eye', scaleAt(108, 78, 1, blink));
+  $('b-shades').setAttribute('opacity', shades);
+  set('b-shades', `translate(0 ${-30 * (1 - shades)})`);
+  $('b-quack').setAttribute('opacity', Math.max(0, quack));
+  $('b-root').style.filter = flash ? 'brightness(2.2) saturate(.3)' : '';
+  // shadow shrinks when Banane is in the air
+  const air = Math.min(1, -rootY / 40);
+  set('b-shadow', `translate(${rootX} 0) ${scaleAt(100, 244, 1 - 0.35 * air, 1 - 0.35 * air)}`);
+
+  // banana peels left behind by the dash (Slippery passive)
+  B.peels.forEach(p => p.age += dt);
+  B.peels = B.peels.filter(p => p.age < 2.5);
+  $('b-peels').innerHTML = B.peels.map(p => {
+    const o = Math.min(1, (2.5 - p.age) * 2), pop = Math.min(1, p.age * 6);
+    return `<g opacity="${o}" transform="translate(${p.x} 238) scale(${pop})"><path d="M-16 4 C-10 -12 10 -12 16 4 C8 -4 -8 -4 -16 4z" fill="#f2d65a" filter="url(#f-soft)"/></g>`;
+  }).join('');
+
+  if (bOneShots[s] && t > bOneShots[s]) { B.state = B.loop; B.t = 0; }
+  if (B.auto) {
+    B.autoT -= dt;
+    if (B.autoT <= 0 && !bOneShots[B.state]) {
+      const [st, dur] = bAuto[B.autoI++ % bAuto.length];
+      bSet(st); B.autoT = dur || 0;
+    }
+  }
+  $('b-state').textContent = (B.auto ? 'Auto demo · ' : '') + 'Now: ' + B.state;
+}
+
+/* ---------------- Zombie ---------------- */
+const Z = { state: 'shamble', t: 0, auto: true, autoT: 3, pieces: null, fluff: [] };
+const zPieces = { 'z-head': [100, 90], 'z-armL': [55, 160], 'z-armR': [145, 160], 'z-body': [100, 175], 'z-eye': [80, 82] };
+
+function zSet(s, fromUser) {
+  if (fromUser) Z.auto = false;
+  if (Z.state === 'death' && s !== 'death') return;
+  Z.state = s; Z.t = 0;
+  if (s === 'death') {
+    Z.pieces = {};
+    for (const id in zPieces) {
+      const [cx] = zPieces[id];
+      Z.pieces[id] = { x: 0, y: 0, r: 0, vx: (cx - 100) * 3 + (Math.random() - .5) * 160, vy: -220 - Math.random() * 220, vr: (Math.random() - .5) * 600 };
+    }
+    Z.pieces['z-eye'].vy -= 200; // the button eye pops off highest
+    Z.fluff = Array.from({ length: 16 }, () => {
+      const a = Math.random() * TAU, v = 80 + Math.random() * 180;
+      return { x: 100, y: 160, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 80, r: 4 + Math.random() * 7 };
+    });
+  }
+  renderButtons();
+}
+
+function zFrame(dt) {
+  Z.t += dt;
+  const t = Z.t, s = Z.state, g = performance.now() / 1000;
+  let rootX = 0, rootY = 0, lean = 0, sx = 1, sy = 1, head = 0, armL = 0, armR = 0, flash = 0, alpha = 1;
+
+  if (s === 'shamble') {
+    const p = g * TAU * 1.1;                  // slow, uneven lurch
+    lean = 5 + 7 * Math.sin(p);
+    rootY = -Math.max(0, Math.sin(p)) * 5;    // limp: only bobs on one step
+    head = -10 * Math.sin(p - 1.1) - 6;       // head lolls behind the body
+    armL = 20 * Math.sin(p - 0.7) - 20;       // arms reach forward and swing loosely
+    armR = 18 * Math.sin(p - 1.4) - 25;
+    sy = 1 - 0.03 * Math.cos(2 * p); sx = 2 - sy;
+  } else if (s === 'hit') {
+    const sp = spring(t, 3, 7);
+    sy = 1 - 0.2 * sp; sx = 1 + 0.16 * sp;
+    rootX = 14 * Math.exp(-8 * t);
+    head = 15 * sp; armL = -25 * sp; armR = -25 * sp;
+    flash = t < 0.09 ? 1 : 0;
+    if (t > 0.6) { Z.state = 'shamble'; Z.t = 0; }
+  } else if (s === 'death') {
+    if (t > 2.2) alpha = Math.max(0, 1 - (t - 2.2) * 3);
+    if (t > 2.6) { Z.state = 'respawn'; Z.t = 0; Z.pieces = null; Z.fluff = []; }
+  } else if (s === 'respawn') {
+    const k = Math.min(1, t / 0.35);
+    sx = sy = k + 0.15 * Math.sin(k * Math.PI);
+    if (t > 0.6) { Z.state = 'shamble'; Z.t = 0; }
+  }
+
+  if (Z.pieces) {
+    for (const id in Z.pieces) {
+      const p = Z.pieces[id], [cx, cy] = zPieces[id];
+      p.vy += 900 * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.r += p.vr * dt;
+      if (cy + p.y > 228) { p.y = 228 - cy; p.vy *= -0.35; p.vx *= 0.6; p.vr *= 0.5; }
+      set(id, `translate(${p.x} ${p.y}) rotate(${p.r} ${cx} ${cy})`);
+    }
+    set('z-all', '');
+  } else {
+    set('z-head', `rotate(${head} 100 135)`);
+    set('z-eye', `rotate(${head} 100 135)`);
+    set('z-armL', `rotate(${armL} 62 145)`);
+    set('z-armR', `rotate(${-armR} 138 145)`);
+    set('z-body', '');
+    set('z-all', `rotate(${lean} 100 232)`);
+  }
+  set('z-root', `translate(${rootX} ${rootY}) ${scaleAt(100, 232, sx, sy)}`);
+  $('z-root').setAttribute('opacity', alpha);
+  $('z-root').style.filter = flash ? 'brightness(2.2) saturate(.3)' : '';
+  $('z-shadow').setAttribute('opacity', Z.pieces ? alpha * 0.5 : 1);
+
+  Z.fluff.forEach(f => { f.vy += 260 * dt; f.vx *= 0.97; f.x += f.vx * dt; f.y += f.vy * dt; if (f.y > 236) { f.y = 236; f.vy = 0; f.vx *= .8; } });
+  $('z-fluff').innerHTML = Z.fluff.map(f => `<circle cx="${f.x}" cy="${f.y}" r="${f.r}" fill="#f4f1e8" opacity="${alpha}" filter="url(#f-soft)"/>`).join('');
+
+  if (Z.auto) {
+    Z.autoT -= dt;
+    if (Z.autoT <= 0 && Z.state === 'shamble') {
+      Z.hits = (Z.hits || 0) + 1;
+      if (Z.hits % 3 === 0) { zSet('death'); Z.autoT = 3.8; } else { zSet('hit'); Z.autoT = 1.4; }
+    }
+  }
+  $('z-state').textContent = (Z.auto ? 'Auto demo · ' : '') + 'Now: ' + Z.state;
+}
+
+/* ---------------- UI ---------------- */
+function renderButtons() {
+  const bb = [['idle', 'Idle'], ['walk', 'Walk'], ['dash', 'Dash'], ['hit', 'Get hit'], ['quack', 'Level up']];
+  $('b-btns').innerHTML = bb.map(([s, l]) => `<button class="${B.state === s ? 'on' : ''}" onclick="bSet('${s}', true)">${l}</button>`).join('')
+    + `<button class="${B.auto ? 'on' : ''}" onclick="B.auto=true;B.autoT=0">Auto</button>`;
+  const zb = [['shamble', 'Shamble'], ['hit', 'Get hit'], ['death', 'Defeat']];
+  $('z-btns').innerHTML = zb.map(([s, l]) => `<button class="${Z.state === s ? 'on' : ''}" onclick="zSet('${s}', true)">${l}</button>`).join('')
+    + `<button class="${Z.auto ? 'on' : ''}" onclick="Z.auto=true;Z.autoT=0">Auto</button>`;
+}
+renderButtons();
+// e.g. animation-concept.html#zombie=death opens straight into one state
+const m = location.hash.match(/zombie=(\w+)/);
+if (m) zSet(m[1], true);
+
+let last = performance.now();
+function loop(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  bFrame(dt); zFrame(dt);
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
