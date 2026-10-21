@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="SpawnSchedule" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://src/enemies/spawn_schedule.gd" id="1_schedule"]
+[ext_resource type="Resource" path="res://data/enemies/shambler.tres" id="2_shambler"]
+
+[resource]
+script = ExtResource("1_schedule")
+shambler = ExtResource("2_shambler")
+start_rate = 1.0
+rate_growth_per_minute = 1.0
+view_margin = 80.0

@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="EnemyStats" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/enemies/enemy_stats.gd" id="1_stats"]
+
+[resource]
+script = ExtResource("1_stats")
+display_name = "Shambler"
+look = 0
+max_health = 10.0
+move_speed = 45.0
+contact_damage = 5.0
+xp_button = 0
+radius = 16.0
+knockback_taken = 1.0

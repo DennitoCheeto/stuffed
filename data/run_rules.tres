@@ -5,3 +5,4 @@
 [resource]
 script = ExtResource("1_rules")
 goal_seconds = 300.0
+max_enemies_alive = 500
