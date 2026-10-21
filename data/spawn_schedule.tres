@@ -1,15 +1,51 @@
-[gd_resource type="Resource" script_class="SpawnSchedule" load_steps=4 format=3]
+[gd_resource type="Resource" script_class="SpawnSchedule" load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://src/enemies/spawn_schedule.gd" id="1_schedule"]
-[ext_resource type="Resource" path="res://data/enemies/shambler.tres" id="2_shambler"]
-[ext_resource type="Resource" path="res://data/enemies/runner.tres" id="3_runner"]
+[ext_resource type="Script" path="res://src/enemies/spawn_entry.gd" id="2_entry"]
+[ext_resource type="Resource" path="res://data/enemies/shambler.tres" id="3_shambler"]
+[ext_resource type="Resource" path="res://data/enemies/runner.tres" id="4_runner"]
+[ext_resource type="Resource" path="res://data/enemies/spitter.tres" id="5_spitter"]
+[ext_resource type="Resource" path="res://data/enemies/bloater.tres" id="6_bloater"]
+[ext_resource type="Resource" path="res://data/enemies/tank.tres" id="7_tank"]
+
+[sub_resource type="Resource" id="Resource_runner"]
+script = ExtResource("2_entry")
+enemy = ExtResource("4_runner")
+start_seconds = 60.0
+share = 0.2
+share_growth_per_minute = 0.03
+share_max = 0.3
+
+[sub_resource type="Resource" id="Resource_spitter"]
+script = ExtResource("2_entry")
+enemy = ExtResource("5_spitter")
+start_seconds = 90.0
+share = 0.08
+share_growth_per_minute = 0.015
+share_max = 0.14
+
+[sub_resource type="Resource" id="Resource_bloater"]
+script = ExtResource("2_entry")
+enemy = ExtResource("6_bloater")
+start_seconds = 150.0
+share = 0.07
+share_growth_per_minute = 0.01
+share_max = 0.1
+
+[sub_resource type="Resource" id="Resource_tank"]
+script = ExtResource("2_entry")
+enemy = ExtResource("7_tank")
+start_seconds = 180.0
+share = 0.05
+share_growth_per_minute = 0.01
+share_max = 0.08
 
 [resource]
 script = ExtResource("1_schedule")
-shambler = ExtResource("2_shambler")
-runner = ExtResource("3_runner")
+shambler = ExtResource("3_shambler")
+entries = Array[ExtResource("2_entry")]([SubResource("Resource_runner"), SubResource("Resource_spitter"), SubResource("Resource_bloater"), SubResource("Resource_tank")])
 start_rate = 0.8
-rate_growth_per_minute = 0.5
+rate_growth_per_minute = 0.4
 view_margin = 80.0
 cycle_seconds = 60.0
 surge_starts_at = 30.0
@@ -19,7 +55,3 @@ breather_seconds = 10.0
 breather_multiplier = 0.2
 final_surge_seconds = 30.0
 final_surge_multiplier = 3.0
-runner_start_seconds = 60.0
-runner_share = 0.25
-runner_share_growth_per_minute = 0.05
-runner_share_max = 0.5

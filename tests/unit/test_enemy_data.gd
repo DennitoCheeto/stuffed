@@ -3,6 +3,9 @@ extends GutTest
 ## spec 02 §8: enemy bullets are always slower than the heroes and come after a wind-up.
 
 const SPITTER: EnemyStats = preload("res://data/enemies/spitter.tres")
+const SHAMBLER: EnemyStats = preload("res://data/enemies/shambler.tres")
+const BLOATER: EnemyStats = preload("res://data/enemies/bloater.tres")
+const TANK: EnemyStats = preload("res://data/enemies/tank.tres")
 const BANANE: HeroStats = preload("res://data/heroes/banane.tres")
 
 
@@ -45,3 +48,27 @@ func test_an_empty_pattern_still_spits_one_ball() -> void:
 	var attack: SpitAttack = SpitAttack.new()
 	attack.pattern = []
 	assert_eq(attack.balls_in_volley(4), 1)
+
+
+func test_ac15_tanks_are_tougher_and_slower_than_shamblers() -> void:
+	assert_gte(TANK.max_health, SHAMBLER.max_health * 5.0, "lots of health")
+	assert_lt(TANK.move_speed, SHAMBLER.move_speed, "slower")
+	assert_gt(TANK.contact_damage, SHAMBLER.contact_damage * 2.0, "heavy contact damage")
+	assert_gt(TANK.radius, SHAMBLER.radius, "big")
+	assert_lt(TANK.knockback_taken, SHAMBLER.knockback_taken, "hard to push")
+	assert_eq(TANK.xp_button, EnemyStats.XpSize.BIG)
+
+
+func test_bloater_is_slow_and_bursts_into_a_cloud() -> void:
+	assert_lt(BLOATER.move_speed, SHAMBLER.move_speed)
+	assert_not_null(BLOATER.death_cloud, "it bursts when killed")
+	assert_gt(BLOATER.death_cloud.radius, BLOATER.radius * 2.0, "don't kill it up close")
+	assert_between(BLOATER.death_cloud.duration, 1.0, 5.0, "only for a moment")
+	assert_gt(BLOATER.death_cloud.damage, 0.0)
+
+
+func test_only_the_bloater_bursts_and_only_the_spitter_spits() -> void:
+	for stats: EnemyStats in [SHAMBLER, TANK, SPITTER]:
+		assert_null(stats.death_cloud, stats.display_name)
+	for stats: EnemyStats in [SHAMBLER, TANK, BLOATER]:
+		assert_null(stats.attack, stats.display_name)

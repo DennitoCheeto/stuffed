@@ -1,7 +1,9 @@
 extends "res://tests/scenarios/run_scenario.gd"
-## Scenario (spec 01 §6, §7, AC-11, AC-12, AC-23): runners, surges and breathers, the 5:00 goal.
+## Scenario (spec 01 §6, §7, AC-11, AC-12, AC-23): runners, surges and breathers, the goal
+## (8:00 since spec 02).
 
 const SHAMBLER: EnemyStats = preload("res://data/enemies/shambler.tres")
+const RUNNER: EnemyStats = preload("res://data/enemies/runner.tres")
 
 var run: Run
 ## Filled by the run's signals (no signal watchers: the run is freed when it ends).
@@ -28,7 +30,8 @@ func _count_spawns_from(time: float, seconds: float) -> Dictionary[String, int]:
 	await wait_physics_frames(roundi(seconds * FPS))
 	for zombie: Zombie in run.enemies.zombies:
 		if not before.has(zombie):
-			counts[zombie.stats.display_name] += 1
+			var kind: String = zombie.stats.display_name
+			counts[kind] = counts.get(kind, 0) + 1
 	return counts
 
 
@@ -44,7 +47,7 @@ func test_ac11_runners_only_after_the_first_minute() -> void:
 
 func test_ac11_runner_is_a_sock_bunny_and_fast() -> void:
 	await _tough_run()
-	var runner_stats: EnemyStats = run.spawner.schedule.runner
+	var runner_stats: EnemyStats = RUNNER
 	var banane: Player = first_player()
 	var runner: Zombie = run.enemies.spawn(runner_stats, banane.global_position + Vector2(400, 0))
 	assert_eq(runner.puppet.look.prefix, "runner")
@@ -80,7 +83,7 @@ func _reach_goal_with_zombies() -> void:
 func test_ac23_goal_stops_spawning_and_pops_every_zombie() -> void:
 	await _reach_goal_with_zombies()
 	assert_false(run.spawner.active, "spawning stopped")
-	assert_eq(run.hud.timer_label.text, "5:00 / 5:00")
+	assert_eq(run.hud.timer_label.text, "8:00 / 8:00")
 	await wait_seconds(Run.POP_CHAIN_TIME + 0.2)
 	assert_eq(run.enemies.alive_count(), 0, "every zombie popped")
 	assert_eq(run.pickups.buttons.size(), 0, "the goal pops drop no XP")

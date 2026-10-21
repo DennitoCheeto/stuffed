@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="EnemyStats" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://src/enemies/enemy_stats.gd" id="1_stats"]
+[ext_resource type="Script" path="res://src/enemies/death_cloud.gd" id="2_cloud"]
+
+[sub_resource type="Resource" id="Resource_cloud"]
+script = ExtResource("2_cloud")
+radius = 70.0
+duration = 2.5
+damage = 6.0
+
+[resource]
+script = ExtResource("1_stats")
+display_name = "Bloater"
+look = 3
+max_health = 14.0
+move_speed = 36.0
+contact_damage = 6.0
+xp_button = 1
+radius = 20.0
+knockback_taken = 0.6
+death_cloud = SubResource("Resource_cloud")

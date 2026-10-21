@@ -2,7 +2,8 @@ class_name EnemyManager
 extends Node
 ## Owns all zombies of a run and moves them together each physics frame: walk towards the
 ## nearest player, push each other apart a little (a crowd, not a blob), hurt players they touch.
-## Ranged zombies (spitters) keep their distance instead and spit after a visible wind-up.
+## Ranged zombies (spitters) keep their distance instead and spit after a visible wind-up;
+## bloaters burst into a hurting cloud when killed.
 ## Weapons ask it for zombies near a point and deal damage through it.
 ## Zombies live under the `actors` node, which sits at the world origin.
 
@@ -13,6 +14,8 @@ signal zombie_hit(zombie: Zombie, amount: float)
 signal zombie_winding_up(zombie: Zombie)
 ## A ranged zombie spat `balls` stuffing balls.
 signal zombie_spat(zombie: Zombie, balls: int)
+## A killed zombie burst into a cloud that hurts players (the bloater).
+signal zombie_burst(zombie: Zombie, cloud: EnemyCloud)
 
 ## Weapons find the manager through this group.
 const GROUP: StringName = &"enemy_manager"
@@ -76,6 +79,7 @@ func damage(zombie: Zombie, amount: float, push: Vector2 = Vector2.ZERO) -> bool
 		return false
 	zombie_hit.emit(zombie, amount)
 	if zombie.take_damage(amount, push):
+		_burst_into_cloud(zombie)
 		_remove(zombie, true)
 		return true
 	return false
@@ -283,3 +287,15 @@ func _spit(zombie: Zombie, target: Player, attack: SpitAttack) -> void:
 			zombie.stats.display_name
 		)
 	zombie_spat.emit(zombie, balls)
+
+
+## A killed bloater leaves its stuffing cloud where it died (not while calm: nothing hurts then).
+func _burst_into_cloud(zombie: Zombie) -> void:
+	var cloud_stats: DeathCloud = zombie.stats.death_cloud
+	if cloud_stats == null or projectiles == null or calm:
+		return
+	var cloud: EnemyCloud = projectiles.spawn(EnemyCloud) as EnemyCloud
+	var damage_amount: float = cloud_stats.damage * damage_scale
+	var source: String = zombie.stats.display_name
+	cloud.launch(zombie.position, cloud_stats.radius, cloud_stats.duration, damage_amount, source)
+	zombie_burst.emit(zombie, cloud)

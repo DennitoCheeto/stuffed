@@ -17,6 +17,7 @@ const LENGTHS: Dictionary[StringName, float] = {
 	&"goal": 1.1,
 	&"puff": 0.5,
 	&"spit": 0.2,
+	&"burst": 0.45,
 }
 
 
@@ -47,6 +48,8 @@ static func make(sound: StringName) -> AudioStreamWAV:
 			voice = _puff
 		&"spit":
 			voice = _spit
+		&"burst":
+			voice = _burst
 		_:
 			voice = _goal
 	return Synth.render(LENGTHS[sound], voice)
@@ -144,3 +147,11 @@ static func _puff(t: float) -> float:
 static func _spit(t: float) -> float:
 	var pop: float = Synth.sine(Synth.sweep(t, 700.0, 220.0, 0.12)) * exp(-20.0 * t)
 	return 0.4 * pop + 0.2 * Synth.noise(t) * exp(-45.0 * t)
+
+
+## Bloater burst: a balloon "pop" and a soft hiss of stuffing.
+static func _burst(t: float) -> float:
+	var bang: float = Synth.noise(t) * exp(-30.0 * t)
+	var thump: float = Synth.sine(Synth.sweep(t, 220.0, 60.0, 0.2)) * exp(-10.0 * t)
+	var hiss: float = Synth.noise(t) * 0.25 * clampf((0.45 - t) / 0.3, 0.0, 1.0)
+	return 0.35 * bang + 0.4 * thump + 0.12 * hiss

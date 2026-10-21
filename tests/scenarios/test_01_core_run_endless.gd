@@ -44,7 +44,7 @@ func test_ac24_end_run_shows_you_survived_with_stats() -> void:
 	if end == null:
 		return
 	assert_eq(end.title_label.text, "You survived!")
-	assert_string_contains(end.stats_label.text, "Time survived: 5:00")
+	assert_string_contains(end.stats_label.text, "Time survived: 8:00")
 	assert_string_contains(end.stats_label.text, "Level: 1")
 	assert_string_contains(end.stats_label.text, "Zombies stuffed:")
 	assert_eq(end.seed_label.text, "Seed %d" % seed_value)

@@ -14,7 +14,7 @@ func test_ac1_start_run_puts_banane_in_arena_centre_with_timer_at_zero() -> void
 	var banane: Player = first_player()
 	assert_eq(banane.stats.display_name, "Banane")
 	assert_almost_eq(banane.global_position, run.arena.center(), Vector2.ONE * 1.0)
-	assert_string_starts_with(run.hud.timer_label.text, "0:00 / 5:00")
+	assert_string_starts_with(run.hud.timer_label.text, "0:00 / 8:00")
 
 
 func test_ac2_holding_d_moves_banane_right() -> void:
