@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="UpgradePool" load_steps=20 format=3]
+[gd_resource type="Resource" script_class="UpgradePool" load_steps=26 format=3]
 
 [ext_resource type="Script" path="res://src/upgrades/upgrade_pool.gd" id="1_pool"]
 [ext_resource type="Script" path="res://src/upgrades/upgrade_def.gd" id="2_def"]
@@ -6,6 +6,9 @@
 [ext_resource type="Resource" path="res://data/weapons/sewing_pin_sniper.tres" id="4_sniper"]
 [ext_resource type="Resource" path="res://data/weapons/orbiting_needles.tres" id="5_needles"]
 [ext_resource type="Resource" path="res://data/weapons/button_shotgun.tres" id="6_shotgun"]
+[ext_resource type="Resource" path="res://data/weapons/stuffing_cloud.tres" id="7_cloud"]
+[ext_resource type="Resource" path="res://data/weapons/bouncy_yarn_ball.tres" id="8_yarn"]
+[ext_resource type="Resource" path="res://data/weapons/thimble_mortar.tres" id="9_mortar"]
 
 [sub_resource type="Resource" id="Resource_boomerang"]
 script = ExtResource("2_def")
@@ -42,6 +45,33 @@ kind = 0
 weight = 1.0
 weapon = ExtResource("6_shotgun")
 icon = &"buttons"
+
+[sub_resource type="Resource" id="Resource_cloud"]
+script = ExtResource("2_def")
+id = &"stuffing_cloud"
+display_name = "Stuffing Cloud"
+kind = 0
+weight = 1.0
+weapon = ExtResource("7_cloud")
+icon = &"cloud"
+
+[sub_resource type="Resource" id="Resource_yarn"]
+script = ExtResource("2_def")
+id = &"bouncy_yarn_ball"
+display_name = "Bouncy Yarn Ball"
+kind = 0
+weight = 1.0
+weapon = ExtResource("8_yarn")
+icon = &"yarn"
+
+[sub_resource type="Resource" id="Resource_mortar"]
+script = ExtResource("2_def")
+id = &"thimble_mortar"
+display_name = "Thimble Mortar"
+kind = 0
+weight = 1.0
+weapon = ExtResource("9_mortar")
+icon = &"thimble"
 
 [sub_resource type="Resource" id="Resource_quick_feet"]
 script = ExtResource("2_def")
@@ -150,7 +180,7 @@ icon = &"snack"
 
 [resource]
 script = ExtResource("1_pool")
-upgrades = Array[ExtResource("2_def")]([SubResource("Resource_boomerang"), SubResource("Resource_sniper"), SubResource("Resource_needles"), SubResource("Resource_shotgun"), SubResource("Resource_quick_feet"), SubResource("Resource_extra_stuffing"), SubResource("Resource_magnet_pocket"), SubResource("Resource_quick_hands"), SubResource("Resource_sharp_scissors"), SubResource("Resource_long_thread"), SubResource("Resource_big_spool"), SubResource("Resource_thick_felt")])
+upgrades = Array[ExtResource("2_def")]([SubResource("Resource_boomerang"), SubResource("Resource_sniper"), SubResource("Resource_needles"), SubResource("Resource_shotgun"), SubResource("Resource_cloud"), SubResource("Resource_yarn"), SubResource("Resource_mortar"), SubResource("Resource_quick_feet"), SubResource("Resource_extra_stuffing"), SubResource("Resource_magnet_pocket"), SubResource("Resource_quick_hands"), SubResource("Resource_sharp_scissors"), SubResource("Resource_long_thread"), SubResource("Resource_big_spool"), SubResource("Resource_thick_felt")])
 snack = SubResource("Resource_snack")
 cards_per_level_up = 3
 max_weapons = 6

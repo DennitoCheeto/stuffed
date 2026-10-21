@@ -5,8 +5,9 @@ extends Control
 const BACK_COLOR: Color = Color("#2a2633")
 const RING_COLOR: Color = Color("#4a4358")
 
-## Which icon to draw: boomerang, pin, needles, buttons, feet, stuffing, magnet, hands, scissors,
-## thread, spool, felt, snack. "" draws only the empty round back (an empty HUD slot).
+## Which icon to draw: boomerang, pin, needles, buttons, cloud, yarn, thimble, feet, stuffing,
+## magnet, hands, scissors, thread, spool, felt, snack. "" draws only the empty round back (an
+## empty HUD slot).
 var icon: StringName = &"":
 	set(value):
 		icon = value
@@ -47,6 +48,12 @@ func _draw() -> void:
 			_needles()
 		&"buttons":
 			_buttons()
+		&"cloud":
+			_cloud()
+		&"yarn":
+			_yarn()
+		&"thimble":
+			_thimble()
 		&"scissors":
 			_scissors()
 		&"thread":
@@ -125,3 +132,28 @@ func _buttons() -> void:
 		draw_circle(center, spot.z, Color("#8fc9b9"))
 		for hole: Vector2 in [Vector2(-1, -1), Vector2(1, -1), Vector2(-1, 1), Vector2(1, 1)]:
 			draw_circle(center + hole * spot.z * 0.3, spot.z * 0.15, Color("#4f7f73"))
+
+
+func _cloud() -> void:
+	for puff: Vector3 in [Vector3(-14, 4, 12), Vector3(14, 4, 12), Vector3(0, -6, 16)]:
+		draw_circle(Vector2(puff.x, puff.y), puff.z, Color("#e9e2f2"))
+	draw_rect(Rect2(-14, 4, 28, 12), Color("#e9e2f2"))
+	for spot: Vector2 in [Vector2(-22, 24), Vector2(0, 26), Vector2(22, 24)]:
+		draw_circle(spot, 3.0, Color("#b9aecb"))
+
+
+func _yarn() -> void:
+	draw_circle(Vector2.ZERO, 20.0, Color("#e98aa8"))
+	for x: float in [-9.0, 0.0, 9.0]:
+		draw_arc(Vector2(x * 2.4, 0), 20.0, PI - 0.9, PI + 0.9, 10, Color("#b65a7c"), 2.5)
+	draw_line(Vector2(16, 12), Vector2(28, 26), Color("#e98aa8"), 3.0)
+
+
+func _thimble() -> void:
+	var body: PackedVector2Array = [Vector2(-16, 18), Vector2(-12, -14), Vector2(0, -20)]
+	body.append_array([Vector2(12, -14), Vector2(16, 18)])
+	draw_colored_polygon(body, Color("#c9c3b4"))
+	for y: float in [-8.0, 2.0]:
+		for x: float in [-6.0, 0.0, 6.0]:
+			draw_circle(Vector2(x, y), 2.0, Color("#8d8676"))
+	draw_rect(Rect2(-18, 14, 36, 6), Color("#aaa395"))

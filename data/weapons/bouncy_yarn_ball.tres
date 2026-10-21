@@ -1,0 +1,79 @@
+[gd_resource type="Resource" script_class="WeaponStats" load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://src/weapons/weapon_stats.gd" id="1_stats"]
+[ext_resource type="Script" path="res://src/weapons/weapon_level.gd" id="2_level"]
+[ext_resource type="Script" path="res://src/weapons/bouncy_yarn_ball.gd" id="3_behaviour"]
+
+[sub_resource type="Resource" id="Resource_level1"]
+script = ExtResource("2_level")
+damage = 8.0
+cooldown = 2.0
+reach = 220.0
+count = 1
+speed = 380.0
+pierce = 3
+area = 0.0
+duration = 4.0
+spread_degrees = 0.0
+card_text = "Throws a yarn ball that bounces between 4 zombies and off walls."
+
+[sub_resource type="Resource" id="Resource_level2"]
+script = ExtResource("2_level")
+damage = 8.0
+cooldown = 2.0
+reach = 220.0
+count = 1
+speed = 380.0
+pierce = 5
+area = 0.0
+duration = 4.0
+spread_degrees = 0.0
+card_text = "Bounces between 6 zombies instead of 4."
+
+[sub_resource type="Resource" id="Resource_level3"]
+script = ExtResource("2_level")
+damage = 12.0
+cooldown = 2.0
+reach = 220.0
+count = 1
+speed = 380.0
+pierce = 5
+area = 0.0
+duration = 4.0
+spread_degrees = 0.0
+card_text = "Damage 8 → 12."
+
+[sub_resource type="Resource" id="Resource_level4"]
+script = ExtResource("2_level")
+damage = 12.0
+cooldown = 2.0
+reach = 220.0
+count = 2
+speed = 380.0
+pierce = 5
+area = 0.0
+duration = 4.0
+spread_degrees = 25.0
+card_text = "2 yarn balls."
+
+[sub_resource type="Resource" id="Resource_level5"]
+script = ExtResource("2_level")
+damage = 12.0
+cooldown = 1.6
+reach = 220.0
+count = 2
+speed = 380.0
+pierce = 7
+area = 0.0
+duration = 4.0
+spread_degrees = 25.0
+card_text = "Bounces between 8 zombies, and throws every 2 → 1.6 seconds."
+
+[resource]
+script = ExtResource("1_stats")
+id = &"bouncy_yarn_ball"
+display_name = "Bouncy Yarn Ball"
+behaviour = ExtResource("3_behaviour")
+knockback = 80.0
+hit_radius = 10.0
+levels = Array[ExtResource("2_level")]([SubResource("Resource_level1"), SubResource("Resource_level2"), SubResource("Resource_level3"), SubResource("Resource_level4"), SubResource("Resource_level5")])
