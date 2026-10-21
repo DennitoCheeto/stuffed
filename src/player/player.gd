@@ -3,6 +3,7 @@ extends CharacterBody2D
 ## A hero controlled by one player: walks, dashes and takes contact damage.
 
 signal health_changed(current: float, maximum: float)
+signal hurt(amount: float)
 signal dashed(from_position: Vector2, direction: Vector2)
 signal died(player: Player)
 
@@ -86,6 +87,11 @@ func is_invulnerable() -> bool:
 	return is_dashing() or _hurt_invulnerable_left > 0.0
 
 
+## Seconds of after-hit invulnerability left (0 when Banane can be hurt again).
+func hurt_invulnerable_left() -> float:
+	return _hurt_invulnerable_left
+
+
 func is_dead() -> bool:
 	return health <= 0.0
 
@@ -97,6 +103,7 @@ func take_hit(amount: float, source: String) -> bool:
 	health = maxf(health - amount, 0.0)
 	last_hit_by = source
 	_hurt_invulnerable_left = stats.hurt_invulnerability
+	hurt.emit(amount)
 	health_changed.emit(health, max_health)
 	if is_dead():
 		died.emit(self)
