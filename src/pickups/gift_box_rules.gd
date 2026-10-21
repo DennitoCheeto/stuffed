@@ -16,13 +16,17 @@ extends Resource
 @export var skip_delay: float = 0.3
 
 
-## What a box holds for a player whose upgrades are at `levels` (id → level): 1-3 level-ups of
-## weapons or items they already have (different ones while possible, never past the top
-## level), or a heal if everything is maxed.
+## What a box holds for a player whose upgrades are at `levels` (id → level): an evolution if a
+## weapon is ready to evolve; otherwise 1-3 level-ups of weapons or items they already have
+## (different ones while possible, never past the top level), or a heal if everything is maxed.
 func contents(
 	levels: Dictionary[StringName, int], pool: UpgradePool, rng: RandomNumberGenerator
 ) -> GiftContents:
 	var gift: GiftContents = GiftContents.new()
+	gift.evolution = pool.ready_evolution(levels)
+	if gift.evolution != null:
+		gift.evolution_from = pool.find(gift.evolution.weapon).display_name
+		return gift
 	var working: Dictionary[StringName, int] = levels.duplicate()
 	var given: Array[StringName] = []
 	for i: int in roll_count(rng):

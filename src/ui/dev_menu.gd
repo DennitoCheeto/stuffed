@@ -83,6 +83,14 @@ func _build() -> void:
 			actions.append(_spawn.bind(stats, count))
 		_row(column, labels, actions)
 	_row(column, ["Spawn elite", "Drop gift box"], [_spawn_elite, _drop_gift_box])
+	var evolutions: Array[EvolutionDef] = run.upgrade_pool.evolutions
+	for first: int in range(0, evolutions.size(), 2):
+		var labels: Array[String] = []
+		var actions: Array[Callable] = []
+		for evolution: EvolutionDef in evolutions.slice(first, first + 2):
+			labels.append("Ready: %s" % evolution.display_name())
+			actions.append(_ready_to_evolve.bind(evolution))
+		_row(column, labels, actions)
 	_row(column, ["Kill all"], [_kill_all])
 	var late: float = run.rules.goal_seconds - 30.0
 	var jump_label: String = "Jump to %s" % TimeFormat.clock(late)
@@ -153,6 +161,22 @@ func _spawn_elite() -> void:
 ## A gift box a few steps to the right of player 1.
 func _drop_gift_box() -> void:
 	run.drop_gift_box(_player().global_position + Vector2(80.0, 0.0))
+
+
+## Gives player 1 the weapon of `evolution` at its top level and its partner item, and drops a
+## gift box next to them: walk onto it to evolve.
+func _ready_to_evolve(evolution: EvolutionDef) -> void:
+	var player: Player = _player()
+	var pool: UpgradePool = run.upgrade_pool
+	var base: UpgradeDef = pool.find(evolution.weapon)
+	var weapon: Weapon = player.weapon(evolution.weapon)
+	if weapon == null:
+		weapon = player.add_weapon(base.weapon)
+	weapon.level = base.top_level()
+	if not player.item_levels.has(evolution.partner):
+		player.apply_upgrade(UpgradeOffer.new(pool.find(evolution.partner), 1))
+	player.loadout_changed.emit()
+	_drop_gift_box()
 
 
 func _kill_all() -> void:

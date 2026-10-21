@@ -75,7 +75,10 @@ func show_loadout() -> void:
 
 func _icon_for(id: StringName) -> StringName:
 	var upgrade: UpgradeDef = pool.find(id)
-	return upgrade.icon if upgrade != null else &""
+	if upgrade != null:
+		return upgrade.icon
+	var evolution: EvolutionDef = pool.evolution_into(id)
+	return evolution.icon if evolution != null else &""
 
 
 func _make_slots(row: HBoxContainer, count: int) -> Array[LoadoutSlot]:

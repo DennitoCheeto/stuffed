@@ -10,10 +10,14 @@ signal died(player: Player)
 signal celebrated
 ## Weapons or items were added or levelled up (the HUD redraws its icons).
 signal loadout_changed
+## A weapon evolved (the gift box moment shows it).
+signal evolved(weapon: Weapon)
 
 const GROUP: StringName = &"players"
 ## Thick Felt never makes the hero take less than this share of a hit.
 const MIN_DAMAGE_TAKEN: float = 0.2
+## An evolved weapon counts as its old weapon past every level, so that is never offered again.
+const EVOLVED_LEVEL: int = 99
 
 @export var stats: HeroStats
 @export var xp_rules: XpRules
@@ -137,6 +141,8 @@ func upgrade_levels() -> Dictionary[StringName, int]:
 	var levels: Dictionary[StringName, int] = item_levels.duplicate()
 	for owned: Weapon in weapons():
 		levels[owned.stats.id] = owned.level
+		if owned.stats.evolved_from != &"":
+			levels[owned.stats.evolved_from] = EVOLVED_LEVEL
 	return levels
 
 
@@ -168,6 +174,24 @@ func add_weapon(weapon_stats: WeaponStats) -> Weapon:
 	_weapons.add_child(weapon)
 	loadout_changed.emit()
 	return weapon
+
+
+## Replaces the weapon of `evolution` by its evolved form, in the same HUD slot. Returns the
+## new weapon, or null if the hero doesn't have the old one.
+func evolve(evolution: EvolutionDef) -> Weapon:
+	var old: Weapon = weapon(evolution.weapon)
+	if old == null:
+		return null
+	var slot: int = old.get_index()
+	_weapons.remove_child(old)
+	old.queue_free()
+	var new_weapon: Weapon = add_weapon(evolution.evolved)
+	_weapons.move_child(new_weapon, slot)
+	picked_upgrades.append("Evolved: %s" % evolution.display_name())
+	RecipeBook.mark_seen(evolution.evolved.id)
+	loadout_changed.emit()
+	evolved.emit(new_weapon)
+	return new_weapon
 
 
 ## The weapon with this id, or null if the hero doesn't have it.

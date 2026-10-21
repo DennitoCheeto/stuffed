@@ -17,6 +17,11 @@ func attack() -> bool:
 	var spread: float = deg_to_rad(numbers.spread_degrees)
 	for i: int in numbers.count:
 		var offset: float = (i - (numbers.count - 1) / 2.0) * spread
-		var ball: CannonProjectile = shots.spawn(CannonProjectile) as CannonProjectile
+		var ball: CannonProjectile = shots.spawn(_ball_kind()) as CannonProjectile
 		ball.launch(self, aim.rotated(offset))
 	return true
+
+
+## Which shot it fires (Yarn Bomb fires balls that leave sticky yarn).
+func _ball_kind() -> GDScript:
+	return CannonProjectile

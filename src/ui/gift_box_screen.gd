@@ -12,6 +12,11 @@ const LID_POP_AT: float = 0.4
 ## How far right of the screen centre the big box stands.
 const ART_OFFSET_X: float = 300.0
 const TITLE: String = "Gift box!"
+const EVOLUTION_TITLE: String = "Evolution!"
+## Evolutions get their own colour and more confetti: they should feel bigger.
+const EVOLUTION_COLOR: Color = Color("#ff7ad9")
+const CONFETTI: int = 90
+const EVOLUTION_CONFETTI: int = 220
 const HINT: String = "Any key: skip"
 const HIGHLIGHT_COLOR: Color = Color("#f2b52e")
 const TEXT_COLOR: Color = Color("#f7f3ea")
@@ -54,6 +59,11 @@ func open(gift: GiftContents, rules: GiftBoxRules) -> void:
 	skip_delay = rules.skip_delay
 	time = 0.0
 	lid_popped = false
+	var evolving: bool = gift.is_evolution()
+	title_label.text = EVOLUTION_TITLE if evolving else TITLE
+	var title_color: Color = EVOLUTION_COLOR if evolving else HIGHLIGHT_COLOR
+	title_label.add_theme_color_override("font_color", title_color)
+	confetti.amount = EVOLUTION_CONFETTI if evolving else CONFETTI
 	contents_label.text = "\n".join(gift.lines())
 	contents_label.visible = false
 	art.lid_open = 0.0
@@ -130,7 +140,7 @@ func _build() -> void:
 	confetti = CPUParticles2D.new()
 	confetti.position = Vector2(960.0 + ART_OFFSET_X, 470.0)
 	confetti.emitting = false
-	confetti.amount = 90
+	confetti.amount = CONFETTI
 	confetti.lifetime = 1.6
 	confetti.one_shot = true
 	confetti.explosiveness = 1.0

@@ -12,7 +12,7 @@ extends Resource
 @export var count: int = 1
 ## Projectile speed in pixels per second.
 @export var speed: float = 450.0
-## How many zombies one projectile passes through (0 = stops at the first).
+## How many zombies one projectile passes through (0 = stops at the first, -1 = no limit).
 @export var pierce: int = 0
 ## Radius of an area hit (clouds, bursts, arcs), in pixels; 0 for weapons without one.
 @export var area: float = 0.0
