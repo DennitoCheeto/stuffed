@@ -6,6 +6,8 @@ signal health_changed(current: float, maximum: float)
 signal hurt(amount: float)
 signal dashed(from_position: Vector2, direction: Vector2)
 signal died(player: Player)
+## A level-up moment: Banane quacks with sunglasses on.
+signal celebrated
 
 const GROUP: StringName = &"players"
 
@@ -26,6 +28,12 @@ var attack_speed: float = 1.0
 var pickup_range: float = 0.0
 ## Level and XP in this run.
 var progress: LevelProgress
+## Multiplies the hero's move speed (Quick Feet raises it).
+var move_speed_multiplier: float = 1.0
+## Levels of the boosts picked this run (weapons keep their own level).
+var boost_levels: Dictionary[StringName, int] = {}
+## Every card picked this run, in order, e.g. "Quick Feet 2" (for the end screen and run log).
+var picked_upgrades: PackedStringArray = []
 
 var _input: PlayerInput
 var _dash_left: float = 0.0
@@ -65,13 +73,55 @@ func _physics_process(delta: float) -> void:
 	if is_dashing():
 		_move_dash(delta)
 	else:
-		velocity = direction * stats.move_speed
+		velocity = direction * move_speed()
 		move_and_slide()
+
+
+func move_speed() -> float:
+	return stats.move_speed * move_speed_multiplier
+
+
+## Plays the level-up moment on the puppet.
+func celebrate() -> void:
+	celebrated.emit()
 
 
 ## Adds collected XP. Returns how many levels were gained.
 func add_xp(amount: int) -> int:
 	return progress.add_xp(amount)
+
+
+func heal(amount: float) -> void:
+	if is_dead():
+		return
+	health = minf(health + amount, max_health)
+	health_changed.emit(health, max_health)
+
+
+## Current level of every upgrade the hero has (weapons and boosts), for rolling cards.
+func upgrade_levels() -> Dictionary[StringName, int]:
+	var levels: Dictionary[StringName, int] = boost_levels.duplicate()
+	for owned: Weapon in weapons():
+		levels[owned.stats.id] = owned.level
+	return levels
+
+
+## Applies a picked level-up card.
+func apply_upgrade(offer: UpgradeOffer) -> void:
+	var upgrade: UpgradeDef = offer.upgrade
+	match upgrade.kind:
+		UpgradeDef.Kind.WEAPON:
+			var owned: Weapon = weapon(upgrade.weapon.id)
+			if owned == null:
+				add_weapon(upgrade.weapon)
+			else:
+				owned.level_up()
+		UpgradeDef.Kind.BOOST:
+			boost_levels[upgrade.id] = boost_levels.get(upgrade.id, 0) + 1
+			_apply_boost(upgrade)
+		UpgradeDef.Kind.SNACK:
+			heal(max_health * upgrade.amount)
+	picked_upgrades.append("%s %d" % [upgrade.display_name, offer.next_level])
 
 
 ## Gives this hero a weapon (level 1). It attacks on its own from now on.
@@ -145,6 +195,19 @@ func take_hit(amount: float, source: String) -> bool:
 	if is_dead():
 		died.emit(self)
 	return true
+
+
+func _apply_boost(upgrade: UpgradeDef) -> void:
+	match upgrade.boost:
+		UpgradeDef.Boost.MOVE_SPEED:
+			move_speed_multiplier += upgrade.amount
+		UpgradeDef.Boost.MAX_HEALTH:
+			max_health += upgrade.amount
+			heal(upgrade.amount)
+		UpgradeDef.Boost.PICKUP_RANGE:
+			pickup_range += stats.pickup_range * upgrade.amount
+		UpgradeDef.Boost.ATTACK_SPEED:
+			attack_speed += upgrade.amount
 
 
 func _move_dash(delta: float) -> void:

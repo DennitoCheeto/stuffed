@@ -4,7 +4,7 @@ extends Node2D
 ## moved in code. Shapes and motion follow docs/art/felt-style-concept.html and
 ## animation-concept.html.
 
-enum State { IDLE, WALK, DASH, HIT }
+enum State { IDLE, WALK, DASH, HIT, QUACK }
 
 const FELT_SHADER: Shader = preload("res://src/puppet/felt.gdshader")
 ## The concept drawing is about 220 units tall; this makes Banane about 75 px tall.
@@ -17,6 +17,10 @@ const WALK_STEPS_PER_SECOND: float = 2.2
 const DASH_ANIM_TIME: float = 0.3
 const HIT_ANIM_TIME: float = 0.6
 const HIT_FLASH_TIME: float = 0.09
+## The level-up moment: jump, deadpan "QUACK.", sunglasses.
+const QUACK_TIME: float = 1.4
+## Where the sunglasses sit on the head (concept point).
+const SHADES_PIVOT: Vector2 = Vector2(105, 76)
 const INVULNERABLE_BLINK: float = 0.08
 const EYE_BLINK_EVERY: float = 3.2
 const WALK_SPEED_THRESHOLD: float = 5.0
@@ -51,6 +55,8 @@ var _eye: FeltPiece
 var _flap_left: FeltPiece
 var _flap_right: FeltPiece
 var _flap_middle: FeltPiece
+var _shades: FeltPiece
+var _quack_label: Label
 
 
 func _ready() -> void:
@@ -59,6 +65,7 @@ func _ready() -> void:
 	if _player != null:
 		_player.dashed.connect(_on_dashed)
 		_player.hurt.connect(_on_hurt)
+		_player.celebrated.connect(_on_celebrated)
 
 
 func _process(delta: float) -> void:
@@ -79,6 +86,12 @@ func _on_hurt(_amount: float) -> void:
 	_enter(State.HIT)
 
 
+## Plays even while the run is frozen for the level-up cards.
+func _on_celebrated() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	_enter(State.QUACK)
+
+
 func _enter(new_state: State) -> void:
 	state = new_state
 	_state_time = 0.0
@@ -86,6 +99,10 @@ func _enter(new_state: State) -> void:
 
 func _update_state() -> void:
 	match state:
+		State.QUACK:
+			if _state_time >= QUACK_TIME:
+				process_mode = Node.PROCESS_MODE_INHERIT
+				_enter(_moving_state())
 		State.HIT:
 			if _state_time >= HIT_ANIM_TIME:
 				_enter(_moving_state())
@@ -139,6 +156,8 @@ func _pose() -> Pose:
 			pose.flap = 18.0 * wobble
 			pose.flash = 1.0 if t < HIT_FLASH_TIME else 0.0
 			pose.eye_open = 0.1 if t < 0.35 else 1.0
+		State.QUACK:
+			_quack_pose(pose, t)
 	return pose
 
 
@@ -149,8 +168,8 @@ func _apply(pose: Pose) -> void:
 	_root.position = ROOT_PIVOT - ANCHOR + pose.lift
 	_root.rotation_degrees = pose.tilt
 	_root.scale = pose.squash
-	# The feet stay on the ground while the body bobs.
-	var feet_counter: Vector2 = Vector2(-pose.lift.x * 0.3, -pose.lift.y)
+	# The feet stay on the ground while the body bobs (but jump along when he jumps).
+	var feet_counter: Vector2 = Vector2(-pose.lift.x * 0.3, -pose.lift.y * (1.0 - pose.jump))
 	_foot_left.position = _foot_left.pivot - ROOT_PIVOT + feet_counter + pose.foot_left
 	_foot_right.position = _foot_right.pivot - ROOT_PIVOT + feet_counter + pose.foot_right
 	_flap_left.rotation_degrees = pose.flap
@@ -161,6 +180,27 @@ func _apply(pose: Pose) -> void:
 	_material.set_shader_parameter("flash", pose.flash)
 	var air: float = clampf(-pose.lift.y / 40.0, 0.0, 1.0)
 	_shadow.scale = Vector2.ONE * (1.0 - 0.35 * air)
+	_lower_beak.rotation_degrees = pose.beak
+	_shades.modulate.a = pose.shades
+	_shades.position = SHADES_PIVOT - _head.pivot + Vector2(0.0, -30.0 * (1.0 - pose.shades))
+	_quack_label.visible = pose.quack_text > 0.0
+	_quack_label.modulate.a = pose.quack_text
+
+
+## Jump, beak open, "QUACK.", then the sunglasses drop on (animation-concept.html).
+func _quack_pose(pose: Pose, t: float) -> void:
+	var jump: float = sin(t / 0.5 * PI) if t < 0.5 else 0.0
+	pose.lift = Vector2(0.0, -34.0 * jump)
+	pose.jump = 1.0
+	if t < 0.5:
+		pose.squash = Vector2(1.0 - 0.1 * jump, 1.0 + 0.15 * jump)
+	else:
+		var wobble: float = _spring(t - 0.5, 3.0, 7.0)
+		pose.squash = Vector2(1.0 + 0.12 * wobble, 1.0 - 0.15 * wobble)
+	pose.beak = 22.0 if t > 0.15 and t < 0.75 else 0.0
+	pose.flap = 20.0 * jump
+	pose.quack_text = clampf((QUACK_TIME - t) * 3.0, 0.0, 1.0) if t > 0.15 else 0.0
+	pose.shades = clampf((t - 0.55) * 4.0, 0.0, 1.0)
 
 
 ## Squash that keeps the volume: taller means thinner.
@@ -206,6 +246,15 @@ func _build() -> void:
 	body.set_seam(_svg([60, 196, 70, 230, 130, 230, 140, 196]), BODY_SEAM_COLOR)
 	_build_head()
 	_build_flaps()
+	_quack_label = Label.new()
+	_quack_label.text = "QUACK."
+	_quack_label.position = Vector2(12, -96)
+	_quack_label.add_theme_font_size_override("font_size", 24)
+	_quack_label.add_theme_color_override("font_color", BODY_COLOR)
+	_quack_label.add_theme_color_override("font_outline_color", Color("#1d1a24"))
+	_quack_label.add_theme_constant_override("outline_size", 6)
+	_quack_label.visible = false
+	add_child(_quack_label)
 
 
 func _build_head() -> void:
@@ -231,6 +280,13 @@ func _build_head() -> void:
 	var shine_center: Vector2 = Vector2(109.5, 76.5)
 	var shine: PackedVector2Array = FeltShapes.circle(shine_center, 1.6, 10)
 	_eye.add_piece(shine_center, shine, Color(1, 1, 1, 0.8), false)
+	var lens: PackedVector2Array = _points(
+		[100, 70, 118, 70, 121, 73, 121, 80, 118, 83, 100, 83, 97, 80, 97, 73]
+	)
+	_shades = _head.add_piece(SHADES_PIVOT, lens, Color("#111111"), false)
+	_shades.add_line(_points([70, 76, 98, 74]), Color("#111111"), 3.0)
+	_shades.add_line(_points([101, 73, 107, 73]), Color(1, 1, 1, 0.5), 2.0)
+	_shades.modulate.a = 0.0
 
 
 func _build_flaps() -> void:
@@ -267,3 +323,11 @@ class Pose:
 	var head_tilt: float = 0.0
 	var eye_open: float = 1.0
 	var flash: float = 0.0
+	## Lower beak opening, in degrees.
+	var beak: float = 0.0
+	## 0..1: how far the sunglasses have dropped on.
+	var shades: float = 0.0
+	## 0..1: how visible "QUACK." is.
+	var quack_text: float = 0.0
+	## 1 while the whole puppet jumps (feet included).
+	var jump: float = 0.0
