@@ -121,3 +121,16 @@ func test_count_follows_the_weights() -> void:
 func test_gift_box_moment_is_about_two_seconds() -> void:
 	assert_between(RULES.moment_seconds, 1.5, 2.5)
 	assert_lt(RULES.skip_delay, RULES.moment_seconds)
+
+
+func test_the_boss_big_box_gives_more() -> void:
+	assert_gt(RULES.big_box_extra_level_ups, 0, "spec 02 §6: more from the boss's box")
+	assert_gt(RULES.big_box_scale, 1.0, "and it looks bigger")
+	var levels: Dictionary[StringName, int] = {
+		&"peel_boomerang": 1, &"orbiting_needles": 1, &"quick_feet": 1, &"thick_felt": 1
+	}
+	var extra: int = RULES.big_box_extra_level_ups
+	for seed_value: int in SEEDS:
+		var normal: GiftContents = RULES.contents(levels, POOL, _rng(seed_value))
+		var big: GiftContents = RULES.contents(levels, POOL, _rng(seed_value), extra)
+		assert_eq(big.level_ups.size(), normal.level_ups.size() + extra)

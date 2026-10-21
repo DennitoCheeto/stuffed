@@ -29,6 +29,8 @@ enum Phase { NORMAL, SURGE, BREATHER, FINAL_SURGE }
 @export_group("Bosses")
 ## Big Ted, in the middle of the run (spec 02 §9). Its own data says when.
 @export var mini_boss: BossDef
+## The Sock Puppet King. He comes at the run goal (run_rules.tres) and is never skipped.
+@export var boss: BossDef
 
 @export_group("Surges and breathers")
 ## Length of one surge/breather rhythm.

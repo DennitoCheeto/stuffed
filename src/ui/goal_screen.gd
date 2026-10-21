@@ -1,8 +1,8 @@
 class_name GoalScreen
 extends CanvasLayer
-## Shown when the run goal is reached: "You survived!" and the choice to end the run with a win
-## or keep going endlessly. Keys 1 / 2, a click, or arrows + Enter. Keeps running while the run
-## is frozen.
+## Shown when the run goal is reached (the boss is beaten): "You beat the Bedroom!" and the
+## choice to end the run with a win or keep going endlessly. Keys 1 / 2, a click, or arrows +
+## Enter. Keeps running while the run is frozen.
 
 signal end_chosen
 signal endless_chosen

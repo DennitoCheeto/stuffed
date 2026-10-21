@@ -83,6 +83,10 @@ func show_time(elapsed: float, goal: float) -> void:
 	timer_label.text = TimeFormat.run_timer(elapsed, goal)
 
 
+func show_boss_fight_time(elapsed: float) -> void:
+	timer_label.text = TimeFormat.boss_fight(elapsed)
+
+
 func show_endless_time(seconds: float) -> void:
 	timer_label.text = TimeFormat.endless(seconds)
 

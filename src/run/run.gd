@@ -13,6 +13,8 @@ signal endless_started
 signal quit_to_title(result: RunResult)
 ## The developer menu asks for a new run (0 = new random seed).
 signal restart_requested(seed_value: int)
+## The music should change to `track` (the boss fight has its own).
+signal music_requested(track: StringName)
 
 ## Weapons and effects find the run through this group.
 const GROUP: StringName = &"run"
@@ -49,6 +51,10 @@ var goal_done: bool = false
 var endless: bool = false
 ## Endless minutes so far (the horde gets tougher each one).
 var endless_minute: int = 0
+## The boss is on the field (from the goal time until he is beaten).
+var boss_fight: bool = false
+## Run time when the goal was reached (the boss was beaten); endless time counts from here.
+var goal_time: float = 0.0
 ## Big-hit freezes so far.
 var hit_stops: int = 0
 ## The gift box moment (built in code, on top of the run).
@@ -64,6 +70,8 @@ var _level_up_queue: Array[Player] = []
 var _gift_queue: Array[GiftContents] = []
 ## Why the run is frozen right now (level-up, pause, ...). Empty = running.
 var _freeze_reasons: Dictionary[StringName, bool] = {}
+## The beaten boss's big gift box, until it is opened.
+var _goal_box: GiftBox
 
 @onready var arena: Arena = $Arena
 @onready var pickups: PickupManager = $Pickups
@@ -100,6 +108,8 @@ func _ready() -> void:
 		func(_boss: Zombie, _pattern: StringName) -> void: Sfx.play(&"puff")
 	)
 	enemies.boss_attacked.connect(_on_boss_attacked)
+	enemies.boss_angry.connect(_on_boss_angry)
+	enemies.boss_landed.connect(_on_boss_landed)
 	spawner.boss_spawned.connect(_on_boss_spawned)
 	pickups.collected.connect(_on_pickup_collected)
 	spawner.setup(enemies, camera, rng)
@@ -129,9 +139,6 @@ func _physics_process(delta: float) -> void:
 	if over or _at_goal:
 		return
 	elapsed += delta
-	if not goal_done and elapsed >= rules.goal_seconds:
-		elapsed = rules.goal_seconds
-		_reach_goal()
 	if endless:
 		_update_endless_scaling()
 	spawner.tick(elapsed, delta)
@@ -284,10 +291,14 @@ func _ids_on_screen() -> Array[StringName]:
 	return ids
 
 
-## Goal reached: spawning stops, the horde pops in a chain, a short celebration, then the run
+## Goal reached (the boss is beaten): spawning stops, the horde pops in a chain, a short
+## celebration, the boss's big gift box opens (by itself if nobody walked onto it), then the run
 ## pauses and offers End run / Keep going.
 func _reach_goal() -> void:
 	goal_done = true
+	goal_time = elapsed
+	boss_fight = false
+	music_requested.emit(&"run")
 	_at_goal = true
 	spawner.active = false
 	enemies.calm = true
@@ -300,6 +311,9 @@ func _reach_goal() -> void:
 		player.celebrate()
 	await enemies.pop_all_in_chain(Players.centroid(get_tree()), POP_CHAIN_TIME)
 	await get_tree().create_timer(CELEBRATION_TIME).timeout
+	if is_instance_valid(_goal_box) and not _goal_box.opened:
+		_goal_box.opened = true
+		_on_gift_box_touched(_goal_box, _nearest_player(_goal_box.position))
 	while not _level_up_queue.is_empty() or not _gift_queue.is_empty() or gift_screen.is_open():
 		await get_tree().process_frame
 	_drops_enabled = true
@@ -309,7 +323,7 @@ func _reach_goal() -> void:
 
 ## Seconds played after the goal.
 func endless_seconds() -> float:
-	return maxf(elapsed - rules.goal_seconds, 0.0) if endless else 0.0
+	return maxf(elapsed - goal_time, 0.0) if endless else 0.0
 
 
 ## A summary of the run so far, for the end screen and the run log.
@@ -331,6 +345,8 @@ func make_result(ending: String) -> RunResult:
 func _show_clock() -> void:
 	if endless:
 		hud.show_endless_time(endless_seconds())
+	elif boss_fight:
+		hud.show_boss_fight_time(elapsed)
 	else:
 		hud.show_time(elapsed, rules.goal_seconds)
 
@@ -376,14 +392,40 @@ func _on_boss_spawned(boss: Zombie) -> void:
 	hud.show_banner(boss.boss.banner, boss.boss.banner_subtitle, boss.boss.banner_seconds)
 	Sfx.play(&"boss_banner")
 	camera.shake(0.4)
+	if is_final_boss(boss):
+		boss_fight = true
+		music_requested.emit(&"boss")
+
+
+## True for the area's boss (beating him is the goal), false for the mini-boss.
+func is_final_boss(zombie: Zombie) -> bool:
+	return zombie.is_boss() and zombie.boss == spawner.schedule.boss
 
 
 func _on_boss_attacked(_boss: Zombie, pattern: StringName) -> void:
-	if pattern == BigTedBrain.STOMP:
-		Sfx.play(&"stomp")
-		camera.shake(0.35)
-	else:
-		Sfx.play(&"dash")
+	match pattern:
+		BigTedBrain.STOMP:
+			Sfx.play(&"stomp")
+			camera.shake(0.35)
+		SockKingBrain.SPIRAL:
+			Sfx.play(&"spit")
+		SockKingBrain.SUMMON:
+			Sfx.play(&"pop")
+		_:
+			Sfx.play(&"dash")
+
+
+func _on_boss_angry(boss: Zombie) -> void:
+	var king: SockKingDef = boss.boss as SockKingDef
+	if king != null:
+		hud.show_banner(king.angry_banner, "", king.banner_seconds * 0.6)
+	Sfx.play(&"boss_banner", 1.3)
+	camera.shake(0.5)
+
+
+func _on_boss_landed(_boss: Zombie) -> void:
+	Sfx.play(&"stomp")
+	camera.shake(0.5)
 
 
 func _on_zombie_hit(zombie: Zombie, amount: float) -> void:
@@ -406,9 +448,13 @@ func _on_zombie_killed(zombie: Zombie) -> void:
 	if _drops_enabled:
 		pickups.drop(zombie.xp_button(), zombie.position)
 		if zombie.is_elite() or zombie.is_boss():
-			drop_gift_box(zombie.position)
+			var box: GiftBox = drop_gift_box(zombie.position, is_final_boss(zombie))
+			if box.big:
+				_goal_box = box
 	if zombie.is_boss():
 		camera.shake(0.6)
+	if is_final_boss(zombie) and not goal_done:
+		_reach_goal()
 
 
 func _on_player_died(_player: Player) -> void:
@@ -428,10 +474,24 @@ func _finish_after_death() -> void:
 
 
 ## Puts a gift box on the floor at `at`; it opens for the first player who touches it.
-func drop_gift_box(at: Vector2) -> GiftBox:
+## The living player closest to `at` (player 1 if everyone is down).
+func _nearest_player(at: Vector2) -> Player:
+	var players: Array[Player] = Players.all(get_tree())
+	var best: Player = players[0]
+	var best_distance: float = INF
+	for player: Player in players:
+		var distance: float = player.global_position.distance_squared_to(at)
+		if not player.is_dead() and distance < best_distance:
+			best = player
+			best_distance = distance
+	return best
+
+
+## A `big` box (the boss's) has more inside.
+func drop_gift_box(at: Vector2, big: bool = false) -> GiftBox:
 	var box: GiftBox = GiftBox.new()
 	box.position = at
-	box.setup(gift_box_rules)
+	box.setup(gift_box_rules, big)
 	box.touched.connect(_on_gift_box_touched)
 	floor_items.add_child(box)
 	return box
@@ -439,8 +499,9 @@ func drop_gift_box(at: Vector2) -> GiftBox:
 
 ## The box opens for `player`: its contents are given right away, then the moment plays.
 func _on_gift_box_touched(box: GiftBox, player: Player) -> void:
+	var extra: int = gift_box_rules.big_box_extra_level_ups if box.big else 0
 	var gift: GiftContents = gift_box_rules.contents(
-		player.upgrade_levels(), upgrade_pool, upgrade_rng
+		player.upgrade_levels(), upgrade_pool, upgrade_rng, extra
 	)
 	gift.player = player
 	gift.apply_to(player)

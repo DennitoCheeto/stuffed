@@ -98,7 +98,7 @@ func test_goal_pops_make_no_clouds() -> void:
 	var banane: Player = first_player()
 	for i: int in 5:
 		run.enemies.spawn(BLOATER, banane.global_position + Vector2.from_angle(i * 1.2) * 60.0)
-	run.elapsed = run.rules.goal_seconds - 0.05
+	beat_the_boss(run)
 	await wait_seconds(Run.POP_CHAIN_TIME + 0.2)
 	assert_eq(run.enemies.alive_count(), 0)
 	assert_eq(run.projectiles.hostile_count(), 0, "celebrating is safe")

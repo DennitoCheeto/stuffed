@@ -3,10 +3,6 @@ extends "res://tests/scenarios/run_scenario.gd"
 ## falls.
 
 const SHAMBLER: EnemyStats = preload("res://data/enemies/shambler.tres")
-## Pop chain + celebration + input delay of the goal screen, plus a little slack.
-const GOAL_SCREEN_WAIT: float = (
-	Run.POP_CHAIN_TIME + Run.CELEBRATION_TIME + GoalScreen.INPUT_DELAY + 0.3
-)
 
 var run: Run
 
@@ -18,9 +14,8 @@ func _to_goal_screen() -> void:
 	disarm(banane)
 	banane.max_health = 1_000_000.0
 	banane.health = banane.max_health
-	run.elapsed = run.rules.goal_seconds - 0.1
-	await wait_for_signal(run.goal_reached, 2.0)
-	await wait_seconds(GOAL_SCREEN_WAIT)
+	beat_the_boss(run)
+	await wait_for_goal_screen(run)
 
 
 func _press(action: String) -> void:
@@ -62,7 +57,7 @@ func test_ac25_keep_going_shows_endless_time() -> void:
 func test_ac25_every_endless_minute_makes_zombies_tougher() -> void:
 	await _to_goal_screen()
 	await _press("pick_card_2")
-	run.elapsed = run.rules.goal_seconds + 61.0
+	run.elapsed = run.goal_time + 61.0
 	await wait_physics_frames(2)
 	assert_eq(run.endless_minute, 1)
 	assert_almost_eq(run.enemies.health_scale, run.rules.endless_health_scale(1), 0.0001)
@@ -72,7 +67,7 @@ func test_ac25_every_endless_minute_makes_zombies_tougher() -> void:
 	var zombie: Zombie = run.enemies.spawn(SHAMBLER, spot)
 	assert_almost_eq(zombie.max_health, SHAMBLER.max_health * 1.15, 0.001, "+15% health")
 	assert_almost_eq(zombie.contact_damage, SHAMBLER.contact_damage * 1.15, 0.001, "+15% damage")
-	run.elapsed = run.rules.goal_seconds + 125.0
+	run.elapsed = run.goal_time + 125.0
 	await wait_physics_frames(2)
 	assert_eq(run.endless_minute, 2)
 	assert_gt(run.enemies.health_scale, 1.15, "and tougher again the next minute")
@@ -81,7 +76,7 @@ func test_ac25_every_endless_minute_makes_zombies_tougher() -> void:
 func test_ac26_dying_in_endless_still_says_you_survived() -> void:
 	await _to_goal_screen()
 	await _press("pick_card_2")
-	run.elapsed = run.rules.goal_seconds + 70.0
+	run.elapsed = run.goal_time + 70.0
 	var banane: Player = first_player()
 	banane.health = 1.0
 	run.enemies.spawn(SHAMBLER, banane.global_position)

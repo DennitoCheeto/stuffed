@@ -1,12 +1,15 @@
 extends GutTest
-## Big Ted, the mini-boss (spec 02 §9, AC-17, AC-24): arrives at 4:00, telegraphs his charge and
-## stomp, lighter spawning while he's alive. Numbers live in data/bosses/big_ted.tres.
+## Big Ted, the mini-boss, and the Sock Puppet King, the boss (spec 02 §9, AC-17, AC-18, AC-24).
+## Both telegraph their patterns and make spawning lighter while alive. Numbers live in
+## data/bosses/*.tres.
 
 const BIG_TED: BigTedDef = preload("res://data/bosses/big_ted.tres")
 const SCHEDULE: SpawnSchedule = preload("res://data/spawn_schedule.tres")
 const ELITE: EliteRules = preload("res://data/elite_rules.tres")
 const SHAMBLER: EnemyStats = preload("res://data/enemies/shambler.tres")
 const BANANE: HeroStats = preload("res://data/heroes/banane.tres")
+const KING: SockKingDef = preload("res://data/bosses/sock_puppet_king.tres")
+const RUNNER: EnemyStats = preload("res://data/enemies/runner.tres")
 
 
 func test_big_ted_is_the_mini_boss_at_4_00() -> void:
@@ -48,3 +51,39 @@ func test_charge_stops_at_the_arena_edge() -> void:
 	assert_almost_eq(BigTedBrain._room_ahead(from, Vector2.DOWN, area), 300.0, 0.01)
 	var diagonal: Vector2 = Vector2(1, 1).normalized()
 	assert_almost_eq(BigTedBrain._room_ahead(from, diagonal, area), 200.0 * sqrt(2.0), 0.01)
+
+
+func test_the_sock_puppet_king_is_the_boss_at_the_goal() -> void:
+	assert_eq(SCHEDULE.boss, KING)
+	assert_eq(KING.enemy.display_name, "Sock Puppet King")
+	assert_eq(KING.enemy.look, EnemyStats.Look.SOCK_KING, "a zombie sock puppet with a crown")
+	assert_gt(KING.enemy.max_health, BIG_TED.enemy.max_health, "tougher than Big Ted")
+	assert_eq(KING.enemy.knockback_taken, 0.0)
+	assert_lt(KING.enemy.move_speed, BANANE.move_speed)
+	assert_false(KING.banner.is_empty())
+	assert_between(KING.spawn_rate_scale, 0.1, 0.8, "lighter spawning while he's alive")
+
+
+func test_his_sock_spiral_is_slow_and_even() -> void:
+	var spiral: SpitAttack = KING.spiral
+	assert_gte(spiral.windup_seconds, 0.6, "he glows first")
+	assert_lt(spiral.bullet_speed, BANANE.move_speed, "slower than Banane")
+	var arms: int = spiral.balls_in_volley(0)
+	assert_gte(arms, 2)
+	assert_almost_eq(arms * spiral.fan_step_degrees, 360.0, 0.01, "arms evenly around him")
+	assert_gt(KING.spiral_turn_degrees, 0.0, "it turns")
+	assert_lt(KING.spiral_turn_degrees, 180.0, "slowly")
+
+
+func test_he_summons_a_ring_of_runners_and_lunges_when_angry() -> void:
+	assert_eq(KING.summon_enemy, RUNNER)
+	assert_gte(KING.summon_count, 4)
+	assert_gte(KING.summon_windup_seconds, 0.6, "the marks show first")
+	assert_eq(KING.angry_below, 0.5, "angry at half health")
+	assert_gte(KING.lunge_windup_seconds, 0.6, "the landing spot shows first")
+	assert_gt(KING.lunge_radius, 0.0)
+	assert_gt(KING.lunge_damage, 0.0)
+
+
+func test_boss_music_is_a_track() -> void:
+	assert_true(MusicPlayer.TRACKS.has(&"boss"))
