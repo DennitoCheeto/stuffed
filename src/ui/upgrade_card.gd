@@ -1,6 +1,7 @@
 class_name UpgradeCard
 extends Button
-## One level-up card: key number, icon, name, "New!" / "Lv 2 → 3" and one line of what it does.
+## One level-up card: key number, icon, name, "New!" / "Lv 2 → 3", one line of what it does and,
+## for weapons that can evolve, the icon of their partner item (spec 02 §5, §11).
 
 const CARD_SIZE: Vector2 = Vector2(340, 400)
 const CARD_COLOR: Color = Color("#2a2633")
@@ -8,6 +9,10 @@ const EDGE_COLOR: Color = Color("#4a4358")
 const HIGHLIGHT_COLOR: Color = Color("#f2b52e")
 
 var offer: UpgradeOffer
+## "Evolves with": the partner item's name and icon (weapons that can evolve only).
+var partner_row: HBoxContainer = HBoxContainer.new()
+var partner_icon: UpgradeIcon = UpgradeIcon.new()
+var partner_label: Label = Label.new()
 
 var _key_label: Label = Label.new()
 var _icon: UpgradeIcon = UpgradeIcon.new()
@@ -26,11 +31,11 @@ func _init() -> void:
 	var column: VBoxContainer = VBoxContainer.new()
 	column.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT, Control.PRESET_MODE_MINSIZE, 28)
 	column.alignment = BoxContainer.ALIGNMENT_BEGIN
-	column.add_theme_constant_override("separation", 14)
+	column.add_theme_constant_override("separation", 10)
 	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(column)
 	_style(_key_label, 24, Color("#a9a3b8"))
-	_icon.custom_minimum_size = Vector2(110, 110)
+	_icon.custom_minimum_size = Vector2(100, 100)
 	_icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_style(_name_label, 34, Color("#f7f3ea"))
@@ -39,6 +44,14 @@ func _init() -> void:
 	_text_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	for part: Control in [_key_label, _icon, _name_label, _level_label, _text_label]:
 		column.add_child(part)
+	partner_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	partner_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	partner_icon.custom_minimum_size = Vector2(40, 40)
+	partner_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_style(partner_label, 18, Color("#a9a3b8"))
+	partner_row.add_child(partner_label)
+	partner_row.add_child(partner_icon)
+	column.add_child(partner_row)
 
 
 ## Shows `card_offer` as card number `number` (1-3).
@@ -49,6 +62,10 @@ func show_offer(card_offer: UpgradeOffer, number: int) -> void:
 	_name_label.text = offer.upgrade.display_name
 	_level_label.text = offer.level_text()
 	_text_label.text = offer.description()
+	partner_row.visible = offer.partner != null
+	if offer.partner != null:
+		partner_label.text = "Evolves with %s" % offer.partner.display_name
+		partner_icon.icon = offer.partner.icon
 
 
 ## A felt card panel; `filled` false draws only the edge (the focus ring on top of the card).

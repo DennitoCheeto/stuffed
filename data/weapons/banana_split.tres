@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="WeaponStats" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://src/weapons/weapon_stats.gd" id="1_stats"]
+[ext_resource type="Script" path="res://src/weapons/weapon_level.gd" id="2_level"]
+[ext_resource type="Script" path="res://src/weapons/banana_split.gd" id="3_behaviour"]
+
+[sub_resource type="Resource" id="Resource_level1"]
+script = ExtResource("2_level")
+damage = 18.0
+cooldown = 0.9
+reach = 340.0
+count = 2
+speed = 500.0
+pierce = 0
+spread_degrees = 25.0
+card_text = "On the way back each peel splits into three."
+
+[resource]
+script = ExtResource("1_stats")
+id = &"banana_split"
+display_name = "Banana Split"
+behaviour = ExtResource("3_behaviour")
+knockback = 140.0
+hit_radius = 16.0
+evolved_from = &"peel_boomerang"
+levels = Array[ExtResource("2_level")]([SubResource("Resource_level1")])

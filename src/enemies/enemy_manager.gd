@@ -232,7 +232,8 @@ func _remove(zombie: Zombie, with_burst: bool) -> void:
 func _walk(zombie: Zombie, target: Player) -> Vector2:
 	if target == null or zombie.stun_left > 0.0:
 		return Vector2.ZERO
-	var toward: Vector2 = zombie.position.direction_to(target.global_position) * zombie.move_speed
+	var toward: Vector2 = zombie.position.direction_to(target.global_position)
+	toward *= zombie.current_speed()
 	var attack: SpitAttack = zombie.attack
 	if attack == null:
 		return toward

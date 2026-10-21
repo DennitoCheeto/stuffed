@@ -11,6 +11,8 @@ extends Resource
 @export var max_weapons: int = 6
 ## Item slots per player. With all of them used, only owned items are offered.
 @export var max_items: int = 6
+## Weapon + partner item pairs that evolve at a gift box (spec 02 §5).
+@export var evolutions: Array[EvolutionDef] = []
 
 @export_group("Control over bad luck (per run)")
 ## Reroll (R): 3 new cards.
@@ -49,7 +51,9 @@ func roll(
 	for choices: Array[UpgradeDef] in [fresh, repeats]:
 		while offers.size() < wanted and not choices.is_empty():
 			var picked: UpgradeDef = choices.pop_at(_weighted_index(choices, rng))
-			offers.append(UpgradeOffer.new(picked, int(levels.get(picked.id, 0)) + 1))
+			var offer: UpgradeOffer = UpgradeOffer.new(picked, int(levels.get(picked.id, 0)) + 1)
+			offer.partner = partner_of(picked)
+			offers.append(offer)
 	while offers.size() < wanted:
 		offers.append(UpgradeOffer.new(snack, 1))
 	return offers
@@ -69,6 +73,44 @@ func find(id: StringName) -> UpgradeDef:
 	for upgrade: UpgradeDef in upgrades:
 		if upgrade.id == id:
 			return upgrade
+	return null
+
+
+## The evolution of weapon `weapon_id`, or null.
+func evolution_of(weapon_id: StringName) -> EvolutionDef:
+	for evolution: EvolutionDef in evolutions:
+		if evolution.weapon == weapon_id:
+			return evolution
+	return null
+
+
+## The evolution that makes the weapon `evolved_id`, or null.
+func evolution_into(evolved_id: StringName) -> EvolutionDef:
+	for evolution: EvolutionDef in evolutions:
+		if evolution.evolved.id == evolved_id:
+			return evolution
+	return null
+
+
+## The item a weapon card shows as its evolution partner, or null (items, the snack, weapons
+## without an evolution yet).
+func partner_of(upgrade: UpgradeDef) -> UpgradeDef:
+	if upgrade.kind != UpgradeDef.Kind.WEAPON:
+		return null
+	var evolution: EvolutionDef = evolution_of(upgrade.id)
+	return find(evolution.partner) if evolution != null else null
+
+
+## The first evolution that is ready at `levels`: its weapon at the top level, its partner item
+## owned, and not evolved yet. Null if none is.
+func ready_evolution(levels: Dictionary[StringName, int]) -> EvolutionDef:
+	for evolution: EvolutionDef in evolutions:
+		var base: UpgradeDef = find(evolution.weapon)
+		if base == null or levels.has(evolution.evolved.id):
+			continue
+		var weapon_level: int = levels.get(evolution.weapon, 0)
+		if weapon_level >= base.top_level() and levels.get(evolution.partner, 0) > 0:
+			return evolution
 	return null
 
 

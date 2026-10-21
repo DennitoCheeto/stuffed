@@ -109,6 +109,7 @@ func _ready() -> void:
 	goal_screen.endless_chosen.connect(_on_endless_chosen)
 	pause_menu.resumed.connect(unfreeze.bind(&"pause"))
 	pause_menu.quit_requested.connect(_on_quit_requested)
+	pause_menu.upgrade_pool = upgrade_pool
 	dev_menu.setup(self)
 	dev_menu.restart_requested.connect(restart_requested.emit)
 	var first: Player = spawn_player(0, arena.center())

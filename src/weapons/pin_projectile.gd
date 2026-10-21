@@ -5,6 +5,8 @@ extends Projectile
 
 ## From this many zombies on one pin, the hit feels heavy (a tiny hit-stop).
 const BIG_HIT: int = 3
+## `max_hits` without a pierce limit (Pincushion Volley).
+const UNLIMITED: int = 1_000_000
 
 ## Zombies hit so far.
 var hits: int = 0
@@ -35,8 +37,10 @@ func launch(from: Weapon, direction: Vector2) -> void:
 	rotation = direction.angle()
 
 
-## How many zombies one pin may hit (it passes through `pierce` of them).
+## How many zombies one pin may hit (it passes through `pierce` of them; below 0 = no limit).
 func max_hits() -> int:
+	if _numbers.pierce < 0:
+		return UNLIMITED
 	return _numbers.pierce + 1
 
 

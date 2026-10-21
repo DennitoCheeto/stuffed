@@ -4,6 +4,9 @@ extends Control
 
 const BACK_COLOR: Color = Color("#2a2633")
 const RING_COLOR: Color = Color("#4a4358")
+## Evolved weapons get a gold ring.
+const EVOLVED_RING_COLOR: Color = Color("#f2c230")
+const EVOLVED: Array[StringName] = [&"split", &"storm", &"volley", &"bomb"]
 
 ## Which icon to draw: boomerang, pin, needles, buttons, cloud, yarn, thimble, cannon, whip,
 ## zipper, feet, stuffing, magnet, hands, scissors, thread, spool, felt, snack. "" draws only the
@@ -17,7 +20,7 @@ var icon: StringName = &"":
 func _draw() -> void:
 	var center: Vector2 = size / 2.0
 	var radius: float = minf(size.x, size.y) / 2.0
-	draw_circle(center, radius, RING_COLOR)
+	draw_circle(center, radius, EVOLVED_RING_COLOR if EVOLVED.has(icon) else RING_COLOR)
 	draw_circle(center, radius - 4.0, BACK_COLOR)
 	draw_set_transform(center, 0.0, Vector2.ONE * radius / 40.0)
 	match icon:
@@ -68,6 +71,14 @@ func _draw() -> void:
 			_spool()
 		&"felt":
 			_felt()
+		&"split":
+			_split()
+		&"storm":
+			_storm()
+		&"volley":
+			_volley()
+		&"bomb":
+			_bomb()
 
 
 func _peel(color: Color, tilt: float) -> void:
@@ -183,3 +194,46 @@ func _zipper() -> void:
 		var at: Vector2 = Vector2(-22, 17).lerp(Vector2(18, -17), i / 5.0)
 		draw_line(at + Vector2(-4, -4), at + Vector2(4, 4), Color("#dfeef4"), 2.5)
 	draw_circle(Vector2(24, -22), 6.0, Color("#dfeef4"))
+
+
+## Banana Split: three peels fanning out.
+func _split() -> void:
+	var shape: PackedVector2Array = FeltShapes.svg_path(
+		PackedFloat32Array([-14, 6, -8, -10, 8, -10, 14, 6, 6, -2, -6, -2, -14, 6])
+	)
+	for tilt: float in [-0.7, 0.0, 0.7]:
+		var points: PackedVector2Array = []
+		for point: Vector2 in shape:
+			points.append((point * 1.2 + Vector2(0, -20)).rotated(tilt) + Vector2(0, 14))
+		draw_colored_polygon(points, Color("#f2d34a"))
+
+
+## Sewing Storm: a whirl of needles.
+func _storm() -> void:
+	for ring: float in [12.0, 22.0]:
+		draw_arc(Vector2.ZERO, ring, 0.0, TAU, 32, Color("#6f6a80"), 2.0)
+	for i: int in 8:
+		var angle: float = TAU * i / 8.0
+		var at: Vector2 = Vector2.from_angle(angle) * (14.0 if i % 2 == 0 else 24.0)
+		var along: Vector2 = Vector2.from_angle(angle + PI / 2.0) * 7.0
+		draw_line(at - along, at + along, Color("#e6eaf5"), 3.0)
+
+
+## Pincushion Volley: a fan of pins.
+func _volley() -> void:
+	for i: int in 5:
+		var direction: Vector2 = Vector2.from_angle(-PI / 2.0 + (i - 2) * 0.32)
+		var tail: Vector2 = Vector2(0, 22) + direction * 4.0
+		var tip: Vector2 = tail + direction * 40.0
+		draw_line(tail, tip, Color("#d9d6e3"), 3.0)
+		draw_circle(tail, 4.5, Color("#e0475b"))
+
+
+## Yarn Bomb: a yarn ball with sticky strands around it.
+func _bomb() -> void:
+	for i: int in 6:
+		var angle: float = TAU * i / 6.0 + 0.3
+		draw_line(Vector2.ZERO, Vector2.from_angle(angle) * 28.0, Color("#f0a8c0"), 2.0)
+	draw_circle(Vector2.ZERO, 17.0, Color("#e98aa8"))
+	for x: float in [-7.0, 0.0, 7.0]:
+		draw_arc(Vector2(x * 2.4, 0), 17.0, PI - 0.9, PI + 0.9, 10, Color("#b65a7c"), 2.5)

@@ -5,6 +5,8 @@ extends RefCounted
 var upgrade: UpgradeDef
 ## 1 = new.
 var next_level: int = 1
+## For weapons that can evolve: the partner item the card shows (null otherwise).
+var partner: UpgradeDef
 
 
 func _init(offered: UpgradeDef, level: int) -> void:

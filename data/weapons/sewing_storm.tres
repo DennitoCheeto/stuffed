@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="WeaponStats" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://src/weapons/weapon_stats.gd" id="1_stats"]
+[ext_resource type="Script" path="res://src/weapons/weapon_level.gd" id="2_level"]
+[ext_resource type="Script" path="res://src/weapons/sewing_storm.gd" id="3_behaviour"]
+
+[sub_resource type="Resource" id="Resource_level1"]
+script = ExtResource("2_level")
+damage = 14.0
+cooldown = 3.0
+reach = 90.0
+count = 10
+speed = 300.0
+pierce = 0
+area = 240.0
+duration = 0.9
+card_text = "A storm of 10 needles that never stops; every 3 s it flings them outward."
+
+[resource]
+script = ExtResource("1_stats")
+id = &"sewing_storm"
+display_name = "Sewing Storm"
+behaviour = ExtResource("3_behaviour")
+knockback = 90.0
+hit_radius = 11.0
+hit_interval = 0.4
+evolved_from = &"orbiting_needles"
+levels = Array[ExtResource("2_level")]([SubResource("Resource_level1")])

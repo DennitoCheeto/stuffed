@@ -24,6 +24,9 @@ var knockback: Vector2 = Vector2.ZERO
 var heading: Vector2 = Vector2.ZERO
 ## Seconds it can't move (banana peel).
 var stun_left: float = 0.0
+## Sticky yarn (Yarn Bomb): seconds it stays slowed, and by how much (0.5 = half speed).
+var slow_left: float = 0.0
+var slow_amount: float = 0.0
 var dead: bool = false
 var puppet: ZombiePuppet
 ## Ranged zombies (`attack`): seconds left in the wind-up, while it puffs up; below 0 = not
@@ -115,6 +118,17 @@ func stun(seconds: float) -> void:
 	_stars.visible = true
 
 
+## Moves `amount` slower (0.5 = half speed) for `seconds`; the strongest slow wins.
+func slow(amount: float, seconds: float) -> void:
+	slow_amount = maxf(slow_amount, clampf(amount, 0.0, 1.0))
+	slow_left = maxf(slow_left, seconds)
+
+
+## Walking speed right now (slowed by sticky yarn).
+func current_speed() -> float:
+	return move_speed * (1.0 - slow_amount)
+
+
 func is_stunned() -> bool:
 	return stun_left > 0.0
 
@@ -135,6 +149,9 @@ func tick(delta: float) -> void:
 	_time += delta
 	_since_hit += delta
 	stun_left = maxf(stun_left - delta, 0.0)
+	slow_left = maxf(slow_left - delta, 0.0)
+	if slow_left <= 0.0:
+		slow_amount = 0.0
 	knockback = knockback.lerp(Vector2.ZERO, minf(KNOCKBACK_DECAY * delta, 1.0))
 	puppet.animate(_time, heading != Vector2.ZERO, _since_hit, heading.x < 0.0)
 	if attack != null:

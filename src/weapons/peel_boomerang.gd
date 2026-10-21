@@ -22,9 +22,14 @@ func attack() -> bool:
 	var aim: Vector2 = player.global_position.direction_to(target.position)
 	Sfx.play(&"throw")
 	for i: int in numbers.count:
-		var peel: BoomerangProjectile = shots.spawn(BoomerangProjectile) as BoomerangProjectile
+		var peel: BoomerangProjectile = shots.spawn(_peel_kind()) as BoomerangProjectile
 		peel.launch(self, aim.rotated(_fan_angle(i, numbers)))
 	return true
+
+
+## Which shot it throws (Banana Split throws peels that split).
+func _peel_kind() -> GDScript:
+	return BoomerangProjectile
 
 
 ## Spreads several peels of one throw evenly around the aim (0, +a, -a, +2a, ...).

@@ -64,13 +64,14 @@ func test_ac8_different_things_while_possible() -> void:
 
 
 func test_ac8_never_past_the_top_level() -> void:
-	# Only one level left anywhere: a box can give just that one.
-	var levels: Dictionary[StringName, int] = _all_maxed({&"peel_boomerang": 0, &"quick_feet": 0})
-	levels[&"quick_feet"] = 4
+	# Only one level left anywhere: a box can give just that one. (Thick Felt is nobody's
+	# evolution partner, so nothing evolves here.)
+	var levels: Dictionary[StringName, int] = _all_maxed({&"peel_boomerang": 0, &"thick_felt": 0})
+	levels[&"thick_felt"] = 4
 	for seed_value: int in SEEDS:
 		var gift: GiftContents = RULES.contents(levels, POOL, _rng(seed_value))
 		assert_eq(gift.level_ups.size(), 1)
-		assert_eq(gift.level_ups[0].upgrade.id, &"quick_feet")
+		assert_eq(gift.level_ups[0].upgrade.id, &"thick_felt")
 		assert_eq(gift.level_ups[0].next_level, 5)
 
 
@@ -87,7 +88,7 @@ func test_ac8_the_same_thing_twice_when_it_is_the_only_one() -> void:
 
 func test_ac8_everything_maxed_gives_a_big_heal() -> void:
 	var levels: Dictionary[StringName, int] = _all_maxed(
-		{&"peel_boomerang": 0, &"zipper_ray": 0, &"quick_feet": 0, &"thick_felt": 0}
+		{&"peel_boomerang": 0, &"zipper_ray": 0, &"magnet_pocket": 0, &"thick_felt": 0}
 	)
 	for seed_value: int in 20:
 		var gift: GiftContents = RULES.contents(levels, POOL, _rng(seed_value))

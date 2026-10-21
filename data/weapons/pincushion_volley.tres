@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="WeaponStats" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://src/weapons/weapon_stats.gd" id="1_stats"]
+[ext_resource type="Script" path="res://src/weapons/weapon_level.gd" id="2_level"]
+[ext_resource type="Script" path="res://src/weapons/sewing_pin_sniper.gd" id="3_behaviour"]
+
+[sub_resource type="Resource" id="Resource_level1"]
+script = ExtResource("2_level")
+damage = 30.0
+cooldown = 0.8
+reach = 950.0
+count = 7
+speed = 1150.0
+pierce = -1
+spread_degrees = 9.0
+card_text = "A fan of 7 pins that pierce everything."
+
+[resource]
+script = ExtResource("1_stats")
+id = &"pincushion_volley"
+display_name = "Pincushion Volley"
+behaviour = ExtResource("3_behaviour")
+knockback = 90.0
+hit_radius = 7.0
+evolved_from = &"sewing_pin_sniper"
+levels = Array[ExtResource("2_level")]([SubResource("Resource_level1")])
