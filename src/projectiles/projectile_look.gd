@@ -1,7 +1,8 @@
 class_name ProjectileLook
 extends RefCounted
 ## The felt shots (banana peel, sewing pin, needle, button) and the zombies' stuffing ball,
-## drawn once into the FeltAtlas. Shapes are in "atlas units": three times the on-screen size, for a sharp bake.
+## drawn once into the FeltAtlas. Shapes are in "atlas units": three times the on-screen size,
+## for a sharp bake.
 ## Players' shots are soft and quiet; enemy bullets are bright with a dark outline (vision §6.1).
 
 const DRAW_SCALE: float = 1.0 / 3.0
