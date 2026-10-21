@@ -25,6 +25,8 @@ upgrade_pool = ExtResource("11_pool")
 script = ExtResource("9_pickups")
 rules = ExtResource("10_xp")
 
+[node name="FloorItems" type="Node2D" parent="." groups=["floor_items"]]
+
 [node name="Actors" type="Node2D" parent="."]
 y_sort_enabled = true
 

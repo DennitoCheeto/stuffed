@@ -20,3 +20,15 @@ extends Resource
 @export var pickup_range: float = 60.0
 ## The weapon the hero starts every run with.
 @export var starting_weapon: WeaponStats
+
+@export_group("Slippery (Banane's passive)")
+## Every dash drops a banana peel where it started (off for heroes without the passive).
+@export var slippery: bool = false
+## Seconds a peel stays on the floor if nobody steps on it.
+@export var peel_lifetime: float = 4.0
+## Seconds a zombie is stunned after slipping.
+@export var peel_stun: float = 1.0
+## Peels on the floor at once (the oldest goes when a new one would be too many).
+@export var peel_max: int = 3
+## Radius of a peel's slippery area, in pixels.
+@export var peel_radius: float = 18.0

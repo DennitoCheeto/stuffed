@@ -67,6 +67,14 @@ func animate(time: float, moving: bool, since_hit: float, facing_left: bool) -> 
 	flash.visible = since_hit < FLASH_TIME
 
 
+## While stunned the zombie spins around (call after `animate`); 0 = not stunned.
+func spin(stun_left: float) -> void:
+	if stun_left > 0.0:
+		origin.rotation = stun_left * TAU * 1.5
+	else:
+		origin.rotation = 0.0
+
+
 ## The pieces that fly apart when the zombie dies (the button eye flies on its own).
 func burst_pieces() -> Array[Node2D]:
 	return [body, limb_left, limb_right, head, eye]
