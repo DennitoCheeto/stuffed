@@ -1,0 +1,124 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: 4.7.2
+  GODOT: /home/runner/godot/godot
+
+jobs:
+  lint:
+    name: Lint and format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install gdtoolkit==4.5.0
+      - run: gdlint src tests
+      - run: gdformat --check src tests
+
+  test:
+    name: Typecheck and tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cache Godot
+        id: cache-godot
+        uses: actions/cache@v4
+        with:
+          path: /home/runner/godot
+          key: godot-${{ env.GODOT_VERSION }}
+      - name: Download Godot
+        if: steps.cache-godot.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p /home/runner/godot && cd /home/runner/godot
+          curl -sSL -o godot.zip "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          unzip -q godot.zip && rm godot.zip
+          mv "Godot_v${GODOT_VERSION}-stable_linux.x86_64" godot && chmod +x godot
+      - name: Typecheck (every script, untyped code is an error)
+        run: tools/check.sh
+      - name: Unit and scenario tests
+        run: tools/test.sh
+      - name: Upload test report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: test-results/
+
+  build-windows:
+    name: Windows build
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cache Godot and Windows export template
+        id: cache-export
+        uses: actions/cache@v4
+        with:
+          path: |
+            /home/runner/godot
+            /home/runner/.local/share/godot/export_templates
+          key: godot-export-win-${{ env.GODOT_VERSION }}
+      - name: Download Godot and Windows export template
+        if: steps.cache-export.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p /home/runner/godot && cd /home/runner/godot
+          curl -sSL -o godot.zip "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          unzip -q godot.zip && rm godot.zip
+          mv "Godot_v${GODOT_VERSION}-stable_linux.x86_64" godot && chmod +x godot
+          # The full template archive is 1.2 GB; keep only what a Windows export needs.
+          curl -sSL -o templates.tpz "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+          dest="/home/runner/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+          mkdir -p "$dest"
+          unzip -j -q templates.tpz 'templates/windows_release_x86_64.exe' 'templates/windows_debug_x86_64.exe' 'templates/version.txt' -d "$dest"
+          rm templates.tpz
+          ls -la "$dest"
+      - name: Export Stuffed.exe
+        run: |
+          "$GODOT" --headless --path . --import >/dev/null 2>&1 || true
+          mkdir -p build/windows
+          "$GODOT" --headless --path . --export-release "Windows Desktop" build/windows/Stuffed.exe
+          test -s build/windows/Stuffed.exe
+          ls -la build/windows
+      - name: Upload build
+        id: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: Stuffed-windows-${{ github.sha }}
+          path: build/windows/
+          retention-days: 30
+      - name: Comment build link on the PR
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          URL: ${{ steps.upload.outputs.artifact-url }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          body="🎮 **Windows build** for this PR (commit ${SHA:0:7}): [download Stuffed-windows.zip]($URL)
+
+          Unzip it and run \`Stuffed.exe\`. If Windows says \"Windows protected your PC\": **More info → Run anyway**."
+          gh pr comment "$PR" --edit-last --body "$body" 2>/dev/null || gh pr comment "$PR" --body "$body"
+      - name: Update the "latest" release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          (cd build/windows && zip -q -r ../Stuffed-windows.zip .)
+          gh release delete latest --yes --cleanup-tag 2>/dev/null || true
+          gh release create latest build/Stuffed-windows.zip --prerelease --target "$GITHUB_SHA" \
+            --title "Latest build (main)" \
+            --notes "Newest playable build from \`main\` (commit ${GITHUB_SHA:0:7}). Download **Stuffed-windows.zip**, unzip, run \`Stuffed.exe\`."
