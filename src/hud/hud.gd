@@ -13,6 +13,10 @@ func show_time(elapsed: float, goal: float) -> void:
 	timer_label.text = TimeFormat.run_timer(elapsed, goal)
 
 
+func show_endless_time(seconds: float) -> void:
+	timer_label.text = TimeFormat.endless(seconds)
+
+
 ## Shows this player's health from now on.
 func follow_player(player: Player) -> void:
 	player.health_changed.connect(show_health)
