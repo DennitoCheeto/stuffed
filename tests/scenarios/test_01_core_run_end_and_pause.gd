@@ -19,7 +19,7 @@ func _die_before_the_goal() -> void:
 	run.spawner.active = false
 	var banane: Player = first_player()
 	run.upgrade_pool = run.upgrade_pool.duplicate()
-	banane.apply_upgrade(UpgradeOffer.new(run.upgrade_pool.upgrades[2], 1))
+	banane.apply_upgrade(UpgradeOffer.new(run.upgrade_pool.find(&"quick_feet"), 1))
 	var target: Zombie = run.enemies.spawn(SHAMBLER, banane.global_position + Vector2(500, 0))
 	run.enemies.damage(target, 999.0)
 	disarm(banane)

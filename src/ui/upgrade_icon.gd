@@ -5,7 +5,7 @@ extends Control
 const BACK_COLOR: Color = Color("#2a2633")
 const RING_COLOR: Color = Color("#4a4358")
 
-## Which icon to draw: boomerang, pin, feet, stuffing, magnet, hands, scissors, thread, spool,
+## Which icon to draw: boomerang, pin, needles, buttons, feet, stuffing, magnet, hands, scissors, thread, spool,
 ## felt, snack. "" draws only the empty round back (an empty HUD slot).
 var icon: StringName = &"":
 	set(value):
@@ -43,6 +43,10 @@ func _draw() -> void:
 			draw_circle(Vector2(4, 0), 15.0, Color("#f2b52e"))
 			for y: float in [-10.0, 0.0, 10.0]:
 				draw_line(Vector2(-28, y), Vector2(-14, y), Color("#f2b52e"), 3.0)
+		&"needles":
+			_needles()
+		&"buttons":
+			_buttons()
 		&"scissors":
 			_scissors()
 		&"thread":
@@ -105,3 +109,19 @@ func _felt() -> void:
 	for i: int in 5:
 		var y: float = -12.0 + i * 7.0
 		draw_line(Vector2(-6, y), Vector2(6, y), stitch, 2.0)
+
+
+func _needles() -> void:
+	draw_arc(Vector2.ZERO, 20.0, 0.0, TAU, 32, Color("#6f6a80"), 2.0)
+	for angle: float in [0.3, 2.4, 4.5]:
+		var at: Vector2 = Vector2.from_angle(angle) * 20.0
+		var along: Vector2 = Vector2.from_angle(angle + PI / 2.0) * 11.0
+		draw_line(at - along, at + along, Color("#cfd3e0"), 3.0)
+
+
+func _buttons() -> void:
+	for spot: Vector3 in [Vector3(-12, 8, 11), Vector3(10, -4, 13), Vector3(-6, -14, 8)]:
+		var center: Vector2 = Vector2(spot.x, spot.y)
+		draw_circle(center, spot.z, Color("#8fc9b9"))
+		for hole: Vector2 in [Vector2(-1, -1), Vector2(1, -1), Vector2(-1, 1), Vector2(1, 1)]:
+			draw_circle(center + hole * spot.z * 0.3, spot.z * 0.15, Color("#4f7f73"))
