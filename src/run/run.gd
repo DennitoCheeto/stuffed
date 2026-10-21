@@ -12,6 +12,8 @@ signal endless_started
 ## The player quit from the pause menu (the result is still logged).
 signal quit_to_title(result: RunResult)
 
+## Weapons and effects find the run through this group.
+const GROUP: StringName = &"run"
 const PLAYER_SCENE: PackedScene = preload("res://src/player/player.tscn")
 ## How long the chain of pops takes when the goal is reached.
 const POP_CHAIN_TIME: float = 1.0
@@ -19,6 +21,10 @@ const POP_CHAIN_TIME: float = 1.0
 const CELEBRATION_TIME: float = 1.2
 ## A moment to see Banane fall before the end screen.
 const DEATH_PAUSE: float = 1.5
+## A tiny freeze on big hits, so they feel heavy.
+const HIT_STOP_TIME: float = 0.06
+## Freezes that muffle the music (a hit-stop is too short to bother).
+const MUFFLING: Array[StringName] = [&"pause", &"level_up", &"goal"]
 
 @export var rules: RunRules
 @export var upgrade_pool: UpgradePool
@@ -39,6 +45,8 @@ var goal_done: bool = false
 var endless: bool = false
 ## Endless minutes so far (the horde gets tougher each one).
 var endless_minute: int = 0
+## Big-hit freezes so far.
+var hit_stops: int = 0
 
 ## False while the goal pops the horde (those zombies drop no XP).
 var _drops_enabled: bool = true
@@ -60,15 +68,19 @@ var _freeze_reasons: Dictionary[StringName, bool] = {}
 @onready var level_up_screen: LevelUpScreen = $LevelUpScreen
 @onready var goal_screen: GoalScreen = $GoalScreen
 @onready var pause_menu: PauseMenu = $PauseMenu
+@onready var damage_numbers: DamageNumbers = $DamageNumbers
 
 
 func _ready() -> void:
+	add_to_group(GROUP)
 	if seed_value == 0:
 		seed_value = randi_range(1, 2_147_483_647)
 	rng.seed = seed_value
 	upgrade_rng.seed = seed_value * 31 + 7
 	enemies.setup(actors, effects, arena.play_rect(), rules.max_enemies_alive)
 	enemies.zombie_killed.connect(_on_zombie_killed)
+	enemies.zombie_hit.connect(_on_zombie_hit)
+	pickups.collected.connect(_on_pickup_collected)
 	spawner.setup(enemies, camera, rng)
 	spawner.goal_seconds = rules.goal_seconds
 	level_up_screen.picked.connect(_on_upgrade_picked)
@@ -119,6 +131,9 @@ func spawn_player(index: int, at: Vector2) -> Player:
 	player.player_index = index
 	player.position = at
 	player.died.connect(_on_player_died)
+	player.hurt.connect(_on_player_hurt)
+	player.dashed.connect(func(_from: Vector2, _direction: Vector2) -> void: Sfx.play(&"dash"))
+	player.celebrated.connect(func() -> void: Sfx.play(&"quack"))
 	actors.add_child(player)
 	player.progress.leveled_up.connect(_on_leveled_up.bind(player))
 	return player
@@ -129,12 +144,29 @@ func spawn_player(index: int, at: Vector2) -> Player:
 func freeze(reason: StringName) -> void:
 	_freeze_reasons[reason] = true
 	process_mode = Node.PROCESS_MODE_DISABLED
+	MusicPlayer.set_muffled(_is_muffled())
 
 
 func unfreeze(reason: StringName) -> void:
 	_freeze_reasons.erase(reason)
 	if _freeze_reasons.is_empty():
 		process_mode = Node.PROCESS_MODE_INHERIT
+	MusicPlayer.set_muffled(_is_muffled())
+
+
+## A very short freeze on a big hit (e.g. a pin through 3+ zombies).
+func hit_stop(duration: float = HIT_STOP_TIME) -> void:
+	hit_stops += 1
+	freeze(&"hit_stop")
+	var timer: SceneTreeTimer = get_tree().create_timer(duration, true, false, true)
+	timer.timeout.connect(unfreeze.bind(&"hit_stop"))
+
+
+func _is_muffled() -> bool:
+	for reason: StringName in MUFFLING:
+		if _freeze_reasons.has(reason):
+			return true
+	return false
 
 
 func is_frozen() -> bool:
@@ -174,6 +206,7 @@ func _reach_goal() -> void:
 	enemies.calm = true
 	_drops_enabled = false
 	goal_reached.emit()
+	Sfx.play(&"goal")
 	var players: Array[Player] = Players.all(get_tree())
 	for player: Player in players:
 		player.celebrate()
@@ -244,12 +277,29 @@ func _on_endless_chosen() -> void:
 	endless_started.emit()
 
 
+func _on_zombie_hit(zombie: Zombie, amount: float) -> void:
+	damage_numbers.show_damage(amount, zombie.position)
+	Sfx.play(&"hit")
+
+
+## Pickups in a row sound higher and higher ("plip" chain).
+func _on_pickup_collected(_player: Player, _value: int, chain: int) -> void:
+	Sfx.play(&"pickup", 1.0 + 0.06 * mini(chain - 1, 12))
+
+
+func _on_player_hurt(_amount: float) -> void:
+	Sfx.play(&"hurt")
+	camera.shake(0.45)
+
+
 func _on_zombie_killed(zombie: Zombie) -> void:
+	Sfx.play(&"pop")
 	if _drops_enabled:
 		pickups.drop(zombie.stats.xp_button, zombie.position)
 
 
 func _on_player_died(_player: Player) -> void:
+	Sfx.play(&"death")
 	for player: Player in Players.all(get_tree()):
 		if not player.is_dead():
 			return

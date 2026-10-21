@@ -6,6 +6,8 @@ extends Node2D
 const LENGTH: float = 30.0
 const SHAFT_COLOR: Color = Color("#d9d6e3")
 const HEAD_COLOR: Color = Color("#e0475b")
+## From this many zombies on one pin, the hit feels heavy (a tiny hit-stop).
+const BIG_HIT: int = 3
 
 ## Zombies hit so far.
 var hits: int = 0
@@ -55,6 +57,10 @@ func _hit_zombies(point: Vector2) -> void:
 		_already_hit[id] = true
 		hits += 1
 		_enemies.damage(zombie, _numbers.damage, push)
+		if hits == BIG_HIT:
+			var run: Run = get_tree().get_first_node_in_group(Run.GROUP) as Run
+			if run != null:
+				run.hit_stop()
 
 
 func _draw() -> void:

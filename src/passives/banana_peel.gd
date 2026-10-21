@@ -45,6 +45,7 @@ func _physics_process(delta: float) -> void:
 	for zombie: Zombie in victims:
 		zombie.stun(stun)
 	slipped.emit(victims.size())
+	Sfx.play(&"slip")
 	remove()
 
 

@@ -13,10 +13,16 @@ const END_SCENE: PackedScene = preload("res://src/ui/end_screen.tscn")
 var quit_enabled: bool = true
 ## The title screen or the run that is currently shown.
 var current_screen: Node
+## Background music (title and run tracks).
+var music: MusicPlayer
 
 
 func _ready() -> void:
 	FeltAtlas.bake(self)
+	Sfx.attach(self)
+	music = MusicPlayer.new()
+	music.name = "Music"
+	add_child(music)
 	show_title()
 
 
@@ -28,6 +34,7 @@ func _input(event: InputEvent) -> void:
 
 func show_title() -> void:
 	Crosshair.stop()
+	_play_music(&"title")
 	var title: TitleScreen = TITLE_SCENE.instantiate()
 	title.start_requested.connect(start_run)
 	title.quit_requested.connect(quit)
@@ -38,6 +45,7 @@ func start_run() -> void:
 	var run: Run = RUN_SCENE.instantiate()
 	run.finished.connect(show_end)
 	run.quit_to_title.connect(_on_quit_to_title)
+	_play_music(&"run")
 	_switch_to(run)
 
 
@@ -45,6 +53,7 @@ func start_run() -> void:
 func show_end(result: RunResult) -> void:
 	RunLog.append(result)
 	Crosshair.stop()
+	_play_music(&"title")
 	var end: EndScreen = END_SCENE.instantiate()
 	end.show_result(result)
 	end.try_again_requested.connect(start_run)
@@ -55,6 +64,11 @@ func show_end(result: RunResult) -> void:
 func _on_quit_to_title(result: RunResult) -> void:
 	RunLog.append(result)
 	show_title()
+
+
+func _play_music(track: StringName) -> void:
+	MusicPlayer.set_muffled(false)
+	music.play_track(track)
 
 
 func quit() -> void:
