@@ -5,8 +5,8 @@ extends Control
 const BACK_COLOR: Color = Color("#2a2633")
 const RING_COLOR: Color = Color("#4a4358")
 
-## Which icon to draw: boomerang, pin, needles, buttons, feet, stuffing, magnet, hands, scissors, thread, spool,
-## felt, snack. "" draws only the empty round back (an empty HUD slot).
+## Which icon to draw: boomerang, pin, needles, buttons, feet, stuffing, magnet, hands, scissors,
+## thread, spool, felt, snack. "" draws only the empty round back (an empty HUD slot).
 var icon: StringName = &"":
 	set(value):
 		icon = value
