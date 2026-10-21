@@ -2,6 +2,8 @@ extends GutTest
 
 const BOOMERANG: WeaponStats = preload("res://data/weapons/peel_boomerang.tres")
 const SNIPER: WeaponStats = preload("res://data/weapons/sewing_pin_sniper.tres")
+const NEEDLES: WeaponStats = preload("res://data/weapons/orbiting_needles.tres")
+const SHOTGUN: WeaponStats = preload("res://data/weapons/button_shotgun.tres")
 
 
 func test_boomerang_has_five_levels_with_card_text() -> void:
@@ -56,10 +58,6 @@ func test_ac9_sniper_levels_add_what_their_cards_say() -> void:
 	assert_eq(SNIPER.at_level(5).count, 2, "L5: two pins")
 	assert_string_contains(SNIPER.at_level(3).card_text, "4")
 	assert_string_contains(SNIPER.at_level(4).card_text, "0.9")
-
-
-const NEEDLES: WeaponStats = preload("res://data/weapons/orbiting_needles.tres")
-const SHOTGUN: WeaponStats = preload("res://data/weapons/button_shotgun.tres")
 
 
 func _assert_never_worse(weapon: WeaponStats) -> void:
