@@ -21,6 +21,7 @@ var puppet: ZombiePuppet
 
 var _time: float = 0.0
 var _since_hit: float = INF
+var _stars: StunStars
 
 
 ## `phase` (0..1) keeps zombies from shambling in perfect sync.
@@ -51,6 +52,20 @@ func radius() -> float:
 	return stats.radius
 
 
+## Can't move for `seconds` (slipped on a banana peel): it spins and sees stars.
+func stun(seconds: float) -> void:
+	stun_left = maxf(stun_left, seconds)
+	if _stars == null:
+		_stars = StunStars.new()
+		_stars.position = Vector2(0.0, -48.0)
+		add_child(_stars)
+	_stars.visible = true
+
+
+func is_stunned() -> bool:
+	return stun_left > 0.0
+
+
 ## Advances its timers and animation by one frame.
 func tick(delta: float) -> void:
 	_time += delta
@@ -58,3 +73,6 @@ func tick(delta: float) -> void:
 	stun_left = maxf(stun_left - delta, 0.0)
 	knockback = knockback.lerp(Vector2.ZERO, minf(KNOCKBACK_DECAY * delta, 1.0))
 	puppet.animate(_time, heading != Vector2.ZERO, _since_hit, heading.x < 0.0)
+	if _stars != null:
+		_stars.visible = is_stunned()
+		puppet.spin(stun_left)

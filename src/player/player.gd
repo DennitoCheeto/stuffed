@@ -55,6 +55,11 @@ func _ready() -> void:
 	var shape: CircleShape2D = CircleShape2D.new()
 	shape.radius = stats.hitbox_radius
 	_hitbox.shape = shape
+	if stats.slippery:
+		var slippery: Slippery = Slippery.new()
+		slippery.name = "Slippery"
+		add_child(slippery)
+		slippery.setup(self)
 	if stats.starting_weapon != null:
 		add_weapon(stats.starting_weapon)
 
