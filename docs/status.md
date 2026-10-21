@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-21 (all 13 M1 tickets merged, waiting for the M1 playtest)_
+_Last updated: 2026-10-21 (M1 accepted, spec 02 drafted)_
 
 ## Where we are
 
@@ -13,14 +13,19 @@ _Last updated: 2026-10-21 (all 13 M1 tickets merged, waiting for the M1 playtest
 | Vision | ✅ approved 2026-10-21 (`docs/specs/00-product-vision.md`) |
 | Art direction | ✅ felt style "B — Soft", puppet animation (`docs/art/`) |
 | M0 Factory setup | ✅ done (PR #1) |
-| M1 Core run | 🎮 all 13 tickets merged (PRs #17–#29), **waiting for the product owner's playtest** (acceptance P-1 … P-6) |
+| M1 Core run | ✅ accepted 2026-10-21 (PRs #17–#29; playtest P-1 … P-6 passed, 144 fps on the PO's PC) |
+| M2 Build variety | 📝 spec 02 drafted (`docs/specs/02-build-variety.md`), **waiting for product owner approval** |
 
 ## Next step
 
-- Product owner plays the "latest" build (GitHub → Releases → latest → `Stuffed-windows.zip`) and reports how it
-  feels (P-1 … P-6 in spec 01 §13). Claude turns the feedback into fix tickets, or M1 is accepted.
-- After acceptance: draft spec 02 for M2 (vision §10) for approval.
-- Small doc nit: spec 01's header still says "DRAFT" although it was approved (product-owner PR).
+- Product owner reviews and merges the spec 02 PR (or asks for changes; open questions in spec 02 §19).
+- After approval: create the 15 GitHub issues from spec 02 §18 and start with ticket 1 (projectile performance base).
+
+## Playtest notes (M1)
+
+- "Feels insanely good for a first demo." Boomerang, sniper, upgrades and dash feel good. Clean readability, satisfying
+  hits and sounds. Wants to see "how crazy my attacks get" → drives M2.
+- Felt "a tiny bit laggy sometimes" at first, but FPS showed a constant 144. Keep an eye on it in M2 (spec 02 §14).
 
 ## Gotchas
 
