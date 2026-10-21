@@ -1,21 +1,61 @@
-extends Control
-## M0 start screen: proves the build pipeline works. Replaced by the real title screen in M1.
+class_name Main
+extends Node
+## The game's root: shows one screen at a time (title or run) and handles app-wide keys
+## like fullscreen.
 
 signal quit_requested
 
-## Tests turn this off so pressing Esc doesn't close the test runner.
-var quit_on_cancel: bool = true
+const TITLE_SCENE: PackedScene = preload("res://src/title/title_screen.tscn")
+const RUN_SCENE: PackedScene = preload("res://src/run/run.tscn")
 
-@onready var title_label: Label = %TitleLabel
-@onready var version_label: Label = %VersionLabel
+## Tests turn this off so "Quit" doesn't close the test runner.
+var quit_enabled: bool = true
+## The title screen or the run that is currently shown.
+var current_screen: Node
 
 
 func _ready() -> void:
-	version_label.text = GameInfo.version_label()
+	show_title()
 
 
-func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_cancel"):
-		quit_requested.emit()
-		if quit_on_cancel:
-			get_tree().quit()
+func _input(event: InputEvent) -> void:
+	if event.is_action_pressed("toggle_fullscreen"):
+		toggle_fullscreen()
+		get_viewport().set_input_as_handled()
+
+
+func show_title() -> void:
+	var title: TitleScreen = TITLE_SCENE.instantiate()
+	title.start_requested.connect(start_run)
+	title.quit_requested.connect(quit)
+	_switch_to(title)
+
+
+func start_run() -> void:
+	_switch_to(RUN_SCENE.instantiate())
+
+
+func quit() -> void:
+	quit_requested.emit()
+	if quit_enabled:
+		get_tree().quit()
+
+
+func toggle_fullscreen() -> void:
+	var mode: DisplayServer.WindowMode = DisplayServer.window_get_mode()
+	var fullscreen: bool = (
+		mode == DisplayServer.WINDOW_MODE_FULLSCREEN
+		or mode == DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN
+	)
+	if fullscreen:
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+	else:
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+
+
+func _switch_to(screen: Node) -> void:
+	if current_screen != null:
+		current_screen.queue_free()
+		remove_child(current_screen)
+	current_screen = screen
+	add_child(screen)

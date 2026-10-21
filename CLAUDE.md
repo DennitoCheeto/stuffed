@@ -43,6 +43,7 @@ Never merge on red or pending CI. Tell the product owner in the chat what was me
 
 ```
 src/            game code and scenes (one folder per feature: src/main, src/player, ...)
+data/           balance numbers as .tres resources (heroes, weapons, enemies, run rules)
 tests/unit/     unit tests for pure logic (test_*.gd)
 tests/scenarios/ scenario tests: real scenes, simulated input and time (test_NN_*.gd)
 addons/gut/     vendored test framework, never edit
