@@ -26,6 +26,10 @@ func _ready() -> void:
 	show_title()
 
 
+func _exit_tree() -> void:
+	Crosshair.stop()
+
+
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("toggle_fullscreen"):
 		toggle_fullscreen()
@@ -41,10 +45,13 @@ func show_title() -> void:
 	_switch_to(title)
 
 
-func start_run() -> void:
+## Starts a fresh run; `seed_value` 0 = a random seed (the developer menu replays seeds).
+func start_run(seed_value: int = 0) -> void:
 	var run: Run = RUN_SCENE.instantiate()
 	run.finished.connect(show_end)
 	run.quit_to_title.connect(_on_quit_to_title)
+	run.seed_value = seed_value
+	run.restart_requested.connect(start_run)
 	_play_music(&"run")
 	_switch_to(run)
 

@@ -11,6 +11,8 @@ signal goal_reached
 signal endless_started
 ## The player quit from the pause menu (the result is still logged).
 signal quit_to_title(result: RunResult)
+## The developer menu asks for a new run (0 = new random seed).
+signal restart_requested(seed_value: int)
 
 ## Weapons and effects find the run through this group.
 const GROUP: StringName = &"run"
@@ -69,6 +71,7 @@ var _freeze_reasons: Dictionary[StringName, bool] = {}
 @onready var goal_screen: GoalScreen = $GoalScreen
 @onready var pause_menu: PauseMenu = $PauseMenu
 @onready var damage_numbers: DamageNumbers = $DamageNumbers
+@onready var dev_menu: DevMenu = $DevMenu
 
 
 func _ready() -> void:
@@ -88,6 +91,8 @@ func _ready() -> void:
 	goal_screen.endless_chosen.connect(_on_endless_chosen)
 	pause_menu.resumed.connect(unfreeze.bind(&"pause"))
 	pause_menu.quit_requested.connect(_on_quit_requested)
+	dev_menu.setup(self)
+	dev_menu.restart_requested.connect(restart_requested.emit)
 	var first: Player = spawn_player(0, arena.center())
 	hud.follow_player(first)
 	camera.set_bounds(arena.outer_rect())
@@ -107,6 +112,11 @@ func _physics_process(delta: float) -> void:
 		_update_endless_scaling()
 	spawner.tick(elapsed, delta)
 	_show_clock()
+
+
+func _exit_tree() -> void:
+	# The developer menu may have changed the game speed.
+	Engine.time_scale = 1.0
 
 
 ## Esc pauses a running run (the pause menu closes itself with Esc or Resume).
