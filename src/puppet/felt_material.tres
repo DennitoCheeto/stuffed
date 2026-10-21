@@ -1,0 +1,9 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3]
+
+[ext_resource type="Shader" path="res://src/puppet/felt.gdshader" id="1_felt"]
+
+[resource]
+shader = ExtResource("1_felt")
+shader_parameter/flash = 0.0
+shader_parameter/grain_strength = 0.14
+shader_parameter/grain_scale = 0.15

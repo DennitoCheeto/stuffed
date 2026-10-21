@@ -49,6 +49,17 @@ static func points(numbers: PackedFloat32Array) -> PackedVector2Array:
 	return result
 
 
+## Rotates every point around `center` by `degrees`.
+static func rotated(
+	points: PackedVector2Array, center: Vector2, degrees: float
+) -> PackedVector2Array:
+	var result: PackedVector2Array = []
+	var angle: float = deg_to_rad(degrees)
+	for point: Vector2 in points:
+		result.append(center + (point - center).rotated(angle))
+	return result
+
+
 ## Moves every point by `offset`.
 static func shifted(points: PackedVector2Array, offset: Vector2) -> PackedVector2Array:
 	var result: PackedVector2Array = []

@@ -4,3 +4,5 @@ extends Resource
 
 ## Survive this long to reach the goal.
 @export var goal_seconds: float = 300.0
+## Never more zombies alive at once than this.
+@export var max_enemies_alive: int = 500

@@ -15,6 +15,7 @@ var current_screen: Node
 
 
 func _ready() -> void:
+	FeltAtlas.bake(self)
 	show_title()
 
 
@@ -32,7 +33,16 @@ func show_title() -> void:
 
 
 func start_run() -> void:
-	_switch_to(RUN_SCENE.instantiate())
+	var run: Run = RUN_SCENE.instantiate()
+	run.all_players_down.connect(_on_all_players_down)
+	_switch_to(run)
+
+
+## Until the end screen exists (M1-11): a short moment, then back to the title.
+func _on_all_players_down() -> void:
+	await get_tree().create_timer(2.0).timeout
+	if current_screen is Run:
+		show_title()
 
 
 func quit() -> void:
