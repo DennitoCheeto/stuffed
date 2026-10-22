@@ -59,5 +59,35 @@ func test_ac28_each_run_adds_one_line_and_keeps_the_old_ones() -> void:
 	assert_eq(lines.size(), 2, "one JSON line per run")
 
 
+func test_ac23_m2_fields_are_saved_and_read_back_the_same() -> void:
+	var result: RunResult = _result()
+	result.evolutions = [{"weapon": "Banana Split", "time": 201.04, "player": 0}]
+	result.rerolls_used = 2
+	result.skips_used = 1
+	result.banishes_used = 3
+	result.mini_boss_defeated_at = 262.27
+	result.boss_defeated_at = 515.56
+	assert_true(RunLog.append(result))
+	var entry: Dictionary = RunLog.read_all()[0]
+	assert_eq(entry["evolutions"].size(), 1)
+	assert_eq(entry["evolutions"][0]["weapon"], "Banana Split")
+	assert_eq(entry["evolutions"][0]["time"], 201.0)
+	assert_eq(int(entry["evolutions"][0]["player"]), 0)
+	assert_eq(int(entry["rerolls_used"]), 2)
+	assert_eq(int(entry["skips_used"]), 1)
+	assert_eq(int(entry["banishes_used"]), 3)
+	assert_eq(entry["mini_boss_defeated_at"], 262.3)
+	assert_eq(entry["boss_defeated_at"], 515.6)
+
+
+func test_ac23_bosses_not_beaten_are_null() -> void:
+	RunLog.append(_result())
+	var entry: Dictionary = RunLog.read_all()[0]
+	assert_true(entry.has("mini_boss_defeated_at"))
+	assert_eq(entry["mini_boss_defeated_at"], null)
+	assert_eq(entry["boss_defeated_at"], null)
+	assert_eq(entry["evolutions"], [])
+
+
 func test_default_path_is_the_user_folder() -> void:
 	assert_eq(RunLog.DEFAULT_PATH, "user://run_log.jsonl")

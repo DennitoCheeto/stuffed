@@ -22,7 +22,28 @@ static func to_entry(result: RunResult) -> Dictionary:
 		"kills": result.kills,
 		"killed_by": result.killed_by,
 		"upgrades": Array(result.upgrades),
+		"evolutions": _evolutions(result.evolutions),
+		"rerolls_used": result.rerolls_used,
+		"skips_used": result.skips_used,
+		"banishes_used": result.banishes_used,
+		"mini_boss_defeated_at": _time_or_null(result.mini_boss_defeated_at),
+		"boss_defeated_at": _time_or_null(result.boss_defeated_at),
 	}
+
+
+## Each evolution with its time rounded to 0.1 s.
+static func _evolutions(evolutions: Array[Dictionary]) -> Array[Dictionary]:
+	var entries: Array[Dictionary] = []
+	for evolution: Dictionary in evolutions:
+		var entry: Dictionary = evolution.duplicate()
+		entry["time"] = snappedf(float(evolution["time"]), 0.1)
+		entries.append(entry)
+	return entries
+
+
+## Null in the log for "didn't happen" (-1 in the result).
+static func _time_or_null(seconds: float) -> Variant:
+	return null if seconds < 0.0 else snappedf(seconds, 0.1)
 
 
 ## Adds one line for `result`. Returns false if the file couldn't be written.

@@ -1,24 +1,33 @@
 class_name DevMenu
 extends CanvasLayer
-## Developer menu (F1, spec 01 §9): a small panel of shortcuts for testing and tuning.
-## The game keeps running while it is open, unless "Pause" is ticked.
+## Developer menu (F1, spec 01 §9, spec 02 §13): a small panel of shortcuts for testing and
+## tuning. The game keeps running while it is open, unless "Pause" is ticked. It acts on player 1.
 
 ## Restart with this seed (0 = new random seed).
 signal restart_requested(seed_value: int)
 
 const PANEL_COLOR: Color = Color(0.1, 0.09, 0.13, 0.92)
+## The panel scrolls when it is taller than this.
+const MAX_HEIGHT: float = 940.0
 const SHAMBLER: EnemyStats = preload("res://data/enemies/shambler.tres")
 const RUNNER: EnemyStats = preload("res://data/enemies/runner.tres")
 const SPITTER: EnemyStats = preload("res://data/enemies/spitter.tres")
 const BLOATER: EnemyStats = preload("res://data/enemies/bloater.tres")
 const TANK: EnemyStats = preload("res://data/enemies/tank.tres")
+const ENEMY_TYPES: Array[EnemyStats] = [SHAMBLER, RUNNER, SPITTER, BLOATER, TANK]
+const MAX_EVERYTHING: String = "Max everything"
+const REFILL: String = "Refill rerolls/skips/banishes"
 
 var run: Run
 ## Everything the menu can do, by button text (tests press them by name).
 var buttons: Dictionary[String, BaseButton] = {}
+## Which weapon or item the "Give Lv N" buttons give.
+var upgrade_picker: OptionButton
 
 var _info_label: Label
 var _hitboxes: HitboxOverlay
+## Upgrade id of each entry in the picker.
+var _picker_ids: Array[StringName] = []
 
 
 func _ready() -> void:
@@ -48,6 +57,65 @@ func press(text: String) -> void:
 		button.pressed.emit()
 
 
+## Selects the weapon or item `id` in the picker (for the "Give Lv N" buttons).
+func choose_upgrade(id: StringName) -> void:
+	upgrade_picker.select(_picker_ids.find(id))
+
+
+## Gives player 1 the weapon or item `id` at `level` (clamped to its levels). Weapons are set to
+## that level; items are raised to it (never lowered). Returns false when its slots are full,
+## or the weapon has already evolved.
+func give(id: StringName, level: int) -> bool:
+	var player: Player = _player()
+	var pool: UpgradePool = run.upgrade_pool
+	var upgrade: UpgradeDef = pool.find(id)
+	var levels: Dictionary[StringName, int] = player.upgrade_levels()
+	var owned: int = levels.get(id, 0)
+	level = clampi(level, 1, upgrade.top_level())
+	if owned == Player.EVOLVED_LEVEL:
+		return false
+	if owned == 0 and pool.owned_count(levels, upgrade.kind) >= _slots(upgrade.kind):
+		return false
+	if upgrade.kind == UpgradeDef.Kind.WEAPON:
+		var weapon: Weapon = player.weapon(id)
+		if weapon == null:
+			weapon = player.add_weapon(upgrade.weapon)
+		weapon.level = level
+		player.loadout_changed.emit()
+		return true
+	for next: int in range(owned + 1, level + 1):
+		player.apply_upgrade(UpgradeOffer.new(upgrade, next))
+	return true
+
+
+## For performance checks: fills player 1's weapon and item slots (weapons that can evolve and
+## their partners first), puts everything at its top level and evolves all it can.
+func max_everything() -> void:
+	var pool: UpgradePool = run.upgrade_pool
+	var weapon_ids: Array[StringName] = []
+	for evolution: EvolutionDef in pool.evolutions:
+		weapon_ids.append(evolution.weapon)
+	for upgrade: UpgradeDef in pool.upgrades:
+		if upgrade.kind == UpgradeDef.Kind.WEAPON and not weapon_ids.has(upgrade.id):
+			weapon_ids.append(upgrade.id)
+	for id: StringName in weapon_ids:
+		give(id, pool.find(id).top_level())
+	var player: Player = _player()
+	var item_ids: Array[StringName] = []
+	for evolution: EvolutionDef in pool.evolutions:
+		if player.upgrade_levels().get(evolution.weapon, 0) > 0:
+			item_ids.append(evolution.partner)
+	for upgrade: UpgradeDef in pool.upgrades:
+		if upgrade.kind == UpgradeDef.Kind.ITEM and not item_ids.has(upgrade.id):
+			item_ids.append(upgrade.id)
+	for id: StringName in item_ids:
+		give(id, pool.find(id).top_level())
+	var ready: EvolutionDef = pool.ready_evolution(player.upgrade_levels())
+	while ready != null:
+		player.evolve(ready)
+		ready = pool.ready_evolution(player.upgrade_levels())
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"dev_menu"):
 		get_viewport().set_input_as_handled()
@@ -70,18 +138,18 @@ func _build() -> void:
 	panel.add_theme_stylebox_override("panel", style)
 	panel.position = Vector2(16, 90)
 	add_child(panel)
+	var scroll: ScrollContainer = ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.custom_minimum_size = Vector2(0.0, MAX_HEIGHT)
+	panel.add_child(scroll)
 	var column: VBoxContainer = VBoxContainer.new()
 	column.add_theme_constant_override("separation", 4)
-	panel.add_child(column)
+	scroll.add_child(column)
 	_title(column, "Developer menu (F1)")
 	_row(column, ["Give 10 XP", "Level up now"], [_give_xp, _level_up])
-	for stats: EnemyStats in [SHAMBLER, RUNNER, SPITTER, BLOATER, TANK]:
-		var labels: Array[String] = []
-		var actions: Array[Callable] = []
-		for count: int in [10, 100, 500]:
-			labels.append("%d %ss" % [count, stats.display_name.to_lower()])
-			actions.append(_spawn.bind(stats, count))
-		_row(column, labels, actions)
+	_build_give(column)
+	_row(column, [MAX_EVERYTHING, REFILL], [max_everything, _refill_card_controls])
+	_build_spawns(column)
 	_row(column, ["Spawn elite", "Drop gift box"], [_spawn_elite, _drop_gift_box])
 	_row(column, ["Spawn Big Ted", "Jump to Big Ted"], [_spawn_mini_boss, _jump_to_mini_boss])
 	_row(column, ["Spawn the King", "Jump to the King"], [_spawn_boss, _jump_to_boss])
@@ -106,6 +174,39 @@ func _build() -> void:
 	_info_label = Label.new()
 	_info_label.visible = false
 	column.add_child(_info_label)
+
+
+## A picker with every weapon and item, and one "Give Lv N" button per level.
+func _build_give(parent: Control) -> void:
+	upgrade_picker = OptionButton.new()
+	upgrade_picker.focus_mode = Control.FOCUS_NONE
+	var top: int = 1
+	for upgrade: UpgradeDef in run.upgrade_pool.upgrades:
+		if upgrade.kind == UpgradeDef.Kind.SNACK:
+			continue
+		upgrade_picker.add_item(upgrade.display_name)
+		_picker_ids.append(upgrade.id)
+		top = maxi(top, upgrade.top_level())
+	parent.add_child(upgrade_picker)
+	var labels: Array[String] = []
+	var actions: Array[Callable] = []
+	for level: int in range(1, top + 1):
+		labels.append("Give Lv %d" % level)
+		actions.append(_give_picked.bind(level))
+	_row(parent, labels, actions)
+
+
+## 1 / 10 / 100 / 500 of each enemy type, and 1 or 10 of every type at once.
+func _build_spawns(parent: Control) -> void:
+	for stats: EnemyStats in ENEMY_TYPES:
+		var name_text: String = stats.display_name.to_lower()
+		var labels: Array[String] = ["1 %s" % name_text]
+		var actions: Array[Callable] = [_spawn.bind(stats, 1)]
+		for count: int in [10, 100, 500]:
+			labels.append("%d %ss" % [count, name_text])
+			actions.append(_spawn.bind(stats, count))
+		_row(parent, labels, actions)
+	_row(parent, ["1 of each", "10 of each"], [_spawn_each.bind(1), _spawn_each.bind(10)])
 
 
 func _title(parent: Control, text: String) -> void:
@@ -140,6 +241,15 @@ func _player() -> Player:
 	return Players.all(run.get_tree())[0]
 
 
+func _slots(kind: UpgradeDef.Kind) -> int:
+	var pool: UpgradePool = run.upgrade_pool
+	return pool.max_weapons if kind == UpgradeDef.Kind.WEAPON else pool.max_items
+
+
+func _give_picked(level: int) -> void:
+	give(_picker_ids[upgrade_picker.selected], level)
+
+
 func _give_xp() -> void:
 	_player().add_xp(10)
 
@@ -148,9 +258,22 @@ func _level_up() -> void:
 	_player().progress.level_up_now()
 
 
+## Every player gets their rerolls, skips and banishes back (an open level-up shows it at once).
+func _refill_card_controls() -> void:
+	for player: Player in Players.all(run.get_tree()):
+		player.card_controls.refill()
+	if run.level_up_screen.is_open():
+		run.level_up_screen.show_controls(_player().card_controls)
+
+
 func _spawn(stats: EnemyStats, count: int) -> void:
 	for i: int in count:
 		run.spawner.spawn_one(stats)
+
+
+func _spawn_each(count: int) -> void:
+	for stats: EnemyStats in ENEMY_TYPES:
+		_spawn(stats, count)
 
 
 ## An elite of a random type from the schedule's elites.

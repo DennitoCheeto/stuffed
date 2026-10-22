@@ -59,6 +59,11 @@ var goal_time: float = 0.0
 var hit_stops: int = 0
 ## The gift box moment (built in code, on top of the run).
 var gift_screen: GiftBoxScreen = GiftBoxScreen.new()
+## Evolutions so far, for the run log: {"weapon", "time", "player"}.
+var evolution_log: Array[Dictionary] = []
+## Run time when the mini-boss / the boss was first beaten (-1 = not yet).
+var mini_boss_defeated_at: float = -1.0
+var boss_defeated_at: float = -1.0
 
 ## False while the goal pops the horde (those zombies drop no XP).
 var _drops_enabled: bool = true
@@ -178,6 +183,7 @@ func spawn_player(index: int, at: Vector2) -> Player:
 	player.hurt.connect(_on_player_hurt)
 	player.dashed.connect(func(_from: Vector2, _direction: Vector2) -> void: Sfx.play(&"dash"))
 	player.celebrated.connect(func() -> void: Sfx.play(&"quack"))
+	player.evolved.connect(_on_player_evolved.bind(player))
 	actors.add_child(player)
 	player.progress.leveled_up.connect(_on_leveled_up.bind(player))
 	return player
@@ -341,6 +347,12 @@ func make_result(ending: String) -> RunResult:
 	result.killed_by = first.last_hit_by if first.is_dead() else ""
 	result.upgrades = first.picked_upgrades
 	result.seed_value = seed_value
+	result.evolutions = evolution_log.duplicate(true)
+	result.rerolls_used = first.card_controls.rerolls_used
+	result.skips_used = first.card_controls.skips_used
+	result.banishes_used = first.card_controls.banishes_used
+	result.mini_boss_defeated_at = mini_boss_defeated_at
+	result.boss_defeated_at = boss_defeated_at
 	return result
 
 
@@ -447,6 +459,8 @@ func _on_player_hurt(_amount: float) -> void:
 
 func _on_zombie_killed(zombie: Zombie) -> void:
 	Sfx.play(&"boss_down" if zombie.is_boss() else &"pop")
+	if zombie.is_boss():
+		_note_boss_defeat(zombie)
 	if _drops_enabled:
 		pickups.drop(zombie.xp_button(), zombie.position)
 		if zombie.is_elite() or zombie.is_boss():
@@ -457,6 +471,21 @@ func _on_zombie_killed(zombie: Zombie) -> void:
 		camera.shake(0.6)
 	if is_final_boss(zombie) and not goal_done:
 		_reach_goal()
+
+
+func _note_boss_defeat(boss: Zombie) -> void:
+	if is_final_boss(boss):
+		if boss_defeated_at < 0.0:
+			boss_defeated_at = elapsed
+	elif mini_boss_defeated_at < 0.0:
+		mini_boss_defeated_at = elapsed
+
+
+func _on_player_evolved(new_weapon: Weapon, player: Player) -> void:
+	var entry: Dictionary = {
+		"weapon": new_weapon.stats.display_name, "time": elapsed, "player": player.player_index
+	}
+	evolution_log.append(entry)
 
 
 func _on_player_died(_player: Player) -> void:
