@@ -22,8 +22,8 @@ _Last updated: 2026-10-22 (spec 03 Town drafted)_
 - M2 is fully built (spec 02 + §20 fixes + spec 02b floor pickups, PRs up to #90). The PO **postponed the M2
   acceptance playtest** (2026-10-22): P-1 … P-11 get played later, together with M3.
 - **Spec 03 (M3 Town) drafted**: `docs/specs/03-town.md`, spec PR open, waiting for PO approval (open questions in §12).
-- After approval: create the 11 M3 issues from spec 03 §14 and start with the save system (ticket 1).
-- M3 ACs are numbered AC-37 … AC-47, playtest P-12 … P-16.
+- After approval: create the 12 M3 issues from spec 03 §15 and start with the save system (ticket 1).
+- M3 ACs are numbered AC-37 … AC-48, playtest P-12 … P-17. Ticket 10 needs photos + names of the GF's plushies from the PO.
 
 ## Playtest notes (M2, first round)
 
