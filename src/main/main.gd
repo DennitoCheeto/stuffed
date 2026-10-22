@@ -1,20 +1,21 @@
 class_name Main
 extends Node
-## The game's root: shows one screen at a time (title or run) and handles app-wide keys
-## like fullscreen.
+## The game's root: shows one screen at a time (title, town, run or end screen) and handles
+## app-wide keys like fullscreen. The loop: title -> town -> run -> "Brought home" -> town.
 
 signal quit_requested
 
 const TITLE_SCENE: PackedScene = preload("res://src/title/title_screen.tscn")
+const TOWN_SCENE: PackedScene = preload("res://src/town/town.tscn")
 const RUN_SCENE: PackedScene = preload("res://src/run/run.tscn")
 const END_SCENE: PackedScene = preload("res://src/ui/end_screen.tscn")
 const MATERIAL_RULES: MaterialRules = preload("res://data/town/material_rules.tres")
 
 ## Tests turn this off so "Quit" doesn't close the test runner.
 var quit_enabled: bool = true
-## The title screen or the run that is currently shown.
+## The screen that is currently shown (title, town, run or end screen).
 var current_screen: Node
-## Background music (title and run tracks).
+## Background music (title, town, run and boss tracks).
 var music: MusicPlayer
 ## The saved town (spec 03 §9). Loaded at start, saved after every run and on quit.
 var town: TownSave
@@ -40,18 +41,32 @@ func show_title() -> void:
 	Crosshair.stop()
 	_play_music(&"title")
 	var title: TitleScreen = TITLE_SCENE.instantiate()
-	title.start_requested.connect(start_run)
+	title.start_requested.connect(show_town)
 	title.quit_requested.connect(quit)
 	title.start_over_requested.connect(start_over)
 	title.has_save = SaveStore.exists()
 	_switch_to(title)
 
 
+## The Pillow Fort between runs (Continue / New game, and after every run).
+func show_town() -> void:
+	Crosshair.stop()
+	_play_music(&"town")
+	# A new game is saved right away, so the title offers Continue next time.
+	SaveStore.write(town)
+	var pillow_fort: Town = TOWN_SCENE.instantiate()
+	pillow_fort.save = town
+	pillow_fort.bedroom_requested.connect(start_run)
+	pillow_fort.title_requested.connect(show_title)
+	pillow_fort.quit_requested.connect(quit)
+	_switch_to(pillow_fort)
+
+
 ## Starts a fresh run; `seed_value` 0 = a random seed (the developer menu replays seeds).
 func start_run(seed_value: int = 0) -> void:
 	var run: Run = RUN_SCENE.instantiate()
 	run.finished.connect(show_end)
-	run.quit_to_title.connect(_on_quit_to_title)
+	run.gave_up.connect(show_end)
 	run.seed_value = seed_value
 	run.restart_requested.connect(start_run)
 	run.music_requested.connect(_play_music)
@@ -63,23 +78,21 @@ func start_run(seed_value: int = 0) -> void:
 	_switch_to(run)
 
 
-## The end screen for a finished run (which is also written to the run log).
+## The end screen for a finished or given-up run (also written to the run log): its stats and
+## what it brought home, counting into the jars.
 func show_end(result: RunResult) -> void:
 	RunLog.append(result)
-	_bank_run(result)
+	var before: Dictionary[String, int] = town.materials.duplicate()
+	var share: float = MATERIAL_RULES.keep_share(result)
+	var kept: Dictionary[String, int] = _bank_run(share)
 	Crosshair.stop()
-	_play_music(&"title")
+	_play_music(&"town")
 	var end: EndScreen = END_SCENE.instantiate()
 	end.show_result(result)
+	end.brought_home.show_haul(kept, before, share)
 	end.try_again_requested.connect(start_run)
-	end.title_requested.connect(show_title)
+	end.fort_requested.connect(show_town)
 	_switch_to(end)
-
-
-func _on_quit_to_title(result: RunResult) -> void:
-	RunLog.append(result)
-	_bank_run(result)
-	show_title()
 
 
 func _play_music(track: StringName) -> void:
@@ -109,13 +122,16 @@ func start_over() -> void:
 	town = TownSave.new()
 
 
-## Takes the finished run's haul home (all of it after a win, else the lost share) and saves.
-func _bank_run(result: RunResult) -> void:
+## Takes `share` of the finished run's haul home and saves. Returns what was kept.
+func _bank_run(share: float) -> Dictionary[String, int]:
+	var kept: Dictionary[String, int] = {}
 	var run: Run = current_screen as Run
 	if run != null:
-		town.bank(run.haul, MATERIAL_RULES.keep_share(result))
+		kept = run.haul.kept(share)
+		town.bank(run.haul, share)
 	town.unfinished_run = {}
 	SaveStore.write(town)
+	return kept
 
 
 ## Closing the window saves first (a running run stays "unfinished" until the next start).

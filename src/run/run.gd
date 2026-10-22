@@ -9,8 +9,8 @@ signal finished(result: RunResult)
 signal goal_reached
 ## The player chose "Keep going (endless)".
 signal endless_started
-## The player quit from the pause menu (the result is still logged).
-signal quit_to_title(result: RunResult)
+## The player gave up from the pause menu (the result is still logged, the haul banked).
+signal gave_up(result: RunResult)
 ## The developer menu asks for a new run (0 = new random seed).
 signal restart_requested(seed_value: int)
 ## The music should change to `track` (the boss fight has its own).
@@ -410,7 +410,7 @@ func _on_end_chosen() -> void:
 
 func _on_quit_requested() -> void:
 	over = true
-	quit_to_title.emit(make_result("quit"))
+	gave_up.emit(make_result("quit"))
 
 
 func _on_endless_chosen() -> void:

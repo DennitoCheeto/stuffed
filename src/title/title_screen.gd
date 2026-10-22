@@ -1,7 +1,8 @@
 class_name TitleScreen
 extends Control
-## The first screen: "Stuffed", Start run, Quit. Works with mouse and keyboard.
-## With a saved town it also offers "Start over", which asks twice before the town is deleted.
+## The first screen: "Stuffed", Continue (or New game the first time) and Quit. Continue and
+## New game open the town. Works with mouse and keyboard. With a saved town it also offers
+## "Start over", which asks twice before the town is deleted.
 
 signal start_requested
 signal quit_requested
@@ -32,11 +33,17 @@ var confirm_step: int = 0
 
 func _ready() -> void:
 	version_label.text = GameInfo.version_label()
+	start_button.text = start_text()
 	# Built first: the copies of the Quit button must not carry its connection.
 	_build_start_over()
 	start_button.pressed.connect(start_requested.emit)
 	quit_button.pressed.connect(quit_requested.emit)
 	start_button.grab_focus()
+
+
+## "Continue" with a saved town, else "New game".
+func start_text() -> String:
+	return "Continue" if has_save else "New game"
 
 
 ## Pressing "Start over", then Yes twice, deletes the town. No (or Esc) backs out at any step.
@@ -53,6 +60,7 @@ func _on_yes() -> void:
 	_close_confirm()
 	has_save = false
 	start_over_button.visible = false
+	start_button.text = start_text()
 	start_over_requested.emit()
 
 

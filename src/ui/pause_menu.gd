@@ -1,7 +1,7 @@
 class_name PauseMenu
 extends CanvasLayer
-## The Esc menu: Resume, damage numbers on/off, Master / Effects / Music volume, Recipes, Quit to
-## title.
+## The Esc menu: Resume, damage numbers on/off, Master / Effects / Music volume, Recipes, Give up
+## (back home with half the haul).
 ## Changes take effect right away. Keeps running while the run is frozen.
 
 signal resumed

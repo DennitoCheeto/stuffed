@@ -23,6 +23,8 @@ const EVOLVED_LEVEL: int = 99
 @export var xp_rules: XpRules
 ## 0 = player 1. Decides which input actions this hero listens to.
 @export var player_index: int = 0
+## False in town: no starting weapon (nothing to fight there).
+@export var armed: bool = true
 
 var health: float = 0.0
 var max_health: float = 0.0
@@ -84,7 +86,7 @@ func _ready() -> void:
 		slippery.name = "Slippery"
 		add_child(slippery)
 		slippery.setup(self)
-	if stats.starting_weapon != null:
+	if armed and stats.starting_weapon != null:
 		add_weapon(stats.starting_weapon)
 
 
@@ -113,6 +115,11 @@ func _input(event: InputEvent) -> void:
 ## Where this player aims (the mouse cursor for player 1, else straight ahead), in the world.
 func aim_point() -> Vector2:
 	return _controls.aim_point(get_viewport(), global_position + facing * 200.0)
+
+
+## True in the frame this player pressed `action_name` (e.g. "interact" = E for player 1).
+func just_pressed(action_name: String) -> bool:
+	return _controls.is_just_pressed(action_name)
 
 
 func move_speed() -> float:

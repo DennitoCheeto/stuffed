@@ -70,7 +70,7 @@ func test_ac47_giving_up_from_the_pause_menu_banks_the_lost_share() -> void:
 	run.pause()
 	run.pause_menu.quit_button.pressed.emit()
 	await wait_physics_frames(2)
-	assert_true(main.current_screen is TitleScreen)
+	assert_true(main.current_screen is EndScreen)
 	assert_eq(_saved().material("coins"), 5)
 
 

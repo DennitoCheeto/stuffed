@@ -1,24 +1,30 @@
 class_name EndScreen
 extends Control
-## After a run: "You survived!" or "Banane got stuffed", the run's stats, and Try again.
+## After a run: "You survived!" or "Banane got stuffed", the run's stats, what the run brought
+## home (counting up into the jars), then "Back to the fort" (or Try again).
 
 signal try_again_requested
-signal title_requested
+signal fort_requested
 
 var result: RunResult
+## The haul counting into the jars (spec 03 §2.6).
+var brought_home: BroughtHomePanel = BroughtHomePanel.new()
 
 @onready var title_label: Label = %TitleLabel
 @onready var stats_label: Label = %StatsLabel
 @onready var upgrades_label: Label = %UpgradesLabel
 @onready var seed_label: Label = %SeedLabel
+@onready var fort_button: Button = %FortButton
 @onready var try_again_button: Button = %TryAgainButton
-@onready var title_button: Button = %TitleButton
 
 
 func _ready() -> void:
+	var center: Control = seed_label.get_parent()
+	center.add_child(brought_home)
+	center.move_child(brought_home, seed_label.get_index() + 1)
+	fort_button.pressed.connect(fort_requested.emit)
 	try_again_button.pressed.connect(try_again_requested.emit)
-	title_button.pressed.connect(title_requested.emit)
-	try_again_button.grab_focus()
+	fort_button.grab_focus()
 
 
 ## Fills the screen with `run_result`. Call before or after adding to the tree.

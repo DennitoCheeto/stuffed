@@ -30,10 +30,25 @@ func after_each() -> void:
 	sender.clear()
 
 
-## Starts a run the way the player does (Start run on the title screen) and returns it.
-func start_run() -> Run:
+## Goes to the town the way the player does (New game / Continue on the title screen, or Back to
+## the fort on the end screen) and returns it.
+func go_to_town() -> Town:
 	var title: TitleScreen = main.current_screen as TitleScreen
-	title.start_button.pressed.emit()
+	var end: EndScreen = main.current_screen as EndScreen
+	if title != null:
+		title.start_button.pressed.emit()
+	elif end != null:
+		end.fort_button.pressed.emit()
+	await wait_physics_frames(2)
+	return main.current_screen as Town
+
+
+## Starts a run the way the player does (title -> town -> E at the Bedroom door) and returns it.
+func start_run() -> Run:
+	var town: Town = main.current_screen as Town
+	if town == null:
+		town = await go_to_town()
+	town.enter_bedroom()
 	await wait_physics_frames(2)
 	return main.current_screen as Run
 
