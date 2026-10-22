@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-22 (M2-01 … M2-14 merged)_
+_Last updated: 2026-10-22 (all M2 tickets merged, waiting for acceptance)_
 
 ## Where we are
 
@@ -14,14 +14,13 @@ _Last updated: 2026-10-22 (M2-01 … M2-14 merged)_
 | Art direction | ✅ felt style "B — Soft", puppet animation (`docs/art/`) |
 | M0 Factory setup | ✅ done (PR #1) |
 | M1 Core run | ✅ accepted 2026-10-21 (PRs #17–#29; playtest P-1 … P-6 passed, 144 fps on the PO's PC) |
-| M2 Build variety | 🔨 spec 02 approved; issues #32–#46 (milestone "M2 — Build variety"); M2-01…M2-14 merged (PRs #47–#49, #51–#55, #57, #58, #60, #61, #63, #67) |
+| M2 Build variety | 🧪 all 15 tickets merged (PRs #47–#49, #51–#55, #57, #58, #60, #61, #63, #67, #69); waiting for the PO's playtest (P-1 … P-6) |
 
 ## Next step
 
-- Next: M2-15 (#46, dev menu, run log, data checks, co-op test; spec 02 §13, §15), the last M2 ticket.
-  Then the PO plays M2 for acceptance (ask them to judge the new M2-14 sounds too). After that: write spec 03 for M3 (Town, vision §10) using the
-  playtest feedback; the PO may send town wishes for it.
-- The PO has not played M2 yet (wants more features first). The run ends by beating the Sock Puppet King.
+- Next: the PO plays M2 for acceptance (playtest P-1 … P-6 in spec 02 §16; ask them to judge the M2-14 sounds too,
+  and P-5 = F1 → "Max everything" + "500 shamblers" + "Spawn the King" with "Show FPS + count"). Fix what they report.
+- After acceptance: write spec 03 for M3 (Town, vision §10) using the playtest feedback; the PO may send town wishes.
 
 ## Playtest notes (M1)
 
@@ -72,8 +71,12 @@ _Last updated: 2026-10-22 (M2-01 … M2-14 merged)_
   `EnemyStats.attack` (`SpitAttack`, wind-up/puff in `EnemyManager._attack`). Burst on death:
   `EnemyStats.death_cloud` (`EnemyCloud`, hostile, pooled). Schedule = `SpawnSchedule.entries` (`SpawnEntry`);
   tests find a type with `schedule.entry_named("Runner")`. Dev menu builds in `setup` (needs `run.rules`).
+  Dev menu: `give(id, level)`, `max_everything()`, `choose_upgrade(id)` + "Give Lv N"; it scrolls. `test_m2_data.gd` fails
+  if any `src/` script calls `.new(` on a balance resource class (keep numbers in `.tres`).
 - GUT `wait_physics_frames(1)` in a loop is not exactly one frame per call: measure time with `run.elapsed`.
 - Scenario tests write the run log to `user://test_run_log.jsonl`, never the real `run_log.jsonl`.
+  M2 log fields: `evolutions` (name, time, player), `rerolls_used`/`skips_used`/`banishes_used` (from
+  `CardControls.*_used`, a dev refill doesn't reset them), `mini_boss_defeated_at`/`boss_defeated_at` (null = not beaten).
 - `docs/` has a `.gdignore`; shell scripts need the executable bit in git (`git update-index --chmod=+x`).
 - Optional later: `@claude` GitHub workflow (as in Tastey) needs the `CLAUDE_CODE_OAUTH_TOKEN` repo secret.
 - Elites: `EliteRules` (`data/elite_rules.tres`) on top of any type: `enemies.spawn(stats, at, elite)` /
