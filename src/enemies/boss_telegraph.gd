@@ -1,10 +1,11 @@
 class_name BossTelegraph
 extends Node2D
 ## A boss's warning on the floor (vision §6.1: danger is always shown before it happens):
-## a red lane for a charge, a red ring for a stomp. It fills up as the attack comes closer.
+## a red lane for a charge, a red ring for a stomp, a red circle where a lunge lands, small
+## marks where summoned zombies appear. It fills up as the attack comes closer.
 ## A child of its boss, drawn under everyone else in the world (above the floor).
 
-enum Kind { NONE, CHARGE, STOMP }
+enum Kind { NONE, CHARGE, STOMP, LANDING, MARKS }
 
 const COLOR: Color = Color("#ff2a2a")
 const EDGE_WIDTH: float = 4.0
@@ -13,12 +14,14 @@ const FILL_ALPHA: Vector2 = Vector2(0.15, 0.45)
 const RING_POINTS: int = 48
 
 var kind: Kind = Kind.NONE
-## Charge: from the boss to the end of his path, in pixels.
+## Charge: from the boss to the end of his path; landing: from the boss to the spot (pixels).
 var path: Vector2 = Vector2.ZERO
 ## Charge: width of the lane (the boss's body).
 var lane_width: float = 0.0
-## Stomp: radius of the ring.
+## Stomp, landing, marks: radius of the ring (of each mark).
 var ring_radius: float = 0.0
+## Marks: where they are, from the boss.
+var marks: Array[Vector2] = []
 ## 0 = just shown, 1 = the attack comes now.
 var progress: float = 0.0
 
@@ -37,6 +40,20 @@ func show_charge(charge_path: Vector2, width: float) -> void:
 
 func show_stomp(radius: float) -> void:
 	kind = Kind.STOMP
+	ring_radius = radius
+	_show()
+
+
+func show_landing(offset: Vector2, radius: float) -> void:
+	kind = Kind.LANDING
+	path = offset
+	ring_radius = radius
+	_show()
+
+
+func show_marks(offsets: Array[Vector2], radius: float) -> void:
+	kind = Kind.MARKS
+	marks = offsets
 	ring_radius = radius
 	_show()
 
@@ -74,5 +91,15 @@ func _draw() -> void:
 			# A bright line grows along the lane: when it reaches the end, he goes.
 			draw_line(Vector2.ZERO, path * progress, COLOR, EDGE_WIDTH * 2.0)
 		Kind.STOMP:
-			draw_circle(Vector2.ZERO, ring_radius * progress, fill)
-			draw_arc(Vector2.ZERO, ring_radius, 0.0, TAU, RING_POINTS, COLOR, EDGE_WIDTH)
+			_draw_ring(Vector2.ZERO, ring_radius, fill)
+		Kind.LANDING:
+			_draw_ring(path, ring_radius, fill)
+		Kind.MARKS:
+			for mark: Vector2 in marks:
+				_draw_ring(mark, ring_radius, fill)
+
+
+## A red ring at `center` that fills from the middle.
+func _draw_ring(center: Vector2, radius: float, fill: Color) -> void:
+	draw_circle(center, radius * progress, fill)
+	draw_arc(center, radius, 0.0, TAU, RING_POINTS, COLOR, EDGE_WIDTH)

@@ -9,7 +9,7 @@ extends Resource
 @export var enemy: EnemyStats
 ## Drawn and touching this much bigger than `enemy.radius` says.
 @export var size: float = 3.0
-## When it arrives, in seconds into the run.
+## When it arrives, in seconds into the run (the mini-boss; the boss comes at the run goal).
 @export var at_seconds: float = 240.0
 ## Big text of the arrival banner, e.g. "Big Ted!".
 @export var banner: String = "Boss!"

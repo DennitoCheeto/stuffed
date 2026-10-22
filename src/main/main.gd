@@ -48,6 +48,7 @@ func start_run(seed_value: int = 0) -> void:
 	run.quit_to_title.connect(_on_quit_to_title)
 	run.seed_value = seed_value
 	run.restart_requested.connect(start_run)
+	run.music_requested.connect(_play_music)
 	_play_music(&"run")
 	_switch_to(run)
 

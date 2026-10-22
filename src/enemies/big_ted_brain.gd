@@ -15,8 +15,6 @@ const AIM_PUFF: float = 0.3
 var state: State = State.WALK
 ## The pattern he starts next.
 var next_pattern: Pattern = Pattern.CHARGE
-## Seconds left in the current state (not used while walking).
-var state_left: float = 0.0
 ## Where the current charge goes, fixed when the red line appears.
 var charge_direction: Vector2 = Vector2.RIGHT
 var charge_end: Vector2 = Vector2.ZERO
@@ -79,13 +77,6 @@ func is_busy() -> bool:
 	return state != State.WALK
 
 
-func _in_range(zombie: Zombie, target: Player) -> bool:
-	if target == null:
-		return false
-	var reach: float = def.pattern_range
-	return zombie.position.distance_squared_to(target.global_position) <= reach * reach
-
-
 ## Starts the next pattern aimed at `target`: shows its telegraph, the attack comes after.
 func _start_pattern(zombie: Zombie, target: Player, manager: EnemyManager) -> void:
 	var pattern: Pattern = next_pattern
@@ -143,11 +134,6 @@ func _back_to_walking() -> void:
 	pattern_cooldown = def.pattern_gap_seconds
 	if telegraph != null:
 		telegraph.clear()
-
-
-## How far the current telegraph is: 0 = just shown, 1 = the attack comes now.
-func _progress(windup: float) -> float:
-	return clampf(1.0 - state_left / maxf(windup, 0.001), 0.0, 1.0)
 
 
 ## How far one can go from `from` along `direction` before leaving `area`.

@@ -56,3 +56,22 @@ func hold_action(action: String, frames: int) -> void:
 ## A short tap of an action (like pressing Space once).
 func tap_action(action: String) -> void:
 	await hold_action(action, 2)
+
+
+## Reaches the goal as a real run does since spec 02: at the goal time the Sock Puppet King
+## comes, and here he is beaten at once. The goal (pops, celebration) starts right away.
+func beat_the_boss(current: Run) -> void:
+	current.elapsed = maxf(current.elapsed, current.rules.goal_seconds)
+	var king: Zombie = current.spawner.spawn_boss(current.spawner.schedule.boss)
+	current.enemies.damage(king, king.max_health * 10.0)
+
+
+## Waits until the goal screen takes keys (skipping the boss's gift box moment on the way).
+func wait_for_goal_screen(current: Run) -> void:
+	for i: int in roundi(10.0 * FPS):
+		if current.goal_screen.is_open():
+			break
+		if current.gift_screen.is_open():
+			current.gift_screen.close()
+		await wait_physics_frames(1)
+	await wait_seconds(GoalScreen.INPUT_DELAY + 0.1)

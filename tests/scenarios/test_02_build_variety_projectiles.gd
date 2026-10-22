@@ -112,7 +112,7 @@ func test_reaching_the_goal_clears_enemy_bullets() -> void:
 	await _quiet_run()
 	disarm(first_player())
 	_bullet(first_player().global_position + Vector2(0, 600), Vector2.ZERO)
-	run.elapsed = run.rules.goal_seconds - 0.05
+	beat_the_boss(run)
 	await wait_physics_frames(10)
 	assert_eq(run.projectiles.hostile_count(), 0)
 

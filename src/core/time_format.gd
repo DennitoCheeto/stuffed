@@ -17,3 +17,8 @@ static func run_timer(elapsed: float, goal: float) -> String:
 ## The timer after the goal: "Endless +2:41".
 static func endless(seconds: float) -> String:
 	return "Endless +%s" % clock(seconds)
+
+
+## The timer while the boss is on the field: "8:23  Boss fight!".
+static func boss_fight(seconds: float) -> String:
+	return "%s  Boss fight!" % clock(seconds)

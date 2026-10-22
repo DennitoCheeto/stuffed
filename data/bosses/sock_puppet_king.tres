@@ -1,0 +1,60 @@
+[gd_resource type="Resource" script_class="SockKingDef" load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://src/enemies/sock_king_def.gd" id="1_def"]
+[ext_resource type="Script" path="res://src/enemies/enemy_stats.gd" id="2_stats"]
+[ext_resource type="Script" path="res://src/enemies/spit_attack.gd" id="3_spit"]
+[ext_resource type="Resource" path="res://data/enemies/runner.tres" id="4_runner"]
+
+[sub_resource type="Resource" id="Resource_body"]
+script = ExtResource("2_stats")
+display_name = "Sock Puppet King"
+look = 5
+max_health = 6000.0
+move_speed = 35.0
+contact_damage = 25.0
+xp_button = 2
+radius = 20.0
+knockback_taken = 0.0
+
+[sub_resource type="Resource" id="Resource_spiral"]
+script = ExtResource("3_spit")
+keep_distance = 0.0
+distance_band = 0.0
+fire_range = 0.0
+windup_seconds = 0.8
+cooldown_seconds = 0.0
+first_delay_seconds = 0.0
+pattern = Array[int]([4])
+fan_step_degrees = 90.0
+bullet_speed = 100.0
+bullet_damage = 8.0
+bullet_radius = 9.0
+bullet_lifetime = 7.0
+
+[resource]
+script = ExtResource("1_def")
+spiral = SubResource("Resource_spiral")
+spiral_seconds = 3.0
+spiral_volleys_per_second = 6.0
+spiral_turn_degrees = 60.0
+summon_enemy = ExtResource("4_runner")
+summon_count = 8
+summon_radius = 200.0
+summon_windup_seconds = 1.0
+angry_below = 0.5
+angry_banner = "The King is angry!"
+lunge_windup_seconds = 1.0
+lunge_seconds = 0.5
+lunge_radius = 110.0
+lunge_damage = 25.0
+lunge_recover_seconds = 0.8
+lunge_height = 120.0
+enemy = SubResource("Resource_body")
+size = 3.2
+banner = "The Sock Puppet King!"
+banner_subtitle = "Boss"
+banner_seconds = 3.0
+spawn_rate_scale = 0.35
+first_pattern_delay = 2.5
+pattern_gap_seconds = 2.0
+pattern_range = 600.0

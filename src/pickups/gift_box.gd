@@ -1,6 +1,6 @@
 class_name GiftBox
 extends Node2D
-## A gift box on the floor (dropped by elites; later the mini-boss and boss). It glows softly and
+## A gift box on the floor (dropped by elites, the mini-boss and the boss). It glows softly and
 ## bobs until a player touches it; then it opens for that player (spec 02 §6, §15).
 
 ## `player` touched the box (it tells only once).
@@ -13,6 +13,8 @@ const GLOW_CENTER: Vector2 = Vector2(0.0, -6.0)
 
 var rules: GiftBoxRules
 var opened: bool = false
+## The boss's big box: more inside, drawn bigger.
+var big: bool = false
 var box: Sprite2D
 var lid: Sprite2D
 ## 0..1, how bright the glow is right now.
@@ -21,10 +23,13 @@ var pulse: float = 0.0
 var _time: float = 0.0
 
 
-func setup(gift_rules: GiftBoxRules) -> void:
+func setup(gift_rules: GiftBoxRules, is_big: bool = false) -> void:
 	rules = gift_rules
 	box = _sprite(GiftBoxLook.BOX, Vector2(0.0, 8.0))
 	lid = _sprite(GiftBoxLook.LID, Vector2(0.0, -18.0))
+	big = is_big
+	if big:
+		scale = Vector2.ONE * rules.big_box_scale
 
 
 func _physics_process(delta: float) -> void:
@@ -37,7 +42,7 @@ func _physics_process(delta: float) -> void:
 	for player: Player in Players.all(get_tree()):
 		if player.is_dead():
 			continue
-		var reach: float = rules.touch_radius + player.stats.hitbox_radius
+		var reach: float = rules.touch_radius * scale.x + player.stats.hitbox_radius
 		if position.distance_squared_to(player.global_position) <= reach * reach:
 			opened = true
 			touched.emit(self, player)

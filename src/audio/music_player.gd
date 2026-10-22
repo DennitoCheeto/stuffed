@@ -1,12 +1,14 @@
 class_name MusicPlayer
 extends AudioStreamPlayer
 ## Plays the background music, synthesized live (no music files): a calm music-box loop on the
-## title screen and a bouncier toy-band loop during runs. Muffled while the game is paused.
+## title screen, a bouncier toy-band loop during runs and a driving minor loop with drums for
+## the boss fight. Muffled while the game is paused.
 
 ## Track name → [beats per minute, chord roots (MIDI, one per bar), lead octave shift].
 const TRACKS: Dictionary[StringName, Array] = {
 	&"title": [80.0, [60.0, 57.0, 53.0, 55.0], 12.0],
 	&"run": [124.0, [57.0, 53.0, 48.0, 55.0], 0.0],
+	&"boss": [148.0, [57.0, 57.0, 53.0, 52.0], -12.0],
 }
 ## Chord shape on top of each root: minor for A (57), major otherwise.
 const MAJOR: PackedFloat32Array = [0.0, 4.0, 7.0, 12.0]
@@ -92,7 +94,11 @@ func sample_at(t: float) -> float:
 	var bass_hz: float = Synth.midi_hz(root - 12.0)
 	var bass: float = Synth.triangle(bass_hz * since_beat) * Synth.pluck(since_beat, 0.01, 3.0)
 	var value: float = 0.55 * lead + 0.45 * bass
-	if track == &"run":
+	if track == &"run" or track == &"boss":
 		var off_beat: float = fposmod(beat + 0.5, 1.0) * 60.0 / _bpm
 		value += 0.12 * Synth.noise(t) * exp(-60.0 * off_beat)
+	if track == &"boss":
+		# A soft felt kick on every beat.
+		var kick: float = Synth.sine(Synth.sweep(since_beat, 120.0, 45.0, 0.12))
+		value += 0.5 * kick * exp(-18.0 * since_beat)
 	return value

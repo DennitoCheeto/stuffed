@@ -20,6 +20,10 @@ signal zombie_burst(zombie: Zombie, cloud: EnemyCloud)
 signal boss_telegraphed(boss: Zombie, pattern: StringName)
 ## A boss's `pattern` happens now (the charge starts, the stomp fires).
 signal boss_attacked(boss: Zombie, pattern: StringName)
+## A boss got angry (the Sock Puppet King at half health).
+signal boss_angry(boss: Zombie)
+## A boss landed from a lunge.
+signal boss_landed(boss: Zombie)
 
 ## Weapons find the manager through this group.
 const GROUP: StringName = &"enemy_manager"
@@ -176,7 +180,8 @@ func _physics_process(delta: float) -> void:
 				_move_boss(zombie, target, delta)
 			else:
 				_move(zombie, target, delta)
-			_touch_players(zombie, players)
+			if zombie.brain == null or not zombie.brain.is_airborne():
+				_touch_players(zombie, players)
 			if zombie.attack != null:
 				_attack(zombie, target, delta)
 		zombie.tick(delta)
@@ -315,6 +320,17 @@ func _spit(zombie: Zombie, target: Player, attack: SpitAttack) -> void:
 	var aim: Vector2 = zombie.position.direction_to(target.global_position)
 	fire_volley(zombie, aim, attack, balls, zombie.spit_damage)
 	zombie_spat.emit(zombie, balls)
+
+
+## Hurts every living player within `radius` of `center` (a boss landing). Dashing players
+## get away.
+func hurt_players_near(center: Vector2, radius: float, damage: float, source: String) -> void:
+	for player: Player in _alive_players():
+		var reach: float = radius + player.stats.hitbox_radius
+		if player.is_dashing():
+			continue
+		if player.global_position.distance_squared_to(center) <= reach * reach:
+			player.take_hit(damage, source)
 
 
 ## Fires `balls` stuffing balls of `attack` from the edge of `zombie`'s body, fanned around

@@ -2,7 +2,7 @@ class_name EnemyStats
 extends Resource
 ## Balance numbers for one zombie type. Tune them in data/enemies/*.tres, not in code.
 
-enum Look { SHAMBLER, RUNNER, FROG, PIG, ELEPHANT }
+enum Look { SHAMBLER, RUNNER, FROG, PIG, ELEPHANT, SOCK_KING }
 enum XpSize { SMALL, MEDIUM, BIG }
 
 @export var display_name: String = "Zombie"

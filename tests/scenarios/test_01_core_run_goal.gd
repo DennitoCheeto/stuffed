@@ -1,6 +1,6 @@
 extends "res://tests/scenarios/run_scenario.gd"
 ## Scenario (spec 01 §6, §7, AC-11, AC-12, AC-23): runners, surges and breathers, the goal
-## (8:00 since spec 02).
+## (since spec 02: beating the Sock Puppet King, who comes at 8:00).
 
 const SHAMBLER: EnemyStats = preload("res://data/enemies/shambler.tres")
 const RUNNER: EnemyStats = preload("res://data/enemies/runner.tres")
@@ -72,26 +72,25 @@ func _reach_goal_with_zombies() -> void:
 	var banane: Player = first_player()
 	for i: int in 12:
 		run.enemies.spawn(SHAMBLER, banane.global_position + Vector2.from_angle(i * 0.5) * 300.0)
-	run.elapsed = run.rules.goal_seconds - 0.2
 	finished_results.clear()
 	endless_starts = 0
 	run.finished.connect(func(result: RunResult) -> void: finished_results.append(result))
 	run.endless_started.connect(func() -> void: endless_starts += 1)
-	await wait_for_signal(run.goal_reached, 2.0)
+	beat_the_boss(run)
 
 
 func test_ac23_goal_stops_spawning_and_pops_every_zombie() -> void:
 	await _reach_goal_with_zombies()
 	assert_false(run.spawner.active, "spawning stopped")
-	assert_eq(run.hud.timer_label.text, "8:00 / 8:00")
+	assert_true(run.goal_done, "beating the boss is the goal")
 	await wait_seconds(Run.POP_CHAIN_TIME + 0.2)
 	assert_eq(run.enemies.alive_count(), 0, "every zombie popped")
-	assert_eq(run.pickups.buttons.size(), 0, "the goal pops drop no XP")
+	assert_eq(run.pickups.buttons.size(), 1, "only the King drops XP, the goal pops drop none")
 
 
 func test_ac23_then_pauses_and_offers_end_run_or_keep_going() -> void:
 	await _reach_goal_with_zombies()
-	await wait_seconds(Run.POP_CHAIN_TIME + Run.CELEBRATION_TIME + GoalScreen.INPUT_DELAY + 0.3)
+	await wait_for_goal_screen(run)
 	assert_true(run.goal_screen.is_open(), "the choice is shown")
 	assert_true(run.is_frozen(), "the run is paused")
 	assert_eq(run.goal_screen.end_button.text, "[1]  End run")
@@ -100,7 +99,7 @@ func test_ac23_then_pauses_and_offers_end_run_or_keep_going() -> void:
 
 func test_ac23_key_1_ends_the_run_with_a_win() -> void:
 	await _reach_goal_with_zombies()
-	await wait_seconds(Run.POP_CHAIN_TIME + Run.CELEBRATION_TIME + GoalScreen.INPUT_DELAY + 0.3)
+	await wait_for_goal_screen(run)
 	sender.action_down("pick_card_1")
 	await wait_process_frames(2)
 	sender.action_up("pick_card_1")
@@ -112,7 +111,7 @@ func test_ac23_key_1_ends_the_run_with_a_win() -> void:
 
 func test_ac23_click_keep_going_continues_the_run() -> void:
 	await _reach_goal_with_zombies()
-	await wait_seconds(Run.POP_CHAIN_TIME + Run.CELEBRATION_TIME + GoalScreen.INPUT_DELAY + 0.3)
+	await wait_for_goal_screen(run)
 	run.goal_screen.endless_button.pressed.emit()
 	assert_eq(endless_starts, 1, "endless started")
 	assert_false(run.is_frozen(), "running again")
@@ -128,8 +127,7 @@ func test_ac23_zombies_cannot_hurt_banane_while_the_goal_pops_them() -> void:
 	var banane: Player = first_player()
 	banane.max_health = 100.0
 	banane.health = 100.0
-	run.elapsed = run.rules.goal_seconds - 0.05
-	await wait_for_signal(run.goal_reached, 2.0)
+	beat_the_boss(run)
 	run.enemies.spawn(SHAMBLER, banane.global_position)
 	await wait_physics_frames(3)
 	assert_eq(banane.health, 100.0)

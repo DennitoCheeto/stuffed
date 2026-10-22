@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="SpawnSchedule" load_steps=20 format=3]
+[gd_resource type="Resource" script_class="SpawnSchedule" load_steps=21 format=3]
 
 [ext_resource type="Script" path="res://src/enemies/spawn_schedule.gd" id="1_schedule"]
 [ext_resource type="Script" path="res://src/enemies/spawn_entry.gd" id="2_entry"]
@@ -10,6 +10,7 @@
 [ext_resource type="Script" path="res://src/enemies/elite_spawn.gd" id="8_elite_spawn"]
 [ext_resource type="Resource" path="res://data/elite_rules.tres" id="9_elite_rules"]
 [ext_resource type="Resource" path="res://data/bosses/big_ted.tres" id="10_big_ted"]
+[ext_resource type="Resource" path="res://data/bosses/sock_puppet_king.tres" id="11_king"]
 
 [sub_resource type="Resource" id="Resource_runner"]
 script = ExtResource("2_entry")
@@ -74,6 +75,7 @@ elite_rules = ExtResource("9_elite_rules")
 elites = Array[ExtResource("8_elite_spawn")]([SubResource("Resource_elite_1"), SubResource("Resource_elite_2"), SubResource("Resource_elite_3"), SubResource("Resource_elite_4")])
 elite_repeat_seconds = 75.0
 mini_boss = ExtResource("10_big_ted")
+boss = ExtResource("11_king")
 cycle_seconds = 60.0
 surge_starts_at = 30.0
 surge_seconds = 20.0

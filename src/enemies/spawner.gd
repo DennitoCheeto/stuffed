@@ -29,6 +29,8 @@ var _owed: float = 0.0
 var _next_elite: int = 0
 ## The mini-boss has come (or was skipped by a time jump).
 var _mini_boss_done: bool = false
+## The boss has come.
+var _boss_done: bool = false
 
 
 func setup(manager: EnemyManager, view_camera: Camera2D, run_rng: RandomNumberGenerator) -> void:
@@ -47,6 +49,7 @@ func tick(run_time: float, delta: float) -> void:
 		spawn_one(schedule.enemy_at(run_time, rng))
 	_spawn_due_elites(run_time)
 	_spawn_due_mini_boss(run_time)
+	_spawn_due_boss(run_time)
 
 
 ## Spawns one zombie of `stats` (an elite with `elite`) outside the screen. Returns null if there
@@ -64,6 +67,11 @@ func spawn_boss(boss: BossDef) -> Zombie:
 	if not at.is_finite():
 		return null
 	var zombie: Zombie = enemies.spawn_boss(boss, at)
+	# Brought early (developer menu): he doesn't come a second time.
+	if boss == schedule.mini_boss:
+		_mini_boss_done = true
+	if boss == schedule.boss:
+		_boss_done = true
 	boss_spawned.emit(zombie)
 	return zombie
 
@@ -113,3 +121,12 @@ func _spawn_due_mini_boss(run_time: float) -> void:
 	_mini_boss_done = true
 	if run_time - boss.at_seconds <= MISSED_ELITE_SECONDS:
 		spawn_boss(boss)
+
+
+## Brings the boss at the run goal, even after a time jump: the run needs him to end.
+func _spawn_due_boss(run_time: float) -> void:
+	var boss: BossDef = schedule.boss
+	if _boss_done or boss == null or goal_seconds <= 0.0 or run_time < goal_seconds:
+		return
+	if spawn_boss(boss) != null:
+		_boss_done = true

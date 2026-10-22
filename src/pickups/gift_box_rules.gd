@@ -9,6 +9,10 @@ extends Resource
 @export var level_up_weights: PackedFloat32Array = [5.0, 3.0, 2.0]
 ## With nothing left to level up, the box heals this share of max health (0.5 = 50%).
 @export var heal_share: float = 0.5
+## The boss's big box tries to give this many more level-ups (spec 02 §6) ...
+@export var big_box_extra_level_ups: int = 2
+## ... and is drawn this much bigger.
+@export var big_box_scale: float = 1.6
 ## How long the opening moment lasts (any key skips it).
 @export var moment_seconds: float = 2.0
 ## Keys are ignored this long after the moment starts, so a key pressed while playing doesn't
@@ -18,9 +22,13 @@ extends Resource
 
 ## What a box holds for a player whose upgrades are at `levels` (id → level): an evolution if a
 ## weapon is ready to evolve; otherwise 1-3 level-ups of weapons or items they already have
-## (different ones while possible, never past the top level), or a heal if everything is maxed.
+## (different ones while possible, never past the top level; `extra` more from a big box), or a
+## heal if everything is maxed.
 func contents(
-	levels: Dictionary[StringName, int], pool: UpgradePool, rng: RandomNumberGenerator
+	levels: Dictionary[StringName, int],
+	pool: UpgradePool,
+	rng: RandomNumberGenerator,
+	extra: int = 0
 ) -> GiftContents:
 	var gift: GiftContents = GiftContents.new()
 	gift.evolution = pool.ready_evolution(levels)
@@ -29,7 +37,7 @@ func contents(
 		return gift
 	var working: Dictionary[StringName, int] = levels.duplicate()
 	var given: Array[StringName] = []
-	for i: int in roll_count(rng):
+	for i: int in roll_count(rng) + extra:
 		var picked: UpgradeDef = _pick(_upgradable(working, pool), given, rng)
 		if picked == null:
 			break
