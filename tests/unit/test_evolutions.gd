@@ -100,7 +100,14 @@ func test_ac7_a_gift_box_with_a_ready_weapon_evolves_it() -> void:
 		assert_eq(gift.evolution, _evolution(&"yarn_bomb"))
 		assert_eq(gift.level_ups.size(), 0, "the evolution is the whole gift")
 		assert_false(gift.is_heal())
-		assert_eq(gift.lines()[0], "Yarn Cannon → Yarn Bomb!")
+		var cards: Array[GiftCard] = gift.cards()
+		assert_eq(cards.size(), 1, "one evolution card")
+		assert_true(cards[0].is_evolution())
+		assert_eq(cards[0].from_name, "Yarn Cannon")
+		assert_eq(cards[0].from_icon, POOL.find(&"yarn_cannon").icon, "old weapon ...")
+		assert_eq(cards[0].icon, _evolution(&"yarn_bomb").icon, "... → new weapon")
+		assert_eq(cards[0].title, "Yarn Bomb")
+		assert_eq(cards[0].text, _evolution(&"yarn_bomb").card_text)
 
 
 func test_ac9_weapon_cards_carry_their_partner() -> void:

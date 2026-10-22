@@ -1,7 +1,7 @@
 extends "res://tests/scenarios/run_scenario.gd"
-## Scenario (spec 02 §6, §8, AC-6, AC-8, AC-25): elites are big zombies with a gold patch that
-## fire one telegraphed pattern and drop a gift box; touching the box opens it with the gift box
-## moment for the player who touched it.
+## Scenario (spec 02 §6, §8, §20, AC-6, AC-8, AC-25, AC-26, AC-27): elites are big zombies with a
+## gold patch that fire one telegraphed pattern and drop a gift box; touching the box opens it with
+## the gift box moment for the player who touched it. Its contents stay as cards until confirmed.
 
 const SHAMBLER: EnemyStats = preload("res://data/enemies/shambler.tres")
 const ELITE: EliteRules = preload("res://data/elite_rules.tres")
@@ -42,6 +42,31 @@ func _boomerang(player: Player, level: int) -> Weapon:
 	var weapon: Weapon = player.add_weapon(player.stats.starting_weapon)
 	weapon.level = level
 	return weapon
+
+
+## A quiet run where Banane has a level 1 boomerang and a gift box opens for him.
+func _open_box() -> void:
+	await _quiet_run()
+	_boomerang(first_player(), 1)
+	await _drop_box()
+
+
+## Drops a gift box on player 1 and waits until it opens.
+func _drop_box() -> void:
+	run.drop_gift_box(first_player().global_position)
+	assert_true(await _wait_until(run.gift_screen.is_open, 1.0), "the box opens")
+
+
+func _showing_contents() -> bool:
+	return run.gift_screen.showing_contents
+
+
+## Presses and releases a key (two frames each).
+func _press_key(key: Key) -> void:
+	sender.key_down(key)
+	await wait_physics_frames(2)
+	sender.key_up(key)
+	await wait_physics_frames(2)
 
 
 func test_ac6_elite_is_big_with_a_gold_patch_and_lots_of_health() -> void:
@@ -117,35 +142,83 @@ func test_ac6_touching_the_box_opens_the_gift_box_moment() -> void:
 	assert_eq(puppet.state, BananePuppet.State.QUACK, "Banane puts his sunglasses on")
 	assert_between(boomerang.level, 2, 4, "1-3 level-ups of the only thing he has")
 	var frozen_at: float = run.elapsed
-	await wait_physics_frames(roundi(run.gift_box_rules.moment_seconds * 0.5 * FPS))
+	await wait_physics_frames(roundi(run.gift_box_rules.opening_seconds * 0.6 * FPS))
 	assert_true(run.gift_screen.lid_popped, "the lid pops")
-	assert_true(run.gift_screen.contents_label.visible, "and shows what was inside")
-	assert_string_contains(run.gift_screen.contents_label.text, "Peel Boomerang")
-	var closed: bool = await _wait_until(
-		func() -> bool: return not run.gift_screen.is_open(), run.gift_box_rules.moment_seconds
+	assert_true(
+		await _wait_until(_showing_contents, run.gift_box_rules.opening_seconds),
+		"then what was inside is shown"
 	)
-	assert_true(closed, "after about 2 seconds it is over")
-	# The run may tick one frame between the moment closing and this check.
-	assert_almost_eq(run.elapsed, frozen_at, 1.5 / FPS, "the run timer waited")
+	assert_eq(run.gift_screen.cards[0].title_label.text, "Peel Boomerang")
+	await wait_seconds(2.0)
+	assert_true(run.gift_screen.is_open(), "it waits for the player")
+	assert_almost_eq(run.elapsed, frozen_at, 0.001, "the run timer waited")
+	await _press_key(KEY_ENTER)
+	assert_false(run.gift_screen.is_open(), "Enter closes it")
 	assert_false(run.is_frozen(), "and the run goes on")
 
 
-func test_ac6_a_key_press_skips_the_moment() -> void:
+func test_ac26_a_key_during_the_opening_jumps_to_the_contents() -> void:
+	await _open_box()
+	await wait_physics_frames(roundi(run.gift_box_rules.skip_delay * FPS) + 2)
+	assert_false(run.gift_screen.showing_contents, "still opening")
+	await _press_key(KEY_ENTER)
+	assert_true(run.gift_screen.is_open(), "a key never closes the box while it opens")
+	assert_true(run.gift_screen.showing_contents, "it jumps straight to the contents")
+	assert_true(run.gift_screen.lid_popped)
+	await _press_key(KEY_ENTER)
+	assert_true(run.gift_screen.is_open(), "the same key right after does not close it")
+
+
+func test_ac26_contents_wait_for_confirmation_not_movement() -> void:
+	await _open_box()
+	assert_true(await _wait_until(_showing_contents, 2.0))
+	await _press_key(KEY_SPACE)
+	assert_true(run.gift_screen.is_open(), "nothing closes it in the first 0.5 s")
+	assert_true(run.gift_screen.continue_button.disabled)
+	await wait_seconds(run.gift_box_rules.confirm_delay + 0.1)
+	for action: String in ["p1_move_up", "p1_move_down", "p1_move_left", "p1_move_right"]:
+		await hold_action(action, 3)
+	for key: Key in [KEY_W, KEY_A, KEY_S, KEY_D]:
+		await _press_key(key)
+	await wait_seconds(1.0)
+	assert_true(run.gift_screen.is_open(), "moving never closes it")
+	assert_true(run.is_frozen(), "the game stays paused")
+	assert_false(run.gift_screen.continue_button.disabled, "Continue is ready")
+
+
+func test_ac26_space_e_and_continue_click_close_it() -> void:
+	await _quiet_run()
+	_boomerang(first_player(), 1)
+	for how: String in ["space", "e", "click"]:
+		await _drop_box()
+		assert_true(await _wait_until(_showing_contents, 2.0))
+		await wait_seconds(run.gift_box_rules.confirm_delay + 0.1)
+		match how:
+			"space":
+				await _press_key(KEY_SPACE)
+			"e":
+				await _press_key(KEY_E)
+			"click":
+				run.gift_screen.continue_button.pressed.emit()
+				await wait_physics_frames(2)
+		assert_false(run.gift_screen.is_open(), "%s closes it" % how)
+		assert_false(run.is_frozen())
+
+
+func test_ac27_a_card_per_level_up_with_icon_name_and_level() -> void:
 	await _quiet_run()
 	var banane: Player = first_player()
-	_boomerang(banane, 1)
+	var boomerang: Weapon = _boomerang(banane, 1)
 	run.drop_gift_box(banane.global_position)
-	assert_true(await _wait_until(run.gift_screen.is_open, 1.0))
-	await wait_physics_frames(roundi(run.gift_box_rules.skip_delay * FPS) + 2)
-	sender.action_down("p1_move_up")
-	await wait_physics_frames(3)
-	sender.action_up("p1_move_up")
-	assert_true(run.gift_screen.is_open(), "moving doesn't skip it")
-	sender.key_down(KEY_ENTER)
-	await wait_physics_frames(2)
-	sender.key_up(KEY_ENTER)
-	assert_false(run.gift_screen.is_open(), "any other key skips it")
-	assert_false(run.is_frozen())
+	assert_true(await _wait_until(_showing_contents, 2.0))
+	var cards: Array[GiftCardView] = run.gift_screen.cards
+	assert_eq(cards.size(), boomerang.level - 1, "one card per level-up")
+	for index: int in cards.size():
+		assert_true(cards[index].visible)
+		assert_eq(cards[index].icon.icon, &"boomerang", "its felt icon")
+		assert_eq(cards[index].title_label.text, "Peel Boomerang")
+		assert_eq(cards[index].level_label.text, "Lv %d → %d" % [index + 1, index + 2])
+		assert_false(cards[index].from_icon.visible)
 
 
 func test_ac8_with_everything_maxed_the_box_heals() -> void:
@@ -158,8 +231,10 @@ func test_ac8_with_everything_maxed_the_box_heals() -> void:
 	assert_eq(boomerang.level, 5)
 	var heal: float = banane.max_health * run.gift_box_rules.heal_share
 	assert_eq(banane.health, 20.0 + heal, "a big heal instead")
-	await wait_physics_frames(roundi(run.gift_box_rules.moment_seconds * 0.6 * FPS))
-	assert_string_contains(run.gift_screen.contents_label.text, "heal")
+	assert_true(await _wait_until(_showing_contents, 2.0))
+	assert_eq(run.gift_screen.cards.size(), 1, "one heal card")
+	assert_eq(run.gift_screen.cards[0].title_label.text, "Big heal!")
+	assert_eq(run.gift_screen.cards[0].level_label.text, "+%d health" % roundi(heal), "how much")
 
 
 func test_ac25_the_box_opens_for_the_player_who_touched_it() -> void:

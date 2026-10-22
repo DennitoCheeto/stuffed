@@ -81,7 +81,6 @@ func test_ac7_a_ready_weapon_evolves_at_the_next_gift_box() -> void:
 	run.drop_gift_box(banane.global_position)
 	assert_true(await _wait_until(run.gift_screen.is_open, 1.0), "the box opens")
 	assert_eq(run.gift_screen.title_label.text, "Evolution!", "a bigger moment")
-	assert_string_contains(run.gift_screen.contents_label.text, "Peel Boomerang → Banana Split")
 	await wait_physics_frames(1)
 	assert_null(banane.weapon(&"peel_boomerang"), "the boomerang is gone")
 	var split: Weapon = banane.weapon(&"banana_split")
@@ -90,6 +89,28 @@ func test_ac7_a_ready_weapon_evolves_at_the_next_gift_box() -> void:
 	assert_eq(run.hud.weapon_slots[slot].icon_name, evolution.icon, "the HUD shows it")
 	assert_eq(banane.item_levels[&"quick_feet"], 1, "the item stays")
 	assert_true(RecipeBook.is_seen(&"banana_split"), "now seen on the Recipes page")
+
+
+func _showing_contents() -> bool:
+	return run.gift_screen.showing_contents
+
+
+func test_ac27_the_evolution_card_shows_old_and_new_weapon() -> void:
+	await _quiet_run()
+	var banane: Player = first_player()
+	var evolution: EvolutionDef = _ready_to_evolve(&"banana_split")
+	run.drop_gift_box(banane.global_position)
+	assert_true(await _wait_until(_showing_contents, 2.0), "the contents show")
+	var cards: Array[GiftCardView] = run.gift_screen.cards
+	assert_eq(cards.size(), 1, "the evolution is the whole gift")
+	var card: GiftCardView = cards[0]
+	assert_true(card.from_icon.visible, "the old weapon ...")
+	assert_eq(card.from_icon.icon, run.upgrade_pool.find(&"peel_boomerang").icon)
+	assert_true(card.arrow_label.visible, "... →")
+	assert_eq(card.icon.icon, evolution.icon, "... the evolved weapon")
+	assert_eq(card.title_label.text, "Banana Split")
+	assert_string_contains(card.level_label.text, "Peel Boomerang")
+	assert_eq(card.text_label.text, evolution.card_text, "with its one line")
 
 
 func test_ac7_without_the_partner_the_box_gives_level_ups() -> void:
