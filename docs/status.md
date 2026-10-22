@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-22 (M2-16 #72 and M2-17 #73 merged; #74, #75 open)_
+_Last updated: 2026-10-22 (M2-18 #74 and M2-19 #75 merged; all M2 tickets done)_
 
 ## Where we are
 
@@ -14,14 +14,15 @@ _Last updated: 2026-10-22 (M2-16 #72 and M2-17 #73 merged; #74, #75 open)_
 | Art direction | ✅ felt style "B — Soft", puppet animation (`docs/art/`) |
 | M0 Factory setup | ✅ done (PR #1) |
 | M1 Core run | ✅ accepted 2026-10-21 (PRs #17–#29; playtest P-1 … P-6 passed, 144 fps on the PO's PC) |
-| M2 Build variety | 🔨 17 tickets merged (PRs #47–#49, #51–#55, #57, #58, #60, #61, #63, #67, #69, #77, #78); playtest round 1 → spec 02 §20, fix tickets #74, #75 left |
+| M2 Build variety | 🔨 all 19 tickets merged (PRs #47–#49, #51–#55, #57, #58, #60, #61, #63, #67, #69, #77, #78, #80, #81); waiting for the PO playtest |
 
 ## Next step
 
-- First M2 playtest (2026-10-22) done; spec 02 §20 approved (PR #71) with 4 fix tickets. Done: **M2-16 #72** gift box
-  cards + confirmation (PR #77), **M2-17 #73** mortar landing ring (PR #78). Next: **M2-18 #74** clearer
-  reroll/skip/banish buttons, then **M2-19 #75** stronger evolved-weapon looks (1–2 per chat), then the PO
-  plays again for acceptance (P-1 … P-9; ask P-1 "want a different build next run?" again).
+- All spec 02 §20 fixes are merged: **M2-16** gift box cards (PR #77), **M2-17** mortar ring (PR #78), **M2-18** reroll/skip/banish
+  buttons (PR #80), **M2-19** evolved looks + golden HUD frame (PR #81).
+- The PO has not played the latest builds yet and wants **more features before the next download**. Proposed next
+  feature: the single-use floor pickups wish (big magnet, freeze, "something fun") as a short spec (PO approves),
+  then tickets. The M2 acceptance playtest (P-1 … P-9) then happens together with it.
 - After acceptance: write spec 03 for M3 (Town, vision §10) using the playtest feedback; the PO may send town wishes.
 
 ## Playtest notes (M2, first round)
@@ -123,3 +124,11 @@ _Last updated: 2026-10-22 (M2-16 #72 and M2-17 #73 merged; #74, #75 open)_
   scaled to `blast_radius()` (Big Spool included); fill disc child, thimble/shadow/dust are `top_level` sprites.
   Tests read `ring_radius()`, `fill_share()`, `height()`. Perl/regex edits that insert functions: check blank
   lines (exactly two between functions) or gdformat fails in CI.
+- Level-up buttons: `CardControlButton` (icon, key badge, dots, hint; `uses_text()` for tests). `LevelUpScreen`
+  pulses them on its first `open` (`is_pulsing()`); banish mode marks cards (`UpgradeCard.set_marked`), Esc cancels.
+- Evolved shot looks: `WeaponStats.shot_look` (`ShotLook` .tres sub-resource: part, size, trail, flash). Projectiles
+  call `dress(from)` at the end of `launch` and hurt zombies via `hurt()` (sparkle pop = `SparkleProjectile`).
+  Pooled shots drop the look in `reset`. A new evolved weapon needs its own part in `ProjectileLook` + a `ShotLook`.
+- gdformat joins a function signature onto one line when it fits in 100 chars (tabs = 4), and splits inline
+  lambdas in calls onto their own lines: in tests prefer small wait helpers over `func() -> bool:` arguments.
+  Avoid `\"` escapes in strings (it rewrote one).
