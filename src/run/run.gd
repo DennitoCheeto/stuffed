@@ -34,6 +34,8 @@ const MUFFLING: Array[StringName] = [&"pause", &"level_up", &"goal"]
 @export var upgrade_pool: UpgradePool
 ## What gift boxes give and how they open.
 @export var gift_box_rules: GiftBoxRules
+## When zombies drop floor pickups (Big Magnet, ...) and which.
+@export var floor_pickup_rules: FloorPickupRules
 
 ## Seconds since the run started.
 var elapsed: float = 0.0
@@ -64,6 +66,14 @@ var evolution_log: Array[Dictionary] = []
 ## Run time when the mini-boss / the boss was first beaten (-1 = not yet).
 var mini_boss_defeated_at: float = -1.0
 var boss_defeated_at: float = -1.0
+## Floor pickups grabbed so far, for the run log: {"name", "time", "player"}.
+var floor_pickup_log: Array[Dictionary] = []
+## Separate randomness for floor pickups, so they don't change the zombies or the cards.
+var pickup_rng: RandomNumberGenerator = RandomNumberGenerator.new()
+## Decides which kills drop a floor pickup.
+var floor_pickup_drops: FloorPickupDrops
+## Edge arrows to floor pickups out of sight (on the HUD).
+var pickup_arrows: PickupArrows = PickupArrows.new()
 
 ## False while the goal pops the horde (those zombies drop no XP).
 var _drops_enabled: bool = true
@@ -101,6 +111,8 @@ func _ready() -> void:
 		seed_value = randi_range(1, 2_147_483_647)
 	rng.seed = seed_value
 	upgrade_rng.seed = seed_value * 31 + 7
+	pickup_rng.seed = seed_value * 17 + 3
+	floor_pickup_drops = FloorPickupDrops.new(floor_pickup_rules, pickup_rng)
 	var furniture: Obstacles = arena.obstacles()
 	enemies.setup(actors, effects, arena.play_rect(), rules.max_enemies_alive, furniture)
 	projectiles.setup(enemies, arena.play_rect(), furniture)
@@ -132,6 +144,8 @@ func _ready() -> void:
 	pause_menu.resumed.connect(unfreeze.bind(&"pause"))
 	pause_menu.quit_requested.connect(_on_quit_requested)
 	pause_menu.upgrade_pool = upgrade_pool
+	pickup_arrows.floor_items = floor_items
+	hud.add_child(pickup_arrows)
 	dev_menu.setup(self)
 	dev_menu.restart_requested.connect(restart_requested.emit)
 	var first: Player = spawn_player(0, arena.center())
@@ -353,6 +367,7 @@ func make_result(ending: String) -> RunResult:
 	result.banishes_used = first.card_controls.banishes_used
 	result.mini_boss_defeated_at = mini_boss_defeated_at
 	result.boss_defeated_at = boss_defeated_at
+	result.floor_pickups = floor_pickup_log.duplicate(true)
 	return result
 
 
@@ -463,6 +478,9 @@ func _on_zombie_killed(zombie: Zombie) -> void:
 		_note_boss_defeat(zombie)
 	if _drops_enabled:
 		pickups.drop(zombie.xp_button(), zombie.position)
+		var kind: FloorPickupDef = floor_pickup_drops.roll(elapsed, floor_pickups().size())
+		if kind != null:
+			drop_floor_pickup(kind.id, zombie.position)
 		if zombie.is_elite() or zombie.is_boss():
 			var box: GiftBox = drop_gift_box(zombie.position, is_final_boss(zombie))
 			if box.big:
@@ -557,3 +575,39 @@ func _on_gift_moment_finished() -> void:
 		_show_next_level_up(true)
 	else:
 		_show_next_gift()
+
+
+## Floor pickups still lying on the floor.
+func floor_pickups() -> Array[FloorPickup]:
+	var result: Array[FloorPickup] = []
+	for child: Node in floor_items.get_children():
+		var pickup: FloorPickup = child as FloorPickup
+		if pickup != null and not pickup.taken and not pickup.is_queued_for_deletion():
+			result.append(pickup)
+	return result
+
+
+## Puts the floor pickup `id` (e.g. &"magnet") on the floor at `at`; the first player who
+## touches it triggers it.
+func drop_floor_pickup(id: StringName, at: Vector2) -> FloorPickup:
+	var pickup: FloorPickup = FloorPickup.new()
+	pickup.position = at
+	pickup.setup(floor_pickup_rules.find(id), floor_pickup_rules)
+	pickup.touched.connect(_on_floor_pickup_touched)
+	floor_items.add_child(pickup)
+	return pickup
+
+
+## A floor pickup works at once (spec 02b §2): banner, sound, log line, then its effect.
+func _on_floor_pickup_touched(pickup: FloorPickup, player: Player) -> void:
+	var kind: FloorPickupDef = pickup.kind
+	pickup.queue_free()
+	hud.show_banner(kind.banner, kind.banner_subtitle, floor_pickup_rules.banner_seconds)
+	Sfx.play(kind.sound)
+	var entry: Dictionary = {
+		"name": kind.display_name, "time": elapsed, "player": player.player_index
+	}
+	floor_pickup_log.append(entry)
+	match kind.id:
+		&"magnet":
+			pickups.attract_all(player)

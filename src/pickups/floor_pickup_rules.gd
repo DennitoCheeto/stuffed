@@ -1,0 +1,48 @@
+class_name FloorPickupRules
+extends Resource
+## When zombies drop floor pickups and which kind (spec 02b §4).
+## Tune it in data/floor_pickup_rules.tres, not in code.
+
+## Every kind that can drop, with its odds.
+@export var kinds: Array[FloorPickupDef] = []
+## Nothing drops before this run time (seconds).
+@export var first_drop_after: float = 30.0
+## After a drop, the next one can't come sooner than this (seconds) ...
+@export var min_gap: float = 45.0
+## ... plus a random extra of up to this many seconds (so about one per minute on average).
+@export var gap_spread: float = 30.0
+## Once a drop is due, each killed zombie drops it with this chance (0.25 = one in four).
+@export var drop_chance: float = 0.25
+## While this many lie on the floor, nothing new drops.
+@export var max_on_floor: int = 2
+## A player this close (plus their hitbox) grabs it.
+@export var touch_radius: float = 22.0
+## How long the name banner stays up.
+@export var banner_seconds: float = 1.8
+
+
+## The kind with this id, or null.
+func find(id: StringName) -> FloorPickupDef:
+	for kind: FloorPickupDef in kinds:
+		if kind.id == id:
+			return kind
+	return null
+
+
+## A random kind, following the weights.
+func pick(rng: RandomNumberGenerator) -> FloorPickupDef:
+	var total: float = 0.0
+	for kind: FloorPickupDef in kinds:
+		total += kind.weight
+	var roll_at: float = rng.randf() * total
+	for kind: FloorPickupDef in kinds:
+		roll_at -= kind.weight
+		if roll_at < 0.0:
+			return kind
+	return kinds[kinds.size() - 1]
+
+
+## Run time when the next drop may come, after one at `last_drop` (or the run start).
+func next_drop_time(last_drop: float, rng: RandomNumberGenerator, first: bool) -> float:
+	var earliest: float = first_drop_after if first else last_drop + min_gap
+	return earliest + rng.randf() * gap_spread

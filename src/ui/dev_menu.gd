@@ -151,6 +151,7 @@ func _build() -> void:
 	_row(column, [MAX_EVERYTHING, REFILL], [max_everything, _refill_card_controls])
 	_build_spawns(column)
 	_row(column, ["Spawn elite", "Drop gift box"], [_spawn_elite, _drop_gift_box])
+	_build_floor_drops(column)
 	_row(column, ["Spawn Big Ted", "Jump to Big Ted"], [_spawn_mini_boss, _jump_to_mini_boss])
 	_row(column, ["Spawn the King", "Jump to the King"], [_spawn_boss, _jump_to_boss])
 	var evolutions: Array[EvolutionDef] = run.upgrade_pool.evolutions
@@ -299,6 +300,21 @@ func _spawn_boss() -> void:
 ## A second before the boss arrives (at the run goal).
 func _jump_to_boss() -> void:
 	_jump_to(run.rules.goal_seconds - 1.0)
+
+
+## One "Drop <name>" button per floor pickup kind (spec 02b §6).
+func _build_floor_drops(parent: Control) -> void:
+	var labels: Array[String] = []
+	var actions: Array[Callable] = []
+	for kind: FloorPickupDef in run.floor_pickup_rules.kinds:
+		labels.append("Drop %s" % kind.display_name)
+		actions.append(_drop_floor_pickup.bind(kind.id))
+	_row(parent, labels, actions)
+
+
+## A floor pickup a few steps to the left of player 1.
+func _drop_floor_pickup(id: StringName) -> void:
+	run.drop_floor_pickup(id, _player().global_position + Vector2(-80.0, 0.0))
 
 
 ## A gift box a few steps to the right of player 1.

@@ -22,21 +22,22 @@ static func to_entry(result: RunResult) -> Dictionary:
 		"kills": result.kills,
 		"killed_by": result.killed_by,
 		"upgrades": Array(result.upgrades),
-		"evolutions": _evolutions(result.evolutions),
+		"evolutions": _timed(result.evolutions),
 		"rerolls_used": result.rerolls_used,
 		"skips_used": result.skips_used,
 		"banishes_used": result.banishes_used,
 		"mini_boss_defeated_at": _time_or_null(result.mini_boss_defeated_at),
 		"boss_defeated_at": _time_or_null(result.boss_defeated_at),
+		"floor_pickups": _timed(result.floor_pickups),
 	}
 
 
-## Each evolution with its time rounded to 0.1 s.
-static func _evolutions(evolutions: Array[Dictionary]) -> Array[Dictionary]:
+## Each event (evolution, floor pickup) with its time rounded to 0.1 s.
+static func _timed(events: Array[Dictionary]) -> Array[Dictionary]:
 	var entries: Array[Dictionary] = []
-	for evolution: Dictionary in evolutions:
-		var entry: Dictionary = evolution.duplicate()
-		entry["time"] = snappedf(float(evolution["time"]), 0.1)
+	for event: Dictionary in events:
+		var entry: Dictionary = event.duplicate()
+		entry["time"] = snappedf(float(event["time"]), 0.1)
 		entries.append(entry)
 	return entries
 
