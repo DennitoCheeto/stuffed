@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="MaterialRules" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/town/material_rules.gd" id="1_rules"]
+
+[resource]
+script = ExtResource("1_rules")
+keep_share_won = 1.0
+keep_share_lost = 0.5
