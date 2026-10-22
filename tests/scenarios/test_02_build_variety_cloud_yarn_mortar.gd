@@ -187,6 +187,7 @@ func test_ac28_mortar_ring_marks_the_landing_area_for_the_whole_flight() -> void
 	assert_true(inside.puppet.flash.visible, "and flashes")
 	assert_false(_hurt(outside), "a zombie outside the ring is not")
 
+
 func test_ac2_mortar_level_2_lobs_two_thimbles() -> void:
 	var mortar: Weapon = await _run_with_card(&"thimble_mortar")
 	_level_up(&"thimble_mortar", 2)

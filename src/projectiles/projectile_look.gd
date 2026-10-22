@@ -211,7 +211,6 @@ static func _shadow() -> FeltPiece:
 	return shadow
 
 
-
 ## The mortar's landing ring: a felt band with a stitched seam inside; RING_RADIUS across.
 static func _ring() -> FeltPiece:
 	var ring: FeltPiece = FeltPiece.new()
@@ -241,6 +240,7 @@ static func _dust() -> FeltPiece:
 	dust.polygon = FeltShapes.circle(Vector2.ZERO, DUST_RADIUS * UNITS, 16)
 	dust.color = DUST_COLOR
 	return dust
+
 
 ## A round puff of yarn with loose strands sticking out; fills BURST_RADIUS.
 static func _burst() -> FeltPiece:
