@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-22 (M2-18 #74 and M2-19 #75 merged; all M2 tickets done)_
+_Last updated: 2026-10-22 (spec 02b floor pickups drafted, waiting for approval)_
 
 ## Where we are
 
@@ -21,8 +21,9 @@ _Last updated: 2026-10-22 (M2-18 #74 and M2-19 #75 merged; all M2 tickets done)_
 - All spec 02 §20 fixes are merged: **M2-16** gift box cards (PR #77), **M2-17** mortar ring (PR #78), **M2-18** reroll/skip/banish
   buttons (PR #80), **M2-19** evolved looks + golden HUD frame (PR #81).
 - The PO has not played the latest builds yet and wants **more features before the next download**. Proposed next
-  feature: the single-use floor pickups wish (big magnet, freeze, "something fun") as a short spec (PO approves),
-  then tickets. The M2 acceptance playtest (P-1 … P-9) then happens together with it.
+  feature: floor pickups. **Spec `docs/specs/02b-floor-pickups.md` (Big Magnet, Snow Globe, Party Popper) is
+  waiting for PO approval** in its spec PR. After approval: issues for tickets M2-20 … M2-22, then build them.
+  The M2 acceptance playtest (P-1 … P-11) then happens together with it.
 - After acceptance: write spec 03 for M3 (Town, vision §10) using the playtest feedback; the PO may send town wishes.
 
 ## Playtest notes (M2, first round)
