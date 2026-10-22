@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-21 (M2-01 … M2-10 merged)_
+_Last updated: 2026-10-22 (M2-01 … M2-12 merged)_
 
 ## Where we are
 
@@ -14,15 +14,12 @@ _Last updated: 2026-10-21 (M2-01 … M2-10 merged)_
 | Art direction | ✅ felt style "B — Soft", puppet animation (`docs/art/`) |
 | M0 Factory setup | ✅ done (PR #1) |
 | M1 Core run | ✅ accepted 2026-10-21 (PRs #17–#29; playtest P-1 … P-6 passed, 144 fps on the PO's PC) |
-| M2 Build variety | 🔨 spec 02 approved; issues #32–#46 (milestone "M2 — Build variety"); M2-01…M2-10 merged (PRs #47–#49, #51–#55, #57, #58) |
+| M2 Build variety | 🔨 spec 02 approved; issues #32–#46 (milestone "M2 — Build variety"); M2-01…M2-12 merged (PRs #47–#49, #51–#55, #57, #58, #60, #61) |
 
 ## Next step
 
-- Next: M2-11 (#42, mini-boss Big Ted, AC-17), then the rest of M2 in order (spec 02 §18 list).
-  Big Ted drops a gift box: use `run.drop_gift_box(at)` (spec §6 says the boss box gives more: add a
-  bonus to `GiftBoxRules.contents` then).
-- The PO has not played M2 yet (wants more features first). The run is now 8:00; the goal still works as in
-  M1 until the boss arrives (M2-12).
+- Next: M2-13 (#44, bedroom furniture + steering, AC-20/21), then M2-14 (#45), M2-15 (#46).
+- The PO has not played M2 yet (wants more features first). The run ends by beating the Sock Puppet King.
 
 ## Playtest notes (M1)
 
@@ -88,3 +85,9 @@ _Last updated: 2026-10-21 (M2-01 … M2-10 merged)_
   now a Banana Split: gift box tests that need "all maxed" must avoid recipe pairs.
 - gdformat wants exactly one newline at the end of a file. Bash heredocs containing apostrophes broke in this
   tool twice: write files with the Write tool instead.
+- Bosses: `BossDef` / `BossBrain` subclasses (`BigTedDef`/`BigTedBrain`, `SockKingDef`/`SockKingBrain`; the def
+  builds its brain via `make_brain`). Spawn with `enemies.spawn_boss` / `spawner.spawn_boss`; find them with
+  `enemies.bosses()`; `run.is_final_boss(z)`. Telegraphs are `BossTelegraph` (child of the boss, z -1).
+  gdlint max-returns is 6: put a pattern `match` in its own `_pattern_step`.
+- The goal is beating the King (not 8:00). Scenario tests use `beat_the_boss(run)` + `wait_for_goal_screen(run)`
+  from `run_scenario.gd`. Endless time counts from `run.goal_time`.
