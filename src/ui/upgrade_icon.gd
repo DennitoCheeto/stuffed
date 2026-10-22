@@ -9,8 +9,8 @@ const EVOLVED_RING_COLOR: Color = Color("#f2c230")
 const EVOLVED: Array[StringName] = [&"split", &"storm", &"volley", &"bomb"]
 
 ## Which icon to draw: boomerang, pin, needles, buttons, cloud, yarn, thimble, cannon, whip,
-## zipper, feet, stuffing, magnet, hands, scissors, thread, spool, felt, snack. "" draws only the
-## empty round back (an empty HUD slot).
+## zipper, feet, stuffing, magnet, hands, scissors, thread, spool, felt, snack, dice, arrow. "" draws
+## only the empty round back (an empty HUD slot).
 var icon: StringName = &"":
 	set(value):
 		icon = value
@@ -79,6 +79,10 @@ func _draw() -> void:
 			_volley()
 		&"bomb":
 			_bomb()
+		&"dice":
+			_dice()
+		&"arrow":
+			_arrow()
 
 
 func _peel(color: Color, tilt: float) -> void:
@@ -93,6 +97,22 @@ func _peel(color: Color, tilt: float) -> void:
 
 func _ellipse(center: Vector2, radii: Vector2, color: Color) -> void:
 	draw_colored_polygon(FeltShapes.ellipse(center, radii, 16), color)
+
+
+func _dice() -> void:
+	var face: PackedVector2Array = FeltShapes.ellipse(Vector2.ZERO, Vector2(22, 22), 4)
+	var square: PackedVector2Array = []
+	for point: Vector2 in face:
+		square.append(point.rotated(PI / 4.0 + 0.2))
+	draw_colored_polygon(square, Color("#f4f1e8"))
+	for pip: Vector2 in [Vector2(-8, -8), Vector2(0, 0), Vector2(8, 8)]:
+		draw_circle(pip.rotated(0.2), 3.5, Color("#3a7fc0"))
+
+
+func _arrow() -> void:
+	var color: Color = Color("#7bd88f")
+	draw_arc(Vector2(-4, 6), 16.0, PI, TAU * 0.92, 16, color, 6.0)
+	draw_colored_polygon(PackedVector2Array([Vector2(8, -14), Vector2(24, 2), Vector2(4, 6)]), color)
 
 
 func _scissors() -> void:

@@ -28,6 +28,19 @@ func refill() -> void:
 	banishes_left = _pool.banishes_per_run
 
 
+## The starting counts for a run (the most dots on the level-up buttons).
+func max_rerolls() -> int:
+	return _pool.rerolls_per_run
+
+
+func max_skips() -> int:
+	return _pool.skips_per_run
+
+
+func max_banishes() -> int:
+	return _pool.banishes_per_run
+
+
 ## Uses one reroll. False (and nothing used) when none are left.
 func use_reroll() -> bool:
 	if rerolls_left <= 0:

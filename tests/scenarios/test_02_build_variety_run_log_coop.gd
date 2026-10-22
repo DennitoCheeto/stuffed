@@ -112,7 +112,7 @@ func test_ac25_each_player_has_their_own_cards_and_rerolls() -> void:
 	banane.card_controls.use_reroll()
 	await _level_up(second)
 	var screen: LevelUpScreen = run.level_up_screen
-	assert_eq(screen.reroll_button.text, "Reroll [R]  3 left", "player 2's own rerolls")
+	assert_eq(screen.reroll_button.uses_left, 3, "player 2's own rerolls")
 	await _press("reroll_cards")
 	assert_eq(second.card_controls.rerolls_left, 2, "player 2 used one")
 	assert_eq(banane.card_controls.rerolls_left, 2, "player 1's count is untouched")

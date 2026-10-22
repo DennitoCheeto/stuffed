@@ -49,7 +49,7 @@ func test_ac10_reroll_shows_three_new_cards_and_counts_down() -> void:
 	await _quiet_run()
 	await _level_up()
 	var screen: LevelUpScreen = run.level_up_screen
-	assert_eq(screen.reroll_button.text, "Reroll [R]  3 left", "the count is on the button")
+	assert_eq(screen.reroll_button.uses_text(), "●●●", "the count is on the button")
 	var before: Array[StringName] = _card_ids()
 	await _press("reroll_cards")
 	var after: Array[StringName] = _card_ids()
@@ -57,7 +57,7 @@ func test_ac10_reroll_shows_three_new_cards_and_counts_down() -> void:
 	for id: StringName in before:
 		assert_does_not_have(after, id, "every card is new")
 	assert_eq(first_player().card_controls.rerolls_left, 2, "one reroll used")
-	assert_eq(screen.reroll_button.text, "Reroll [R]  2 left")
+	assert_eq(screen.reroll_button.uses_text(), "●●○")
 	assert_true(screen.is_open(), "still choosing")
 	assert_true(run.is_frozen(), "still paused")
 
@@ -71,7 +71,7 @@ func test_ac10_with_no_rerolls_left_the_button_is_disabled() -> void:
 	await _press("reroll_cards")
 	assert_eq(first_player().card_controls.rerolls_left, 0)
 	assert_true(screen.reroll_button.disabled, "disabled at 0")
-	assert_eq(screen.reroll_button.text, "Reroll [R]  0 left")
+	assert_eq(screen.reroll_button.uses_text(), "none left")
 	var before: Array[StringName] = _card_ids()
 	await _press("reroll_cards")
 	assert_eq(_card_ids(), before, "R does nothing at 0")
@@ -86,7 +86,7 @@ func test_ac11_skip_closes_without_an_upgrade_and_heals_a_little() -> void:
 	banane.health = banane.max_health * 0.5
 	var weapons_before: int = banane.weapons().size()
 	await _level_up()
-	assert_eq(run.level_up_screen.skip_button.text, "Skip [S]  3 left")
+	assert_eq(run.level_up_screen.skip_button.uses_left, 3)
 	await _press("skip_cards")
 	await wait_physics_frames(2)
 	assert_false(run.level_up_screen.is_open(), "cards closed")
@@ -118,7 +118,7 @@ func test_ac12_banished_card_is_replaced_and_never_offered_again() -> void:
 	run.upgrade_pool = _only(ids)
 	await _level_up()
 	var screen: LevelUpScreen = run.level_up_screen
-	assert_eq(screen.banish_button.text, "Banish [B]  2 left")
+	assert_eq(screen.banish_button.uses_text(), "●●")
 	var before: Array[StringName] = _card_ids()
 	var victim: StringName = before[1]
 	await _press("banish_card")
@@ -131,7 +131,7 @@ func test_ac12_banished_card_is_replaced_and_never_offered_again() -> void:
 	assert_eq(after[0], before[0], "the other cards stay")
 	assert_eq(after[2], before[2], "the other cards stay")
 	assert_eq(first_player().picked_upgrades.size(), 0, "banishing doesn't pick")
-	assert_eq(screen.banish_button.text, "Banish [B]  1 left")
+	assert_eq(screen.banish_button.uses_text(), "●○")
 	for level: int in 8:
 		await _press("pick_card_1")
 		await _level_up()
