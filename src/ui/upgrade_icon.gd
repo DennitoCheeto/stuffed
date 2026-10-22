@@ -9,8 +9,8 @@ const EVOLVED_RING_COLOR: Color = Color("#f2c230")
 const EVOLVED: Array[StringName] = [&"split", &"storm", &"volley", &"bomb"]
 
 ## Which icon to draw: boomerang, pin, needles, buttons, cloud, yarn, thimble, cannon, whip,
-## zipper, feet, stuffing, magnet, hands, scissors, thread, spool, felt, snack, dice, arrow. "" draws
-## only the empty round back (an empty HUD slot).
+## zipper, feet, stuffing, magnet, hands, scissors, thread, spool, felt, snack, dice, arrow.
+## "" draws only the empty round back (an empty HUD slot).
 var icon: StringName = &"":
 	set(value):
 		icon = value
@@ -112,7 +112,8 @@ func _dice() -> void:
 func _arrow() -> void:
 	var color: Color = Color("#7bd88f")
 	draw_arc(Vector2(-4, 6), 16.0, PI, TAU * 0.92, 16, color, 6.0)
-	draw_colored_polygon(PackedVector2Array([Vector2(8, -14), Vector2(24, 2), Vector2(4, 6)]), color)
+	var head: PackedVector2Array = [Vector2(8, -14), Vector2(24, 2), Vector2(4, 6)]
+	draw_colored_polygon(head, color)
 
 
 func _scissors() -> void:
