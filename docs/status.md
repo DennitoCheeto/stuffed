@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-22 (M2-01 … M2-12 merged)_
+_Last updated: 2026-10-22 (M2-01 … M2-13 merged)_
 
 ## Where we are
 
@@ -14,11 +14,13 @@ _Last updated: 2026-10-22 (M2-01 … M2-12 merged)_
 | Art direction | ✅ felt style "B — Soft", puppet animation (`docs/art/`) |
 | M0 Factory setup | ✅ done (PR #1) |
 | M1 Core run | ✅ accepted 2026-10-21 (PRs #17–#29; playtest P-1 … P-6 passed, 144 fps on the PO's PC) |
-| M2 Build variety | 🔨 spec 02 approved; issues #32–#46 (milestone "M2 — Build variety"); M2-01…M2-12 merged (PRs #47–#49, #51–#55, #57, #58, #60, #61) |
+| M2 Build variety | 🔨 spec 02 approved; issues #32–#46 (milestone "M2 — Build variety"); M2-01…M2-13 merged (PRs #47–#49, #51–#55, #57, #58, #60, #61, #63) |
 
 ## Next step
 
-- Next: M2-13 (#44, bedroom furniture + steering, AC-20/21), then M2-14 (#45), M2-15 (#46).
+- Next: M2-14 (#45, sounds and feel pass, spec 02 §12), then M2-15 (#46, dev menu, run log, data checks,
+  co-op test). Then the PO plays M2 for acceptance. After that: write spec 03 for M3 (Town, vision §10) using the
+  playtest feedback; the PO may send town wishes for it.
 - The PO has not played M2 yet (wants more features first). The run ends by beating the Sock Puppet King.
 
 ## Playtest notes (M1)
@@ -45,8 +47,10 @@ _Last updated: 2026-10-22 (M2-01 … M2-12 merged)_
   `ProjectileLook`. Look up pool cards with `pool.find(id)`, not by index.
 - gdlint `class-definitions-order`: signals, consts, plain vars, then `@onready` vars, and all consts at the top of
   test files too. gdformat joins a call or dictionary onto one line whenever it fits in 100 chars.
-- The Linux CI test job can hang at exit after all tests passed (M2-04: 12-min timeout). Re-run the failed job
-  once (`gh run rerun <run> --failed`); if it hangs again, look for a real cause.
+- Godot on Linux CI often hangs at exit after all tests ran (most runs since M2-12, even docs-only PRs).
+  `tools/test.sh` handles it (PR #65): 30 s after `junit.xml` is written it stops Godot and judges the run by
+  the report ("Godot did not quit ... stopping it" in the log is fine). A hang *during* the tests still hits the
+  12-min job timeout: then look for a real cause. Timing asserts in scenarios: allow one frame (PR #64).
 - Level-up screen: Reroll (R) / Skip (S) / Banish (B, then 1/2/3). Counts per run + skip heal in `upgrade_pool.tres`,
   per player in `Player.card_controls` (`CardControls`). `UpgradePool.roll(levels, rng, excluded, avoid, count)`:
   banished ids go in `excluded`. S is also "move down": watch for accidental skips in the playtest.
@@ -91,3 +95,7 @@ _Last updated: 2026-10-22 (M2-01 … M2-12 merged)_
   gdlint max-returns is 6: put a pattern `match` in its own `_pattern_step`.
 - The goal is beating the King (not 8:00). Scenario tests use `beat_the_boss(run)` + `wait_for_goal_screen(run)`
   from `run_scenario.gd`. Endless time counts from `run.goal_time`.
+- Furniture: `data/arena/bedroom_furniture.tres` (`FurnitureLayout` of `FurniturePiece`, kind + rect + blocks).
+  Players are blocked by physics bodies (wall layer), zombies/enemy bullets/spawns by `Obstacles`
+  (`run.enemies.obstacles`, `push_out`, `steer` with a per-zombie `detour`). Player shots ignore it. Keep the
+  first screen around the arena centre free (scenario tests play there) and wide gaps between pieces.
