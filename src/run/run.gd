@@ -40,6 +40,8 @@ const MUFFLING: Array[StringName] = [&"pause", &"level_up", &"goal"]
 @export var gift_box_rules: GiftBoxRules
 ## When zombies drop floor pickups (Big Magnet, ...) and which.
 @export var floor_pickup_rules: FloorPickupRules
+## What kills, gift boxes and the win add to the haul (spec 03 §3).
+@export var material_rules: MaterialRules
 
 ## Seconds since the run started.
 var elapsed: float = 0.0
@@ -80,6 +82,8 @@ var floor_pickup_drops: FloorPickupDrops
 var pickup_arrows: PickupArrows = PickupArrows.new()
 ## Materials and a freed plushie collected for the town in this run (spec 03 §3).
 var haul: RunHaul = RunHaul.new()
+## Separate randomness for materials, so they don't change the zombies or the cards.
+var material_rng: RandomNumberGenerator = RandomNumberGenerator.new()
 
 ## False while the goal pops the horde (those zombies drop no XP).
 var _drops_enabled: bool = true
@@ -120,6 +124,7 @@ func _ready() -> void:
 	rng.seed = seed_value
 	upgrade_rng.seed = seed_value * 31 + 7
 	pickup_rng.seed = seed_value * 17 + 3
+	material_rng.seed = seed_value * 13 + 5
 	floor_pickup_drops = FloorPickupDrops.new(floor_pickup_rules, pickup_rng)
 	var furniture: Obstacles = arena.obstacles()
 	enemies.setup(actors, effects, arena.play_rect(), rules.max_enemies_alive, furniture)
@@ -380,6 +385,7 @@ func make_result(ending: String) -> RunResult:
 	result.mini_boss_defeated_at = mini_boss_defeated_at
 	result.boss_defeated_at = boss_defeated_at
 	result.floor_pickups = floor_pickup_log.duplicate(true)
+	result.materials_collected = haul.materials.duplicate()
 	return result
 
 
@@ -490,6 +496,7 @@ func _on_zombie_killed(zombie: Zombie) -> void:
 		_note_boss_defeat(zombie)
 	if _drops_enabled:
 		pickups.drop(zombie.xp_button(), zombie.position)
+		_collect_kill(zombie)
 		var kind: FloorPickupDef = floor_pickup_drops.roll(elapsed, floor_pickups().size())
 		if kind != null:
 			drop_floor_pickup(kind.id, zombie.position)
@@ -500,6 +507,7 @@ func _on_zombie_killed(zombie: Zombie) -> void:
 	if zombie.is_boss():
 		camera.shake(0.6)
 	if is_final_boss(zombie) and not goal_done:
+		collect(material_rules.victory_bonus.roll(material_rng), zombie.position, true)
 		_reach_goal()
 
 
@@ -509,6 +517,25 @@ func _note_boss_defeat(boss: Zombie) -> void:
 			boss_defeated_at = elapsed
 	elif mini_boss_defeated_at < 0.0:
 		mini_boss_defeated_at = elapsed
+
+
+## Adds `amounts` to the shared haul (any player's kill counts) and shows it on the HUD; with
+## `burst`, the pieces fly from world position `at` into the jars.
+func collect(amounts: Dictionary[String, int], at: Vector2, burst: bool = false) -> void:
+	for material: String in amounts:
+		haul.add(material, amounts[material])
+	hud.jars.show_haul(haul)
+	if burst and not amounts.is_empty():
+		hud.jars.burst(amounts, get_viewport().get_canvas_transform() * at)
+
+
+## A kill's materials go straight into the haul, never onto the floor (spec 03 §3).
+func _collect_kill(zombie: Zombie) -> void:
+	# The base type's name ("Tank"), not the elite's display name ("Elite Tank").
+	var amounts: Dictionary[String, int] = material_rules.for_kill(
+		zombie.stats.display_name, zombie.is_elite(), material_rng
+	)
+	collect(amounts, zombie.position, zombie.is_elite() or zombie.is_boss())
 
 
 func _on_player_evolved(new_weapon: Weapon, player: Player) -> void:
@@ -566,6 +593,7 @@ func _on_gift_box_touched(box: GiftBox, player: Player) -> void:
 	)
 	gift.player = player
 	gift.apply_to(player)
+	collect(material_rules.for_gift_box(box.big, material_rng), box.position, true)
 	box.queue_free()
 	_gift_queue.append(gift)
 	if not level_up_screen.is_open() and not gift_screen.is_open():
