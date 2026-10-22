@@ -1,6 +1,6 @@
 # 02b — Floor pickups: magnet, freeze, party popper (M2 add-on)
 
-Status: **DRAFT**, waiting for the product owner's approval.
+Status: **APPROVED** by the product owner, 2026-10-22 (PR #83).
 Milestone: **M2 — Build variety** add-on, played together with the M2 acceptance playtest.
 Based on: the M2 playtest wish (spec 02 §20, "Wish for later"); builds on [`01-core-run.md`](01-core-run.md) and
 [`02-build-variety.md`](02-build-variety.md).

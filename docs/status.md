@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-22 (spec 02b floor pickups drafted, waiting for approval)_
+_Last updated: 2026-10-22 (spec 02b floor pickups approved, issues #84–#86 created)_
 
 ## Where we are
 
@@ -14,16 +14,16 @@ _Last updated: 2026-10-22 (spec 02b floor pickups drafted, waiting for approval)
 | Art direction | ✅ felt style "B — Soft", puppet animation (`docs/art/`) |
 | M0 Factory setup | ✅ done (PR #1) |
 | M1 Core run | ✅ accepted 2026-10-21 (PRs #17–#29; playtest P-1 … P-6 passed, 144 fps on the PO's PC) |
-| M2 Build variety | 🔨 all 19 tickets merged (PRs #47–#49, #51–#55, #57, #58, #60, #61, #63, #67, #69, #77, #78, #80, #81); waiting for the PO playtest |
+| M2 Build variety | 🔨 all 19 tickets merged (PRs #47–#49, #51–#55, #57, #58, #60, #61, #63, #67, #69, #77, #78, #80, #81); + spec 02b floor pickups approved (#83), 3 tickets open; then the PO playtest |
 
 ## Next step
 
 - All spec 02 §20 fixes are merged: **M2-16** gift box cards (PR #77), **M2-17** mortar ring (PR #78), **M2-18** reroll/skip/banish
   buttons (PR #80), **M2-19** evolved looks + golden HUD frame (PR #81).
-- The PO has not played the latest builds yet and wants **more features before the next download**. Proposed next
-  feature: floor pickups. **Spec `docs/specs/02b-floor-pickups.md` (Big Magnet, Snow Globe, Party Popper) is
-  waiting for PO approval** in its spec PR. After approval: issues for tickets M2-20 … M2-22, then build them.
-  The M2 acceptance playtest (P-1 … P-11) then happens together with it.
+- The PO has not played the latest builds yet and wants **more features before the next download**.
+  **Spec 02b floor pickups approved** (PR #83, `docs/specs/02b-floor-pickups.md`). Next: **M2-20** #84 (pickup base +
+  Big Magnet), then **M2-21** #85 (Snow Globe), **M2-22** #86 (Party Popper). Then the M2 acceptance playtest
+  (P-1 … P-11) together with them.
 - After acceptance: write spec 03 for M3 (Town, vision §10) using the playtest feedback; the PO may send town wishes.
 
 ## Playtest notes (M2, first round)
