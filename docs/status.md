@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-22 (spec 03 Town drafted)_
+_Last updated: 2026-10-22 (spec 03 approved, M3 issues created)_
 
 ## Where we are
 
@@ -15,15 +15,17 @@ _Last updated: 2026-10-22 (spec 03 Town drafted)_
 | M0 Factory setup | ✅ done (PR #1) |
 | M1 Core run | ✅ accepted 2026-10-21 (PRs #17–#29; playtest P-1 … P-6 passed, 144 fps on the PO's PC) |
 | M2 Build variety | ✅ built (not yet accepted): all 19 tickets merged (PRs #47–#49, #51–#55, #57, #58, #60, #61, #63, #67, #69, #77, #78, #80, #81); + spec 02b floor pickups approved (#83): M2-20 (PR #88), M2-21 (PR #89) and M2-22 (PR #90) merged; PO playtest postponed, played with M3 |
-| M3 Town | 📝 spec 03 drafted, waiting for approval |
+| M3 Town | 🔨 spec 03 approved (PR #91); issues #92–#103 |
 
 ## Next step
 
 - M2 is fully built (spec 02 + §20 fixes + spec 02b floor pickups, PRs up to #90). The PO **postponed the M2
   acceptance playtest** (2026-10-22): P-1 … P-11 get played later, together with M3.
-- **Spec 03 (M3 Town) drafted**: `docs/specs/03-town.md`, spec PR open, waiting for PO approval (open questions in §12).
-- After approval: create the 12 M3 issues from spec 03 §15 and start with the save system (ticket 1).
-- M3 ACs are numbered AC-37 … AC-48, playtest P-12 … P-17. Ticket 10 needs photos + names of the GF's plushies from the PO.
+- **Spec 03 (M3 Town) approved** (PR #91, `docs/specs/03-town.md`). Issues **#92–#103** (M3-01 … M3-12, milestone
+  "M3 — Town"). Next: **M3-01** #92 save system, then M3-02 #93 town scene + flow.
+- M3 ACs are AC-37 … AC-48, playtest P-12 … P-17. **M3-10** (#101) needs photos + names of the girlfriend's
+  plushies from the PO: ask when starting it (M3-09 uses placeholder looks).
+- PO ideas for later: a skill / progress tree (own spec, after M3).
 
 ## Playtest notes (M2, first round)
 

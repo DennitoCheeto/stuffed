@@ -1,6 +1,6 @@
 # 03 — The Pillow Fort: town, materials, saving (M3)
 
-Status: **DRAFT**, waiting for the product owner's approval (first round of answers worked in, 2026-10-22).
+Status: **APPROVED** by the product owner, 2026-10-22 (PR #91).
 Milestone: **M3 — Town** (vision §10).
 Based on: [`00-product-vision.md`](00-product-vision.md) §2, §4, §5 (The loop, Town, Rescued plushies, Collection
 book), §6 (principles 2, 3, 4, 5, 6, 9); builds on [`01-core-run.md`](01-core-run.md) and
