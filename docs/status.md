@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-22 (M2-21 Snow Globe)_
+_Last updated: 2026-10-22 (M2-22 Party Popper)_
 
 ## Where we are
 
@@ -14,7 +14,7 @@ _Last updated: 2026-10-22 (M2-21 Snow Globe)_
 | Art direction | ✅ felt style "B — Soft", puppet animation (`docs/art/`) |
 | M0 Factory setup | ✅ done (PR #1) |
 | M1 Core run | ✅ accepted 2026-10-21 (PRs #17–#29; playtest P-1 … P-6 passed, 144 fps on the PO's PC) |
-| M2 Build variety | 🔨 all 19 tickets merged (PRs #47–#49, #51–#55, #57, #58, #60, #61, #63, #67, #69, #77, #78, #80, #81); + spec 02b floor pickups approved (#83): M2-20 (PR #88) and M2-21 merged, 1 ticket open; then the PO playtest |
+| M2 Build variety | 🔨 all 19 tickets merged (PRs #47–#49, #51–#55, #57, #58, #60, #61, #63, #67, #69, #77, #78, #80, #81); + spec 02b floor pickups approved (#83): M2-20 (PR #88), M2-21 (PR #89) and M2-22 merged; next: the PO playtest |
 
 ## Next step
 
@@ -22,8 +22,8 @@ _Last updated: 2026-10-22 (M2-21 Snow Globe)_
   buttons (PR #80), **M2-19** evolved looks + golden HUD frame (PR #81).
 - The PO has not played the latest builds yet and wants **more features before the next download**.
   **Spec 02b floor pickups approved** (PR #83, `docs/specs/02b-floor-pickups.md`). **M2-20** #84 (pickup base + Big Magnet) is
-  done (PR #88), **M2-21** #85 (Snow Globe) is done. Next: **M2-22** #86 (Party Popper). Then the M2 acceptance playtest
-  (P-1 … P-11) together with them.
+  done (PR #88), **M2-21** #85 (Snow Globe, PR #89) and **M2-22** #86 (Party Popper) are done. Next: the M2 acceptance
+  playtest (P-1 … P-11) on the "latest" build.
 - After acceptance: write spec 03 for M3 (Town, vision §10) using the playtest feedback; the PO may send town wishes.
 
 ## Playtest notes (M2, first round)
@@ -143,3 +143,6 @@ _Last updated: 2026-10-22 (M2-21 Snow Globe)_
   zombies: `zombie.frozen` / `zombie.thaw_shake`, tint `ZombiePuppet.ICE_TINT`; bosses run their whole turn at
   `delta * freeze_boss_speed`. `enemies.ice_cracking` plays `ice_crack`. Spawn tests at 120 s hit a breather
   (almost no spawns): use 150 s (a surge).
+- Party Popper: `run.party_pop(player)` hits every zombie inside `spawner.visible_rect()` (normal ones get their
+  full health, elites/bosses `popper_elite_share`/`popper_boss_share` of max health, in `floor_pickup_rules.tres`)
+  and adds a `ConfettiBlast` (one node draws all bits; `piece_offset(i)` / `piece_color(i)` for tests).

@@ -614,6 +614,8 @@ func _on_floor_pickup_touched(pickup: FloorPickup, player: Player) -> void:
 			pickups.attract_all(player)
 		&"snow_globe":
 			freeze_the_horde()
+		&"party_popper":
+			party_pop(player)
 
 
 ## Snow Globe (spec 02b §3): the horde freezes, bosses slow down, enemy bullets in the air pop
@@ -625,3 +627,24 @@ func freeze_the_horde() -> void:
 	var popped: PackedVector2Array = projectiles.pop_enemy_bullets()
 	if not popped.is_empty():
 		effects.add_child(FluffPoofs.new(popped))
+
+
+## Party Popper (spec 02b §3): confetti over the whole screen. Normal zombies on screen pop (and
+## drop their XP as usual), elites and bosses lose the share of their health set in data,
+## zombies off screen are untouched.
+func party_pop(player: Player) -> void:
+	var data: FloorPickupRules = floor_pickup_rules
+	var view: Rect2 = spawner.visible_rect()
+	for zombie: Zombie in enemies.zombies.duplicate():
+		if zombie.dead or not view.has_point(zombie.position):
+			continue
+		var hit: float = zombie.health
+		if zombie.is_boss():
+			hit = zombie.max_health * data.popper_boss_share
+		elif zombie.is_elite():
+			hit = zombie.max_health * data.popper_elite_share
+		enemies.damage(zombie, hit)
+	var seconds: float = data.popper_seconds
+	var confetti: ConfettiBlast = ConfettiBlast.new(player.global_position, view, seconds, randi())
+	effects.add_child(confetti)
+	camera.shake(0.3)
