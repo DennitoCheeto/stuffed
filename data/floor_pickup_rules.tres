@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="FloorPickupRules" load_steps=4 format=3]
+[gd_resource type="Resource" script_class="FloorPickupRules" load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://src/pickups/floor_pickup_rules.gd" id="1_rules"]
 [ext_resource type="Script" path="res://src/pickups/floor_pickup_def.gd" id="2_def"]
@@ -12,9 +12,18 @@ banner_subtitle = "All XP flies to you"
 weight = 40.0
 sound = &"magnet"
 
+[sub_resource type="Resource" id="Resource_snow_globe"]
+script = ExtResource("2_def")
+id = &"snow_globe"
+display_name = "Snow Globe"
+banner = "SNOW GLOBE!"
+banner_subtitle = "The horde is frozen"
+weight = 30.0
+sound = &"snow_globe"
+
 [resource]
 script = ExtResource("1_rules")
-kinds = Array[ExtResource("2_def")]([SubResource("Resource_magnet")])
+kinds = Array[ExtResource("2_def")]([SubResource("Resource_magnet"), SubResource("Resource_snow_globe")])
 first_drop_after = 30.0
 min_gap = 45.0
 gap_spread = 30.0
@@ -22,3 +31,6 @@ drop_chance = 0.25
 max_on_floor = 2
 touch_radius = 22.0
 banner_seconds = 1.8
+freeze_seconds = 5.0
+freeze_crack_seconds = 1.0
+freeze_boss_speed = 0.5

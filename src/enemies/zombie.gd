@@ -44,6 +44,10 @@ var attack_cooldown: float = 0.0
 var volleys: int = 0
 ## Damage of one of its stuffing balls (endless mode scales it like touching).
 var spit_damage: float = 0.0
+## Frozen by a Snow Globe: it stands still in its pose with an icy tint (set by the manager).
+var frozen: bool = false
+## 0..1 while frozen: how hard it shakes because the ice is cracking (the freeze ends soon).
+var thaw_shake: float = 0.0
 
 var _time: float = 0.0
 var _since_hit: float = INF
@@ -164,8 +168,10 @@ func windup_progress() -> float:
 
 ## Advances its timers and animation by one frame.
 func tick(delta: float) -> void:
-	_time += delta
+	if not frozen:
+		_time += delta
 	_since_hit += delta
+	puppet.chill(frozen, thaw_shake)
 	stun_left = maxf(stun_left - delta, 0.0)
 	slow_left = maxf(slow_left - delta, 0.0)
 	if slow_left <= 0.0:

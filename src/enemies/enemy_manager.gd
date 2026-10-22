@@ -24,6 +24,10 @@ signal boss_attacked(boss: Zombie, pattern: StringName)
 signal boss_angry(boss: Zombie)
 ## A boss landed from a lunge.
 signal boss_landed(boss: Zombie)
+## A freeze is about to end: the ice cracks (sound).
+signal ice_cracking
+## A freeze ended: everything moves again.
+signal thawed
 
 ## Weapons find the manager through this group.
 const GROUP: StringName = &"enemy_manager"
@@ -49,7 +53,15 @@ var kills: int = 0
 var zombies: Array[Zombie] = []
 ## While calm (goal reached), zombies stand still and can't hurt anyone.
 var calm: bool = false
+## Snow Globe: seconds the horde stays frozen (0 = not frozen), see `freeze`.
+var freeze_left: float = 0.0
+## While frozen, bosses move at this share of their speed.
+var freeze_boss_speed: float = 0.5
+## The ice cracks this many seconds before the freeze ends.
+var freeze_crack_seconds: float = 1.0
 
+## The crack of the current freeze was announced.
+var _cracked: bool = false
 var _grid: SpatialGrid = SpatialGrid.new(GRID_CELL)
 ## Only for looks (shamble phase, burst directions), so it doesn't change the seeded run.
 var _cosmetic_rng: RandomNumberGenerator = RandomNumberGenerator.new()
@@ -178,23 +190,81 @@ func _physics_process(delta: float) -> void:
 	_grid.clear()
 	for zombie: Zombie in zombies:
 		_grid.insert(zombie, zombie.position)
+	var frozen: bool = is_frozen()
+	var shake: float = thaw_shake()
 	for zombie: Zombie in zombies:
 		if calm:
 			zombie.heading = Vector2.ZERO
 			zombie.windup_left = -1.0
 			if zombie.brain != null:
 				zombie.brain.calm_down()
+			zombie.tick(delta)
+		elif frozen and not zombie.is_boss():
+			_hold_frozen(zombie, shake)
+			zombie.tick(delta)
 		else:
-			var target: Player = _nearest_player(zombie.position, players)
-			if zombie.brain != null:
-				_move_boss(zombie, target, delta)
-			else:
-				_move(zombie, target, delta)
-			if zombie.brain == null or not zombie.brain.is_airborne():
-				_touch_players(zombie, players)
-			if zombie.attack != null:
-				_attack(zombie, target, delta)
-		zombie.tick(delta)
+			zombie.frozen = false
+			# A Snow Globe only slows bosses: their whole turn runs at a share of the speed.
+			var turn: float = delta * freeze_boss_speed if frozen else delta
+			_take_turn(zombie, players, turn)
+			zombie.tick(turn)
+	_count_down_freeze(delta)
+
+
+## A zombie's normal turn: walk (or the boss's pattern), touch players, attack.
+func _take_turn(zombie: Zombie, players: Array[Player], delta: float) -> void:
+	var target: Player = _nearest_player(zombie.position, players)
+	if zombie.brain != null:
+		_move_boss(zombie, target, delta)
+	else:
+		_move(zombie, target, delta)
+	if zombie.brain == null or not zombie.brain.is_airborne():
+		_touch_players(zombie, players)
+	if zombie.attack != null:
+		_attack(zombie, target, delta)
+
+
+## Freezes the horde for `seconds` (Snow Globe, spec 02b §3): zombies can't move, attack or hurt
+## by touch, but still take damage. Bosses aren't frozen, they move at `boss_speed` (0.5 = half).
+## In the last `crack_seconds` the ice cracks and they shake.
+func freeze(seconds: float, boss_speed: float, crack_seconds: float) -> void:
+	freeze_left = maxf(freeze_left, seconds)
+	freeze_boss_speed = boss_speed
+	freeze_crack_seconds = crack_seconds
+	_cracked = false
+
+
+func is_frozen() -> bool:
+	return freeze_left > 0.0
+
+
+## 0 while the ice holds, rising to 1 in the last seconds of a freeze (the ice cracks).
+func thaw_shake() -> float:
+	if not is_frozen() or freeze_left > freeze_crack_seconds:
+		return 0.0
+	return clampf(1.0 - freeze_left / maxf(freeze_crack_seconds, 0.001), 0.0, 1.0)
+
+
+## A frozen zombie stands still in its pose: no walking, no push, no wind-up, no touch damage.
+func _hold_frozen(zombie: Zombie, shake: float) -> void:
+	zombie.frozen = true
+	zombie.thaw_shake = shake
+	zombie.heading = Vector2.ZERO
+	zombie.knockback = Vector2.ZERO
+	zombie.windup_left = -1.0
+
+
+func _count_down_freeze(delta: float) -> void:
+	if not is_frozen():
+		return
+	freeze_left = maxf(freeze_left - delta, 0.0)
+	if not _cracked and freeze_left <= freeze_crack_seconds:
+		_cracked = true
+		ice_cracking.emit()
+	if freeze_left <= 0.0:
+		for zombie: Zombie in zombies:
+			zombie.frozen = false
+		thawed.emit()
 
 
 func _alive_players() -> Array[Player]:

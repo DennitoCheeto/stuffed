@@ -9,6 +9,11 @@ const FLASH_TIME: float = 0.08
 const PUFF_SIZE: Vector2 = Vector2(0.4, 0.3)
 ## Colour it glows towards while puffing up (the colour of the stuffing ball it will spit).
 const PUFF_TINT: Color = Color(1.8, 0.7, 0.9)
+## Pale ice blue while frozen (Snow Globe). Multiplies the felt, so dark outlines stay dark.
+const ICE_TINT: Color = Color(1.05, 1.3, 1.7)
+## How far (pixels) a frozen zombie shakes when the ice cracks, and how many times.
+const SHAKE_PIXELS: float = 2.5
+const SHAKES: float = 14.0
 
 var look: ZombieLook
 var origin: Node2D
@@ -84,6 +89,17 @@ func puff(amount: float) -> void:
 	var swell: float = clampf(amount, 0.0, 1.0)
 	root.scale *= Vector2.ONE + PUFF_SIZE * swell
 	root.modulate = Color.WHITE.lerp(PUFF_TINT, swell)
+
+
+## Frozen by a Snow Globe: a pale icy tint that keeps the dark outline (so you still see where it
+## is), and a shake once the ice cracks (`shake` grows 0..1 until it thaws).
+func chill(frozen: bool, shake: float) -> void:
+	modulate = ICE_TINT if frozen else Color.WHITE
+	if not frozen or shake <= 0.0:
+		position = Vector2.ZERO
+		return
+	var jitter: float = sin(shake * TAU * SHAKES) * SHAKE_PIXELS * shake
+	position = Vector2(jitter, 0.0)
 
 
 ## While stunned the zombie spins around (call after `animate`); 0 = not stunned.

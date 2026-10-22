@@ -128,6 +128,7 @@ func _ready() -> void:
 	enemies.boss_attacked.connect(_on_boss_attacked)
 	enemies.boss_angry.connect(_on_boss_angry)
 	enemies.boss_landed.connect(_on_boss_landed)
+	enemies.ice_cracking.connect(func() -> void: Sfx.play(&"ice_crack"))
 	spawner.boss_spawned.connect(_on_boss_spawned)
 	spawner.elite_spawned.connect(func(_elite: Zombie) -> void: Sfx.play(&"elite"))
 	pickups.collected.connect(_on_pickup_collected)
@@ -611,3 +612,16 @@ func _on_floor_pickup_touched(pickup: FloorPickup, player: Player) -> void:
 	match kind.id:
 		&"magnet":
 			pickups.attract_all(player)
+		&"snow_globe":
+			freeze_the_horde()
+
+
+## Snow Globe (spec 02b §3): the horde freezes, bosses slow down, enemy bullets in the air pop
+## into fluff and no new zombies come, all for the freeze time from data.
+func freeze_the_horde() -> void:
+	var data: FloorPickupRules = floor_pickup_rules
+	enemies.freeze(data.freeze_seconds, data.freeze_boss_speed, data.freeze_crack_seconds)
+	spawner.pause(data.freeze_seconds)
+	var popped: PackedVector2Array = projectiles.pop_enemy_bullets()
+	if not popped.is_empty():
+		effects.add_child(FluffPoofs.new(popped))

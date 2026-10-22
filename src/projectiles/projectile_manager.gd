@@ -86,6 +86,17 @@ func clear_hostile() -> void:
 			_release_at(i)
 
 
+## Removes every enemy bullet in the air (Snow Globe; clouds on the floor stay) and returns
+## where they were, so they can pop into fluff there.
+func pop_enemy_bullets() -> PackedVector2Array:
+	var spots: PackedVector2Array = []
+	for i: int in range(active.size() - 1, -1, -1):
+		if active[i] is EnemyBullet:
+			spots.append(active[i].position)
+			_release_at(i)
+	return spots
+
+
 func _physics_process(delta: float) -> void:
 	targets.clear()
 	for player: Player in Players.all(get_tree()):

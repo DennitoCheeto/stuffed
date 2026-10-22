@@ -41,6 +41,8 @@ const LENGTHS: Dictionary[StringName, float] = {
 	&"boss_down": 1.6,
 	# Floor pickups (spec 02b).
 	&"magnet": 0.45,
+	&"snow_globe": 0.7,
+	&"ice_crack": 0.4,
 }
 
 
@@ -105,6 +107,8 @@ static func _weapon_or_moment(sound: StringName) -> Callable:
 		&"boss_hit": _boss_hit,
 		&"boss_down": _boss_down,
 		&"magnet": _magnet,
+		&"snow_globe": _snow_globe,
+		&"ice_crack": _ice_crack,
 	}
 	return voices[sound]
 
@@ -400,3 +404,28 @@ static func _magnet(t: float) -> float:
 	var tone: float = Synth.sine(phase) + 0.35 * Synth.triangle(phase * 2.0)
 	var envelope: float = minf(t / 0.02, 1.0) * clampf((0.45 - t) / 0.12, 0.0, 1.0)
 	return 0.3 * tone * envelope
+
+
+## Snow Globe grabbed: a bright music-box tinkle going up, over a soft icy crackle.
+static func _snow_globe(t: float) -> float:
+	var tinkle: float = 0.0
+	var notes: PackedFloat32Array = [84.0, 88.0, 91.0, 96.0]
+	for i: int in notes.size():
+		var start: float = i * 0.08
+		if t >= start:
+			var local: float = t - start
+			tinkle += Synth.sine(Synth.midi_hz(notes[i]) * local) * exp(-7.0 * local)
+	return 0.18 * tinkle + 0.08 * _crackle(t, 0.7)
+
+
+## The ice of a freeze cracks (it ends soon): a few sharp snaps.
+static func _ice_crack(t: float) -> float:
+	var snap: float = Synth.sine(Synth.sweep(t, 2400.0, 900.0, 0.4)) * exp(-14.0 * t)
+	return 0.12 * snap + 0.2 * _crackle(t, 0.4)
+
+
+## Short noise ticks that come and go, like ice or frost crackling, fading out over `length`.
+static func _crackle(t: float, length: float) -> float:
+	var tick_phase: float = fmod(t * 23.0, 1.0)
+	var ticks: float = exp(-40.0 * tick_phase) * absf(sin(t * 61.0))
+	return Synth.noise(t) * ticks * clampf((length - t) / (length * 0.5), 0.0, 1.0)

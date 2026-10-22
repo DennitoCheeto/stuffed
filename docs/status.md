@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-22 (M2-20 floor pickup base + Big Magnet, PR #88)_
+_Last updated: 2026-10-22 (M2-21 Snow Globe)_
 
 ## Where we are
 
@@ -14,7 +14,7 @@ _Last updated: 2026-10-22 (M2-20 floor pickup base + Big Magnet, PR #88)_
 | Art direction | ✅ felt style "B — Soft", puppet animation (`docs/art/`) |
 | M0 Factory setup | ✅ done (PR #1) |
 | M1 Core run | ✅ accepted 2026-10-21 (PRs #17–#29; playtest P-1 … P-6 passed, 144 fps on the PO's PC) |
-| M2 Build variety | 🔨 all 19 tickets merged (PRs #47–#49, #51–#55, #57, #58, #60, #61, #63, #67, #69, #77, #78, #80, #81); + spec 02b floor pickups approved (#83): M2-20 merged (PR #88), 2 tickets open; then the PO playtest |
+| M2 Build variety | 🔨 all 19 tickets merged (PRs #47–#49, #51–#55, #57, #58, #60, #61, #63, #67, #69, #77, #78, #80, #81); + spec 02b floor pickups approved (#83): M2-20 (PR #88) and M2-21 merged, 1 ticket open; then the PO playtest |
 
 ## Next step
 
@@ -22,7 +22,7 @@ _Last updated: 2026-10-22 (M2-20 floor pickup base + Big Magnet, PR #88)_
   buttons (PR #80), **M2-19** evolved looks + golden HUD frame (PR #81).
 - The PO has not played the latest builds yet and wants **more features before the next download**.
   **Spec 02b floor pickups approved** (PR #83, `docs/specs/02b-floor-pickups.md`). **M2-20** #84 (pickup base + Big Magnet) is
-  done (PR #88). Next: **M2-21** #85 (Snow Globe), **M2-22** #86 (Party Popper). Then the M2 acceptance playtest
+  done (PR #88), **M2-21** #85 (Snow Globe) is done. Next: **M2-22** #86 (Party Popper). Then the M2 acceptance playtest
   (P-1 … P-11) together with them.
 - After acceptance: write spec 03 for M3 (Town, vision §10) using the playtest feedback; the PO may send town wishes.
 
@@ -138,3 +138,8 @@ _Last updated: 2026-10-22 (M2-20 floor pickup base + Big Magnet, PR #88)_
   `run.drop_floor_pickup(id, at)`; the effect is a `match kind.id` in `Run._on_floor_pickup_touched` (add new kinds
   there + a part in `FloorPickupLook` + a sound). Pickups free themselves on touch: tests check
   `run.floor_pickup_log` / `run.floor_pickups()`, never a held reference. Edge arrows: `run.pickup_arrows.points`.
+- Snow Globe: `run.freeze_the_horde()` → `enemies.freeze(seconds, boss_speed, crack_seconds)` (numbers in
+  `floor_pickup_rules.tres`), `spawner.pause(seconds)`, `projectiles.pop_enemy_bullets()` (+ `FluffPoofs`). Frozen
+  zombies: `zombie.frozen` / `zombie.thaw_shake`, tint `ZombiePuppet.ICE_TINT`; bosses run their whole turn at
+  `delta * freeze_boss_speed`. `enemies.ice_cracking` plays `ice_crack`. Spawn tests at 120 s hit a breather
+  (almost no spawns): use 150 s (a surge).
