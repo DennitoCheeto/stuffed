@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-22 (M2-22 Party Popper)_
+_Last updated: 2026-10-22 (spec 03 Town drafted)_
 
 ## Where we are
 
@@ -14,17 +14,16 @@ _Last updated: 2026-10-22 (M2-22 Party Popper)_
 | Art direction | ✅ felt style "B — Soft", puppet animation (`docs/art/`) |
 | M0 Factory setup | ✅ done (PR #1) |
 | M1 Core run | ✅ accepted 2026-10-21 (PRs #17–#29; playtest P-1 … P-6 passed, 144 fps on the PO's PC) |
-| M2 Build variety | 🔨 all 19 tickets merged (PRs #47–#49, #51–#55, #57, #58, #60, #61, #63, #67, #69, #77, #78, #80, #81); + spec 02b floor pickups approved (#83): M2-20 (PR #88), M2-21 (PR #89) and M2-22 merged; next: the PO playtest |
+| M2 Build variety | ✅ built (not yet accepted): all 19 tickets merged (PRs #47–#49, #51–#55, #57, #58, #60, #61, #63, #67, #69, #77, #78, #80, #81); + spec 02b floor pickups approved (#83): M2-20 (PR #88), M2-21 (PR #89) and M2-22 (PR #90) merged; PO playtest postponed, played with M3 |
+| M3 Town | 📝 spec 03 drafted, waiting for approval |
 
 ## Next step
 
-- All spec 02 §20 fixes are merged: **M2-16** gift box cards (PR #77), **M2-17** mortar ring (PR #78), **M2-18** reroll/skip/banish
-  buttons (PR #80), **M2-19** evolved looks + golden HUD frame (PR #81).
-- The PO has not played the latest builds yet and wants **more features before the next download**.
-  **Spec 02b floor pickups approved** (PR #83, `docs/specs/02b-floor-pickups.md`). **M2-20** #84 (pickup base + Big Magnet) is
-  done (PR #88), **M2-21** #85 (Snow Globe, PR #89) and **M2-22** #86 (Party Popper) are done. Next: the M2 acceptance
-  playtest (P-1 … P-11) on the "latest" build.
-- After acceptance: write spec 03 for M3 (Town, vision §10) using the playtest feedback; the PO may send town wishes.
+- M2 is fully built (spec 02 + §20 fixes + spec 02b floor pickups, PRs up to #90). The PO **postponed the M2
+  acceptance playtest** (2026-10-22): P-1 … P-11 get played later, together with M3.
+- **Spec 03 (M3 Town) drafted**: `docs/specs/03-town.md`, spec PR open, waiting for PO approval (open questions in §12).
+- After approval: create the 12 M3 issues from spec 03 §15 and start with the save system (ticket 1).
+- M3 ACs are numbered AC-37 … AC-48, playtest P-12 … P-17. Ticket 10 needs photos + names of the GF's plushies from the PO.
 
 ## Playtest notes (M2, first round)
 
