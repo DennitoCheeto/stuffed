@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-22 (M3-02 town flow)_
+_Last updated: 2026-10-22 (M3-03 materials in the run)_
 
 ## Where we are
 
@@ -15,7 +15,7 @@ _Last updated: 2026-10-22 (M3-02 town flow)_
 | M0 Factory setup | ✅ done (PR #1) |
 | M1 Core run | ✅ accepted 2026-10-21 (PRs #17–#29; playtest P-1 … P-6 passed, 144 fps on the PO's PC) |
 | M2 Build variety | ✅ built (not yet accepted): all 19 tickets merged (PRs #47–#49, #51–#55, #57, #58, #60, #61, #63, #67, #69, #77, #78, #80, #81); + spec 02b floor pickups approved (#83): M2-20 (PR #88), M2-21 (PR #89) and M2-22 (PR #90) merged; PO playtest postponed, played with M3 |
-| M3 Town | 🔨 spec 03 approved (PR #91); issues #92–#103; M3-01 save system (PR #105), M3-02 town + flow (PR #106) |
+| M3 Town | 🔨 spec 03 approved (PR #91); issues #92–#103; M3-01 save system (PR #105), M3-02 town + flow (PR #106), M3-03 materials (PR #107) |
 
 ## Next step
 
@@ -23,7 +23,8 @@ _Last updated: 2026-10-22 (M3-02 town flow)_
   acceptance playtest** (2026-10-22): P-1 … P-11 get played later, together with M3.
 - **Spec 03 (M3 Town) approved** (PR #91, `docs/specs/03-town.md`). Issues **#92–#103** (M3-01 … M3-12, milestone
   "M3 — Town"). M3-01 #92 save system (PR #105) and M3-02 #93 town + title → town → run → "Brought home" flow (PR #106) done.
-  Next: **M3-03** #94 materials in the run (coins/stuffing/thread from kills, HUD jars, keep share, run log).
+  M3-03 #94 materials in the run (PR #107) done.
+  Next: **M3-04** #95 Way Home portal after Big Ted (end the run with `ending = "way_home"`: keep share is ready).
 - M3 ACs are AC-37 … AC-48, playtest P-12 … P-17. **M3-10** (#101) needs photos + names of the girlfriend's
   plushies from the PO: ask when starting it (M3-09 uses placeholder looks).
 - PO ideas for later: a skill / progress tree (own spec, after M3).
@@ -160,3 +161,8 @@ _Last updated: 2026-10-22 (M3-02 town flow)_
   fort" (`fort_requested`) → town. Town players are `armed = false`. Scenario helpers: `go_to_town()`, and
   `start_run()` now goes title → town → door. The headless test window is square (1920×1920): check camera follow
   sideways only.
+- Materials (spec 03 §3): `MaterialRules` (`data/town/material_rules.tres`) holds one `MaterialReward` per zombie
+  type / boss, matched by the **base** name `zombie.stats.display_name` (not the elite's), plus `elite_extra`,
+  `gift_box`, `big_gift_box`, `victory_bonus`. `run.collect(amounts, at, burst)` adds to `run.haul` and the HUD
+  (`hud.jars`: `RunJars`, bursts are `MaterialBurst`, `hud.jars.bursts`). Rolls use `run.material_rng`. The victory
+  bonus goes into the haul when the King dies. Rebuild costs (M3-05): a 5-min dying run brings ~250-300 coins.
