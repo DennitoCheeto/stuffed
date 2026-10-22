@@ -15,6 +15,8 @@ var active: Array[Projectile] = []
 ## Shot nodes ever made (the pool keeps this small).
 var created: int = 0
 var enemies: EnemyManager
+## Enemy bullets that hit furniture are gone (the players' shots fly over it).
+var obstacles: Obstacles = Obstacles.new()
 ## Shots that leave this area are gone (the arena floor).
 var play_rect: Rect2 = Rect2()
 ## Living players this frame (enemy bullets look for them here).
@@ -36,9 +38,11 @@ func _ready() -> void:
 	add_child(_hostile)
 
 
-func setup(enemy_manager: EnemyManager, area: Rect2) -> void:
+func setup(enemy_manager: EnemyManager, area: Rect2, furniture: Obstacles = null) -> void:
 	enemies = enemy_manager
 	play_rect = area
+	if furniture != null:
+		obstacles = furniture
 
 
 ## A fresh shot of `kind` (a Projectile script), from the pool if one is free. Launch it next.

@@ -1,18 +1,26 @@
 class_name SpawnPlacement
 extends RefCounted
-## Picks where a new zombie appears: just outside the visible screen, but inside the arena.
+## Picks where a new zombie appears: just outside the visible screen, inside the arena and not
+## inside furniture.
 
 
 ## A random point on the ring `margin` pixels outside `view`, inside `area` (shrunk by `edge`).
-## Returns Vector2.INF if there is no room (the caller skips this spawn).
+## Never inside `furniture`. Returns Vector2.INF if there is no room (the caller skips this spawn).
 static func outside_view(
-	view: Rect2, area: Rect2, margin: float, edge: float, rng: RandomNumberGenerator
+	view: Rect2,
+	area: Rect2,
+	margin: float,
+	edge: float,
+	rng: RandomNumberGenerator,
+	furniture: Obstacles = null
 ) -> Vector2:
 	var ring: Rect2 = view.grow(margin)
 	var inside: Rect2 = area.grow(-edge)
 	for attempt: int in 12:
 		var point: Vector2 = _point_on_border(ring, rng)
-		if inside.has_point(point):
+		if not inside.has_point(point):
+			continue
+		if furniture == null or not furniture.blocks(point, edge):
 			return point
 	return Vector2.INF
 

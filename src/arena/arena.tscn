@@ -1,7 +1,9 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://src/arena/arena.gd" id="1_arena"]
+[ext_resource type="Resource" path="res://data/arena/bedroom_furniture.tres" id="2_furniture"]
 
 [node name="Arena" type="Node2D"]
 z_index = -10
 script = ExtResource("1_arena")
+furniture = ExtResource("2_furniture")
