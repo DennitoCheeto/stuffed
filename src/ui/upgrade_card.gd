@@ -7,18 +7,25 @@ const CARD_SIZE: Vector2 = Vector2(340, 400)
 const CARD_COLOR: Color = Color("#2a2633")
 const EDGE_COLOR: Color = Color("#4a4358")
 const HIGHLIGHT_COLOR: Color = Color("#f2b52e")
+## While choosing a card to banish: how far (radians) and how fast (per second) the card wiggles.
+const WIGGLE_ANGLE: float = 0.035
+const WIGGLE_SPEED: float = 9.0
 
 var offer: UpgradeOffer
 ## "Evolves with": the partner item's name and icon (weapons that can evolve only).
 var partner_row: HBoxContainer = HBoxContainer.new()
 var partner_icon: UpgradeIcon = UpgradeIcon.new()
 var partner_label: Label = Label.new()
+## The scissors mark shown while choosing a card to banish.
+var banish_mark: UpgradeIcon = UpgradeIcon.new()
+var marked: bool = false
 
 var _key_label: Label = Label.new()
 var _icon: UpgradeIcon = UpgradeIcon.new()
 var _name_label: Label = Label.new()
 var _level_label: Label = Label.new()
 var _text_label: Label = Label.new()
+var _wiggle_time: float = 0.0
 
 
 func _init() -> void:
@@ -52,6 +59,13 @@ func _init() -> void:
 	partner_row.add_child(partner_label)
 	partner_row.add_child(partner_icon)
 	column.add_child(partner_row)
+	banish_mark.icon = &"scissors"
+	banish_mark.custom_minimum_size = Vector2(64, 64)
+	banish_mark.size = banish_mark.custom_minimum_size
+	banish_mark.position = Vector2(CARD_SIZE.x - 76, 12)
+	banish_mark.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	banish_mark.visible = false
+	add_child(banish_mark)
 
 
 ## Shows `card_offer` as card number `number` (1-3).
@@ -66,6 +80,23 @@ func show_offer(card_offer: UpgradeOffer, number: int) -> void:
 	if offer.partner != null:
 		partner_label.text = "Evolves with %s" % offer.partner.display_name
 		partner_icon.icon = offer.partner.icon
+
+
+## Marks the card while the player picks one to banish: scissors mark + a small wiggle.
+func set_marked(on: bool) -> void:
+	marked = on
+	banish_mark.visible = on
+	_wiggle_time = 0.0
+	rotation = 0.0
+	set_process(on)
+
+
+func _process(delta: float) -> void:
+	if not marked:
+		return
+	_wiggle_time += delta
+	pivot_offset = size / 2.0
+	rotation = sin(_wiggle_time * WIGGLE_SPEED) * WIGGLE_ANGLE
 
 
 ## A felt card panel; `filled` false draws only the edge (the focus ring on top of the card).
