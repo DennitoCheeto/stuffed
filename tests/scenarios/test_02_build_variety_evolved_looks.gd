@@ -5,6 +5,8 @@ extends "res://tests/scenarios/run_scenario.gd"
 
 const SHAMBLER: EnemyStats = preload("res://data/enemies/shambler.tres")
 const TOUGH: float = 100000.0
+## Seconds to wait for a shot or a hit.
+const WAIT: float = 4.0
 const EVOLVED_IDS: Array[StringName] = [
 	&"banana_split", &"pincushion_volley", &"sewing_storm", &"yarn_bomb"
 ]
@@ -37,13 +39,22 @@ func _tough_zombie(at: Vector2) -> Zombie:
 	return zombie
 
 
-## Waits up to `seconds` until `done` returns true.
-func _wait_until(done: Callable, seconds: float) -> bool:
-	for i: int in roundi(seconds * FPS):
-		if done.call():
+## Waits up to WAIT seconds until `weapon` has a shot in flight.
+func _wait_for_shot(weapon: Weapon) -> bool:
+	for i: int in roundi(WAIT * FPS):
+		if _shot_of(weapon) != null:
 			return true
 		await wait_physics_frames(1)
-	return done.call()
+	return _shot_of(weapon) != null
+
+
+## Waits up to WAIT seconds until a hit of `weapon` made a sparkle pop.
+func _wait_for_sparkle(weapon: Weapon) -> bool:
+	for i: int in roundi(WAIT * FPS):
+		if _sparkle_of(weapon) != null:
+			return true
+		await wait_physics_frames(1)
+	return _sparkle_of(weapon) != null
 
 
 ## The first shot `weapon` has in flight that is a real shot (not a sparkle or sticky yarn).
@@ -88,7 +99,7 @@ func test_ac30_evolved_shots_look_different_from_the_base_weapon() -> void:
 		var base: Weapon = banane.add_weapon(base_def.weapon)
 		base.level = base_def.top_level()
 		banane.loadout_changed.emit()
-		assert_true(await _wait_until(func() -> bool: return _shot_of(base) != null, 4.0))
+		assert_true(await _wait_for_shot(base), "a shot flies")
 		var base_shot: Projectile = _shot_of(base)
 		var base_region: Rect2 = base_shot.region_rect
 		var base_size: float = base_shot.scale.x
@@ -97,7 +108,7 @@ func test_ac30_evolved_shots_look_different_from_the_base_weapon() -> void:
 		var evolved: Weapon = banane.evolve(evolution)
 		_ring_of_zombies(evolved.current().reach)
 		await wait_physics_frames(1)
-		assert_true(await _wait_until(func() -> bool: return _shot_of(evolved) != null, 4.0))
+		assert_true(await _wait_for_shot(evolved), "a shot flies")
 		var shot: Projectile = _shot_of(evolved)
 		assert_not_null(shot.look, "%s: wears its own look" % evolved_id)
 		assert_ne(shot.region_rect, base_region, "%s: another felt part" % evolved_id)
@@ -109,8 +120,7 @@ func test_ac30_evolved_shots_look_different_from_the_base_weapon() -> void:
 		var slot: LoadoutSlot = _slot_of(evolved)
 		assert_true(slot.evolved, "%s: evolved HUD slot" % evolved_id)
 		assert_true(slot.frame.visible, "%s: golden frame + star" % evolved_id)
-		var has_sparkle: Callable = func() -> bool: return _sparkle_of(evolved) != null
-		var popped: bool = await _wait_until(has_sparkle, 4.0)
+		var popped: bool = await _wait_for_sparkle(evolved)
 		assert_true(popped, "%s: a sparkle pop on a hit" % evolved_id)
 		if popped:
 			var sparkle: SparkleProjectile = _sparkle_of(evolved)
@@ -127,12 +137,12 @@ func test_ac30_a_pooled_shot_loses_the_evolved_look_for_the_base_weapon() -> voi
 	var evolution: EvolutionDef = run.upgrade_pool.evolution_into(&"pincushion_volley")
 	banane.add_weapon(evolution.evolved)
 	var volley: Weapon = banane.weapon(&"pincushion_volley")
-	assert_true(await _wait_until(func() -> bool: return _shot_of(volley) != null, 4.0))
+	assert_true(await _wait_for_shot(volley), "a shot flies")
 	_drop(volley)
 	await wait_physics_frames(2)
 	var sniper_def: UpgradeDef = run.upgrade_pool.find(evolution.weapon)
 	var sniper: Weapon = banane.add_weapon(sniper_def.weapon)
-	assert_true(await _wait_until(func() -> bool: return _shot_of(sniper) != null, 4.0))
+	assert_true(await _wait_for_shot(sniper), "a shot flies")
 	var pin: Projectile = _shot_of(sniper)
 	assert_null(pin.look, "a reused pin is a plain pin again")
 	assert_false(pin.trail != null and pin.trail.emitting, "no trail")

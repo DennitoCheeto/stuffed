@@ -157,9 +157,7 @@ static func _pin(
 
 
 ## Points along +x like the pin: thin, with a little eye at the back.
-static func _needle(
-	color: Color = NEEDLE_COLOR, eye_color: Color = BUTTON_HOLE_COLOR
-) -> FeltPiece:
+static func _needle(color: Color = NEEDLE_COLOR, eye_color: Color = BUTTON_HOLE_COLOR) -> FeltPiece:
 	var needle: FeltPiece = FeltPiece.new()
 	needle.soft = false
 	var half: float = NEEDLE_LENGTH / 2.0
@@ -196,9 +194,7 @@ static func _cloud() -> FeltPiece:
 	return cloud
 
 
-static func _yarn(
-	color: Color = YARN_COLOR, strand_color: Color = YARN_STRAND_COLOR
-) -> FeltPiece:
+static func _yarn(color: Color = YARN_COLOR, strand_color: Color = YARN_STRAND_COLOR) -> FeltPiece:
 	var ball: FeltPiece = FeltPiece.new()
 	var radius: float = YARN_RADIUS * UNITS
 	ball.polygon = FeltShapes.circle(Vector2.ZERO, radius, 22)
