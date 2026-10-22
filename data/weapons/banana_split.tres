@@ -1,7 +1,8 @@
-[gd_resource type="Resource" script_class="WeaponStats" load_steps=5 format=3]
+[gd_resource type="Resource" script_class="WeaponStats" load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://src/weapons/weapon_stats.gd" id="1_stats"]
 [ext_resource type="Script" path="res://src/weapons/weapon_level.gd" id="2_level"]
+[ext_resource type="Script" path="res://src/weapons/shot_look.gd" id="4_look"]
 [ext_resource type="Script" path="res://src/weapons/banana_split.gd" id="3_behaviour"]
 
 [sub_resource type="Resource" id="Resource_level1"]
@@ -15,6 +16,16 @@ pierce = 0
 spread_degrees = 25.0
 card_text = "On the way back each peel splits into three."
 
+[sub_resource type="Resource" id="Resource_look"]
+script = ExtResource("4_look")
+part = &"shot/split_peel"
+size = 1.35
+trail_color = Color(0.784, 0.961, 0.863, 0.55)
+trail_amount = 14
+trail_seconds = 0.4
+flash_color = Color(0.847, 1, 0.914, 0.55)
+flash_radius = 30.0
+
 [resource]
 script = ExtResource("1_stats")
 sound = &"split"
@@ -24,4 +35,5 @@ behaviour = ExtResource("3_behaviour")
 knockback = 140.0
 hit_radius = 16.0
 evolved_from = &"peel_boomerang"
+shot_look = SubResource("Resource_look")
 levels = Array[ExtResource("2_level")]([SubResource("Resource_level1")])

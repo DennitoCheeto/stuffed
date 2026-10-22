@@ -35,6 +35,7 @@ func launch(from: Weapon, direction: Vector2) -> void:
 	global_position = from.player.global_position
 	size_to(from.area_scale())
 	rotation = direction.angle()
+	dress(from)
 
 
 ## How many zombies one pin may hit (it passes through `pierce` of them; below 0 = no limit).
@@ -64,7 +65,7 @@ func _hit_zombies(point: Vector2) -> void:
 			continue
 		_already_hit[id] = true
 		hits += 1
-		manager.enemies.damage(zombie, _numbers.damage, push)
+		hurt(zombie, _numbers.damage, push)
 		if hits == BIG_HIT:
 			var run: Run = get_tree().get_first_node_in_group(Run.GROUP) as Run
 			if run != null:

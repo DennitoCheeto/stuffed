@@ -1,7 +1,8 @@
-[gd_resource type="Resource" script_class="WeaponStats" load_steps=5 format=3]
+[gd_resource type="Resource" script_class="WeaponStats" load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://src/weapons/weapon_stats.gd" id="1_stats"]
 [ext_resource type="Script" path="res://src/weapons/weapon_level.gd" id="2_level"]
+[ext_resource type="Script" path="res://src/weapons/shot_look.gd" id="4_look"]
 [ext_resource type="Script" path="res://src/weapons/yarn_bomb.gd" id="3_behaviour"]
 
 [sub_resource type="Resource" id="Resource_level1"]
@@ -17,6 +18,16 @@ duration = 3.0
 spread_degrees = 18.0
 card_text = "Bursts leave sticky yarn that slows zombies to 40% speed and hurts them."
 
+[sub_resource type="Resource" id="Resource_look"]
+script = ExtResource("4_look")
+part = &"shot/bomb_ball"
+size = 1.25
+trail_color = Color(0.624, 0.902, 0.863, 0.55)
+trail_amount = 18
+trail_seconds = 0.5
+flash_color = Color(0.761, 0.949, 0.918, 0.5)
+flash_radius = 30.0
+
 [resource]
 script = ExtResource("1_stats")
 sound = &"sticky"
@@ -27,6 +38,7 @@ knockback = 220.0
 hit_radius = 18.0
 hit_interval = 0.5
 evolved_from = &"yarn_cannon"
+shot_look = SubResource("Resource_look")
 slow = 0.6
 linger_damage = 8.0
 levels = Array[ExtResource("2_level")]([SubResource("Resource_level1")])

@@ -33,6 +33,7 @@ func launch(from: Weapon, start_angle: float) -> void:
 	radius = from.current().reach
 	size_to(from.area_scale())
 	_place()
+	dress(from)
 
 
 ## Swings out to the weapon's area and back.
@@ -64,7 +65,7 @@ func advance(delta: float) -> bool:
 		if _cooldowns.has(id):
 			continue
 		_cooldowns[id] = weapon.stats.hit_interval
-		manager.enemies.damage(zombie, numbers.damage, push)
+		hurt(zombie, numbers.damage, push)
 	return true
 
 

@@ -35,6 +35,7 @@ func launch(from: PeelBoomerang, direction: Vector2) -> void:
 	_direction = direction
 	global_position = from.player.global_position
 	size_to(from.area_scale())
+	dress(from)
 
 
 func advance(delta: float) -> bool:
@@ -64,4 +65,4 @@ func _hit_zombies() -> void:
 		if already_hit.has(id):
 			continue
 		already_hit[id] = true
-		manager.enemies.damage(zombie, _numbers.damage, push)
+		hurt(zombie, _numbers.damage, push)
