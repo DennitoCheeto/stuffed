@@ -124,7 +124,8 @@ func show_loadout() -> void:
 	for index: int in weapon_slots.size():
 		if index < weapons.size():
 			var owned: Weapon = weapons[index]
-			weapon_slots[index].show_upgrade(_icon_for(owned.stats.id), owned.level)
+			var is_evolved: bool = owned.stats.evolved_from != &""
+			weapon_slots[index].show_upgrade(_icon_for(owned.stats.id), owned.level, is_evolved)
 		else:
 			weapon_slots[index].show_upgrade(&"", 0)
 	for index: int in item_slots.size():

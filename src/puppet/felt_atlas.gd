@@ -41,6 +41,24 @@ static func show_part(sprite: Sprite2D, key: StringName) -> void:
 	sprite.scale = Vector2.ONE / BAKE_SCALE
 
 
+## Swaps the part an existing sprite shows to `key`, keeping its scale and rotation (a shot that
+## changes its look in flight, e.g. an evolved weapon's shot).
+static func swap_part(sprite: Sprite2D, key: StringName) -> void:
+	_ensure_layout()
+	var atlas_part: AtlasPart = _parts[key]
+	sprite.region_rect = atlas_part.region
+	sprite.offset = -atlas_part.origin
+
+
+## Part `key` as its own texture (for particles), centred on the part.
+static func part_texture(key: StringName) -> AtlasTexture:
+	_ensure_layout()
+	var region_texture: AtlasTexture = AtlasTexture.new()
+	region_texture.atlas = texture
+	region_texture.region = _parts[key].region
+	return region_texture
+
+
 ## What part `key` covers, in concept units around its pivot (where to sew something onto it).
 static func part_bounds(key: StringName) -> Rect2:
 	_ensure_layout()

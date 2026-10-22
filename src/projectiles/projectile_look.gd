@@ -22,6 +22,12 @@ const DUST: StringName = &"shot/dust"
 const BURST: StringName = &"shot/burst"
 const WHIP: StringName = &"shot/whip"
 const ZIPPER: StringName = &"shot/zipper"
+const SPLIT_PEEL: StringName = &"shot/split_peel"
+const VOLLEY_PIN: StringName = &"shot/volley_pin"
+const STORM_NEEDLE: StringName = &"shot/storm_needle"
+const BOMB_BALL: StringName = &"shot/bomb_ball"
+const GLITTER: StringName = &"shot/glitter"
+const SPARKLE: StringName = &"shot/sparkle"
 const BULLET: StringName = &"bullet/stuffing"
 const HAZARD: StringName = &"bullet/cloud"
 ## On-screen radius of the stuffing ball part; bigger bullets scale it.
@@ -68,6 +74,17 @@ const WHIP_COLOR: Color = Color("#f0d78c")
 const ZIPPER_LENGTH: float = 400.0
 const ZIPPER_COLOR: Color = Color("#8fc4d9")
 const ZIPPER_TEETH_COLOR: Color = Color("#dfeef4")
+## Evolved weapons' shots (spec 02 §20): their own soft colours, never enemy red/orange.
+const SPLIT_PEEL_COLOR: Color = Color("#a8ecc8")
+const VOLLEY_SHAFT_COLOR: Color = Color("#efe9ff")
+const VOLLEY_HEAD_COLOR: Color = Color("#b48cf0")
+const STORM_NEEDLE_COLOR: Color = Color("#a8dcff")
+const STORM_EYE_COLOR: Color = Color("#f4fbff")
+const BOMB_COLOR: Color = Color("#6fd3c6")
+const BOMB_STRAND_COLOR: Color = Color("#2f8f86")
+## Glitter speck (trail) and sparkle pop (hit flash): white felt stars, tinted by the ShotLook.
+const GLITTER_RADIUS: float = 5.0
+const SPARKLE_RADIUS: float = 30.0
 const BULLET_COLOR: Color = Color("#ff3d6e")
 const BULLET_CORE_COLOR: Color = Color("#ffe1ea")
 const BULLET_OUTLINE_COLOR: Color = Color("#14101a")
@@ -89,6 +106,12 @@ static func make_parts() -> Dictionary[StringName, FeltPiece]:
 		BURST: _burst(),
 		WHIP: _whip(),
 		ZIPPER: _zipper(),
+		SPLIT_PEEL: _peel(SPLIT_PEEL_COLOR),
+		VOLLEY_PIN: _pin(VOLLEY_SHAFT_COLOR, VOLLEY_HEAD_COLOR),
+		STORM_NEEDLE: _needle(STORM_NEEDLE_COLOR, STORM_EYE_COLOR),
+		BOMB_BALL: _yarn(BOMB_COLOR, BOMB_STRAND_COLOR),
+		GLITTER: _star(GLITTER_RADIUS, 4),
+		SPARKLE: _star(SPARKLE_RADIUS, 8),
 		BULLET: _bullet(),
 		HAZARD: _hazard(),
 	}
@@ -107,32 +130,36 @@ static func _scaled(points: PackedVector2Array, factor: float) -> PackedVector2A
 	return result
 
 
-static func _peel() -> FeltPiece:
+static func _peel(color: Color = PEEL_COLOR) -> FeltPiece:
 	var peel: FeltPiece = FeltPiece.new()
 	var outline: PackedVector2Array = FeltShapes.svg_path(
 		PackedFloat32Array([-14, 6, -8, -10, 8, -10, 14, 6, 6, -2, -6, -2, -14, 6])
 	)
 	peel.polygon = _scaled(outline, PEEL_SIZE * UNITS)
-	peel.color = PEEL_COLOR
+	peel.color = color
 	return peel
 
 
 ## Points along +x: the tip at the pivot, the round head at the back.
-static func _pin() -> FeltPiece:
+static func _pin(
+	shaft_color: Color = PIN_SHAFT_COLOR, head_color: Color = PIN_HEAD_COLOR
+) -> FeltPiece:
 	var pin: FeltPiece = FeltPiece.new()
 	pin.soft = false
 	var shaft: PackedVector2Array = FeltShapes.points(
 		PackedFloat32Array([-PIN_LENGTH, -1.5, 0, -1.5, 7, 0, 0, 1.5, -PIN_LENGTH, 1.5])
 	)
 	pin.polygon = _scaled(shaft, UNITS)
-	pin.color = PIN_SHAFT_COLOR
+	pin.color = shaft_color
 	var head: Vector2 = Vector2(-PIN_LENGTH, 0.0) * UNITS
-	pin.add_layer(FeltShapes.circle(head, 4.0 * UNITS), PIN_HEAD_COLOR)
+	pin.add_layer(FeltShapes.circle(head, 4.0 * UNITS), head_color)
 	return pin
 
 
 ## Points along +x like the pin: thin, with a little eye at the back.
-static func _needle() -> FeltPiece:
+static func _needle(
+	color: Color = NEEDLE_COLOR, eye_color: Color = BUTTON_HOLE_COLOR
+) -> FeltPiece:
 	var needle: FeltPiece = FeltPiece.new()
 	needle.soft = false
 	var half: float = NEEDLE_LENGTH / 2.0
@@ -140,10 +167,10 @@ static func _needle() -> FeltPiece:
 		PackedFloat32Array([-half, -2.4, half - 6, -2, half, 0, half - 6, 2, -half, 2.4])
 	)
 	needle.polygon = _scaled(shaft, UNITS)
-	needle.color = NEEDLE_COLOR
+	needle.color = color
 	var eye_center: Vector2 = Vector2(-half + 4.0, 0.0) * UNITS
 	var eye: PackedVector2Array = FeltShapes.ellipse(eye_center, Vector2(2.6, 1.1) * UNITS)
-	needle.add_layer(eye, BUTTON_HOLE_COLOR)
+	needle.add_layer(eye, eye_color)
 	return needle
 
 
@@ -169,16 +196,18 @@ static func _cloud() -> FeltPiece:
 	return cloud
 
 
-static func _yarn() -> FeltPiece:
+static func _yarn(
+	color: Color = YARN_COLOR, strand_color: Color = YARN_STRAND_COLOR
+) -> FeltPiece:
 	var ball: FeltPiece = FeltPiece.new()
 	var radius: float = YARN_RADIUS * UNITS
 	ball.polygon = FeltShapes.circle(Vector2.ZERO, radius, 22)
-	ball.color = YARN_COLOR
+	ball.color = color
 	for offset: float in [-0.45, 0.0, 0.45]:
 		var strand: PackedVector2Array = FeltShapes.ellipse(
 			Vector2(offset * radius, 0.0), Vector2(radius * 0.18, radius * 0.85), 12
 		)
-		ball.add_line(strand, YARN_STRAND_COLOR, 2.0 * UNITS)
+		ball.add_line(strand, strand_color, 2.0 * UNITS)
 	return ball
 
 
@@ -339,3 +368,16 @@ static func _closed_circle(center: Vector2, radius: float, segments: int) -> Pac
 	var ring: PackedVector2Array = FeltShapes.circle(center, radius, segments)
 	ring.append(ring[0])
 	return ring
+
+
+## A white felt star with `points` points, `radius` across on screen (tinted where it is used).
+static func _star(radius: float, points: int) -> FeltPiece:
+	var star: FeltPiece = FeltPiece.new()
+	star.soft = false
+	var outline: PackedVector2Array = []
+	for i: int in points * 2:
+		var reach: float = radius if i % 2 == 0 else radius * 0.4
+		outline.append(Vector2.from_angle(TAU * i / (points * 2) - PI / 2.0) * reach * UNITS)
+	star.polygon = outline
+	star.color = Color.WHITE
+	return star

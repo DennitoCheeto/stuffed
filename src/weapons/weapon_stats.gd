@@ -20,6 +20,8 @@ extends Resource
 @export var slow: float = 0.0
 ## ... and take this much damage every `hit_interval`.
 @export var linger_damage: float = 0.0
+## Evolved weapons: how their shots look (null = the normal look).
+@export var shot_look: ShotLook
 ## Sound of one attack (a name in SfxBank) and its pitch (1 = as made).
 @export var sound: StringName = &""
 @export var sound_pitch: float = 1.0

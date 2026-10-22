@@ -42,6 +42,7 @@ func launch(from: Weapon, direction: Vector2) -> void:
 	_direction = direction
 	global_position = from.player.global_position
 	scale = _ball_scale * from.area_scale()
+	dress(from)
 
 
 ## On-screen radius of the burst (Big Spool included).
@@ -68,11 +69,13 @@ func advance(delta: float) -> bool:
 
 func _burst() -> void:
 	burst = true
+	if trail != null:
+		trail.emitting = false
 	_burst_left = BURST_TIME
 	Sfx.play(&"pop", 0.6)
 	for zombie: Zombie in manager.enemies.query_circle(global_position, _numbers.area):
 		var push: Vector2 = global_position.direction_to(zombie.position) * weapon.stats.knockback
-		manager.enemies.damage(zombie, _numbers.damage, push)
+		hurt(zombie, _numbers.damage, push)
 	ProjectileLook.apply(self, ProjectileLook.BURST)
 	rotation = 0.0
 	scale = _burst_scale * burst_radius() / ProjectileLook.BURST_RADIUS * 0.7
