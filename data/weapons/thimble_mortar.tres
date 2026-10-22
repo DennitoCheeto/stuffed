@@ -15,7 +15,7 @@ pierce = 0
 area = 42.0
 duration = 0.0
 spread_degrees = 0.0
-card_text = "Lobs a thimble at a random zombie on screen. It lands with a small blast where its shadow is."
+card_text = "Lobs a thimble at a random zombie on screen. It lands with a small blast inside the ring on the floor."
 
 [sub_resource type="Resource" id="Resource_level2"]
 script = ExtResource("2_level")
