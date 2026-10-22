@@ -1,6 +1,6 @@
 # 02 — Build variety: the Bedroom, complete (M2)
 
-Status: **APPROVED** by the product owner, 2026-10-21.
+Status: **APPROVED** by the product owner, 2026-10-21. Amended after the M2 playtest (§20), pending approval.
 Milestone: **M2 — Build variety** (vision §10).
 Based on: [`00-product-vision.md`](00-product-vision.md) §5 (Enemies, Combat, Banane), §6; builds on
 [`01-core-run.md`](01-core-run.md) (accepted 2026-10-21).
@@ -42,7 +42,7 @@ Every weapon has an **evolution partner** (an item, §4). Evolutions are in §5.
 | 4 | **Button Shotgun** | auto | A short-range spread of buttons at the nearest zombie, with knockback |
 | 5 | **Stuffing Cloud** | auto | A soft cloud around Banane that hurts zombies inside it a few times a second |
 | 6 | **Bouncy Yarn Ball** | auto | A yarn ball that bounces between zombies and off walls |
-| 7 | **Thimble Mortar** | auto | Lobs a thimble at a random zombie on screen; it lands with a small area hit (shadow shows where) |
+| 7 | **Thimble Mortar** | auto | Lobs a thimble at a random zombie on screen; it lands with a small area hit (a ring on the floor shows where and how big, see §20) |
 | 8 | **Yarn Cannon** | aimed | A slow, heavy yarn ball towards the cursor that bursts on impact |
 | 9 | **Thread Whip** | aimed | A quick lash in a wide arc towards the cursor |
 | 10 | **Zipper Ray** | aimed | Every few seconds, a short-lived beam towards the cursor that hits everything in the line |
@@ -87,7 +87,7 @@ The other weapons get their evolutions in later milestones (vision MVP: 10 weapo
 
 - **Dropped by** elites, the mini-boss and the boss. It sits on the floor with a soft glow until Banane touches it.
 - **Opening** pauses the game for a short, big moment: the box wobbles, the lid pops, Banane puts his sunglasses on,
-  confetti. It takes about 2 seconds and can be skipped with a key press.
+  confetti. Then the contents stay on screen until the player confirms (changed after the playtest, see §20).
 - **Contents:** if a weapon is ready to evolve → that evolution. Otherwise **1–3 level-ups** of items or weapons Banane
   already has (more from the boss's box). If everything is maxed → a big heal.
 
@@ -242,7 +242,8 @@ Scenario tests in `tests/scenarios/test_02_build_variety.gd` unless marked *(uni
 - Town, materials, saving, unlocks, sewing patterns, rescued plushies (M3 / M4.5).
 - Evolutions for the other 6 weapons (later), more areas (M8+), other heroes (M5).
 - Equipment (M4.5), siege (M4), key rebinding and controller (M6 / M7).
-
+- Single-use floor pickups (e.g. a big magnet that pulls in all XP, a freeze): wished for in the M2 playtest,
+  planned for a later spec (§20).
 ## 18. Proposed tickets (after approval)
 
 1. Performance base for projectiles: shared pooled/baked projectile and enemy-bullet system — §14
@@ -269,3 +270,47 @@ Scenario tests in `tests/scenarios/test_02_build_variety.gd` unless marked *(uni
 3. Slot limits: **6 weapons and 6 items**?
 4. Per run: **3 rerolls, 3 skips, 2 banishes**?
 5. Bedroom **furniture that blocks movement**, or keep the open floor for now?
+
+## 20. Changes after the M2 playtest (2026-10-22)
+
+The product owner played M2: "looking really good", "I enjoy this a lot". Two things were hard to read:
+
+**Gift box: "the screen changes automatically and it's not easy to see what you got, and there is no confirmation."**
+Today the contents appear as a line of text for about one second, then the moment closes by itself.
+New behaviour:
+- The opening (wobble, lid pops, confetti, sunglasses) plays as before, about 1 second. A key press or click jumps
+  straight to the contents (it never closes the box).
+- The contents then **stay on screen** as big cards, like the level-up cards: the felt icon, the name and the level
+  change (e.g. "Lv 2 → 3"). An evolution shows the old weapon → the evolved weapon with its one-line text. A heal shows
+  how much was healed.
+- It closes only when the player confirms: a **Continue** button, **Enter**, **Space** or **E**, or a click on Continue.
+  Confirming works only after a short delay (0.5 s), so a key that was already held doesn't close it by accident.
+  Movement keys never close it.
+- The game stays paused until then.
+
+**Thimble Mortar: "it wasn't really visually understandable what it did and where the attack landed."**
+New behaviour:
+- When a thimble is thrown, a **ring on the floor** marks the landing spot at the real size of the hit area (Big Spool
+  included). It fills in as the thimble comes down, so you can see when it will land.
+- The thimble flies in a visible arc (higher, with its shadow under it).
+- On landing: a felt "thump" ring the size of the hit area plus a small dust puff, and the zombies inside flash.
+- Colours stay soft and warm (Banane's own effects), never the red/orange of enemy danger (hard rule 9).
+
+**Wish for later: single-use floor pickups** (a big magnet that pulls in all XP, a freeze, "something fun").
+Not part of M2. Proposal: a short spec of its own after M2 is accepted, before or together with M3.
+
+### Acceptance criteria (additions)
+
+- **AC-26** After a gift box opens, its contents stay on screen until the player confirms (Continue, Enter, Space, E
+  or a click on Continue); before 0.5 s and with movement keys nothing closes it; a key during the opening skips to
+  the contents. *(scenario)*
+- **AC-27** The contents show one card per thing received, with its icon, name and level change; an evolution shows
+  the old and new weapon; a heal shows the amount. *(scenario)*
+- **AC-28** A thrown thimble shows a ring at its landing spot as big as its hit area (Big Spool included) for the
+  whole flight; landing shows the impact ring; zombies inside the ring are hit, zombies outside are not. *(scenario)*
+- **P-7** (playtest) You can always tell what a gift box gave you, and where the mortar lands.
+
+### Tickets
+
+16. Gift box: contents as cards, wait for confirmation — AC-26, 27
+17. Thimble Mortar readability: landing ring, arc, impact — AC-28

@@ -18,9 +18,18 @@ _Last updated: 2026-10-22 (all M2 tickets merged, waiting for acceptance)_
 
 ## Next step
 
-- Next: the PO plays M2 for acceptance (playtest P-1 … P-6 in spec 02 §16; ask them to judge the M2-14 sounds too,
-  and P-5 = F1 → "Max everything" + "500 shamblers" + "Spawn the King" with "Show FPS + count"). Fix what they report.
+- First M2 playtest (2026-10-22) found two readability problems. Spec 02 §20 (PR "spec 02: playtest fixes") adds
+  tickets 16 (gift box waits for confirmation, contents as cards) and 17 (mortar landing ring). Once the PO merges
+  that spec PR: create the two issues, build them, then the PO finishes the M2 acceptance (P-1 … P-7; P-5 = F1 →
+  "Max everything" + "500 shamblers" + "Spawn the King" with "Show FPS + count").
 - After acceptance: write spec 03 for M3 (Town, vision §10) using the playtest feedback; the PO may send town wishes.
+
+## Playtest notes (M2, first round)
+
+- "Looking really good", "I enjoy this a lot".
+- Gift box: the moment closes by itself, hard to see what you got, no confirmation → spec 02 §20.
+- Thimble Mortar: not clear what it does or where it lands → spec 02 §20.
+- Wish: single-use floor pickups (big magnet, freeze, "something fun") → own short spec after M2 acceptance.
 
 ## Playtest notes (M1)
 
