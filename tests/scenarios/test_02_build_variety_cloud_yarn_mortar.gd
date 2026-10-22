@@ -1,6 +1,7 @@
 extends "res://tests/scenarios/run_scenario.gd"
-## Scenario (spec 02 §3, AC-1, AC-2): Stuffing Cloud, Bouncy Yarn Ball and Thimble Mortar, picked
-## from a card, attack on their own as described, and one of their levels shows a visible change.
+## Scenario (spec 02 §3, §20, AC-1, AC-2, AC-28): Stuffing Cloud, Bouncy Yarn Ball and Thimble
+## Mortar, picked from a card, attack on their own as described, and one of their levels shows a
+## visible change. The mortar marks its landing spot with a ring as big as its hit area.
 
 const SHAMBLER: EnemyStats = preload("res://data/enemies/shambler.tres")
 const POOL: UpgradePool = preload("res://data/upgrade_pool.tres")
@@ -127,7 +128,7 @@ func test_ac2_yarn_level_2_bounces_between_6_zombies() -> void:
 	assert_eq(hurt, 6, "one ball hit 6 different zombies")
 
 
-func test_ac1_mortar_lobs_at_zombies_on_screen_with_a_shadow() -> void:
+func test_ac1_mortar_lobs_at_zombies_on_screen_with_a_ring() -> void:
 	var mortar: Weapon = await _run_with_card(&"thimble_mortar")
 	assert_not_null(mortar, "the card gave the mortar")
 	var off_screen: Zombie = _dummy(OFF_SCREEN)
@@ -143,13 +144,48 @@ func test_ac1_mortar_lobs_at_zombies_on_screen_with_a_shadow() -> void:
 		func(zombie: Zombie) -> bool:
 			return thimble.global_position.distance_to(zombie.position) < 1.0
 	)
-	assert_true(on_one, "the shadow sits on one of the zombies")
-	assert_true(thimble.visible, "the shadow shows where it lands")
+	assert_true(on_one, "the ring sits on one of the zombies")
+	assert_true(thimble.visible, "the ring shows where it lands")
 	assert_gt(thimble.time_to_land(), 0.2, "in the air for a moment first")
 	assert_false(_hurt(pair[0]) or _hurt(pair[1]), "nobody hurt before it lands")
 	await wait_until(func() -> bool: return thimble.landed, 2.0)
 	await wait_physics_frames(1)
 	assert_true(_hurt(pair[0]) and _hurt(pair[1]), "the landing hurt both (area hit)")
+
+
+func test_ac28_mortar_ring_marks_the_landing_area_for_the_whole_flight() -> void:
+	var mortar: Weapon = await _run_with_card(&"thimble_mortar")
+	var banane: Player = first_player()
+	_level_up(&"big_spool", 1)
+	assert_gt(banane.area_multiplier, 1.0, "Big Spool makes areas bigger")
+	_dummy(Vector2(350, -150))
+	await wait_until(func() -> bool: return not _shots(mortar).is_empty(), 1.0)
+	var thimble: ThimbleProjectile = _shots(mortar)[0] as ThimbleProjectile
+	var blast: float = MORTAR.at_level(1).area * banane.area_multiplier
+	assert_almost_eq(thimble.blast_radius(), blast, 0.01, "the hit area includes Big Spool")
+	var spot: Vector2 = thimble.global_position - banane.global_position
+	var inside: Zombie = _dummy(spot + Vector2(0, blast * 0.8))
+	var outside: Zombie = _dummy(spot - Vector2(blast + inside.radius() + 30.0, 0))
+	var ring_ok: bool = true
+	var fills: Array[float] = []
+	var highest: float = 0.0
+	while not thimble.landed:
+		var right_size: bool = absf(thimble.ring_radius() - blast) < 0.5
+		ring_ok = ring_ok and thimble.visible and thimble.self_modulate.a > 0.3 and right_size
+		fills.append(thimble.fill_share())
+		highest = maxf(highest, thimble.height())
+		await wait_physics_frames(1)
+	assert_true(ring_ok, "a ring as big as the hit area shows for the whole flight")
+	assert_gt(fills.size(), 10, "in the air for a while")
+	assert_lt(fills[0], 0.2, "the ring starts empty ...")
+	assert_gt(fills[-1], 0.8, "... and fills in as the thimble comes down")
+	assert_gte(highest, ThimbleProjectile.MIN_ARC * 0.9, "a high arc above its shadow")
+	await wait_physics_frames(1)
+	assert_true(thimble.visible and thimble.self_modulate.a > 0.5, "the landing shows a thump ring")
+	assert_gte(thimble.ring_radius(), blast, "as big as the hit area")
+	assert_true(_hurt(inside), "a zombie inside the ring is hit")
+	assert_true(inside.puppet.flash.visible, "and flashes")
+	assert_false(_hurt(outside), "a zombie outside the ring is not")
 
 
 func test_ac2_mortar_level_2_lobs_two_thimbles() -> void:

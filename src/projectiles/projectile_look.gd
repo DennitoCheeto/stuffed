@@ -16,6 +16,9 @@ const CLOUD: StringName = &"shot/cloud"
 const YARN: StringName = &"shot/yarn"
 const THIMBLE: StringName = &"shot/thimble"
 const SHADOW: StringName = &"shot/shadow"
+const RING: StringName = &"shot/ring"
+const DISC: StringName = &"shot/disc"
+const DUST: StringName = &"shot/dust"
 const BURST: StringName = &"shot/burst"
 const WHIP: StringName = &"shot/whip"
 const ZIPPER: StringName = &"shot/zipper"
@@ -48,6 +51,14 @@ const THIMBLE_DOT_COLOR: Color = Color("#8d8676")
 const SHADOW_RADIUS: float = 30.0
 const SHADOW_COLOR: Color = Color("#1a1620")
 const SHADOW_RIM_COLOR: Color = Color("#d8d0c0")
+## The mortar's landing ring and its fill: drawn RING_RADIUS across, scaled to the hit area.
+## Soft banana cream, never enemy red/orange (vision §6, hard rule 9).
+const RING_RADIUS: float = 40.0
+const RING_WIDTH: float = 3.0
+const RING_COLOR: Color = Color("#f3e3a2")
+const RING_STITCH_COLOR: Color = Color("#c9b878")
+const DUST_RADIUS: float = 8.0
+const DUST_COLOR: Color = Color("#e6dccb")
 ## On-screen sizes the burst, the whip's arc and the zipper are drawn at; weapons scale them.
 const BURST_RADIUS: float = 40.0
 const WHIP_RADIUS: float = 100.0
@@ -72,6 +83,9 @@ static func make_parts() -> Dictionary[StringName, FeltPiece]:
 		YARN: _yarn(),
 		THIMBLE: _thimble(),
 		SHADOW: _shadow(),
+		RING: _ring(),
+		DISC: _disc(),
+		DUST: _dust(),
 		BURST: _burst(),
 		WHIP: _whip(),
 		ZIPPER: _zipper(),
@@ -195,6 +209,37 @@ static func _shadow() -> FeltPiece:
 	shadow.outline_width = 2.0 * UNITS
 	shadow.outline_color = SHADOW_RIM_COLOR
 	return shadow
+
+
+## The mortar's landing ring: a felt band with a stitched seam inside; RING_RADIUS across.
+static func _ring() -> FeltPiece:
+	var ring: FeltPiece = FeltPiece.new()
+	ring.soft = false
+	var radius: float = RING_RADIUS * UNITS
+	var band: PackedVector2Array = FeltShapes.circle(Vector2.ZERO, radius, 48)
+	band.append(band[0])
+	ring.add_line(band, RING_COLOR, RING_WIDTH * UNITS)
+	var seam: PackedVector2Array = FeltShapes.circle(Vector2.ZERO, radius - 3.5 * UNITS, 48)
+	seam.append(seam[0])
+	ring.set_seam(seam, RING_STITCH_COLOR)
+	return ring
+
+
+## A flat disc that fills the landing ring as the thimble comes down; RING_RADIUS across.
+static func _disc() -> FeltPiece:
+	var disc: FeltPiece = FeltPiece.new()
+	disc.soft = false
+	disc.polygon = FeltShapes.circle(Vector2.ZERO, RING_RADIUS * UNITS, 48)
+	disc.color = RING_COLOR
+	return disc
+
+
+## A small puff of felt dust kicked up by the landing.
+static func _dust() -> FeltPiece:
+	var dust: FeltPiece = FeltPiece.new()
+	dust.polygon = FeltShapes.circle(Vector2.ZERO, DUST_RADIUS * UNITS, 16)
+	dust.color = DUST_COLOR
+	return dust
 
 
 ## A round puff of yarn with loose strands sticking out; fills BURST_RADIUS.
