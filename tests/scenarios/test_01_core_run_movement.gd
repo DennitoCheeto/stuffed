@@ -7,8 +7,11 @@ func test_ac1_start_run_puts_banane_in_arena_centre_with_timer_at_zero() -> void
 	await wait_physics_frames(2)
 	sender.key_up(KEY_ENTER)
 	await wait_physics_frames(2)
+	assert_true(main.current_screen is Town, "Enter on the focused New game button opens the town")
+	await tap_action("p1_interact")
+	await wait_physics_frames(2)
 	var run: Run = main.current_screen as Run
-	assert_not_null(run, "Enter on the focused Start run button starts a run")
+	assert_not_null(run, "E at the Bedroom door starts a run")
 	if run == null:
 		return
 	var banane: Player = first_player()

@@ -31,6 +31,15 @@ func building_level(id: String) -> int:
 	return building_levels.get(id, 0)
 
 
+## How many buildings are rebuilt (level 1 or more).
+func rebuilt_count() -> int:
+	var count: int = 0
+	for id: String in building_levels:
+		if building_levels[id] > 0:
+			count += 1
+	return count
+
+
 ## Adds `share` of a run's haul to the jars (rounded up) and takes in its freed plushie.
 func bank(haul: RunHaul, share: float) -> void:
 	var kept: Dictionary[String, int] = haul.kept(share)

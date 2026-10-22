@@ -43,7 +43,7 @@ func test_ac24_end_run_shows_you_survived_with_stats() -> void:
 	assert_string_contains(end.stats_label.text, "Level: 1")
 	assert_string_contains(end.stats_label.text, "Zombies stuffed:")
 	assert_eq(end.seed_label.text, "Seed %d" % seed_value)
-	assert_true(end.try_again_button.has_focus(), "Try again is ready on the keyboard")
+	assert_true(end.fort_button.has_focus(), "Back to the fort is ready on the keyboard")
 
 
 func test_ac25_keep_going_shows_endless_time() -> void:

@@ -46,6 +46,7 @@ func test_ac22_dying_before_the_goal_shows_the_stats() -> void:
 
 func test_ac27_try_again_starts_a_fresh_run() -> void:
 	await _die_before_the_goal()
+	(main.current_screen as EndScreen).try_again_button.grab_focus()
 	await _press("ui_accept")
 	await wait_physics_frames(3)
 	var fresh: Run = main.current_screen as Run
@@ -104,12 +105,12 @@ func test_ac29_resume_button_continues() -> void:
 	assert_false(run.is_frozen())
 
 
-func test_ac29_quit_returns_to_the_title_and_logs_the_run() -> void:
+func test_ac29_give_up_shows_the_end_screen_and_logs_the_run() -> void:
 	run = await start_run()
 	await _press("pause")
 	run.pause_menu.quit_button.pressed.emit()
 	await wait_process_frames(2)
-	assert_true(main.current_screen is TitleScreen, "back at the title")
+	assert_true(main.current_screen is EndScreen, "the end screen (Brought home)")
 	var entries: Array[Dictionary] = RunLog.read_all()
 	assert_eq(entries.size(), 1)
 	assert_eq(entries[0]["ending"], "quit")

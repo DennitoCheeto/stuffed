@@ -31,4 +31,6 @@ var floor_pickups: Array[Dictionary] = []
 
 
 func title() -> String:
-	return "You survived!" if won else "Banane got stuffed"
+	if won:
+		return "You survived!"
+	return "You gave up" if ending == "quit" else "Banane got stuffed"

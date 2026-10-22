@@ -64,12 +64,12 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -560.0
-offset_top = -400.0
+offset_top = -500.0
 offset_right = 560.0
-offset_bottom = 400.0
+offset_bottom = 500.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 22
+theme_override_constants/separation = 16
 alignment = 1
 
 [node name="TitleLabel" type="Label" parent="Center"]
@@ -114,7 +114,7 @@ horizontal_alignment = 1
 custom_minimum_size = Vector2(0, 16)
 layout_mode = 2
 
-[node name="TryAgainButton" type="Button" parent="Center"]
+[node name="FortButton" type="Button" parent="Center"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(420, 84)
 layout_mode = 2
@@ -124,9 +124,9 @@ theme_override_styles/normal = SubResource("StyleBoxFlat_normal")
 theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_hover")
 theme_override_styles/focus = SubResource("StyleBoxFlat_focus")
-text = "Try again"
+text = "Back to the fort"
 
-[node name="TitleButton" type="Button" parent="Center"]
+[node name="TryAgainButton" type="Button" parent="Center"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(420, 72)
 layout_mode = 2
@@ -136,4 +136,4 @@ theme_override_styles/normal = SubResource("StyleBoxFlat_normal")
 theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_hover")
 theme_override_styles/focus = SubResource("StyleBoxFlat_focus")
-text = "Title screen"
+text = "Try again"

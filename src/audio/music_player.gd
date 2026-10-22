@@ -1,12 +1,13 @@
 class_name MusicPlayer
 extends AudioStreamPlayer
 ## Plays the background music, synthesized live (no music files): a calm music-box loop on the
-## title screen, a bouncier toy-band loop during runs and a driving minor loop with drums for
-## the boss fight. Muffled while the game is paused.
+## title screen, a slower, cozier one in town, a bouncier toy-band loop during runs and a
+## driving minor loop with drums for the boss fight. Muffled while the game is paused.
 
 ## Track name → [beats per minute, chord roots (MIDI, one per bar), lead octave shift].
 const TRACKS: Dictionary[StringName, Array] = {
 	&"title": [80.0, [60.0, 57.0, 53.0, 55.0], 12.0],
+	&"town": [70.0, [53.0, 57.0, 50.0, 55.0], 12.0],
 	&"run": [124.0, [57.0, 53.0, 48.0, 55.0], 0.0],
 	&"boss": [148.0, [57.0, 57.0, 53.0, 52.0], -12.0],
 }
