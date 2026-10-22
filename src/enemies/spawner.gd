@@ -87,7 +87,9 @@ func boss_rate_scale() -> float:
 func _outside_view(radius: float) -> Vector2:
 	var view: Rect2 = visible_rect()
 	var area: Rect2 = enemies.play_rect
-	return SpawnPlacement.outside_view(view, area, schedule.view_margin, radius, rng)
+	return SpawnPlacement.outside_view(
+		view, area, schedule.view_margin, radius, rng, enemies.obstacles
+	)
 
 
 ## The part of the world the camera shows right now.

@@ -1,7 +1,9 @@
 class_name Arena
 extends Node2D
 ## The bedroom floor the run happens on: a felt carpet with a simple pattern (so movement is
-## readable) bounded by toy-block walls. Walls are built in code from `size`.
+## readable) bounded by toy-block walls, with hand-placed furniture (spec 02 §10). Walls and
+## furniture bodies are built in code. Furniture blocks players (physics), zombies and enemy
+## bullets (through `obstacles`); the players' shots fly over it.
 
 const WALL_LAYER: int = 1
 const FLOOR_COLOR: Color = Color("#2b2733")
@@ -11,6 +13,20 @@ const BLOCK_COLORS: Array[Color] = [
 	Color("#8f4a46"), Color("#46648f"), Color("#a0843f"), Color("#4f7d55")
 ]
 const BLOCK_INNER_COLOR: Color = Color(1.0, 1.0, 1.0, 0.1)
+## Furniture felt: muted, so zombies and their bullets always read first (vision §6).
+const SHADOW_COLOR: Color = Color(0.0, 0.0, 0.0, 0.3)
+const SHADOW_OFFSET: Vector2 = Vector2(10.0, 16.0)
+const STITCH_COLOR: Color = Color(1.0, 1.0, 1.0, 0.16)
+## See-through, so the floor pattern still shows movement.
+const RUG_COLOR: Color = Color(0.6, 0.38, 0.3, 0.14)
+const RUG_RING_COLOR: Color = Color(0.7, 0.55, 0.32, 0.14)
+const BED_FRAME_COLOR: Color = Color("#5b4636")
+const BED_BLANKET_COLOR: Color = Color("#3f5672")
+const BED_FOLD_COLOR: Color = Color("#4b6584")
+const PILLOW_COLOR: Color = Color("#8a8494")
+const TOY_BOX_COLOR: Color = Color("#6d4535")
+const TOY_BOX_LID_COLOR: Color = Color("#7f5341")
+const TOY_BOX_BAND_COLOR: Color = Color("#8f7640")
 
 ## Size of the walkable floor in pixels (about 4 x 4 screens).
 @export var size: Vector2 = Vector2(7680.0, 4320.0)
@@ -18,10 +34,14 @@ const BLOCK_INNER_COLOR: Color = Color(1.0, 1.0, 1.0, 0.1)
 @export var wall_thickness: float = 96.0
 ## Side length of one carpet pattern tile.
 @export var tile_size: float = 192.0
+## The furniture of this room (none = an open floor).
+@export var furniture: FurnitureLayout
 
 
 func _ready() -> void:
 	_build_walls()
+	for rect: Rect2 in _blocking_rects():
+		_add_wall(rect)
 
 
 ## The walkable floor, in arena coordinates.
@@ -36,6 +56,17 @@ func outer_rect() -> Rect2:
 
 func center() -> Vector2:
 	return size / 2.0
+
+
+## The furniture that blocks zombies and enemy bullets.
+func obstacles() -> Obstacles:
+	return Obstacles.new(_blocking_rects())
+
+
+func _blocking_rects() -> Array[Rect2]:
+	if furniture == null:
+		return []
+	return furniture.blocking_rects()
 
 
 func _build_walls() -> void:
@@ -64,6 +95,9 @@ func _draw() -> void:
 	draw_rect(play_rect(), FLOOR_COLOR)
 	_draw_carpet_pattern()
 	_draw_blocks()
+	if furniture != null:
+		for piece: FurniturePiece in furniture.pieces:
+			_draw_piece(piece)
 
 
 func _draw_carpet_pattern() -> void:
@@ -103,3 +137,86 @@ func _draw_block(top_left: Vector2, index: int) -> void:
 	var block: Rect2 = Rect2(top_left, Vector2(t, t))
 	draw_rect(block.grow(-2.0), BLOCK_COLORS[index % BLOCK_COLORS.size()])
 	draw_rect(block.grow(-t * 0.25), BLOCK_INNER_COLOR, false, 3.0)
+
+
+func _draw_piece(piece: FurniturePiece) -> void:
+	match piece.kind:
+		FurniturePiece.Kind.RUG:
+			_draw_rug(piece.rect)
+		FurniturePiece.Kind.BED:
+			_draw_bed(piece.rect)
+		FurniturePiece.Kind.TOY_BOX:
+			_draw_toy_box(piece.rect)
+		FurniturePiece.Kind.BLOCK_TOWER:
+			_draw_tower(piece.rect)
+
+
+## A soft felt panel with rounded corners and a stitched edge.
+func _draw_felt(rect: Rect2, color: Color, corner: float, stitched: bool = true) -> void:
+	var box: StyleBoxFlat = StyleBoxFlat.new()
+	box.bg_color = color
+	box.set_corner_radius_all(int(corner))
+	box.anti_aliasing = true
+	box.draw(get_canvas_item(), rect)
+	if stitched:
+		_draw_stitches(rect.grow(-maxf(corner * 0.4, 8.0)))
+
+
+func _draw_stitches(rect: Rect2) -> void:
+	var corners: PackedVector2Array = [
+		rect.position,
+		Vector2(rect.end.x, rect.position.y),
+		rect.end,
+		Vector2(rect.position.x, rect.end.y),
+	]
+	for i: int in corners.size():
+		var next: Vector2 = corners[(i + 1) % corners.size()]
+		draw_dashed_line(corners[i], next, STITCH_COLOR, 3.0, 12.0)
+
+
+func _draw_shadow(rect: Rect2, corner: float) -> void:
+	_draw_felt(Rect2(rect.position + SHADOW_OFFSET, rect.size), SHADOW_COLOR, corner, false)
+
+
+func _draw_rug(rect: Rect2) -> void:
+	var corner: float = minf(rect.size.x, rect.size.y) * 0.5
+	_draw_felt(rect, RUG_COLOR, corner, false)
+	_draw_felt(rect.grow(-48.0), RUG_RING_COLOR, corner - 48.0, false)
+	_draw_felt(rect.grow(-110.0), RUG_COLOR, corner - 110.0, false)
+
+
+func _draw_bed(rect: Rect2) -> void:
+	_draw_shadow(rect, 36.0)
+	_draw_felt(rect, BED_FRAME_COLOR, 36.0)
+	var inner: Rect2 = rect.grow(-36.0)
+	var pillow_height: float = inner.size.y * 0.2
+	var pillow: Rect2 = Rect2(inner.position, Vector2(inner.size.x, pillow_height)).grow(-14.0)
+	_draw_felt(pillow, PILLOW_COLOR, 40.0)
+	var blanket: Rect2 = Rect2(
+		inner.position + Vector2(0.0, pillow_height), inner.size - Vector2(0.0, pillow_height)
+	)
+	_draw_felt(blanket, BED_BLANKET_COLOR, 28.0)
+	var fold: Rect2 = Rect2(blanket.position, Vector2(blanket.size.x, 70.0))
+	_draw_felt(fold, BED_FOLD_COLOR, 28.0, false)
+
+
+func _draw_toy_box(rect: Rect2) -> void:
+	_draw_shadow(rect, 24.0)
+	_draw_felt(rect, TOY_BOX_COLOR, 24.0)
+	var lid: Rect2 = Rect2(rect.position, Vector2(rect.size.x, rect.size.y * 0.35))
+	_draw_felt(lid.grow(-10.0), TOY_BOX_LID_COLOR, 18.0, false)
+	var band_width: float = 44.0
+	var band_left: float = rect.get_center().x - band_width / 2.0
+	var band: Rect2 = Rect2(band_left, rect.position.y + 6.0, band_width, rect.size.y - 12.0)
+	_draw_felt(band, TOY_BOX_BAND_COLOR, 10.0, false)
+
+
+## Toy blocks stacked in a 2 x 2 tower, seen from above.
+func _draw_tower(rect: Rect2) -> void:
+	_draw_shadow(rect, 12.0)
+	var half: Vector2 = rect.size / 2.0
+	for i: int in 4:
+		var cell: Rect2 = Rect2(rect.position + Vector2(i % 2, floorf(i / 2.0)) * half, half)
+		var color: Color = BLOCK_COLORS[(i + int(rect.position.x)) % BLOCK_COLORS.size()]
+		_draw_felt(cell.grow(-3.0), color.darkened(0.25), 10.0, false)
+		draw_rect(cell.grow(-half.x * 0.25), BLOCK_INNER_COLOR, false, 3.0)

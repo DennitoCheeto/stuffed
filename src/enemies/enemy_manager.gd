@@ -37,6 +37,8 @@ var actors: Node2D
 var effects: Node2D
 ## Where ranged zombies put their stuffing balls.
 var projectiles: ProjectileManager
+## Furniture: zombies walk around it (bosses too, unless they are in the air).
+var obstacles: Obstacles = Obstacles.new()
 ## Zombies never leave this area (the arena floor).
 var play_rect: Rect2 = Rect2()
 var max_alive: int = 500
@@ -57,11 +59,19 @@ func _ready() -> void:
 	add_to_group(GROUP)
 
 
-func setup(actors_node: Node2D, effects_node: Node2D, area: Rect2, max_count: int) -> void:
+func setup(
+	actors_node: Node2D,
+	effects_node: Node2D,
+	area: Rect2,
+	max_count: int,
+	furniture: Obstacles = null
+) -> void:
 	actors = actors_node
 	effects = effects_node
 	play_rect = area
 	max_alive = max_count
+	if furniture != null:
+		obstacles = furniture
 
 
 func alive_count() -> int:
@@ -196,21 +206,40 @@ func _alive_players() -> Array[Player]:
 
 
 func _move(zombie: Zombie, target: Player, delta: float) -> void:
-	var walk: Vector2 = _walk(zombie, target)
+	var walk: Vector2 = _around_furniture(zombie, _walk(zombie, target))
 	zombie.heading = walk.normalized()
 	var step: Vector2 = (walk + zombie.knockback) * delta + _separation(zombie)
-	var edge: float = zombie.radius()
-	var inside: Rect2 = play_rect.grow(-edge)
-	zombie.position = (zombie.position + step).clamp(inside.position, inside.end)
+	_place(zombie, zombie.position + step)
 
 
 ## A boss goes where its brain says. The crowd doesn't push it: it pushes the crowd.
 func _move_boss(zombie: Zombie, target: Player, delta: float) -> void:
 	var walk: Vector2 = zombie.brain.step(zombie, target, self, delta)
+	if zombie.brain.is_airborne():
+		zombie.heading = walk.normalized()
+		var inside: Rect2 = play_rect.grow(-zombie.radius())
+		var flight: Vector2 = zombie.position + (walk + zombie.knockback) * delta
+		zombie.position = flight.clamp(inside.position, inside.end)
+		return
+	walk = _around_furniture(zombie, walk)
 	zombie.heading = walk.normalized()
-	var inside: Rect2 = play_rect.grow(-zombie.radius())
-	var step: Vector2 = (walk + zombie.knockback) * delta
-	zombie.position = (zombie.position + step).clamp(inside.position, inside.end)
+	_place(zombie, zombie.position + (walk + zombie.knockback) * delta)
+
+
+## `walk` turned along the side of furniture in the way (zombies slide around it).
+func _around_furniture(zombie: Zombie, walk: Vector2) -> Vector2:
+	if obstacles.is_empty():
+		return walk
+	var steered: Array = obstacles.steer(zombie.position, zombie.radius(), walk, zombie.detour)
+	zombie.detour = steered[1]
+	return steered[0]
+
+
+## Moves a zombie to `point`, but never into furniture or out of the arena.
+func _place(zombie: Zombie, point: Vector2) -> void:
+	var edge: float = zombie.radius()
+	var inside: Rect2 = play_rect.grow(-edge)
+	zombie.position = obstacles.push_out(point, edge).clamp(inside.position, inside.end)
 
 
 func _nearest_player(point: Vector2, players: Array[Player]) -> Player:

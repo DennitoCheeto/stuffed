@@ -1,0 +1,56 @@
+[gd_resource type="Resource" script_class="FurnitureLayout" load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://src/arena/furniture_layout.gd" id="1_layout"]
+[ext_resource type="Script" path="res://src/arena/furniture_piece.gd" id="2_piece"]
+
+[sub_resource type="Resource" id="Resource_rug"]
+script = ExtResource("2_piece")
+kind = 3
+rect = Rect2(3140, 1710, 1400, 900)
+blocks = false
+
+[sub_resource type="Resource" id="Resource_bed"]
+script = ExtResource("2_piece")
+kind = 0
+rect = Rect2(700, 520, 820, 1180)
+blocks = true
+
+[sub_resource type="Resource" id="Resource_toy_box"]
+script = ExtResource("2_piece")
+kind = 1
+rect = Rect2(5860, 760, 660, 420)
+blocks = true
+
+[sub_resource type="Resource" id="Resource_toy_box_2"]
+script = ExtResource("2_piece")
+kind = 1
+rect = Rect2(3400, 3560, 640, 380)
+blocks = true
+
+[sub_resource type="Resource" id="Resource_tower_1"]
+script = ExtResource("2_piece")
+kind = 2
+rect = Rect2(1500, 3020, 200, 200)
+blocks = true
+
+[sub_resource type="Resource" id="Resource_tower_2"]
+script = ExtResource("2_piece")
+kind = 2
+rect = Rect2(1960, 3360, 160, 160)
+blocks = true
+
+[sub_resource type="Resource" id="Resource_tower_3"]
+script = ExtResource("2_piece")
+kind = 2
+rect = Rect2(5880, 3080, 220, 220)
+blocks = true
+
+[sub_resource type="Resource" id="Resource_tower_4"]
+script = ExtResource("2_piece")
+kind = 2
+rect = Rect2(6400, 2700, 180, 180)
+blocks = true
+
+[resource]
+script = ExtResource("1_layout")
+pieces = Array[ExtResource("2_piece")]([SubResource("Resource_rug"), SubResource("Resource_bed"), SubResource("Resource_toy_box"), SubResource("Resource_toy_box_2"), SubResource("Resource_tower_1"), SubResource("Resource_tower_2"), SubResource("Resource_tower_3"), SubResource("Resource_tower_4")])
