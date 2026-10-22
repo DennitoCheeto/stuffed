@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-22 (M2 playtest round 1 done, fix tickets #72–#75 open)_
+_Last updated: 2026-10-22 (M2-16 #72 and M2-17 #73 merged; #74, #75 open)_
 
 ## Where we are
 
@@ -14,13 +14,13 @@ _Last updated: 2026-10-22 (M2 playtest round 1 done, fix tickets #72–#75 open)
 | Art direction | ✅ felt style "B — Soft", puppet animation (`docs/art/`) |
 | M0 Factory setup | ✅ done (PR #1) |
 | M1 Core run | ✅ accepted 2026-10-21 (PRs #17–#29; playtest P-1 … P-6 passed, 144 fps on the PO's PC) |
-| M2 Build variety | 🔨 15 tickets merged (PRs #47–#49, #51–#55, #57, #58, #60, #61, #63, #67, #69); playtest round 1 → spec 02 §20, fix tickets #72–#75 |
+| M2 Build variety | 🔨 17 tickets merged (PRs #47–#49, #51–#55, #57, #58, #60, #61, #63, #67, #69, #77, #78); playtest round 1 → spec 02 §20, fix tickets #74, #75 left |
 
 ## Next step
 
-- First M2 playtest (2026-10-22) done; spec 02 §20 approved (PR #71) with 4 fix tickets: **M2-16 #72** gift box waits
-  for confirmation (contents as cards), **M2-17 #73** mortar landing ring, **M2-18 #74** clearer reroll/skip/banish
-  buttons, **M2-19 #75** stronger evolved-weapon looks. Next: build them in that order (1–2 per chat), then the PO
+- First M2 playtest (2026-10-22) done; spec 02 §20 approved (PR #71) with 4 fix tickets. Done: **M2-16 #72** gift box
+  cards + confirmation (PR #77), **M2-17 #73** mortar landing ring (PR #78). Next: **M2-18 #74** clearer
+  reroll/skip/banish buttons, then **M2-19 #75** stronger evolved-weapon looks (1–2 per chat), then the PO
   plays again for acceptance (P-1 … P-9; ask P-1 "want a different build next run?" again).
 - After acceptance: write spec 03 for M3 (Town, vision §10) using the playtest feedback; the PO may send town wishes.
 
@@ -94,8 +94,10 @@ _Last updated: 2026-10-22 (M2 playtest round 1 done, fix tickets #72–#75 open)
   `spawner.spawn_elite(stats)`. Read `zombie.attack`, `zombie.display_name`, `zombie.radius()`,
   `zombie.xp_button()`, never `zombie.stats.*` for those. Elite times: `SpawnSchedule.elites` / `elite_time(i)`.
 - Gift box: `run.drop_gift_box(at)`; contents from `GiftBoxRules.contents` (evolution first, else 1-3
-  level-ups, else heal), given at touch; the moment is `run.gift_screen` (freeze reason `gift_box`). Level-ups
-  and gift moments wait for each other. Scenario tests: clear `run.pickups.buttons` before walking onto a box
+  level-ups, else heal), given at touch; the moment is `run.gift_screen` (freeze reason `gift_box`): ~1 s opening
+  (`opening_seconds`), then `GiftCardView` cards from `GiftContents.cards()` that stay until `confirm()` (Enter /
+  Space / E / Continue, after `confirm_delay`). Tests force-close with `gift_screen.close()` or wait for
+  `showing_contents`. Level-ups and gift moments wait for each other. Scenario tests: clear `run.pickups.buttons` before walking onto a box
   (the elite's XP button would open a level-up first).
 - Evolutions: `UpgradePool.evolutions` (`EvolutionDef`) + evolved weapon `.tres` with `evolved_from` and one
   level; `Player.evolve`. `upgrade_levels()` reports the old weapon at `Player.EVOLVED_LEVEL` so it is never
@@ -117,3 +119,7 @@ _Last updated: 2026-10-22 (M2 playtest round 1 done, fix tickets #72–#75 open)
   `WeaponStats.sound` / `sound_pitch`, played by the `Weapon` base on each attack (never in weapon scripts).
   `test_audio.gd` checks every weapon has its own sound, quieter than enemy-danger sounds. Scenario tests read
   `Sfx.history` (clear it first) to see what played.
+- Thimble Mortar: the `ThimbleProjectile` node *is* the landing ring (`ProjectileLook.RING`, z -1 under zombies),
+  scaled to `blast_radius()` (Big Spool included); fill disc child, thimble/shadow/dust are `top_level` sprites.
+  Tests read `ring_radius()`, `fill_share()`, `height()`. Perl/regex edits that insert functions: check blank
+  lines (exactly two between functions) or gdformat fails in CI.
