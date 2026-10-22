@@ -116,3 +116,23 @@ func test_ac34_freeze_numbers_live_in_the_data() -> void:
 	assert_eq(RULES.freeze_seconds, 5.0, "spec: frozen for 5 s")
 	assert_eq(RULES.freeze_boss_speed, 0.5, "spec: bosses at half speed")
 	assert_eq(RULES.freeze_crack_seconds, 1.0, "spec: the ice cracks in the last second")
+
+
+func test_ac35_party_popper_is_in_the_data_with_a_look_and_a_sound() -> void:
+	var popper: FloorPickupDef = RULES.find(&"party_popper")
+	assert_not_null(popper, "the Party Popper can drop")
+	if popper == null:
+		return
+	assert_eq(popper.banner, "PARTY POPPER!")
+	assert_eq(popper.weight, 30.0, "spec odds: Party Popper 30%")
+	assert_true(SfxBank.LENGTHS.has(popper.sound), "its own sound")
+	var parts: Dictionary[StringName, FeltPiece] = FloorPickupLook.make_parts()
+	assert_true(parts.has(FloorPickupLook.key(popper.id)), "its own felt look")
+	for part: FeltPiece in parts.values():
+		part.free()
+
+
+func test_ac35_popper_numbers_live_in_the_data() -> void:
+	assert_between(RULES.popper_elite_share, 0.2, 0.6, "elites lose a big chunk")
+	assert_between(RULES.popper_boss_share, 0.01, 0.1, "bosses take a small hit")
+	assert_gt(RULES.popper_seconds, 0.5, "the confetti stays long enough to see")

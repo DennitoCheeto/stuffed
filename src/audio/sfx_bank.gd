@@ -43,6 +43,7 @@ const LENGTHS: Dictionary[StringName, float] = {
 	&"magnet": 0.45,
 	&"snow_globe": 0.7,
 	&"ice_crack": 0.4,
+	&"party_popper": 0.8,
 }
 
 
@@ -109,6 +110,7 @@ static func _weapon_or_moment(sound: StringName) -> Callable:
 		&"magnet": _magnet,
 		&"snow_globe": _snow_globe,
 		&"ice_crack": _ice_crack,
+		&"party_popper": _party_popper,
 	}
 	return voices[sound]
 
@@ -429,3 +431,14 @@ static func _crackle(t: float, length: float) -> float:
 	var tick_phase: float = fmod(t * 23.0, 1.0)
 	var ticks: float = exp(-40.0 * tick_phase) * absf(sin(t * 61.0))
 	return Synth.noise(t) * ticks * clampf((length - t) / (length * 0.5), 0.0, 1.0)
+
+
+## Party Popper pulled: a bright "pop" with a soft thump, then a rustle of confetti floating down.
+static func _party_popper(t: float) -> float:
+	var pop: float = Synth.sine(Synth.sweep(t, 900.0, 300.0, 0.06)) * exp(-45.0 * t)
+	var thump: float = Synth.sine(Synth.sweep(t, 160.0, 70.0, 0.1)) * exp(-25.0 * t)
+	var crack: float = Synth.noise(t) * exp(-60.0 * t)
+	var rustle: float = 0.0
+	if t >= 0.05:
+		rustle = _crackle(t * 1.7, 1.3) * minf((t - 0.05) / 0.1, 1.0)
+	return 0.3 * pop + 0.25 * thump + 0.2 * crack + 0.12 * rustle

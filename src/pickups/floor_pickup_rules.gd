@@ -25,6 +25,12 @@ extends Resource
 @export var freeze_crack_seconds: float = 1.0
 ## Snow Globe: bosses aren't frozen, they move at this share of their speed (0.5 = half).
 @export var freeze_boss_speed: float = 0.5
+## Party Popper: elites on screen lose this share of their full health (0.4 = 40 %).
+@export var popper_elite_share: float = 0.4
+## Party Popper: bosses on screen lose this share of their full health (a small hit).
+@export var popper_boss_share: float = 0.05
+## Party Popper: how long the confetti flies (seconds; looks only).
+@export var popper_seconds: float = 1.4
 
 
 ## The kind with this id, or null.

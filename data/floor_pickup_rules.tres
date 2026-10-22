@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="FloorPickupRules" load_steps=5 format=3]
+[gd_resource type="Resource" script_class="FloorPickupRules" load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://src/pickups/floor_pickup_rules.gd" id="1_rules"]
 [ext_resource type="Script" path="res://src/pickups/floor_pickup_def.gd" id="2_def"]
@@ -21,9 +21,18 @@ banner_subtitle = "The horde is frozen"
 weight = 30.0
 sound = &"snow_globe"
 
+[sub_resource type="Resource" id="Resource_party_popper"]
+script = ExtResource("2_def")
+id = &"party_popper"
+display_name = "Party Popper"
+banner = "PARTY POPPER!"
+banner_subtitle = "Confetti for everyone"
+weight = 30.0
+sound = &"party_popper"
+
 [resource]
 script = ExtResource("1_rules")
-kinds = Array[ExtResource("2_def")]([SubResource("Resource_magnet"), SubResource("Resource_snow_globe")])
+kinds = Array[ExtResource("2_def")]([SubResource("Resource_magnet"), SubResource("Resource_snow_globe"), SubResource("Resource_party_popper")])
 first_drop_after = 30.0
 min_gap = 45.0
 gap_spread = 30.0
@@ -34,3 +43,6 @@ banner_seconds = 1.8
 freeze_seconds = 5.0
 freeze_crack_seconds = 1.0
 freeze_boss_speed = 0.5
+popper_elite_share = 0.4
+popper_boss_share = 0.05
+popper_seconds = 1.4

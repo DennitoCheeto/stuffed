@@ -24,10 +24,13 @@ const BANANE_YELLOW: Color = Color("#f2b52e")
 const BEAK_ORANGE: Color = Color("#f47a3a")
 ## Radius of the glass ball (on screen, pixels).
 const GLOBE_RADIUS: float = 11.0
+const PARTY_POPPER: StringName = &"floor/party_popper"
+const POPPER_TEAL: Color = Color("#5cc2b5")
+const RIBBON_PINK: Color = Color("#f4a8d6")
 
 
 static func make_parts() -> Dictionary[StringName, FeltPiece]:
-	return {MAGNET: _magnet(), SNOW_GLOBE: _snow_globe()}
+	return {MAGNET: _magnet(), SNOW_GLOBE: _snow_globe(), PARTY_POPPER: _party_popper()}
 
 
 ## The atlas part for pickup `id` (e.g. &"magnet").
@@ -98,3 +101,38 @@ static func _snow_globe() -> FeltPiece:
 		shine.append(Vector2(cos(angle), sin(angle)) * (GLOBE_RADIUS - 3.0) * unit)
 	globe.add_line(shine, SNOW_WHITE, 4.0)
 	return globe
+
+
+## A teal felt party popper with yellow stripes, opening to the upper right, a pink curly
+## ribbon and a few confetti bits flying out; its pivot is the middle of the cone.
+static func _party_popper() -> FeltPiece:
+	var unit: float = 1.0 / DRAW_SCALE
+	var tip: Vector2 = Vector2(-8, 11) * unit
+	var open_left: Vector2 = Vector2(-1, -8) * unit
+	var open_right: Vector2 = Vector2(9, 1) * unit
+	var popper: FeltPiece = FeltPiece.new()
+	popper.polygon = PackedVector2Array([tip, open_left, open_right])
+	popper.color = POPPER_TEAL
+	popper.outline_width = 5.0
+	popper.outline_color = OUTLINE_COLOR
+	for band: Vector2 in [Vector2(0.35, 0.5), Vector2(0.7, 0.85)]:
+		var stripe: PackedVector2Array = [
+			tip.lerp(open_left, band.x),
+			tip.lerp(open_left, band.y),
+			tip.lerp(open_right, band.y),
+			tip.lerp(open_right, band.x),
+		]
+		popper.add_layer(stripe, BANANE_YELLOW)
+	var mouth: Vector2 = open_left.lerp(open_right, 0.5)
+	var ribbon: PackedVector2Array = []
+	for i: int in 13:
+		var share: float = i / 12.0
+		var curl: Vector2 = Vector2(cos(share * TAU * 1.5), sin(share * TAU * 1.5)) * 2.5
+		ribbon.append(mouth + (Vector2(4, -9) * share + curl - Vector2(2.5, 0)) * unit)
+	popper.add_line(ribbon, RIBBON_PINK, 5.0)
+	var bits: Dictionary[Vector2, Color] = {
+		Vector2(10, -8): SNOW_WHITE, Vector2(12, -2): GLASS_BLUE, Vector2(4, -12): BANANE_YELLOW
+	}
+	for bit: Vector2 in bits:
+		popper.add_layer(FeltShapes.circle(bit * unit, 1.5 * unit, 8), bits[bit])
+	return popper
