@@ -15,9 +15,13 @@ signal quit_to_title(result: RunResult)
 signal restart_requested(seed_value: int)
 ## The music should change to `track` (the boss fight has its own).
 signal music_requested(track: StringName)
+## Time to save the haul so far (every CHECKPOINT_SECONDS of run time).
+signal checkpoint_due
 
 ## Weapons and effects find the run through this group.
 const GROUP: StringName = &"run"
+## How often the run's haul is saved while it goes (spec 03 §9).
+const CHECKPOINT_SECONDS: float = 5.0
 const PLAYER_SCENE: PackedScene = preload("res://src/player/player.tscn")
 ## How long the chain of pops takes when the goal is reached.
 const POP_CHAIN_TIME: float = 1.0
@@ -74,6 +78,8 @@ var pickup_rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var floor_pickup_drops: FloorPickupDrops
 ## Edge arrows to floor pickups out of sight (on the HUD).
 var pickup_arrows: PickupArrows = PickupArrows.new()
+## Materials and a freed plushie collected for the town in this run (spec 03 §3).
+var haul: RunHaul = RunHaul.new()
 
 ## False while the goal pops the horde (those zombies drop no XP).
 var _drops_enabled: bool = true
@@ -87,6 +93,8 @@ var _gift_queue: Array[GiftContents] = []
 var _freeze_reasons: Dictionary[StringName, bool] = {}
 ## The beaten boss's big gift box, until it is opened.
 var _goal_box: GiftBox
+## Run time of the next haul checkpoint.
+var _next_checkpoint_at: float = CHECKPOINT_SECONDS
 
 @onready var arena: Arena = $Arena
 @onready var pickups: PickupManager = $Pickups
@@ -161,6 +169,9 @@ func _physics_process(delta: float) -> void:
 	if over or _at_goal:
 		return
 	elapsed += delta
+	if elapsed >= _next_checkpoint_at:
+		_next_checkpoint_at = elapsed + CHECKPOINT_SECONDS
+		checkpoint_due.emit()
 	if endless:
 		_update_endless_scaling()
 	spawner.tick(elapsed, delta)
