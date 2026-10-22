@@ -95,3 +95,24 @@ func test_ac32_big_magnet_is_in_the_data_with_a_look_and_a_sound() -> void:
 	assert_true(parts.has(FloorPickupLook.key(magnet.id)), "its own felt look")
 	for part: FeltPiece in parts.values():
 		part.free()
+
+
+func test_ac34_snow_globe_is_in_the_data_with_a_look_and_a_sound() -> void:
+	var globe: FloorPickupDef = RULES.find(&"snow_globe")
+	assert_not_null(globe, "the Snow Globe can drop")
+	if globe == null:
+		return
+	assert_eq(globe.banner, "SNOW GLOBE!")
+	assert_eq(globe.weight, 30.0, "spec odds: Snow Globe 30%")
+	assert_true(SfxBank.LENGTHS.has(globe.sound), "its own sound")
+	assert_true(SfxBank.LENGTHS.has(&"ice_crack"), "and a crack when the ice breaks")
+	var parts: Dictionary[StringName, FeltPiece] = FloorPickupLook.make_parts()
+	assert_true(parts.has(FloorPickupLook.key(globe.id)), "its own felt look")
+	for part: FeltPiece in parts.values():
+		part.free()
+
+
+func test_ac34_freeze_numbers_live_in_the_data() -> void:
+	assert_eq(RULES.freeze_seconds, 5.0, "spec: frozen for 5 s")
+	assert_eq(RULES.freeze_boss_speed, 0.5, "spec: bosses at half speed")
+	assert_eq(RULES.freeze_crack_seconds, 1.0, "spec: the ice cracks in the last second")

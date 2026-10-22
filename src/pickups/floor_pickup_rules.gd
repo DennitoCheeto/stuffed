@@ -19,6 +19,12 @@ extends Resource
 @export var touch_radius: float = 22.0
 ## How long the name banner stays up.
 @export var banner_seconds: float = 1.8
+## Snow Globe: how long the horde stays frozen (seconds).
+@export var freeze_seconds: float = 5.0
+## Snow Globe: in the last this-many seconds the ice cracks and the zombies shake.
+@export var freeze_crack_seconds: float = 1.0
+## Snow Globe: bosses aren't frozen, they move at this share of their speed (0.5 = half).
+@export var freeze_boss_speed: float = 0.5
 
 
 ## The kind with this id, or null.

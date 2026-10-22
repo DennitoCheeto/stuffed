@@ -16,10 +16,18 @@ const MAGNET_OUTER: float = 13.0
 const MAGNET_INNER: float = 6.0
 const MAGNET_LEGS: float = 9.0
 const MAGNET_TIPS: float = 5.0
+const SNOW_GLOBE: StringName = &"floor/snow_globe"
+const GLASS_BLUE: Color = Color("#cfe8f7")
+const BASE_PURPLE: Color = Color("#8f73c4")
+const SNOW_WHITE: Color = Color("#fbfbff")
+const BANANE_YELLOW: Color = Color("#f2b52e")
+const BEAK_ORANGE: Color = Color("#f47a3a")
+## Radius of the glass ball (on screen, pixels).
+const GLOBE_RADIUS: float = 11.0
 
 
 static func make_parts() -> Dictionary[StringName, FeltPiece]:
-	return {MAGNET: _magnet()}
+	return {MAGNET: _magnet(), SNOW_GLOBE: _snow_globe()}
 
 
 ## The atlas part for pickup `id` (e.g. &"magnet").
@@ -60,3 +68,33 @@ static func _horseshoe(outer: float, inner: float, legs: float) -> PackedVector2
 		points.append(Vector2(cos(angle), sin(angle)) * inner)
 	points.append(Vector2(-inner, legs))
 	return points
+
+
+## A light blue glass ball on a purple base, with a tiny Banane and snowflakes inside; its pivot
+## is the middle of the ball.
+static func _snow_globe() -> FeltPiece:
+	var unit: float = 1.0 / DRAW_SCALE
+	var globe: FeltPiece = FeltPiece.new()
+	globe.polygon = FeltShapes.circle(Vector2.ZERO, GLOBE_RADIUS * unit, 28)
+	globe.color = GLASS_BLUE
+	globe.outline_width = 5.0
+	globe.outline_color = OUTLINE_COLOR
+	var base: PackedFloat32Array = [-9.0, 7.0, 9.0, 7.0, 12.0, 15.0, -12.0, 15.0]
+	for i: int in base.size():
+		base[i] *= unit
+	globe.add_layer(FeltShapes.points(base), BASE_PURPLE)
+	# Tiny Banane: a yellow body with an orange beak, standing on a snowy hill.
+	var hill: PackedVector2Array = FeltShapes.ellipse(Vector2(0, 6) * unit, Vector2(8, 3) * unit)
+	globe.add_layer(hill, SNOW_WHITE)
+	var body: PackedVector2Array = FeltShapes.ellipse(Vector2(0, 1) * unit, Vector2(3.5, 4.5) * unit)
+	globe.add_layer(body, BANANE_YELLOW)
+	globe.add_layer(FeltShapes.circle(Vector2(2.8, -0.5) * unit, 1.3 * unit, 10), BEAK_ORANGE)
+	var flakes: Array[Vector2] = [Vector2(-6, -4), Vector2(5, -6), Vector2(-2, -8), Vector2(7, 1)]
+	for flake: Vector2 in flakes:
+		globe.add_layer(FeltShapes.circle(flake * unit, 1.0 * unit, 8), SNOW_WHITE)
+	var shine: PackedVector2Array = []
+	for i: int in 7:
+		var angle: float = PI * (1.1 + 0.35 * i / 6.0)
+		shine.append(Vector2(cos(angle), sin(angle)) * (GLOBE_RADIUS - 3.0) * unit)
+	globe.add_line(shine, SNOW_WHITE, 4.0)
+	return globe

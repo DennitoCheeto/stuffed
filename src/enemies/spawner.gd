@@ -31,6 +31,10 @@ var _next_elite: int = 0
 var _mini_boss_done: bool = false
 ## The boss has come.
 var _boss_done: bool = false
+## Seconds the spawner still waits (Snow Globe); while it waits, nothing new comes.
+var _paused_left: float = 0.0
+## Elites that fell due during the last pause may come this much later than usual.
+var _pause_grace: float = 0.0
 
 
 func setup(manager: EnemyManager, view_camera: Camera2D, run_rng: RandomNumberGenerator) -> void:
@@ -43,6 +47,9 @@ func setup(manager: EnemyManager, view_camera: Camera2D, run_rng: RandomNumberGe
 func tick(run_time: float, delta: float) -> void:
 	if not active:
 		return
+	if _paused_left > 0.0:
+		_paused_left = maxf(_paused_left - delta, 0.0)
+		return
 	_owed += schedule.rate_at(run_time, goal_seconds) * rate_scale * boss_rate_scale() * delta
 	while _owed >= 1.0:
 		_owed -= 1.0
@@ -50,6 +57,17 @@ func tick(run_time: float, delta: float) -> void:
 	_spawn_due_elites(run_time)
 	_spawn_due_mini_boss(run_time)
 	_spawn_due_boss(run_time)
+
+
+## Nothing new comes for `seconds` (Snow Globe). Elites and bosses that fall due meanwhile come
+## right after.
+func pause(seconds: float) -> void:
+	_paused_left = maxf(_paused_left, seconds)
+	_pause_grace = seconds
+
+
+func is_paused() -> bool:
+	return _paused_left > 0.0
 
 
 ## Spawns one zombie of `stats` (an elite with `elite`) outside the screen. Returns null if there
@@ -110,7 +128,7 @@ func spawn_elite(stats: EnemyStats) -> Zombie:
 ## skipped instead of all arriving at once.
 func _spawn_due_elites(run_time: float) -> void:
 	while schedule.elite_time(_next_elite) <= run_time:
-		if run_time - schedule.elite_time(_next_elite) <= MISSED_ELITE_SECONDS:
+		if run_time - schedule.elite_time(_next_elite) <= _missed_after():
 			spawn_elite(schedule.elite_enemy(_next_elite))
 		_next_elite += 1
 
@@ -121,7 +139,7 @@ func _spawn_due_mini_boss(run_time: float) -> void:
 	if _mini_boss_done or boss == null or run_time < boss.at_seconds:
 		return
 	_mini_boss_done = true
-	if run_time - boss.at_seconds <= MISSED_ELITE_SECONDS:
+	if run_time - boss.at_seconds <= _missed_after():
 		spawn_boss(boss)
 
 
@@ -132,3 +150,8 @@ func _spawn_due_boss(run_time: float) -> void:
 		return
 	if spawn_boss(boss) != null:
 		_boss_done = true
+
+
+## An elite or mini-boss later than this (seconds) was skipped by a time jump.
+func _missed_after() -> float:
+	return MISSED_ELITE_SECONDS + _pause_grace
