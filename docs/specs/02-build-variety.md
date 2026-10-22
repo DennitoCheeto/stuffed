@@ -273,7 +273,8 @@ Scenario tests in `tests/scenarios/test_02_build_variety.gd` unless marked *(uni
 
 ## 20. Changes after the M2 playtest (2026-10-22)
 
-The product owner played M2: "looking really good", "I enjoy this a lot". Two things were hard to read:
+The product owner played M2: "looking really good", "I enjoy this a lot". Bosses, enemy bullets, sounds and
+performance (with "Max everything") felt good. These things were hard to read or too weak:
 
 **Gift box: "the screen changes automatically and it's not easy to see what you got, and there is no confirmation."**
 Today the contents appear as a line of text for about one second, then the moment closes by itself.
@@ -296,6 +297,23 @@ New behaviour:
 - On landing: a felt "thump" ring the size of the hit area plus a small dust puff, and the zombies inside flash.
 - Colours stay soft and warm (Banane's own effects), never the red/orange of enemy danger (hard rule 9).
 
+**Reroll / skip / banish: "I didn't see that feature at all."** (P-6) Today they are three dark grey text buttons
+under the cards. New behaviour:
+- Each button gets its own colour and a felt icon (dice = Reroll, arrow = Skip, scissors = Banish), a big key badge
+  (**R**, **S**, **B**) and its uses left as dots (●●○).
+- A short line under each says what it does: "3 new cards", "No card, heal a little", "Remove a card for this run".
+- The buttons sit right under the cards, at a size that is easy to see next to them.
+- On the first level-up of a run the three buttons pulse briefly, so a new player notices them.
+- Used up: the button greys out and shows "none left".
+- Choosing a card to banish: the cards wiggle and get a scissors mark, so it is clear you are picking which one to
+  banish (Esc or B again cancels).
+
+**Evolutions: "it felt good, but the visuals could be stronger."** (P-2) New behaviour:
+- Evolved weapons look clearly different from their base weapon: bigger shots in their own colour, a soft glitter
+  trail, and a bigger hit flash.
+- The HUD slot of an evolved weapon gets a golden frame and a small star.
+- They stay quieter than enemy danger (hard rule 9): no red/orange, less contrast than enemy bullets.
+
 **Wish for later: single-use floor pickups** (a big magnet that pulls in all XP, a freeze, "something fun").
 Not part of M2. Proposal: a short spec of its own after M2 is accepted, before or together with M3.
 
@@ -308,9 +326,18 @@ Not part of M2. Proposal: a short spec of its own after M2 is accepted, before o
   the old and new weapon; a heal shows the amount. *(scenario)*
 - **AC-28** A thrown thimble shows a ring at its landing spot as big as its hit area (Big Spool included) for the
   whole flight; landing shows the impact ring; zombies inside the ring are hit, zombies outside are not. *(scenario)*
+- **AC-29** The level-up screen shows Reroll, Skip and Banish with their icon, key, uses left and a one-line
+  explanation; on the first level-up of a run they pulse; a used-up one is greyed out with "none left"; while choosing
+  a card to banish the cards are marked. *(scenario)*
+- **AC-30** An evolved weapon's shots use their own look (bigger, own colour, trail), different from the base
+  weapon's; its HUD slot has the evolved frame. *(scenario + unit on the look data)*
 - **P-7** (playtest) You can always tell what a gift box gave you, and where the mortar lands.
+- **P-8** (playtest) You notice reroll / skip / banish on your own and use them.
+- **P-9** (playtest) An evolved weapon looks clearly stronger than before.
 
 ### Tickets
 
 16. Gift box: contents as cards, wait for confirmation — AC-26, 27
 17. Thimble Mortar readability: landing ring, arc, impact — AC-28
+18. Reroll / skip / banish buttons: icons, key badges, uses as dots, explanations, first-time pulse — AC-29
+19. Stronger evolved-weapon visuals + evolved HUD frame — AC-30
