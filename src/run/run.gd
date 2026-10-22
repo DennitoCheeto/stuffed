@@ -96,8 +96,9 @@ func _ready() -> void:
 		seed_value = randi_range(1, 2_147_483_647)
 	rng.seed = seed_value
 	upgrade_rng.seed = seed_value * 31 + 7
-	enemies.setup(actors, effects, arena.play_rect(), rules.max_enemies_alive)
-	projectiles.setup(enemies, arena.play_rect())
+	var furniture: Obstacles = arena.obstacles()
+	enemies.setup(actors, effects, arena.play_rect(), rules.max_enemies_alive, furniture)
+	projectiles.setup(enemies, arena.play_rect(), furniture)
 	enemies.projectiles = projectiles
 	enemies.zombie_killed.connect(_on_zombie_killed)
 	enemies.zombie_hit.connect(_on_zombie_hit)

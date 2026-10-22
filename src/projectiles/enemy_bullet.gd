@@ -2,7 +2,7 @@ class_name EnemyBullet
 extends Projectile
 ## A zombie's stuffing ball: bright with a dark outline, the most readable thing on screen. Flies
 ## straight, hurts the first player it touches and is gone. A dashing player passes through it.
-## It also vanishes at the end of its life or at the arena's edge.
+## It also vanishes at the end of its life, at the arena's edge or when it hits furniture.
 
 var damage: float = 0.0
 ## Hit radius in pixels (the sprite is sized to match).
@@ -44,6 +44,8 @@ func advance(delta: float) -> bool:
 	_life_left -= delta
 	position += velocity * delta
 	if _life_left <= 0.0 or not manager.play_rect.has_point(position):
+		return false
+	if manager.obstacles.blocks(position, radius * 0.5):
 		return false
 	for player: Player in manager.targets:
 		var reach: float = radius + player.stats.hitbox_radius

@@ -26,6 +26,8 @@ var move_speed: float = 0.0
 var knockback: Vector2 = Vector2.ZERO
 ## Direction it is walking (zero when standing).
 var heading: Vector2 = Vector2.ZERO
+## Which way round it walks the furniture in its way (1 or -1; 0 = nothing in the way).
+var detour: int = 0
 ## Seconds it can't move (banana peel).
 var stun_left: float = 0.0
 ## Sticky yarn (Yarn Bomb): seconds it stays slowed, and by how much (0.5 = half speed).
