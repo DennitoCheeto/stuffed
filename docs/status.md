@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-22 (M2-01 … M2-13 merged)_
+_Last updated: 2026-10-22 (M2-01 … M2-14 merged)_
 
 ## Where we are
 
@@ -14,12 +14,12 @@ _Last updated: 2026-10-22 (M2-01 … M2-13 merged)_
 | Art direction | ✅ felt style "B — Soft", puppet animation (`docs/art/`) |
 | M0 Factory setup | ✅ done (PR #1) |
 | M1 Core run | ✅ accepted 2026-10-21 (PRs #17–#29; playtest P-1 … P-6 passed, 144 fps on the PO's PC) |
-| M2 Build variety | 🔨 spec 02 approved; issues #32–#46 (milestone "M2 — Build variety"); M2-01…M2-13 merged (PRs #47–#49, #51–#55, #57, #58, #60, #61, #63) |
+| M2 Build variety | 🔨 spec 02 approved; issues #32–#46 (milestone "M2 — Build variety"); M2-01…M2-14 merged (PRs #47–#49, #51–#55, #57, #58, #60, #61, #63, #67) |
 
 ## Next step
 
-- Next: M2-14 (#45, sounds and feel pass, spec 02 §12), then M2-15 (#46, dev menu, run log, data checks,
-  co-op test). Then the PO plays M2 for acceptance. After that: write spec 03 for M3 (Town, vision §10) using the
+- Next: M2-15 (#46, dev menu, run log, data checks, co-op test; spec 02 §13, §15), the last M2 ticket.
+  Then the PO plays M2 for acceptance (ask them to judge the new M2-14 sounds too). After that: write spec 03 for M3 (Town, vision §10) using the
   playtest feedback; the PO may send town wishes for it.
 - The PO has not played M2 yet (wants more features first). The run ends by beating the Sock Puppet King.
 
@@ -99,3 +99,7 @@ _Last updated: 2026-10-22 (M2-01 … M2-13 merged)_
   Players are blocked by physics bodies (wall layer), zombies/enemy bullets/spawns by `Obstacles`
   (`run.enemies.obstacles`, `push_out`, `steer` with a per-zombie `detour`). Player shots ignore it. Keep the
   first screen around the arena centre free (scenario tests play there) and wide gaps between pieces.
+- Sounds: all made in code in `SfxBank` (`LENGTHS` + a voice function). Weapon attack sounds live in data:
+  `WeaponStats.sound` / `sound_pitch`, played by the `Weapon` base on each attack (never in weapon scripts).
+  `test_audio.gd` checks every weapon has its own sound, quieter than enemy-danger sounds. Scenario tests read
+  `Sfx.history` (clear it first) to see what played.
