@@ -99,3 +99,25 @@ func test_ac10_reroll_repeats_cards_rather_than_offering_snacks() -> void:
 func test_one_card_can_be_drawn() -> void:
 	var offers: Array[UpgradeOffer] = POOL.roll({}, _rng(2), [], [], 1)
 	assert_eq(offers.size(), 1)
+
+
+func test_ac23_used_counts_for_the_run_log() -> void:
+	var controls: CardControls = CardControls.new(POOL)
+	controls.use_reroll()
+	controls.use_reroll()
+	controls.use_skip()
+	controls.banish(&"quick_feet")
+	controls.banish(&"quick_feet")
+	assert_eq(controls.rerolls_used, 2)
+	assert_eq(controls.skips_used, 1)
+	assert_eq(controls.banishes_used, 1, "a failed banish is not counted")
+
+
+func test_ac22_refill_restores_the_counts_but_keeps_what_was_used() -> void:
+	var controls: CardControls = CardControls.new(POOL)
+	for i: int in 5:
+		controls.use_reroll()
+	controls.refill()
+	assert_eq(controls.rerolls_left, POOL.rerolls_per_run)
+	assert_eq(controls.rerolls_used, POOL.rerolls_per_run, "only the real uses")
+	assert_true(controls.use_reroll(), "usable again")

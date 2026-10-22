@@ -17,6 +17,15 @@ var upgrades: PackedStringArray = []
 var seed_value: int = 0
 ## How the run ended: "died" or "ended" (End run after the goal).
 var ending: String = "died"
+## Evolutions in order: {"weapon": evolved name, "time": run seconds, "player": 0-based index}.
+var evolutions: Array[Dictionary] = []
+## Player 1's rerolls, skips and banishes used.
+var rerolls_used: int = 0
+var skips_used: int = 0
+var banishes_used: int = 0
+## Run time when the mini-boss / the boss was beaten (-1 = not beaten).
+var mini_boss_defeated_at: float = -1.0
+var boss_defeated_at: float = -1.0
 
 
 func title() -> String:
