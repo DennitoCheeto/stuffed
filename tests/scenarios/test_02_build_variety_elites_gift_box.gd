@@ -125,7 +125,8 @@ func test_ac6_touching_the_box_opens_the_gift_box_moment() -> void:
 		func() -> bool: return not run.gift_screen.is_open(), run.gift_box_rules.moment_seconds
 	)
 	assert_true(closed, "after about 2 seconds it is over")
-	assert_eq(run.elapsed, frozen_at, "the run timer waited")
+	# The run may tick one frame between the moment closing and this check.
+	assert_almost_eq(run.elapsed, frozen_at, 1.5 / FPS, "the run timer waited")
 	assert_false(run.is_frozen(), "and the run goes on")
 
 
