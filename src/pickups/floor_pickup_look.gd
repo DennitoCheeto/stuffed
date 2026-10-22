@@ -86,8 +86,8 @@ static func _snow_globe() -> FeltPiece:
 	# Tiny Banane: a yellow body with an orange beak, standing on a snowy hill.
 	var hill: PackedVector2Array = FeltShapes.ellipse(Vector2(0, 6) * unit, Vector2(8, 3) * unit)
 	globe.add_layer(hill, SNOW_WHITE)
-	var body: PackedVector2Array = FeltShapes.ellipse(Vector2(0, 1) * unit, Vector2(3.5, 4.5) * unit)
-	globe.add_layer(body, BANANE_YELLOW)
+	var body_size: Vector2 = Vector2(3.5, 4.5) * unit
+	globe.add_layer(FeltShapes.ellipse(Vector2(0, 1) * unit, body_size), BANANE_YELLOW)
 	globe.add_layer(FeltShapes.circle(Vector2(2.8, -0.5) * unit, 1.3 * unit, 10), BEAK_ORANGE)
 	var flakes: Array[Vector2] = [Vector2(-6, -4), Vector2(5, -6), Vector2(-2, -8), Vector2(7, 1)]
 	for flake: Vector2 in flakes:
