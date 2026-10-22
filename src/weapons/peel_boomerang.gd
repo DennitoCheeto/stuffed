@@ -20,7 +20,6 @@ func attack() -> bool:
 	if target == null:
 		return false
 	var aim: Vector2 = player.global_position.direction_to(target.position)
-	Sfx.play(&"throw")
 	for i: int in numbers.count:
 		var peel: BoomerangProjectile = shots.spawn(_peel_kind()) as BoomerangProjectile
 		peel.launch(self, aim.rotated(_fan_angle(i, numbers)))

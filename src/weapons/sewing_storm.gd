@@ -21,7 +21,6 @@ func attack() -> bool:
 			needles.append(needle)
 		_spread(needles)
 		return true
-	Sfx.play(&"pin", 1.2)
 	for needle: Projectile in needles:
 		(needle as StormNeedleProjectile).fling()
 	return true

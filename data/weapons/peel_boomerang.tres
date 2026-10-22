@@ -61,6 +61,7 @@ card_text = "Throws faster: every 1.4 s → 1.0 s."
 
 [resource]
 script = ExtResource("1_stats")
+sound = &"throw"
 id = &"peel_boomerang"
 display_name = "Peel Boomerang"
 behaviour = ExtResource("3_behaviour")

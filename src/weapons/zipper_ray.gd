@@ -10,7 +10,6 @@ func attack() -> bool:
 	var shots: ProjectileManager = projectiles()
 	if shots == null or enemies() == null or not shots.fired_by(self).is_empty():
 		return false
-	Sfx.play(&"pin", 0.6)
 	var beam: BeamProjectile = shots.spawn(BeamProjectile) as BeamProjectile
 	beam.launch(self)
 	return true

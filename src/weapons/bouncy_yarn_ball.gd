@@ -17,7 +17,6 @@ func attack() -> bool:
 	if target == null:
 		return false
 	var aim: Vector2 = player.global_position.direction_to(target.position)
-	Sfx.play(&"throw", 1.3)
 	var spread: float = deg_to_rad(numbers.spread_degrees)
 	for i: int in numbers.count:
 		var offset: float = (i - (numbers.count - 1) / 2.0) * spread

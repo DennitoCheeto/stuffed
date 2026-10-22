@@ -71,6 +71,7 @@ card_text = "Bounces between 8 zombies, and throws every 2 → 1.6 seconds."
 
 [resource]
 script = ExtResource("1_stats")
+sound = &"boing"
 id = &"bouncy_yarn_ball"
 display_name = "Bouncy Yarn Ball"
 behaviour = ExtResource("3_behaviour")

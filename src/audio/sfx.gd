@@ -4,10 +4,15 @@ extends RefCounted
 ## pleasant crackle, not noise) and a slightly different pitch every time.
 ## Main attaches it once; without a host (some tests) playing does nothing.
 
-const MAX_VOICES: Dictionary[StringName, int] = {&"pop": 6, &"hit": 5, &"pickup": 4}
+const MAX_VOICES: Dictionary[StringName, int] = {
+	&"pop": 6, &"hit": 5, &"pickup": 4, &"boss_hit": 2, &"fluff": 2, &"evolution": 1
+}
 const DEFAULT_VOICES: int = 3
 const PITCH_VARIATION: float = 0.08
+const HISTORY_SIZE: int = 64
 
+## The last sounds that started (newest last, at most HISTORY_SIZE), for tests.
+static var history: Array[StringName] = []
 static var _host: Node
 static var _streams: Dictionary[StringName, AudioStreamWAV] = {}
 static var _voices: Dictionary[StringName, Array] = {}
@@ -32,6 +37,9 @@ static func play(sound: StringName, pitch: float = 1.0) -> bool:
 		return false
 	player.pitch_scale = pitch * randf_range(1.0 - PITCH_VARIATION, 1.0 + PITCH_VARIATION)
 	player.play()
+	history.append(sound)
+	if history.size() > HISTORY_SIZE:
+		history.pop_front()
 	return true
 
 

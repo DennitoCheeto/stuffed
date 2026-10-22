@@ -20,6 +20,25 @@ const LENGTHS: Dictionary[StringName, float] = {
 	&"burst": 0.45,
 	&"boss_banner": 1.2,
 	&"stomp": 0.5,
+	# Weapons (spec 02 §12): soft, each its own; evolved weapons a bit fuller.
+	&"buttons": 0.2,
+	&"boing": 0.3,
+	&"whip": 0.22,
+	&"cannon": 0.35,
+	&"zip": 0.32,
+	&"mortar": 0.3,
+	&"needles": 0.4,
+	&"fluff": 0.35,
+	&"volley": 0.4,
+	&"storm": 0.5,
+	&"split": 0.4,
+	&"sticky": 0.4,
+	# Moments.
+	&"elite": 0.7,
+	&"gift_open": 0.8,
+	&"evolution": 1.4,
+	&"boss_hit": 0.16,
+	&"boss_down": 1.6,
 }
 
 
@@ -56,9 +75,35 @@ static func make(sound: StringName) -> AudioStreamWAV:
 			voice = _stomp
 		&"burst":
 			voice = _burst
-		_:
+		&"goal":
 			voice = _goal
+		_:
+			voice = _weapon_or_moment(sound)
 	return Synth.render(LENGTHS[sound], voice)
+
+
+## The sounds added in spec 02 (kept apart so `make` stays short).
+static func _weapon_or_moment(sound: StringName) -> Callable:
+	var voices: Dictionary[StringName, Callable] = {
+		&"buttons": _buttons,
+		&"boing": _boing,
+		&"whip": _whip,
+		&"cannon": _cannon,
+		&"zip": _zip,
+		&"mortar": _mortar,
+		&"needles": _needles,
+		&"fluff": _fluff,
+		&"volley": _volley,
+		&"storm": _storm,
+		&"split": _split,
+		&"sticky": _sticky,
+		&"elite": _elite,
+		&"gift_open": _gift_open,
+		&"evolution": _evolution,
+		&"boss_hit": _boss_hit,
+		&"boss_down": _boss_down,
+	}
+	return voices[sound]
 
 
 ## Boomerang throw / return: soft "whff".
@@ -177,3 +222,170 @@ static func _boss_banner(t: float) -> float:
 static func _stomp(t: float) -> float:
 	var thump: float = Synth.sine(Synth.sweep(t, 110.0, 35.0, 0.4)) * exp(-7.0 * t)
 	return 0.6 * thump + 0.2 * Synth.noise(t) * exp(-25.0 * t)
+
+
+## Button Shotgun: a little clatter of buttons ("tk-tk-tk").
+static func _buttons(t: float) -> float:
+	var value: float = 0.0
+	for i: int in 4:
+		var start: float = i * 0.035
+		if t >= start:
+			var local: float = t - start
+			value += Synth.sine((1800.0 + 350.0 * i) * local) * exp(-90.0 * local)
+	return 0.17 * value + 0.06 * Synth.noise(t) * exp(-40.0 * t)
+
+
+## Bouncy Yarn Ball: a soft spring "boing".
+static func _boing(t: float) -> float:
+	var phase: float = Synth.sweep(t, 180.0, 420.0, 0.3) + 0.5 * sin(TAU * 18.0 * t)
+	return 0.24 * Synth.sine(phase) * Synth.pluck(t, 0.01, 9.0)
+
+
+## Thread Whip: a swish that ends in a small snap.
+static func _whip(t: float) -> float:
+	var swish: float = Synth.noise(t) * Synth.sine(Synth.sweep(t, 600.0, 2600.0, 0.14))
+	swish *= sin(PI * minf(t / 0.16, 1.0))
+	var snap: float = 0.0
+	if t > 0.14:
+		snap = Synth.noise(t) * exp(-80.0 * (t - 0.14))
+	return 0.2 * swish + 0.22 * snap
+
+
+## Yarn Cannon: a padded "whump".
+static func _cannon(t: float) -> float:
+	var thump: float = Synth.sine(Synth.sweep(t, 150.0, 55.0, 0.25)) * exp(-11.0 * t)
+	return 0.32 * thump + 0.08 * Synth.noise(t) * exp(-30.0 * t)
+
+
+## Zipper Ray: a zipper being pulled ("zrrrip"), clicks getting faster.
+static func _zip(t: float) -> float:
+	var clicks: float = 0.5 + 0.5 * Synth.square(Synth.sweep(t, 60.0, 160.0, 0.32))
+	var shape: float = minf(t / 0.02, 1.0) * clampf((0.32 - t) / 0.06, 0.0, 1.0)
+	return 0.2 * Synth.noise(t) * clicks * shape
+
+
+## Thimble Mortar: a hollow "thoonk" as the thimble is launched.
+static func _mortar(t: float) -> float:
+	var hollow: float = Synth.sine(Synth.sweep(t, 300.0, 180.0, 0.1)) * exp(-14.0 * t)
+	hollow += 0.4 * Synth.sine(Synth.sweep(t, 750.0, 450.0, 0.1)) * exp(-20.0 * t)
+	return 0.25 * hollow
+
+
+## Orbiting Needles: a quick glassy shimmer going up.
+static func _needles(t: float) -> float:
+	var value: float = 0.0
+	var notes: PackedFloat32Array = [88.0, 91.0, 95.0]
+	for i: int in notes.size():
+		var start: float = i * 0.06
+		if t >= start:
+			var local: float = t - start
+			value += Synth.sine(Synth.midi_hz(notes[i]) * local) * exp(-14.0 * local)
+	return 0.11 * value
+
+
+## Stuffing Cloud: a soft breath of fluff ("fffh"), the quietest weapon (it puffs often).
+static func _fluff(t: float) -> float:
+	var breath: float = Synth.noise(t) * Synth.sine(Synth.sweep(t, 300.0, 120.0, 0.35))
+	return 0.16 * breath * sin(PI * minf(t / 0.35, 1.0))
+
+
+## Pincushion Volley (evolved): three pins at once, a bright chord with a little ring.
+static func _volley(t: float) -> float:
+	var ring: float = 0.0
+	for hz: float in [2100.0, 2650.0, 3150.0]:
+		ring += Synth.sine(hz * t) * exp(-11.0 * t)
+	return 0.17 * ring + 0.1 * Synth.noise(t) * exp(-50.0 * t)
+
+
+## Sewing Storm (evolved): a whirl of air with glassy sparkles in it.
+static func _storm(t: float) -> float:
+	var whirl: float = Synth.noise(t) * Synth.sine(Synth.sweep(t, 500.0, 1400.0, 0.5))
+	whirl *= 0.5 + 0.5 * sin(TAU * 12.0 * t)
+	var sparkle: float = Synth.sine(Synth.midi_hz(93.0 + 3.0 * floorf(t * 10.0)) * t)
+	var shape: float = sin(PI * minf(t / 0.5, 1.0))
+	return (0.18 * whirl + 0.1 * sparkle) * shape
+
+
+## Banana Split (evolved): two whooshes, one after the other, and a bright "ting".
+static func _split(t: float) -> float:
+	var value: float = 0.0
+	for start: float in [0.0, 0.1]:
+		if t >= start:
+			var local: float = t - start
+			var swish: float = Synth.noise(t) * Synth.sine(Synth.sweep(local, 300.0, 1000.0, 0.2))
+			value += swish * Synth.pluck(local, 0.03, 14.0)
+	var ting: float = Synth.sine(1900.0 * t) * exp(-10.0 * t)
+	return 0.38 * value + 0.12 * ting
+
+
+## Yarn Bomb (evolved): a fat "splotch" of sticky yarn.
+static func _sticky(t: float) -> float:
+	var splat: float = Synth.sine(Synth.sweep(t, 260.0, 70.0, 0.3)) * exp(-8.0 * t)
+	var wet: float = Synth.noise(t) * exp(-18.0 * t) * (0.5 + 0.5 * Synth.square(t * 60.0))
+	return 0.3 * splat + 0.14 * wet
+
+
+## An elite appears: a bright, slightly sour warning bell (two notes, the second higher).
+static func _elite(t: float) -> float:
+	var value: float = 0.0
+	for i: int in 2:
+		var start: float = i * 0.16
+		if t >= start:
+			var local: float = t - start
+			var hz: float = Synth.midi_hz(76.0 + 6.0 * i)
+			var bell: float = Synth.sine(hz * local) + 0.5 * Synth.sine(hz * 2.76 * local)
+			value += bell * exp(-6.0 * local)
+	return 0.3 * value * clampf((0.7 - t) / 0.15, 0.0, 1.0)
+
+
+## The gift box opens: a cork "pop", then a little sparkle going up.
+static func _gift_open(t: float) -> float:
+	var pop: float = Synth.sine(Synth.sweep(t, 900.0, 300.0, 0.06)) * exp(-35.0 * t)
+	var sparkle: float = 0.0
+	var notes: PackedFloat32Array = [79.0, 83.0, 86.0, 91.0]
+	for i: int in notes.size():
+		var start: float = 0.12 + i * 0.08
+		if t >= start:
+			var local: float = t - start
+			sparkle += Synth.sine(Synth.midi_hz(notes[i]) * local) * exp(-7.0 * local)
+	return 0.4 * pop + 0.16 * sparkle
+
+
+## An evolution: a bigger fanfare than any other moment. A rising run, then a full chord that
+## rings out with a shimmer.
+static func _evolution(t: float) -> float:
+	var value: float = 0.0
+	var run_notes: PackedFloat32Array = [60.0, 64.0, 67.0, 72.0, 76.0]
+	for i: int in run_notes.size():
+		var start: float = i * 0.07
+		if t >= start:
+			var local: float = t - start
+			value += 0.6 * Synth.triangle(Synth.midi_hz(run_notes[i]) * local) * exp(-9.0 * local)
+	if t >= 0.4:
+		var local: float = t - 0.4
+		var fade: float = minf(local / 0.02, 1.0) * clampf((1.4 - t) / 0.6, 0.0, 1.0)
+		for note: float in [72.0, 76.0, 79.0, 84.0]:
+			var hz: float = Synth.midi_hz(note) * (1.0 + 0.004 * sin(TAU * 6.0 * t))
+			value += 0.45 * Synth.sine(hz * local) * fade
+	return 0.2 * value
+
+
+## A boss is hit: a deeper, heavier "thud" than a normal hit.
+static func _boss_hit(t: float) -> float:
+	var thud: float = Synth.sine(Synth.sweep(t, 110.0, 55.0, 0.16)) * exp(-20.0 * t)
+	return 0.5 * thud + 0.12 * Synth.noise(t) * exp(-50.0 * t)
+
+
+## A boss is beaten: a long deflating wobble going down, then a warm chord.
+static func _boss_down(t: float) -> float:
+	var deflate: float = 0.0
+	if t < 0.9:
+		var phase: float = Synth.sweep(t, 500.0, 90.0, 0.9) + 0.6 * sin(TAU * 9.0 * t)
+		deflate = Synth.saw(phase) * minf(t / 0.03, 1.0) * clampf((0.9 - t) / 0.2, 0.0, 1.0)
+	var chord: float = 0.0
+	if t >= 0.85:
+		var local: float = t - 0.85
+		var fade: float = minf(local / 0.03, 1.0) * clampf((1.6 - t) / 0.5, 0.0, 1.0)
+		for note: float in [55.0, 59.0, 62.0, 67.0]:
+			chord += Synth.sine(Synth.midi_hz(note) * local) * fade
+	return 0.2 * deflate + 0.12 * chord

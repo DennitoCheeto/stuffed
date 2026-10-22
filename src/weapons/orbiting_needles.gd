@@ -10,7 +10,6 @@ func attack() -> bool:
 	if shots == null or not shots.fired_by(self).is_empty():
 		return false
 	var numbers: WeaponLevel = current()
-	Sfx.play(&"pin", 1.4)
 	for i: int in numbers.count:
 		var needle: NeedleProjectile = shots.spawn(NeedleProjectile) as NeedleProjectile
 		needle.launch(self, TAU * i / numbers.count)

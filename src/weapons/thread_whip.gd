@@ -13,7 +13,6 @@ func attack() -> bool:
 	var aim: Vector2 = player.global_position.direction_to(player.aim_point())
 	if aim == Vector2.ZERO:
 		aim = player.facing
-	Sfx.play(&"throw", 1.8)
 	for i: int in current().count:
 		var lash: WhipProjectile = shots.spawn(WhipProjectile) as WhipProjectile
 		lash.launch(self, aim.rotated(PI * i))
