@@ -81,10 +81,11 @@ func start_run(seed_value: int = 0) -> void:
 ## The end screen for a finished or given-up run (also written to the run log): its stats and
 ## what it brought home, counting into the jars.
 func show_end(result: RunResult) -> void:
-	RunLog.append(result)
 	var before: Dictionary[String, int] = town.materials.duplicate()
 	var share: float = MATERIAL_RULES.keep_share(result)
 	var kept: Dictionary[String, int] = _bank_run(share)
+	result.materials_kept = kept
+	RunLog.append(result)
 	Crosshair.stop()
 	_play_music(&"town")
 	var end: EndScreen = END_SCENE.instantiate()

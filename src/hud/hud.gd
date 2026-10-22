@@ -14,6 +14,8 @@ const OUTLINE_COLOR: Color = Color(0.08, 0.07, 0.1, 1)
 const BANNER_TOP: float = 170.0
 ## The banner fades out over its last this many seconds.
 const BANNER_FADE: float = 0.5
+## Where the run's material jars sit (under the item row, top left).
+const JARS_POSITION: Vector2 = Vector2(24.0, 176.0)
 
 ## Upgrade cards by id, for the icons of owned weapons and items.
 var pool: UpgradePool
@@ -28,6 +30,8 @@ var boss_label: Label
 var banner: VBoxContainer
 var banner_title: Label
 var banner_subtitle: Label
+## The run's haul (coins, stuffing, thread).
+var jars: RunJars
 
 var _player: Player
 var _boss: Zombie
@@ -45,6 +49,9 @@ var _banner_left: float = 0.0
 func _ready() -> void:
 	_build_boss_bar()
 	_build_banner()
+	jars = RunJars.new()
+	jars.position = JARS_POSITION
+	add_child(jars)
 
 
 func _process(delta: float) -> void:

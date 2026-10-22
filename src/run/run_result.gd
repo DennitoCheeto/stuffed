@@ -28,6 +28,21 @@ var mini_boss_defeated_at: float = -1.0
 var boss_defeated_at: float = -1.0
 ## Floor pickups grabbed, in order: {"name", "time": run seconds, "player": 0-based index}.
 var floor_pickups: Array[Dictionary] = []
+## Material id -> amount collected in the run (victory bonus included), and what went home.
+var materials_collected: Dictionary[String, int] = {}
+var materials_kept: Dictionary[String, int] = {}
+
+
+## How the run ended for the town (spec 03 §10): "king", "way_home", "died" or "gave_up".
+func run_end() -> String:
+	if won:
+		return "king"
+	match ending:
+		"way_home":
+			return "way_home"
+		"quit":
+			return "gave_up"
+	return "died"
 
 
 func title() -> String:

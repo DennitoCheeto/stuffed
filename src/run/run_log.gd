@@ -29,6 +29,9 @@ static func to_entry(result: RunResult) -> Dictionary:
 		"mini_boss_defeated_at": _time_or_null(result.mini_boss_defeated_at),
 		"boss_defeated_at": _time_or_null(result.boss_defeated_at),
 		"floor_pickups": _timed(result.floor_pickups),
+		"materials_collected": result.materials_collected.duplicate(),
+		"materials_kept": result.materials_kept.duplicate(),
+		"run_end": result.run_end(),
 	}
 
 

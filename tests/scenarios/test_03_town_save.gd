@@ -28,6 +28,11 @@ func _saved() -> TownSave:
 	return SaveStore.read()
 
 
+## Coins the King's kill and the victory bonus add to the haul.
+func _king_coins() -> int:
+	return RULES.kill_reward("Sock Puppet King").coins + RULES.victory_bonus.coins
+
+
 func test_ac47_a_running_run_is_saved_every_few_seconds() -> void:
 	var run: Run = await _quiet_run()
 	assert_eq(_saved().runs_started, 1, "starting a run is saved")
@@ -79,10 +84,12 @@ func test_ac47_beating_the_king_keeps_everything() -> void:
 	run.haul.add("coins", 31)
 	beat_the_boss(run)
 	await wait_for_goal_screen(run)
+	var coins: int = run.haul.amount("coins")
+	assert_eq(coins, 31 + _king_coins(), "the King and the victory bonus")
 	run.goal_screen.end_button.pressed.emit()
 	await wait_physics_frames(2)
-	assert_eq(_saved().material("coins"), 31)
-	assert_eq(main.town.material("coins"), 31)
+	assert_eq(_saved().material("coins"), coins)
+	assert_eq(main.town.material("coins"), coins)
 
 
 func test_ac47_start_over_asks_twice_then_deletes_the_town() -> void:

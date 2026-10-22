@@ -168,17 +168,20 @@ func test_ac38_beating_the_king_brings_everything_home() -> void:
 	run.haul.add("thread", 2)
 	beat_the_boss(run)
 	await wait_for_goal_screen(run)
+	var coins: int = run.haul.amount("coins")
+	var thread: int = run.haul.amount("thread")
+	assert_gt(coins, 31, "the King and the victory bonus add coins")
 	run.goal_screen.end_button.pressed.emit()
 	await wait_physics_frames(2)
 	var end: EndScreen = _end()
 	assert_not_null(end)
 	if end == null:
 		return
-	assert_eq(end.brought_home.amount("coins"), 31)
-	assert_eq(end.brought_home.amount("thread"), 2)
+	assert_eq(end.brought_home.amount("coins"), coins)
+	assert_eq(end.brought_home.amount("thread"), thread)
 	assert_eq(end.brought_home.note_label.text, "You kept everything!")
 	end.brought_home.finish()
-	assert_eq(end.brought_home.shown_total("coins"), 31)
+	assert_eq(end.brought_home.shown_total("coins"), coins)
 	await go_to_town()
 	assert_not_null(_town(), "Back to the fort")
 

@@ -1,8 +1,86 @@
-[gd_resource type="Resource" script_class="MaterialRules" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="MaterialRules" load_steps=17 format=3]
 
 [ext_resource type="Script" path="res://src/town/material_rules.gd" id="1_rules"]
+[ext_resource type="Script" path="res://src/town/material_reward.gd" id="2_reward"]
+
+[sub_resource type="Resource" id="Resource_shambler"]
+script = ExtResource("2_reward")
+source = "Shambler"
+coins = 1
+
+[sub_resource type="Resource" id="Resource_runner"]
+script = ExtResource("2_reward")
+source = "Runner"
+coins = 1
+
+[sub_resource type="Resource" id="Resource_spitter"]
+script = ExtResource("2_reward")
+source = "Spitter"
+coins = 2
+
+[sub_resource type="Resource" id="Resource_tank"]
+script = ExtResource("2_reward")
+source = "Tank"
+coins = 4
+stuffing = 1
+stuffing_chance = 0.15
+
+[sub_resource type="Resource" id="Resource_bloater"]
+script = ExtResource("2_reward")
+source = "Bloater"
+coins = 3
+stuffing = 1
+stuffing_chance = 0.15
+
+[sub_resource type="Resource" id="Resource_big_ted"]
+script = ExtResource("2_reward")
+source = "Big Ted"
+coins = 150
+stuffing = 5
+thread = 3
+
+[sub_resource type="Resource" id="Resource_king"]
+script = ExtResource("2_reward")
+source = "Sock Puppet King"
+coins = 300
+stuffing = 8
+thread = 5
+
+[sub_resource type="Resource" id="Resource_other"]
+script = ExtResource("2_reward")
+source = "Other zombie"
+coins = 1
+
+[sub_resource type="Resource" id="Resource_elite"]
+script = ExtResource("2_reward")
+source = "Elite (extra)"
+coins = 20
+stuffing = 2
+
+[sub_resource type="Resource" id="Resource_gift_box"]
+script = ExtResource("2_reward")
+source = "Gift box"
+thread = 1
+
+[sub_resource type="Resource" id="Resource_big_gift_box"]
+script = ExtResource("2_reward")
+source = "Big gift box"
+thread = 3
+
+[sub_resource type="Resource" id="Resource_victory"]
+script = ExtResource("2_reward")
+source = "Victory bonus"
+coins = 200
+thread = 5
 
 [resource]
 script = ExtResource("1_rules")
 keep_share_won = 1.0
+keep_share_way_home = 1.0
 keep_share_lost = 0.5
+kills = Array[ExtResource("2_reward")]([SubResource("Resource_shambler"), SubResource("Resource_runner"), SubResource("Resource_spitter"), SubResource("Resource_tank"), SubResource("Resource_bloater"), SubResource("Resource_big_ted"), SubResource("Resource_king")])
+other_kill = SubResource("Resource_other")
+elite_extra = SubResource("Resource_elite")
+gift_box = SubResource("Resource_gift_box")
+big_gift_box = SubResource("Resource_big_gift_box")
+victory_bonus = SubResource("Resource_victory")
