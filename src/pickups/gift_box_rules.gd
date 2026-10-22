@@ -13,11 +13,14 @@ extends Resource
 @export var big_box_extra_level_ups: int = 2
 ## ... and is drawn this much bigger.
 @export var big_box_scale: float = 1.6
-## How long the opening moment lasts (any key skips it).
-@export var moment_seconds: float = 2.0
-## Keys are ignored this long after the moment starts, so a key pressed while playing doesn't
-## skip it by accident.
+## How long the opening (wobble, lid pop, confetti) lasts before the contents show (spec 02 §20).
+@export var opening_seconds: float = 1.0
+## Keys are ignored this long after the box opens, so a key pressed while playing doesn't
+## skip the opening by accident (a key after that jumps straight to the contents).
 @export var skip_delay: float = 0.3
+## The contents stay until the player confirms; confirming works only this long after they
+## show, so a key that was already held doesn't close them by accident.
+@export var confirm_delay: float = 0.5
 
 
 ## What a box holds for a player whose upgrades are at `levels` (id → level): an evolution if a
@@ -33,7 +36,9 @@ func contents(
 	var gift: GiftContents = GiftContents.new()
 	gift.evolution = pool.ready_evolution(levels)
 	if gift.evolution != null:
-		gift.evolution_from = pool.find(gift.evolution.weapon).display_name
+		var base: UpgradeDef = pool.find(gift.evolution.weapon)
+		gift.evolution_from = base.display_name
+		gift.evolution_from_icon = base.icon
 		return gift
 	var working: Dictionary[StringName, int] = levels.duplicate()
 	var given: Array[StringName] = []

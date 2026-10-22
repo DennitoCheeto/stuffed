@@ -99,16 +99,29 @@ func test_ac8_everything_maxed_gives_a_big_heal() -> void:
 	assert_gt(RULES.heal_share, POOL.skip_heal, "bigger than a skip")
 
 
-func test_ac8_heal_line() -> void:
+func test_ac27_heal_card_shows_the_amount() -> void:
 	var gift: GiftContents = GiftContents.new()
 	gift.heal_share = 0.5
-	assert_eq(gift.lines(), PackedStringArray(["Big heal! +50% health"]))
+	gift.heal_amount = 60.0
+	var cards: Array[GiftCard] = gift.cards()
+	assert_eq(cards.size(), 1)
+	assert_eq(cards[0].title, "Big heal!")
+	assert_eq(cards[0].level_text, "+60 health")
+	assert_eq(cards[0].icon, GiftContents.HEAL_ICON)
 
 
-func test_ac8_level_up_lines_name_the_upgrade_and_level() -> void:
+func test_ac27_one_card_per_level_up_with_icon_name_and_level() -> void:
 	var gift: GiftContents = GiftContents.new()
-	gift.level_ups.append(UpgradeOffer.new(POOL.find(&"peel_boomerang"), 3))
-	assert_eq(gift.lines(), PackedStringArray(["Peel Boomerang  Lv 2 → 3"]))
+	var boomerang: UpgradeDef = POOL.find(&"peel_boomerang")
+	gift.level_ups.append(UpgradeOffer.new(boomerang, 3))
+	gift.level_ups.append(UpgradeOffer.new(boomerang, 4))
+	var cards: Array[GiftCard] = gift.cards()
+	assert_eq(cards.size(), 2, "one card each, even for the same upgrade")
+	assert_eq(cards[0].icon, boomerang.icon)
+	assert_eq(cards[0].title, "Peel Boomerang")
+	assert_eq(cards[0].level_text, "Lv 2 → 3")
+	assert_eq(cards[1].level_text, "Lv 3 → 4")
+	assert_false(cards[0].is_evolution())
 
 
 func test_count_follows_the_weights() -> void:
@@ -118,9 +131,10 @@ func test_count_follows_the_weights() -> void:
 		assert_eq(rules.roll_count(_rng(seed_value)), 2)
 
 
-func test_gift_box_moment_is_about_two_seconds() -> void:
-	assert_between(RULES.moment_seconds, 1.5, 2.5)
-	assert_lt(RULES.skip_delay, RULES.moment_seconds)
+func test_opening_is_about_one_second_and_confirm_waits_a_moment() -> void:
+	assert_between(RULES.opening_seconds, 0.7, 1.3, "spec 02 §20: about 1 second")
+	assert_lt(RULES.skip_delay, RULES.opening_seconds)
+	assert_almost_eq(RULES.confirm_delay, 0.5, 0.05, "spec 02 §20: 0.5 s before confirming")
 
 
 func test_the_boss_big_box_gives_more() -> void:
