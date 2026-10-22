@@ -17,6 +17,7 @@ card_text = "On the way back each peel splits into three."
 
 [resource]
 script = ExtResource("1_stats")
+sound = &"split"
 id = &"banana_split"
 display_name = "Banana Split"
 behaviour = ExtResource("3_behaviour")

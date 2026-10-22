@@ -71,6 +71,7 @@ card_text = "2 yarn balls."
 
 [resource]
 script = ExtResource("1_stats")
+sound = &"cannon"
 id = &"yarn_cannon"
 display_name = "Yarn Cannon"
 behaviour = ExtResource("3_behaviour")

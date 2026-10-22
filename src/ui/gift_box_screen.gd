@@ -36,6 +36,8 @@ var skip_delay: float = 0.3
 var time: float = 0.0
 ## True once the lid has popped (confetti, contents shown).
 var lid_popped: bool = false
+## The box holds an evolution (bigger title, confetti and sound).
+var evolution: bool = false
 var art: GiftBoxArt
 var title_label: Label
 var contents_label: Label
@@ -59,11 +61,11 @@ func open(gift: GiftContents, rules: GiftBoxRules) -> void:
 	skip_delay = rules.skip_delay
 	time = 0.0
 	lid_popped = false
-	var evolving: bool = gift.is_evolution()
-	title_label.text = EVOLUTION_TITLE if evolving else TITLE
-	var title_color: Color = EVOLUTION_COLOR if evolving else HIGHLIGHT_COLOR
+	evolution = gift.is_evolution()
+	title_label.text = EVOLUTION_TITLE if evolution else TITLE
+	var title_color: Color = EVOLUTION_COLOR if evolution else HIGHLIGHT_COLOR
 	title_label.add_theme_color_override("font_color", title_color)
-	confetti.amount = EVOLUTION_CONFETTI if evolving else CONFETTI
+	confetti.amount = EVOLUTION_CONFETTI if evolution else CONFETTI
 	contents_label.text = "\n".join(gift.lines())
 	contents_label.visible = false
 	art.lid_open = 0.0
@@ -119,7 +121,7 @@ func _pop_lid() -> void:
 	lid_popped = true
 	contents_label.visible = true
 	confetti.restart()
-	Sfx.play(&"goal")
+	Sfx.play(&"evolution" if evolution else &"gift_open")
 
 
 func _build() -> void:

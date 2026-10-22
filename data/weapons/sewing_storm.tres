@@ -18,6 +18,7 @@ card_text = "A storm of 10 needles that never stops; every 3 s it flings them ou
 
 [resource]
 script = ExtResource("1_stats")
+sound = &"storm"
 id = &"sewing_storm"
 display_name = "Sewing Storm"
 behaviour = ExtResource("3_behaviour")

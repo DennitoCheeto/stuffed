@@ -71,6 +71,7 @@ card_text = "A beam every 3 → 2.2 seconds."
 
 [resource]
 script = ExtResource("1_stats")
+sound = &"zip"
 id = &"zipper_ray"
 display_name = "Zipper Ray"
 behaviour = ExtResource("3_behaviour")

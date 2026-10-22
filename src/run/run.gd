@@ -111,6 +111,7 @@ func _ready() -> void:
 	enemies.boss_angry.connect(_on_boss_angry)
 	enemies.boss_landed.connect(_on_boss_landed)
 	spawner.boss_spawned.connect(_on_boss_spawned)
+	spawner.elite_spawned.connect(func(_elite: Zombie) -> void: Sfx.play(&"elite"))
 	pickups.collected.connect(_on_pickup_collected)
 	spawner.setup(enemies, camera, rng)
 	spawner.goal_seconds = rules.goal_seconds
@@ -430,7 +431,7 @@ func _on_boss_landed(_boss: Zombie) -> void:
 
 func _on_zombie_hit(zombie: Zombie, amount: float) -> void:
 	damage_numbers.show_damage(amount, zombie.position)
-	Sfx.play(&"hit")
+	Sfx.play(&"boss_hit" if zombie.is_boss() else &"hit")
 
 
 ## Pickups in a row sound higher and higher ("plip" chain).
@@ -444,7 +445,7 @@ func _on_player_hurt(_amount: float) -> void:
 
 
 func _on_zombie_killed(zombie: Zombie) -> void:
-	Sfx.play(&"pop")
+	Sfx.play(&"boss_down" if zombie.is_boss() else &"pop")
 	if _drops_enabled:
 		pickups.drop(zombie.xp_button(), zombie.position)
 		if zombie.is_elite() or zombie.is_boss():

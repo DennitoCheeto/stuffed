@@ -66,6 +66,7 @@ card_text = "4 needles instead of 3."
 
 [resource]
 script = ExtResource("1_stats")
+sound = &"needles"
 id = &"orbiting_needles"
 display_name = "Orbiting Needles"
 behaviour = ExtResource("3_behaviour")

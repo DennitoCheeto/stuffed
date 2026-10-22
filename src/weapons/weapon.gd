@@ -69,6 +69,8 @@ func _physics_process(delta: float) -> void:
 		return
 	if attack():
 		_cooldown_left = current().cooldown
+		if stats.sound != &"":
+			Sfx.play(stats.sound, stats.sound_pitch)
 		fired.emit()
 	else:
 		_cooldown_left = RETRY_DELAY

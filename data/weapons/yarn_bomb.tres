@@ -19,6 +19,7 @@ card_text = "Bursts leave sticky yarn that slows zombies to 40% speed and hurts 
 
 [resource]
 script = ExtResource("1_stats")
+sound = &"sticky"
 id = &"yarn_bomb"
 display_name = "Yarn Bomb"
 behaviour = ExtResource("3_behaviour")

@@ -15,7 +15,6 @@ func attack() -> bool:
 	var targets: Array[Zombie] = _on_screen(manager)
 	if targets.is_empty():
 		return false
-	Sfx.play(&"throw", 0.6)
 	for i: int in current().count:
 		var target: Zombie = targets[_rng.randi_range(0, targets.size() - 1)]
 		var thimble: ThimbleProjectile = shots.spawn(ThimbleProjectile) as ThimbleProjectile

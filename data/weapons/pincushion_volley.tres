@@ -17,6 +17,7 @@ card_text = "A fan of 7 pins that pierce everything."
 
 [resource]
 script = ExtResource("1_stats")
+sound = &"volley"
 id = &"pincushion_volley"
 display_name = "Pincushion Volley"
 behaviour = ExtResource("3_behaviour")

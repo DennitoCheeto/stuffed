@@ -71,6 +71,7 @@ card_text = "3 thimbles, and lobs every 2.4 → 2 seconds."
 
 [resource]
 script = ExtResource("1_stats")
+sound = &"mortar"
 id = &"thimble_mortar"
 display_name = "Thimble Mortar"
 behaviour = ExtResource("3_behaviour")
