@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-22 (all M2 tickets merged, waiting for acceptance)_
+_Last updated: 2026-10-22 (M2 playtest round 1 done, fix tickets #72–#75 open)_
 
 ## Where we are
 
@@ -14,14 +14,14 @@ _Last updated: 2026-10-22 (all M2 tickets merged, waiting for acceptance)_
 | Art direction | ✅ felt style "B — Soft", puppet animation (`docs/art/`) |
 | M0 Factory setup | ✅ done (PR #1) |
 | M1 Core run | ✅ accepted 2026-10-21 (PRs #17–#29; playtest P-1 … P-6 passed, 144 fps on the PO's PC) |
-| M2 Build variety | 🧪 all 15 tickets merged (PRs #47–#49, #51–#55, #57, #58, #60, #61, #63, #67, #69); waiting for the PO's playtest (P-1 … P-6) |
+| M2 Build variety | 🔨 15 tickets merged (PRs #47–#49, #51–#55, #57, #58, #60, #61, #63, #67, #69); playtest round 1 → spec 02 §20, fix tickets #72–#75 |
 
 ## Next step
 
-- First M2 playtest (2026-10-22) found two readability problems. Spec 02 §20 (PR "spec 02: playtest fixes") adds
-  tickets 16 (gift box confirmation), 17 (mortar landing ring), 18 (reroll/skip/banish buttons), 19 (evolved looks). Once the PO merges
-  that spec PR: create the two issues, build them, then the PO finishes the M2 acceptance (P-1 … P-9; P-5 = F1 →
-  "Max everything" + "500 shamblers" + "Spawn the King" with "Show FPS + count").
+- First M2 playtest (2026-10-22) done; spec 02 §20 approved (PR #71) with 4 fix tickets: **M2-16 #72** gift box waits
+  for confirmation (contents as cards), **M2-17 #73** mortar landing ring, **M2-18 #74** clearer reroll/skip/banish
+  buttons, **M2-19 #75** stronger evolved-weapon looks. Next: build them in that order (1–2 per chat), then the PO
+  plays again for acceptance (P-1 … P-9; ask P-1 "want a different build next run?" again).
 - After acceptance: write spec 03 for M3 (Town, vision §10) using the playtest feedback; the PO may send town wishes.
 
 ## Playtest notes (M2, first round)
