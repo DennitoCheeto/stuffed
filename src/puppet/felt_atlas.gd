@@ -107,6 +107,7 @@ static func _all_pieces() -> Dictionary[StringName, FeltPiece]:
 	pieces.merge(XpButtonLook.make_parts())
 	pieces.merge(ProjectileLook.make_parts())
 	pieces.merge(GiftBoxLook.make_parts())
+	pieces.merge(FloorPickupLook.make_parts())
 	return pieces
 
 

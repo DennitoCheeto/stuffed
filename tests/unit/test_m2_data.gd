@@ -12,7 +12,8 @@ const ENEMIES_DIR: String = "res://data/enemies/"
 const DATA_CLASSES: String = (
 	"(EnemyStats|WeaponStats|WeaponLevel|UpgradeDef|EvolutionDef|UpgradePool|SpawnSchedule"
 	+ "|SpawnEntry|EliteSpawn|EliteRules|BossDef|BigTedDef|SockKingDef|SpitAttack|DeathCloud"
-	+ "|GiftBoxRules|RunRules|XpRules|HeroStats|FurnitureLayout|FurniturePiece)\\.new\\("
+	+ "|GiftBoxRules|FloorPickupRules|FloorPickupDef|RunRules|XpRules|HeroStats|FurnitureLayout"
+	+ "|FurniturePiece)\\.new\\("
 )
 
 
@@ -58,6 +59,7 @@ func test_ac24_the_run_reads_its_rules_from_data() -> void:
 	_assert_from_data(_saved(".", "rules"), "run rules")
 	_assert_from_data(_saved(".", "upgrade_pool"), "upgrade pool")
 	_assert_from_data(_saved(".", "gift_box_rules"), "gift box rules")
+	_assert_from_data(_saved(".", "floor_pickup_rules"), "floor pickup rules")
 	_assert_from_data(_saved("./Spawner", "schedule"), "spawn schedule")
 
 

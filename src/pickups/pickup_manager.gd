@@ -36,6 +36,13 @@ func drop(size: EnemyStats.XpSize, at: Vector2) -> XpButton:
 	return button
 
 
+## Big Magnet (spec 02b §3): every button on the floor, near or far, flies to `player`.
+func attract_all(player: Player) -> void:
+	for button: XpButton in buttons:
+		button.target = player
+		button.speed = maxf(button.speed, rules.attract_start_speed)
+
+
 func _physics_process(delta: float) -> void:
 	_time += delta
 	var players: Array[Player] = []

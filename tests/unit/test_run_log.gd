@@ -89,5 +89,16 @@ func test_ac23_bosses_not_beaten_are_null() -> void:
 	assert_eq(entry["evolutions"], [])
 
 
+func test_ac32_floor_pickups_are_saved_and_read_back_the_same() -> void:
+	var result: RunResult = _result()
+	result.floor_pickups = [{"name": "Big Magnet", "time": 61.27, "player": 1}]
+	assert_true(RunLog.append(result))
+	var entry: Dictionary = RunLog.read_all()[0]
+	assert_eq(entry["floor_pickups"].size(), 1)
+	assert_eq(entry["floor_pickups"][0]["name"], "Big Magnet")
+	assert_eq(entry["floor_pickups"][0]["time"], 61.3)
+	assert_eq(int(entry["floor_pickups"][0]["player"]), 1)
+
+
 func test_default_path_is_the_user_folder() -> void:
 	assert_eq(RunLog.DEFAULT_PATH, "user://run_log.jsonl")

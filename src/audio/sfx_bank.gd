@@ -39,6 +39,8 @@ const LENGTHS: Dictionary[StringName, float] = {
 	&"evolution": 1.4,
 	&"boss_hit": 0.16,
 	&"boss_down": 1.6,
+	# Floor pickups (spec 02b).
+	&"magnet": 0.45,
 }
 
 
@@ -102,6 +104,7 @@ static func _weapon_or_moment(sound: StringName) -> Callable:
 		&"evolution": _evolution,
 		&"boss_hit": _boss_hit,
 		&"boss_down": _boss_down,
+		&"magnet": _magnet,
 	}
 	return voices[sound]
 
@@ -389,3 +392,11 @@ static func _boss_down(t: float) -> float:
 		for note: float in [55.0, 59.0, 62.0, 67.0]:
 			chord += Synth.sine(Synth.midi_hz(note) * local) * fade
 	return 0.2 * deflate + 0.12 * chord
+
+
+## Big Magnet grabbed: a rising, wobbly "zwoop".
+static func _magnet(t: float) -> float:
+	var phase: float = Synth.sweep(t, 220.0, 1100.0, 0.35) + 0.8 * sin(TAU * 14.0 * t)
+	var tone: float = Synth.sine(phase) + 0.35 * Synth.triangle(phase * 2.0)
+	var envelope: float = minf(t / 0.02, 1.0) * clampf((0.45 - t) / 0.12, 0.0, 1.0)
+	return 0.3 * tone * envelope
