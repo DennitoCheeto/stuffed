@@ -16,6 +16,10 @@ signal changed
 const PLAYER_SCENE: PackedScene = preload("res://src/player/player.tscn")
 ## The level-up cards (weapon names and icons for the Toy Box Armory).
 const UPGRADE_POOL: UpgradePool = preload("res://data/upgrade_pool.tres")
+## Who can be rescued (to find a saved plushie by its id).
+const RESCUE_RULES: RescueRules = preload("res://data/town/rescue_rules.tres")
+## How plushies walk, sit and wave at home.
+const PLUSHIE_RULES: PlushieTownRules = preload("res://data/town/plushie_town_rules.tres")
 const PROMPT_COLOR: Color = Color("#f4efe6")
 const BANNER_COLOR: Color = Color("#cfe3f0")
 ## Seconds after a rebuild before new buildings are revealed and the fort grows (after the pop).
@@ -34,6 +38,10 @@ var fort: TownFort
 var scrapbook: ScrapbookStand
 ## Building spot id -> its building (a ruin at level 0).
 var buildings: Dictionary[StringName, TownBuilding] = {}
+## Plushie id -> the rescued plushie living in town.
+var plushies: Dictionary[String, TownPlushie] = {}
+## Where rescued plushies wait for a Hospital bed.
+var tent: PlushieTent
 var actors: Node2D
 var camera: PlayersCamera
 var hud: CanvasLayer
@@ -78,9 +86,16 @@ func _ready() -> void:
 		var building: TownBuilding = TownBuilding.new(spot, level, _is_open(spot))
 		holder.add_child(building)
 		buildings[spot.id] = building
+	tent = PlushieTent.new(PLUSHIE_RULES, layout.tent_position)
+	holder.add_child(tent)
 	actors = Node2D.new()
 	actors.name = "Actors"
 	add_child(actors)
+	for id: String in save.plushies:
+		var who: PlushieDef = RESCUE_RULES.find(id)
+		if save.plushies[id] == "in_town" and who != null:
+			spawn_plushie(who, random_town_spot(), true)
+	refresh_tent()
 	spawn_player(0)
 	add_child(card)
 	camera = PlayersCamera.new()
@@ -91,7 +106,7 @@ func _ready() -> void:
 	camera.snap_to_players()
 	_build_hud()
 	refresh()
-	if not pending_reveals().is_empty():
+	if not pending_reveals().is_empty() or can_move_in():
 		_settle_left = ARRIVAL_REVEAL_SECONDS
 	add_child(menu)
 	menu.resumed.connect(func() -> void: process_mode = Node.PROCESS_MODE_INHERIT)
@@ -270,11 +285,32 @@ func _weapons(ids: Array[StringName]) -> Array[UpgradeDef]:
 	return result
 
 
-## An extra line on the info card: the starting weapon at a building that lets you choose it.
+## An extra line on the info card: beds at the Hospital, the starting weapon at a building that
+## lets you choose it.
 func _note_for(building: TownBuilding) -> String:
+	if _has_beds(building.building):
+		return _bed_note(building.level)
 	if not building.building.chooses_start_weapon(building.level):
 		return ""
 	return "Starting weapon: " + UPGRADE_POOL.find(start_weapon_id()).display_name
+
+
+func _has_beds(building: BuildingDef) -> bool:
+	for level: BuildingLevel in building.levels:
+		if level.plushie_beds > 0:
+			return true
+	return false
+
+
+## "Beds used: 1 / 2   1 waiting in the tent".
+func _bed_note(level: int) -> String:
+	var parts: PackedStringArray = []
+	if level > 0:
+		parts.append("Beds used: %d / %d" % [save.plushies_in_town(), hospital_beds()])
+	var waiting: int = save.waiting_plushies().size()
+	if waiting > 0:
+		parts.append("%d waiting in the tent" % waiting)
+	return "   ".join(parts)
 
 
 ## Updates the jars and every sign for what's in the jars now.
@@ -285,8 +321,8 @@ func refresh() -> void:
 		buildings[id].refresh(save)
 
 
-## After a rebuild settles (and on arrival): the fort grows and newly unlocked ruins lose
-## their yarn.
+## After a rebuild settles (and on arrival): the fort grows, newly unlocked ruins lose their
+## yarn and waiting plushies move into free Hospital beds.
 func settle() -> void:
 	var pieces: int = TownFort.pieces_for(save.total_levels(), layout.fort_piece_every)
 	if pieces > fort.pieces:
@@ -294,6 +330,7 @@ func settle() -> void:
 		add_child(TownPuff.new(layout.fort_rect, 0.7))
 		Sfx.play(&"upgrade", 0.8)
 	reveal_new_buildings()
+	move_in_waiting()
 
 
 ## True while a rebuild or arrival is still waiting for `settle` (or a building is animating).
@@ -345,6 +382,87 @@ func show_banner(title: String, subtitle: String) -> void:
 
 func is_banner_showing() -> bool:
 	return banner.visible
+
+
+## Beds for plushies in town right now (the Plush Hospital at its level).
+func hospital_beds() -> int:
+	var beds: int = 0
+	for spot: TownSpot in layout.spots:
+		var reached: BuildingLevel = spot.building.reached(save.building_level(String(spot.id)))
+		if reached != null:
+			beds += reached.plushie_beds
+	return beds
+
+
+func free_beds() -> int:
+	return maxi(hospital_beds() - save.plushies_in_town(), 0)
+
+
+## True when a plushie waits in the tent and there is a free bed for it.
+func can_move_in() -> bool:
+	return free_beds() > 0 and not save.waiting_plushies().is_empty()
+
+
+## Every waiting plushie that gets a free bed (first come, first served) is stitched up and
+## moves into town, with a banner. Returns the plushies that moved in.
+func move_in_waiting() -> Array[TownPlushie]:
+	var moved: Array[TownPlushie] = []
+	var names: PackedStringArray = []
+	for id: String in save.waiting_plushies():
+		var who: PlushieDef = RESCUE_RULES.find(id)
+		if free_beds() <= 0:
+			break
+		if who == null:
+			continue
+		save.plushies[id] = "in_town"
+		moved.append(spawn_plushie(who, hospital_door(), false))
+		names.append(who.display_name)
+	if moved.is_empty():
+		return moved
+	var bonus: int = roundi(PLUSHIE_RULES.coin_bonus_per_plushie * 100.0)
+	var title: String = PLUSHIE_RULES.moved_in_banner % " and ".join(names)
+	show_banner(title, PLUSHIE_RULES.moved_in_subtitle % bonus)
+	Sfx.play(PLUSHIE_RULES.moved_in_sound)
+	refresh_tent()
+	changed.emit()
+	return moved
+
+
+## Adds the rescued plushie `who` to the town at `at` (`stitched` = it already lived here).
+func spawn_plushie(who: PlushieDef, at: Vector2, stitched: bool) -> TownPlushie:
+	var plushie: TownPlushie = TownPlushie.new(who, PLUSHIE_RULES, layout, at, stitched)
+	actors.add_child(plushie)
+	plushies[who.id] = plushie
+	return plushie
+
+
+## Where a freshly stitched plushie steps out: beside the Plush Hospital.
+func hospital_door() -> Vector2:
+	for spot: TownSpot in layout.spots:
+		for level: BuildingLevel in spot.building.levels:
+			if level.plushie_beds > 0:
+				var margin: float = PLUSHIE_RULES.keep_clear + 10.0
+				return Vector2(spot.rect.position.x - margin, spot.rect.end.y - 20.0)
+	return layout.spawn_position
+
+
+## A random free spot on the blanket (where plushies stand when you get home).
+func random_town_spot() -> Vector2:
+	for i: int in 50:
+		var spot: Vector2 = Vector2(randf() * layout.size.x, randf() * layout.size.y)
+		if TownPlushie.is_walkable(layout, spot, PLUSHIE_RULES.keep_clear):
+			return spot
+	return layout.spawn_position + Vector2(0.0, 120.0)
+
+
+## The tent shows who still waits for a bed.
+func refresh_tent() -> void:
+	var waiting: Array[PlushieDef] = []
+	for id: String in save.waiting_plushies():
+		var who: PlushieDef = RESCUE_RULES.find(id)
+		if who != null:
+			waiting.append(who)
+	tent.show_waiting(waiting)
 
 
 ## What pressing E at the door does: off to the Bedroom (once).

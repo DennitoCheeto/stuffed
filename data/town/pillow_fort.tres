@@ -72,3 +72,4 @@ spots = Array[ExtResource("2_spot")]([SubResource("Resource_armory"), SubResourc
 cushions = PackedVector2Array(330, 320, 2560, 1520, 420, 1560, 1440, 1600)
 block_piles = PackedVector2Array(2600, 320, 260, 1050)
 lamps = PackedVector2Array(1440, 260, 2620, 1100)
+tent_position = Vector2(2170, 1420)

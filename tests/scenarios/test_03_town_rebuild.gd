@@ -144,7 +144,7 @@ func test_ac42_locked_ruins_open_after_1_and_3_rebuilds() -> void:
 
 
 func test_ac42_the_first_rescue_opens_the_hospital_when_you_get_home() -> void:
-	main.town.plushies["bunny"] = "waiting"
+	main.town.plushies["bambam"] = "waiting"
 	var town: Town = await go_to_town()
 	var hospital: TownBuilding = town.buildings[&"plush_hospital"]
 	assert_false(hospital.unlocked, "still tangled the moment you arrive")

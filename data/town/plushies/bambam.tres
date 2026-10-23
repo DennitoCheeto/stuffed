@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="PlushieDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rescue/plushie_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = "bambam"
+display_name = "BamBam"
+shape = 2
+body_color = Color(0.78, 0.65, 0.49, 1)
+accent_color = Color(0.96, 0.94, 0.9, 1)
+detail_color = Color(0.66, 0.84, 0.95, 1)
+patch_color = Color(0.72, 0.65, 0.92, 1)
+height = 1.0

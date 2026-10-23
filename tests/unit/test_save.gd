@@ -21,7 +21,7 @@ func _full_town() -> TownSave:
 	var town: TownSave = TownSave.new()
 	town.materials = {"coins": 1234, "stuffing": 56, "thread": 7}
 	town.building_levels = {"armory": 2, "lucky_jar": 1, "watchtower": 0}
-	town.plushies = {"bunny": "in_town", "frog": "waiting"}
+	town.plushies = {"bambam": "in_town", "frog": "waiting"}
 	town.mark_seen("weapons", "peel_boomerang")
 	town.mark_seen("weapons", "banana_split")
 	town.mark_seen("enemies", "runner")
@@ -108,11 +108,11 @@ func test_banking_keeps_the_share_rounded_up_and_takes_the_plushie_in() -> void:
 	var haul: RunHaul = RunHaul.new()
 	haul.add("coins", 31)
 	haul.add("stuffing", 3)
-	haul.rescued = "bunny"
+	haul.rescued = "bambam"
 	town.bank(haul, RULES.keep_share_lost)
 	assert_eq(town.material("coins"), 116, "half of 31 rounded up = 16")
 	assert_eq(town.material("stuffing"), 2)
-	assert_eq(town.plushies["bunny"], "waiting")
+	assert_eq(town.plushies["bambam"], "waiting")
 	town.bank(haul, RULES.keep_share_won)
 	assert_eq(town.material("coins"), 147)
 
