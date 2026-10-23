@@ -53,6 +53,12 @@ func start_run() -> Run:
 	return main.current_screen as Run
 
 
+## Every weapon on the level-up cards (Toy Box Armory at level 2), for scenarios about a weapon
+## the Armory unlocks. Call it before start_run().
+func unlock_all_weapons() -> void:
+	main.town.building_levels["toy_box_armory"] = 2
+
+
 func first_player() -> Player:
 	return Players.all(get_tree())[0]
 

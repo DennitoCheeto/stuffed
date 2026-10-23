@@ -8,6 +8,11 @@ extends Resource
 @export var thread: int = 0
 ## What the building does at this level, in a few words ("+20% pickup range").
 @export var effect: String = ""
+## Weapons (upgrade pool ids) this level adds to the level-up cards (Toy Box Armory). Weapons
+## listed on any building level stay off the cards until that level is reached.
+@export var unlocks_weapons: Array[StringName] = []
+## From this level on, the player can choose Banane's starting weapon (Toy Box Armory Lv 3).
+@export var start_weapon_choice: bool = false
 
 
 ## Material id -> amount, only the materials this level needs.

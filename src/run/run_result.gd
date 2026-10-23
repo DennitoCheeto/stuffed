@@ -32,6 +32,8 @@ var floor_pickups: Array[Dictionary] = []
 ## Material id -> amount collected in the run (victory bonus included), and what went home.
 var materials_collected: Dictionary[String, int] = {}
 var materials_kept: Dictionary[String, int] = {}
+## Weapons that could come up on cards this run (upgrade pool ids; the Toy Box Armory adds more).
+var unlocked_weapons: PackedStringArray = []
 
 
 ## How the run ended for the town (spec 03 §10): "king", "way_home", "died" or "gave_up".

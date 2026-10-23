@@ -14,6 +14,7 @@ var run: Run
 
 ## A run without spawning or the boomerang, where only `id` is on the cards; picks it.
 func _run_with_card(id: StringName) -> Weapon:
+	unlock_all_weapons()
 	run = await start_run()
 	run.spawner.active = false
 	var banane: Player = first_player()
