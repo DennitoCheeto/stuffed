@@ -54,7 +54,11 @@ func pick(rng: RandomNumberGenerator) -> FloorPickupDef:
 	return kinds[kinds.size() - 1]
 
 
-## Run time when the next drop may come, after one at `last_drop` (or the run start).
-func next_drop_time(last_drop: float, rng: RandomNumberGenerator, first: bool) -> float:
-	var earliest: float = first_drop_after if first else last_drop + min_gap
-	return earliest + rng.randf() * gap_spread
+## Run time when the next drop may come, after one at `last_drop` (or the run start). The wait
+## between drops gets `gap_cut` shorter (0.15 = 15%, Party Shop).
+func next_drop_time(
+	last_drop: float, rng: RandomNumberGenerator, first: bool, gap_cut: float = 0.0
+) -> float:
+	var keep: float = clampf(1.0 - gap_cut, 0.0, 1.0)
+	var earliest: float = first_drop_after if first else last_drop + min_gap * keep
+	return earliest + rng.randf() * gap_spread * keep

@@ -131,7 +131,9 @@ func _ready() -> void:
 	upgrade_rng.seed = seed_value * 31 + 7
 	pickup_rng.seed = seed_value * 17 + 3
 	material_rng.seed = seed_value * 13 + 5
-	floor_pickup_drops = FloorPickupDrops.new(floor_pickup_rules, pickup_rng)
+	floor_pickup_drops = FloorPickupDrops.new(
+		floor_pickup_rules, pickup_rng, perks.pickup_gap_cut, perks.first_pickup_at
+	)
 	var furniture: Obstacles = arena.obstacles()
 	enemies.setup(actors, effects, arena.play_rect(), rules.max_enemies_alive, furniture)
 	projectiles.setup(enemies, arena.play_rect(), furniture)
