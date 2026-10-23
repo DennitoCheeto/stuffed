@@ -16,6 +16,10 @@ var extra_card_uses: int = 0
 var pickup_range_bonus: float = 0.0
 ## Extra max health (Snack Bar).
 var max_health_bonus: float = 0.0
+## How much shorter the wait between floor pickups is, as a share (Party Shop).
+var pickup_gap_cut: float = 0.0
+## Run time the first floor pickup is due (0 = the normal first drop time, Party Shop Lv 3).
+var first_pickup_at: float = 0.0
 
 
 ## The perks of the town in `save`, with the buildings standing on the spots of `layout`.
@@ -31,10 +35,18 @@ static func from_save(save: TownSave, layout: TownLayout) -> TownPerks:
 			perks.extra_card_uses += reached.extra_card_uses
 			perks.pickup_range_bonus += reached.pickup_range_bonus
 			perks.max_health_bonus += reached.max_health_bonus
+			perks.pickup_gap_cut += reached.pickup_gap_cut
+			if reached.first_pickup_at > 0.0:
+				perks.first_pickup_at = _earliest(perks.first_pickup_at, reached.first_pickup_at)
 	var chosen: StringName = StringName(save.start_weapon)
 	if perks.can_choose_start_weapon and not perks.locked_weapons.has(chosen):
 		perks.start_weapon = chosen
 	return perks
+
+
+## The earlier of two first-drop times, where 0 means "not set".
+static func _earliest(current: float, other: float) -> float:
+	return other if current <= 0.0 else minf(current, other)
 
 
 ## The weapons of `pool` that can come up on cards (in pool order).

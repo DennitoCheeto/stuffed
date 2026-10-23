@@ -7,6 +7,7 @@ const POOL: UpgradePool = preload("res://data/upgrade_pool.tres")
 const LUCKY_JAR: BuildingDef = preload("res://data/town/buildings/lucky_jar.tres")
 const WATCHTOWER: BuildingDef = preload("res://data/town/buildings/watchtower.tres")
 const SNACK_BAR: BuildingDef = preload("res://data/town/buildings/snack_bar.tres")
+const PARTY_SHOP: BuildingDef = preload("res://data/town/buildings/party_shop.tres")
 
 
 func _perks(levels: Dictionary[String, int]) -> TownPerks:
@@ -58,6 +59,25 @@ func test_ac43_watchtower_and_snack_bar_reach_the_perks() -> void:
 	assert_almost_eq(perks.pickup_range_bonus, 0.2, 0.001)
 	assert_eq(perks.max_health_bonus, 30.0)
 	assert_eq(perks.extra_card_uses, 0, "the Lucky Jar is still a ruin")
+
+
+func test_ac43_party_shop_numbers_come_from_data() -> void:
+	assert_almost_eq(PARTY_SHOP.reached(1).pickup_gap_cut, 0.15, 0.001, "spec: -15% gap")
+	assert_almost_eq(PARTY_SHOP.reached(2).pickup_gap_cut, 0.3, 0.001, "spec: -30% gap")
+	assert_almost_eq(PARTY_SHOP.reached(3).pickup_gap_cut, 0.45, 0.001, "spec: -45% gap")
+	assert_eq(PARTY_SHOP.reached(2).first_pickup_at, 0.0, "Lv 2 keeps the normal first drop")
+	assert_eq(PARTY_SHOP.reached(3).first_pickup_at, 15.0, "spec: Lv 3 first after 15 s")
+
+
+func test_ac43_party_shop_reaches_the_perks() -> void:
+	assert_eq(_perks({}).pickup_gap_cut, 0.0)
+	assert_eq(_perks({}).first_pickup_at, 0.0)
+	var perks: TownPerks = _perks({"party_shop": 2})
+	assert_almost_eq(perks.pickup_gap_cut, 0.3, 0.001)
+	assert_eq(perks.first_pickup_at, 0.0)
+	perks = _perks({"party_shop": 3})
+	assert_almost_eq(perks.pickup_gap_cut, 0.45, 0.001)
+	assert_eq(perks.first_pickup_at, 15.0)
 
 
 func test_effect_texts_match_the_numbers() -> void:

@@ -70,6 +70,30 @@ func test_ac31_about_one_per_minute_with_normal_kills() -> void:
 	assert_between(average, 50.0, 75.0, "about one a minute (two kills a second)")
 
 
+func test_ac43_a_gap_cut_makes_drops_come_more_often() -> void:
+	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
+	rng.seed = 7
+	var drops: FloorPickupDrops = FloorPickupDrops.new(RULES, rng, 0.45)
+	var times: Array[float] = []
+	var t: float = 0.0
+	while t < 3600.0:
+		if drops.roll(t, 0) != null:
+			if not times.is_empty():
+				assert_gte(t - times[-1], RULES.min_gap * 0.55, "the shorter gap still holds")
+			times.append(t)
+		t += 0.5
+	var average: float = (times[-1] - times[0]) / (times.size() - 1)
+	assert_between(average, 50.0 * 0.55, 75.0 * 0.55, "about 45% shorter waits")
+
+
+func test_ac43_an_early_first_drop_time_replaces_the_normal_one() -> void:
+	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
+	var drops: FloorPickupDrops = FloorPickupDrops.new(_sure_rules(), rng, 0.45, 15.0)
+	assert_eq(drops.next_drop_at, 15.0)
+	assert_null(drops.roll(14.5, 0), "not before")
+	assert_not_null(drops.roll(15.0, 0), "due at 15 s")
+
+
 func test_ac31_kinds_follow_their_weights() -> void:
 	var rules: FloorPickupRules = FloorPickupRules.new()
 	rules.kinds = [_kind(&"a", 40.0), _kind(&"b", 30.0), _kind(&"c", 30.0)]

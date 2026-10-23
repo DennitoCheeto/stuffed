@@ -20,6 +20,12 @@ extends Resource
 @export var pickup_range_bonus: float = 0.0
 ## Extra max health at this level, in total (Snack Bar).
 @export var max_health_bonus: float = 0.0
+## How much shorter the wait between floor pickups gets at this level, in total, as a share
+## (0.15 = 15% shorter, Party Shop).
+@export var pickup_gap_cut: float = 0.0
+## From this level on, the first floor pickup of a run is due at this run time (seconds;
+## 0 = the normal first drop time, Party Shop Lv 3).
+@export var first_pickup_at: float = 0.0
 
 
 ## Material id -> amount, only the materials this level needs.
