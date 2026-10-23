@@ -9,6 +9,7 @@ coins = 350
 stuffing = 0
 thread = 0
 effect = "+10% pickup range"
+pickup_range_bonus = 0.1
 
 [sub_resource type="Resource" id="Resource_level_2"]
 script = ExtResource("2_level")
@@ -16,6 +17,7 @@ coins = 800
 stuffing = 18
 thread = 0
 effect = "+20% pickup range"
+pickup_range_bonus = 0.2
 
 [sub_resource type="Resource" id="Resource_level_3"]
 script = ExtResource("2_level")
@@ -23,6 +25,7 @@ coins = 1500
 stuffing = 35
 thread = 8
 effect = "+30% pickup range"
+pickup_range_bonus = 0.3
 
 [resource]
 script = ExtResource("1_def")

@@ -58,6 +58,10 @@ var items: Array[UpgradeDef] = []
 var item_levels: Dictionary[StringName, int] = {}
 ## The weapon this hero starts the run with (null = the hero's own; set before adding the hero).
 var starting_weapon: WeaponStats
+## Town bonuses for this run (Snack Bar health, Watchtower range as a share of the hero's
+## own); set before adding the hero.
+var bonus_max_health: float = 0.0
+var bonus_pickup_share: float = 0.0
 ## Every card picked this run, in order, e.g. "Quick Feet 2" (for the end screen and run log).
 var picked_upgrades: PackedStringArray = []
 ## Rerolls, skips and banishes left this run (the run sets it up when it spawns the player).
@@ -76,9 +80,9 @@ var _hurt_invulnerable_left: float = 0.0
 func _ready() -> void:
 	add_to_group(GROUP)
 	_controls = PlayerInput.new(player_index)
-	max_health = stats.max_health
+	max_health = stats.max_health + bonus_max_health
 	health = max_health
-	pickup_range = stats.pickup_range
+	pickup_range = stats.pickup_range * (1.0 + bonus_pickup_share)
 	progress = LevelProgress.new(xp_rules)
 	var shape: CircleShape2D = CircleShape2D.new()
 	shape.radius = stats.hitbox_radius

@@ -27,9 +27,15 @@ func next(level: int) -> BuildingLevel:
 
 ## What it does at `level` (0 = still a ruin: nothing).
 func effect_at(level: int) -> String:
+	var at: BuildingLevel = reached(level)
+	return "" if at == null else at.effect
+
+
+## The level the building stands at (null at 0, a ruin).
+func reached(level: int) -> BuildingLevel:
 	if level <= 0 or level > levels.size():
-		return ""
-	return levels[level - 1].effect
+		return null
+	return levels[level - 1]
 
 
 ## Weapons this building still keeps off the cards at `level` (those of the levels above it).

@@ -1,7 +1,8 @@
 class_name CardControls
 extends RefCounted
 ## One player's control over bad luck on the level-up screen for one run: rerolls, skips,
-## banishes left, and the cards they banished. The starting counts come from the upgrade pool.
+## banishes left, and the cards they banished. The starting counts come from the upgrade pool,
+## plus the town's extra uses (Lucky Jar).
 
 var rerolls_left: int = 0
 var skips_left: int = 0
@@ -14,31 +15,34 @@ var skips_used: int = 0
 var banishes_used: int = 0
 
 var _pool: UpgradePool
+## Extra uses of each kind on top of the pool's counts (Lucky Jar).
+var _extra: int = 0
 
 
-func _init(pool: UpgradePool) -> void:
+func _init(pool: UpgradePool, extra: int = 0) -> void:
 	_pool = pool
+	_extra = maxi(extra, 0)
 	refill()
 
 
-## Back to the starting counts from the pool (developer menu). Banished cards stay banished.
+## Back to the starting counts (developer menu). Banished cards stay banished.
 func refill() -> void:
-	rerolls_left = _pool.rerolls_per_run
-	skips_left = _pool.skips_per_run
-	banishes_left = _pool.banishes_per_run
+	rerolls_left = max_rerolls()
+	skips_left = max_skips()
+	banishes_left = max_banishes()
 
 
 ## The starting counts for a run (the most dots on the level-up buttons).
 func max_rerolls() -> int:
-	return _pool.rerolls_per_run
+	return _pool.rerolls_per_run + _extra
 
 
 func max_skips() -> int:
-	return _pool.skips_per_run
+	return _pool.skips_per_run + _extra
 
 
 func max_banishes() -> int:
-	return _pool.banishes_per_run
+	return _pool.banishes_per_run + _extra
 
 
 ## Uses one reroll. False (and nothing used) when none are left.
