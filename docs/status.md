@@ -28,7 +28,12 @@ _Last updated: 2026-10-23 (M3-05 ruins and rebuilding)_
   Building effects are only texts so far: M3-06 … M3-08 make them reach the run (AC-43).
 - M3 ACs are AC-37 … AC-48, playtest P-12 … P-17. **M3-10** (#101) needs photos + names of the girlfriend's
   plushies from the PO: ask when starting it (M3-09 uses placeholder looks).
-- PO ideas for later: a skill / progress tree (own spec, after M3).
+- PO ideas for later: a skill / progress tree (own spec, after M3). **Visual pass** for the town and the Bedroom
+  (PO, 2026-10-23): "everything is a tiny bit dark" and needs more cool details. Own short art spec (brighter
+  palette, more props/details), after M3 unless the PO wants it sooner.
+- M3-05 quick check (PO, 2026-10-23): rebuilding "feels really good". First run brought home ~1.2k coins and
+  bought several buildings at once (prices assumed ~150 per short run). Re-check the economy in the M3 playtest
+  (P-12, P-16); prices live in `data/town/buildings/*.tres`.
 
 ## Playtest notes (M2, first round)
 
