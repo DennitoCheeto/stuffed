@@ -18,6 +18,8 @@ var kept: Dictionary[String, int] = {}
 var jars_before: Dictionary[String, int] = {}
 var heading: Label
 var note_label: Label
+## "Plushies in town: +10% coins" (hidden without plushies in town).
+var bonus_label: Label
 ## "Bunny is coming home!" (hidden when nobody was rescued).
 var rescue_label: Label
 ## Material id -> "+12" counter (this run).
@@ -41,6 +43,10 @@ func _init() -> void:
 	note_label = TownArt.label("", 22)
 	note_label.add_theme_color_override(&"font_color", NOTE_COLOR)
 	add_child(note_label)
+	bonus_label = TownArt.label("", 22)
+	bonus_label.add_theme_color_override(&"font_color", RESCUE_COLOR)
+	bonus_label.visible = false
+	add_child(bonus_label)
 	rescue_label = TownArt.label("", 28)
 	rescue_label.add_theme_color_override(&"font_color", RESCUE_COLOR)
 	rescue_label.visible = false
@@ -57,13 +63,19 @@ func _init() -> void:
 		totals_row.add_child(totals[material])
 
 
-## Starts counting `kept_amounts` into jars that held `before` (`share` of the haul was kept).
+## Starts counting `kept_amounts` into jars that held `before` (`share` of the haul was kept,
+## coins got `coin_bonus` more from plushies in town).
 func show_haul(
-	kept_amounts: Dictionary[String, int], before: Dictionary[String, int], share: float
+	kept_amounts: Dictionary[String, int],
+	before: Dictionary[String, int],
+	share: float,
+	coin_bonus: float = 0.0
 ) -> void:
 	kept = kept_amounts.duplicate()
 	jars_before = before.duplicate()
 	note_label.text = share_text(share)
+	bonus_label.text = bonus_text(coin_bonus)
+	bonus_label.visible = not bonus_label.text.is_empty()
 	_time = 0.0
 	_plips = 0
 	_counting = true
@@ -74,6 +86,13 @@ func show_haul(
 func show_rescue(plushie_name: String) -> void:
 	rescue_label.text = "%s is coming home!" % plushie_name
 	rescue_label.visible = true
+
+
+## The line about the coin bonus from plushies in town ("" = none).
+static func bonus_text(coin_bonus: float) -> String:
+	if coin_bonus <= 0.0:
+		return ""
+	return "Plushies in town: +%d%% coins" % roundi(coin_bonus * 100.0)
 
 
 ## What the note under the heading says for a kept share.

@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="PlushieDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rescue/plushie_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = "robbar"
+display_name = "Robbar"
+shape = 3
+body_color = Color(0.79, 0.81, 0.83, 1)
+accent_color = Color(0.95, 0.95, 0.94, 1)
+detail_color = Color(0.5, 0.55, 0.58, 1)
+patch_color = Color(0.16, 0.13, 0.19, 1)
+height = 0.8

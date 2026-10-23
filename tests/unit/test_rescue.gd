@@ -46,11 +46,11 @@ func test_about_every_second_run_has_one_between_2_and_6_minutes() -> void:
 
 
 func test_a_plushie_already_home_never_comes_again() -> void:
-	var home: PackedStringArray = ["bunny", "bear", "kitty"]
+	var home: PackedStringArray = ["bambam", "bobo", "pip"]
 	for seed_value: int in SEEDS:
 		var plan: RescuePlan = RULES.plan(3, home, _rng(seed_value))
 		if plan != null:
-			assert_eq(plan.plushie.id, "froggy", "only the one still out there")
+			assert_eq(plan.plushie.id, "robbar", "only the one still out there")
 
 
 func test_no_more_rescues_once_all_are_home() -> void:
@@ -63,7 +63,7 @@ func test_no_more_rescues_once_all_are_home() -> void:
 
 
 func test_find_by_id() -> void:
-	assert_eq(RULES.find("bunny").display_name, "Bunny")
+	assert_eq(RULES.find("bambam").display_name, "BamBam")
 	assert_null(RULES.find("nobody"))
 
 
@@ -71,21 +71,21 @@ func test_run_log_writes_the_rescue() -> void:
 	var result: RunResult = RunResult.new()
 	assert_null(RunLog.to_entry(result)["rescue"], "null when no rescue appeared")
 	assert_eq(result.rescued_plushie(), "")
-	result.rescue = {"plushie": "bunny", "time": 150.04, "freed": true, "freed_at": 158.06}
+	result.rescue = {"plushie": "bambam", "time": 150.04, "freed": true, "freed_at": 158.06}
 	var entry: Dictionary = RunLog.to_entry(result)["rescue"]
-	assert_eq(entry["plushie"], "bunny")
+	assert_eq(entry["plushie"], "bambam")
 	assert_almost_eq(float(entry["time"]), 150.0, 0.001)
 	assert_true(entry["freed"])
 	assert_almost_eq(float(entry["freed_at"]), 158.1, 0.001)
-	assert_eq(result.rescued_plushie(), "bunny")
-	result.rescue = {"plushie": "bunny", "time": 150.0, "freed": false, "freed_at": -1.0}
+	assert_eq(result.rescued_plushie(), "bambam")
+	result.rescue = {"plushie": "bambam", "time": 150.0, "freed": false, "freed_at": -1.0}
 	assert_null(RunLog.to_entry(result)["rescue"]["freed_at"], "never freed")
 	assert_eq(result.rescued_plushie(), "", "not freed = not brought home")
 
 
 func test_a_freed_plushie_is_banked_whatever_share_is_kept() -> void:
 	var haul: RunHaul = RunHaul.new()
-	haul.rescued = "kitty"
+	haul.rescued = "pip"
 	var town: TownSave = TownSave.new()
 	town.bank(haul, 0.5)
-	assert_eq(town.plushies["kitty"], "waiting", "waits in the tent for a Hospital bed")
+	assert_eq(town.plushies["pip"], "waiting", "waits in the tent for a Hospital bed")

@@ -17,11 +17,13 @@ func amount(material: String) -> int:
 	return materials.get(material, 0)
 
 
-## What goes home when `share` of the haul is kept (0.5 = half), each amount rounded up.
-func kept(share: float) -> Dictionary[String, int]:
+## What goes home when `share` of the haul is kept (0.5 = half), each amount rounded up. Coins
+## get `coin_bonus` more on top (0.1 = +10%, from plushies living in town).
+func kept(share: float, coin_bonus: float = 0.0) -> Dictionary[String, int]:
 	var result: Dictionary[String, int] = {}
 	for material: String in materials:
-		result[material] = ceili(materials[material] * share - 0.0001)
+		var boost: float = 1.0 + coin_bonus if material == "coins" else 1.0
+		result[material] = ceili(materials[material] * share * boost - 0.0001)
 	return result
 
 

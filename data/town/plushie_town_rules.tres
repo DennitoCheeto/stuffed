@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="PlushieTownRules" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/town/plushie_town_rules.gd" id="1_rules"]
+
+[resource]
+script = ExtResource("1_rules")
+coin_bonus_per_plushie = 0.05
+size = 24.0
+walk_speed = 70.0
+walk_distance = 520.0
+idle_min_seconds = 1.2
+idle_max_seconds = 3.5
+sit_chance = 0.3
+sit_min_seconds = 4.0
+sit_max_seconds = 9.0
+wave_radius = 170.0
+wave_seconds = 1.6
+wave_cooldown = 6.0
+keep_clear = 40.0
+bob_pixels = 4.0
+stitch_seconds = 1.3
+moved_in_banner = "%s moved in!"
+moved_in_subtitle = "Stitched up at the Plush Hospital: +%d%% coins per plushie"
+waiting_text = "Waiting for a Hospital bed"
+moved_in_sound = &"rescued"

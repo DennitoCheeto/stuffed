@@ -39,7 +39,7 @@ func test_ruins_unlock_after_1_and_3_rebuilds_and_the_first_rescue() -> void:
 	town.building_levels["watchtower"] = 1
 	assert_true(_unlocked(town).has(&"party_shop"), "after 3 rebuilds")
 	assert_false(_unlocked(town).has(&"plush_hospital"))
-	town.plushies["bunny"] = "waiting"
+	town.plushies["bambam"] = "waiting"
 	assert_true(_unlocked(town).has(&"plush_hospital"), "after the first rescue")
 
 

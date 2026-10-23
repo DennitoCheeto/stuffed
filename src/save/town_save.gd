@@ -5,13 +5,20 @@ extends RefCounted
 ## Written to disk by SaveStore. Unlocks (weapons, rerolls, ...) follow from the building levels.
 
 ## Bump when the meaning of a field changes; from_dict upgrades older saves.
-const VERSION: int = 1
+const VERSION: int = 2
+## Plushie ids of the placeholder plushies (version 1) -> the real plushies that replaced them.
+const OLD_PLUSHIE_IDS: Dictionary[String, String] = {
+	"kitty": "pip",
+	"bear": "bobo",
+	"bunny": "bambam",
+	"froggy": "robbar",
+}
 
 ## Material id ("coins", "stuffing", "thread") -> amount in the town's jars.
 var materials: Dictionary[String, int] = {}
 ## Building id -> level (0 = still a ruin, 1-3 = rebuilt).
 var building_levels: Dictionary[String, int] = {}
-## Plushie id -> "waiting" (in the tent) or "in_town" (moved in).
+## Plushie id -> "waiting" (in the tent) or "in_town" (moved in), in the order they came home.
 var plushies: Dictionary[String, String] = {}
 ## Scrapbook page -> ids seen on it (e.g. "weapons" -> ["peel_boomerang"]).
 var seen: Dictionary[String, PackedStringArray] = {}
@@ -72,9 +79,28 @@ func spend(cost: Dictionary[String, int]) -> bool:
 	return true
 
 
-## Adds `share` of a run's haul to the jars (rounded up) and takes in its freed plushie.
-func bank(haul: RunHaul, share: float) -> void:
-	var kept: Dictionary[String, int] = haul.kept(share)
+## Plushies that moved into town.
+func plushies_in_town() -> int:
+	var count: int = 0
+	for id: String in plushies:
+		if plushies[id] == "in_town":
+			count += 1
+	return count
+
+
+## Plushies still waiting in the tent for a Hospital bed (first come, first served).
+func waiting_plushies() -> PackedStringArray:
+	var result: PackedStringArray = []
+	for id: String in plushies:
+		if plushies[id] == "waiting":
+			result.append(id)
+	return result
+
+
+## Adds `share` of a run's haul to the jars (rounded up; coins get `coin_bonus` more, from
+## plushies in town) and takes in its freed plushie.
+func bank(haul: RunHaul, share: float, coin_bonus: float = 0.0) -> void:
+	var kept: Dictionary[String, int] = haul.kept(share, coin_bonus)
 	for id: String in kept:
 		materials[id] = material(id) + kept[id]
 	if not haul.rescued.is_empty() and not plushies.has(haul.rescued):
@@ -83,10 +109,10 @@ func bank(haul: RunHaul, share: float) -> void:
 
 ## A run that never finished (the game closed) counts as given up: `share` of it is banked.
 ## Returns true if there was one.
-func settle_unfinished_run(share: float) -> bool:
+func settle_unfinished_run(share: float, coin_bonus: float = 0.0) -> bool:
 	if unfinished_run.is_empty():
 		return false
-	bank(RunHaul.from_dict(unfinished_run), share)
+	bank(RunHaul.from_dict(unfinished_run), share, coin_bonus)
 	unfinished_run = {}
 	return true
 
@@ -126,8 +152,10 @@ static func from_dict(data: Dictionary) -> TownSave:
 		save.materials[key] = int(data["materials"][key])
 	for key: String in _dict(data, "building_levels"):
 		save.building_levels[key] = int(data["building_levels"][key])
+	var old: bool = int(data.get("version", VERSION)) < 2
 	for key: String in _dict(data, "plushies"):
-		save.plushies[key] = str(data["plushies"][key])
+		var id: String = OLD_PLUSHIE_IDS.get(key, key) if old else key
+		save.plushies[id] = str(data["plushies"][key])
 	for key: String in _dict(data, "seen"):
 		var ids: Variant = data["seen"][key]
 		if ids is Array:
@@ -141,7 +169,10 @@ static func from_dict(data: Dictionary) -> TownSave:
 	if unfinished is Dictionary:
 		var saved: Dictionary = unfinished as Dictionary
 		if not saved.is_empty():
-			save.unfinished_run = RunHaul.from_dict(saved).to_dict()
+			var haul: RunHaul = RunHaul.from_dict(saved)
+			if old:
+				haul.rescued = OLD_PLUSHIE_IDS.get(haul.rescued, haul.rescued)
+			save.unfinished_run = haul.to_dict()
 	return save
 
 

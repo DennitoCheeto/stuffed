@@ -28,6 +28,9 @@ extends Resource
 @export var cushions: PackedVector2Array = []
 @export var block_piles: PackedVector2Array = []
 @export var lamps: PackedVector2Array = []
+## Where the tent stands (its bottom middle) in which rescued plushies wait for a Hospital bed.
+## It doesn't block walking.
+@export var tent_position: Vector2 = Vector2(2170, 1420)
 
 
 func play_rect() -> Rect2:

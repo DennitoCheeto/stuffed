@@ -26,6 +26,9 @@ extends Resource
 ## From this level on, the first floor pickup of a run is due at this run time (seconds;
 ## 0 = the normal first drop time, Party Shop Lv 3).
 @export var first_pickup_at: float = 0.0
+## Beds for rescued plushies at this level, in total (Plush Hospital). A plushie waits in the
+## tent until there is a free bed, then moves into town.
+@export var plushie_beds: int = 0
 
 
 ## Material id -> amount, only the materials this level needs.

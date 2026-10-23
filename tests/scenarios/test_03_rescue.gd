@@ -5,7 +5,7 @@ extends "res://tests/scenarios/run_scenario.gd"
 
 const SHAMBLER: EnemyStats = preload("res://data/enemies/shambler.tres")
 const RULES: RescueRules = preload("res://data/town/rescue_rules.tres")
-const BUNNY: PlushieDef = preload("res://data/town/plushies/bunny.tres")
+const BAMBAM: PlushieDef = preload("res://data/town/plushies/bambam.tres")
 
 var run: Run
 
@@ -50,29 +50,29 @@ func test_ac44_the_first_run_never_has_a_rescue() -> void:
 
 func test_ac44_later_runs_know_their_number_and_who_is_already_home() -> void:
 	main.town.runs_started = 1
-	main.town.plushies["bear"] = "in_town"
+	main.town.plushies["bobo"] = "in_town"
 	run = await start_run()
 	assert_eq(run.run_number, 2)
-	assert_eq(run.rescued_before, PackedStringArray(["bear"]))
+	assert_eq(run.rescued_before, PackedStringArray(["bobo"]))
 	if run.rescue_plan != null:
-		assert_ne(run.rescue_plan.plushie.id, "bear", "a plushie at home is never offered again")
+		assert_ne(run.rescue_plan.plushie.id, "bobo", "a plushie at home is never offered again")
 		assert_between(run.rescue_plan.at_seconds, RULES.earliest_seconds, RULES.latest_seconds)
 
 
 func test_ac44_the_rescue_appears_at_its_planned_time() -> void:
 	await _quiet_run()
-	run.rescue_plan = RescuePlan.new(BUNNY, run.elapsed + 0.5)
+	run.rescue_plan = RescuePlan.new(BAMBAM, run.elapsed + 0.5)
 	await wait_seconds(0.2)
 	assert_eq(_plushies_on_floor().size(), 0, "not yet")
 	await wait_seconds(0.5)
 	assert_eq(_plushies_on_floor().size(), 1, "it appeared")
-	assert_eq(run.rescue.plushie, BUNNY, "the planned plushie")
+	assert_eq(run.rescue.plushie, BAMBAM, "the planned plushie")
 
 
 func test_ac44_it_appears_away_from_banane_with_a_banner_a_squeak_and_an_edge_arrow() -> void:
 	await _quiet_run()
 	Sfx.history.clear()
-	var plushie: TangledPlushie = run.start_rescue(BUNNY)
+	var plushie: TangledPlushie = run.start_rescue(BAMBAM)
 	await wait_physics_frames(2)
 	assert_eq(run.hud.banner_title.text, RULES.help_banner)
 	assert_eq(Sfx.history.count(RULES.help_sound), 1, "one help squeak")
@@ -98,7 +98,7 @@ func test_ac44_standing_next_to_it_fills_the_ring_in_3_s_and_moving_away_pauses_
 	await _quiet_run()
 	var banane: Player = first_player()
 	var outside: Vector2 = banane.global_position
-	var plushie: TangledPlushie = run.start_rescue(BUNNY)
+	var plushie: TangledPlushie = run.start_rescue(BAMBAM)
 	_step_to(banane, plushie.middle())
 	await wait_seconds(RULES.fill_seconds * 0.5)
 	var half: float = plushie.fill
@@ -110,8 +110,8 @@ func test_ac44_standing_next_to_it_fills_the_ring_in_3_s_and_moving_away_pauses_
 	Sfx.history.clear()
 	_step_to(banane, plushie.middle())
 	await wait_seconds(RULES.fill_seconds * 0.5 + 0.2)
-	assert_eq(run.haul.rescued, "bunny", "in the backpack")
-	assert_eq(run.hud.banner_title.text, RULES.freed_banner % "Bunny")
+	assert_eq(run.haul.rescued, "bambam", "in the backpack")
+	assert_eq(run.hud.banner_title.text, RULES.freed_banner % "BamBam")
 	assert_has(Sfx.history, RULES.freed_sound, "the happy sound plays")
 	await wait_seconds(TangledPlushie.HOP_SECONDS + 0.2)
 	assert_eq(_plushies_on_floor().size(), 0, "it hopped into the backpack")
@@ -121,29 +121,29 @@ func test_ac44_standing_next_to_it_fills_the_ring_in_3_s_and_moving_away_pauses_
 func test_ac44_a_freed_plushie_comes_home_even_if_banane_dies() -> void:
 	main.town.runs_started = 1
 	await _quiet_run()
-	var plushie: TangledPlushie = run.start_rescue(BUNNY)
+	var plushie: TangledPlushie = run.start_rescue(BAMBAM)
 	_step_to(first_player(), plushie.middle())
 	await wait_seconds(RULES.fill_seconds + 0.2)
 	await _die()
 	assert_true(main.current_screen is EndScreen, "Banane got stuffed")
-	assert_eq(main.town.plushies.get("bunny", ""), "waiting", "the plushie came home")
+	assert_eq(main.town.plushies.get("bambam", ""), "waiting", "the plushie came home")
 	var end: EndScreen = main.current_screen as EndScreen
 	assert_true(end.brought_home.rescue_label.visible, "the end screen says so")
-	assert_string_contains(end.brought_home.rescue_label.text, "Bunny")
+	assert_string_contains(end.brought_home.rescue_label.text, "BamBam")
 	var entry: Dictionary = RunLog.read_all().back()
-	assert_eq(entry["rescue"]["plushie"], "bunny")
+	assert_eq(entry["rescue"]["plushie"], "bambam")
 	assert_true(entry["rescue"]["freed"], "logged as freed")
 	var saved: TownSave = SaveStore.read()
-	assert_eq(saved.plushies.get("bunny", ""), "waiting", "and it is saved")
+	assert_eq(saved.plushies.get("bambam", ""), "waiting", "and it is saved")
 
 
 func test_ac44_a_plushie_not_freed_in_time_stays_behind() -> void:
 	await _quiet_run()
-	var plushie: TangledPlushie = run.start_rescue(BUNNY)
+	var plushie: TangledPlushie = run.start_rescue(BAMBAM)
 	_step_to(first_player(), plushie.middle())
 	await wait_seconds(RULES.fill_seconds * 0.5)
 	await _die()
-	assert_false(main.town.plushies.has("bunny"), "not brought home")
+	assert_false(main.town.plushies.has("bambam"), "not brought home")
 	var end: EndScreen = main.current_screen as EndScreen
 	assert_false(end.brought_home.rescue_label.visible)
 	var entry: Dictionary = RunLog.read_all().back()
@@ -152,21 +152,21 @@ func test_ac44_a_plushie_not_freed_in_time_stays_behind() -> void:
 
 func test_ac44_freeing_saves_at_once_so_closing_the_game_keeps_it() -> void:
 	await _quiet_run()
-	var plushie: TangledPlushie = run.start_rescue(BUNNY)
+	var plushie: TangledPlushie = run.start_rescue(BAMBAM)
 	_step_to(first_player(), plushie.middle())
 	await wait_seconds(RULES.fill_seconds + 0.2)
 	var saved: TownSave = SaveStore.read()
-	assert_eq(saved.unfinished_run.get("rescued", ""), "bunny", "the run in progress has it")
+	assert_eq(saved.unfinished_run.get("rescued", ""), "bambam", "the run in progress has it")
 
 
 func test_ac44_the_second_player_can_free_it() -> void:
 	await _quiet_run()
 	var second: Player = run.spawn_player(1, first_player().global_position + Vector2(-200, 0))
 	second.invincible = true
-	var plushie: TangledPlushie = run.start_rescue(BUNNY)
+	var plushie: TangledPlushie = run.start_rescue(BAMBAM)
 	_step_to(second, plushie.middle())
 	await wait_seconds(RULES.fill_seconds + 0.2)
-	assert_eq(run.haul.rescued, "bunny")
+	assert_eq(run.haul.rescued, "bambam")
 
 
 func test_ac44_only_one_rescue_per_run_and_the_dev_menu_starts_one() -> void:

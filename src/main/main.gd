@@ -14,6 +14,8 @@ const MATERIAL_RULES: MaterialRules = preload("res://data/town/material_rules.tr
 const TOWN_LAYOUT: TownLayout = preload("res://data/town/pillow_fort.tres")
 ## Who can be rescued in a run (for the name on the "Brought home" screen).
 const RESCUE_RULES: RescueRules = preload("res://data/town/rescue_rules.tres")
+## Plushies living in town add coins to every run.
+const PLUSHIE_RULES: PlushieTownRules = preload("res://data/town/plushie_town_rules.tres")
 
 ## Tests turn this off so "Quit" doesn't close the test runner.
 var quit_enabled: bool = true
@@ -91,14 +93,15 @@ func start_run(seed_value: int = 0) -> void:
 func show_end(result: RunResult) -> void:
 	var before: Dictionary[String, int] = town.materials.duplicate()
 	var share: float = MATERIAL_RULES.keep_share(result)
-	var kept: Dictionary[String, int] = _bank_run(share)
+	var bonus: float = coin_bonus()
+	var kept: Dictionary[String, int] = _bank_run(share, bonus)
 	result.materials_kept = kept
 	RunLog.append(result)
 	Crosshair.stop()
 	_play_music(&"town")
 	var end: EndScreen = END_SCENE.instantiate()
 	end.show_result(result)
-	end.brought_home.show_haul(kept, before, share)
+	end.brought_home.show_haul(kept, before, share, bonus)
 	var rescued: PlushieDef = RESCUE_RULES.find(result.rescued_plushie())
 	if rescued != null:
 		end.brought_home.show_rescue(rescued.display_name)
@@ -115,7 +118,7 @@ func _play_music(track: StringName) -> void:
 ## Loads the saved town. A run the game closed during counts as given up (spec 03 §9).
 func load_town() -> void:
 	town = SaveStore.read()
-	if town.settle_unfinished_run(MATERIAL_RULES.keep_share_lost):
+	if town.settle_unfinished_run(MATERIAL_RULES.keep_share_lost, coin_bonus()):
 		SaveStore.write(town)
 
 
@@ -134,13 +137,19 @@ func start_over() -> void:
 	town = TownSave.new()
 
 
-## Takes `share` of the finished run's haul home and saves. Returns what was kept.
-func _bank_run(share: float) -> Dictionary[String, int]:
+## Extra share of coins every run brings home, from the plushies living in town (spec 03 §7).
+func coin_bonus() -> float:
+	return town.plushies_in_town() * PLUSHIE_RULES.coin_bonus_per_plushie
+
+
+## Takes `share` of the finished run's haul home (coins plus `bonus`) and saves. Returns what
+## was kept.
+func _bank_run(share: float, bonus: float) -> Dictionary[String, int]:
 	var kept: Dictionary[String, int] = {}
 	var run: Run = current_screen as Run
 	if run != null:
-		kept = run.haul.kept(share)
-		town.bank(run.haul, share)
+		kept = run.haul.kept(share, bonus)
+		town.bank(run.haul, share, bonus)
 	town.unfinished_run = {}
 	SaveStore.write(town)
 	return kept
