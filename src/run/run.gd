@@ -215,8 +215,10 @@ func spawn_player(index: int, at: Vector2) -> Player:
 	var player: Player = PLAYER_SCENE.instantiate()
 	player.player_index = index
 	player.position = at
-	player.card_controls = CardControls.new(upgrade_pool)
+	player.card_controls = CardControls.new(upgrade_pool, perks.extra_card_uses)
 	player.starting_weapon = perks.starting_weapon(upgrade_pool, player.stats.starting_weapon)
+	player.bonus_max_health = perks.max_health_bonus
+	player.bonus_pickup_share = perks.pickup_range_bonus
 	player.died.connect(_on_player_died)
 	player.hurt.connect(_on_player_hurt)
 	player.dashed.connect(func(_from: Vector2, _direction: Vector2) -> void: Sfx.play(&"dash"))

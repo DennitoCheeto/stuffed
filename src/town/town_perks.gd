@@ -10,6 +10,12 @@ var locked_weapons: Array[StringName] = []
 var can_choose_start_weapon: bool = false
 ## The chosen starting weapon (an upgrade pool id; "" = Banane's own).
 var start_weapon: StringName = &""
+## Extra rerolls, skips and banishes per run (Lucky Jar).
+var extra_card_uses: int = 0
+## Extra pickup range as a share of the hero's own (0.2 = +20%, Watchtower).
+var pickup_range_bonus: float = 0.0
+## Extra max health (Snack Bar).
+var max_health_bonus: float = 0.0
 
 
 ## The perks of the town in `save`, with the buildings standing on the spots of `layout`.
@@ -20,6 +26,11 @@ static func from_save(save: TownSave, layout: TownLayout) -> TownPerks:
 		perks.locked_weapons.append_array(spot.building.locked_weapons_at(level))
 		if spot.building.chooses_start_weapon(level):
 			perks.can_choose_start_weapon = true
+		var reached: BuildingLevel = spot.building.reached(level)
+		if reached != null:
+			perks.extra_card_uses += reached.extra_card_uses
+			perks.pickup_range_bonus += reached.pickup_range_bonus
+			perks.max_health_bonus += reached.max_health_bonus
 	var chosen: StringName = StringName(save.start_weapon)
 	if perks.can_choose_start_weapon and not perks.locked_weapons.has(chosen):
 		perks.start_weapon = chosen

@@ -13,6 +13,13 @@ extends Resource
 @export var unlocks_weapons: Array[StringName] = []
 ## From this level on, the player can choose Banane's starting weapon (Toy Box Armory Lv 3).
 @export var start_weapon_choice: bool = false
+## Extra rerolls, skips and banishes per run at this level, in total (Lucky Jar).
+@export var extra_card_uses: int = 0
+## Extra pickup range at this level, in total, as a share of the hero's own (0.2 = +20%,
+## Watchtower).
+@export var pickup_range_bonus: float = 0.0
+## Extra max health at this level, in total (Snack Bar).
+@export var max_health_bonus: float = 0.0
 
 
 ## Material id -> amount, only the materials this level needs.

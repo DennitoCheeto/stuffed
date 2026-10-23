@@ -9,6 +9,7 @@ coins = 200
 stuffing = 0
 thread = 0
 effect = "+1 reroll, skip and banish per run"
+extra_card_uses = 1
 
 [sub_resource type="Resource" id="Resource_level_2"]
 script = ExtResource("2_level")
@@ -16,6 +17,7 @@ coins = 600
 stuffing = 15
 thread = 0
 effect = "+2 rerolls, skips and banishes per run"
+extra_card_uses = 2
 
 [sub_resource type="Resource" id="Resource_level_3"]
 script = ExtResource("2_level")
@@ -23,6 +25,7 @@ coins = 1200
 stuffing = 30
 thread = 6
 effect = "+3 rerolls, skips and banishes per run"
+extra_card_uses = 3
 
 [resource]
 script = ExtResource("1_def")
