@@ -1,10 +1,10 @@
 class_name Town
 extends Node2D
 ## The Pillow Fort (spec 03 §5, §6): a small walkable town between runs. The fort in the middle
-## has the Bedroom door (E starts a run), next to it the Scrapbook stand, and 6 building spots
-## around it that start as ruins. Walk up to one and press E to rebuild or upgrade it. Players
-## walk like in a run (no zombies, no weapons); the camera follows. Anyone can rebuild (the
-## jars are shared).
+## has the Bedroom door (E starts a run), next to it the Scrapbook stand (E opens the book), and
+## 6 building spots around it that start as ruins. Walk up to one and press E to rebuild or
+## upgrade it. Players walk like in a run (no zombies, no weapons); the camera follows. Anyone
+## can rebuild (the jars are shared).
 
 ## A player pressed E at the Bedroom door: Main starts a run.
 signal bedroom_requested
@@ -60,6 +60,8 @@ var menu: TownMenu = TownMenu.new()
 var picker: StartWeaponPicker = StartWeaponPicker.new()
 ## "New weapons for your cards!" when an Armory level adds weapons.
 var unlock_toast: WeaponUnlockToast = WeaponUnlockToast.new()
+## The Scrapbook, opened (E at its stand).
+var book: ScrapbookBook = ScrapbookBook.new()
 
 ## Set once the Bedroom door was used (one press = one run).
 var _leaving: bool = false
@@ -115,6 +117,8 @@ func _ready() -> void:
 	add_child(picker)
 	picker.chosen.connect(_on_start_weapon_chosen)
 	picker.closed.connect(func() -> void: process_mode = Node.PROCESS_MODE_INHERIT)
+	add_child(book)
+	book.closed.connect(func() -> void: process_mode = Node.PROCESS_MODE_INHERIT)
 
 
 func _physics_process(delta: float) -> void:
@@ -127,7 +131,9 @@ func _physics_process(delta: float) -> void:
 			if pressed:
 				enter_bedroom()
 		elif is_at_scrapbook(player):
-			prompt = "Scrapbook: coming soon"
+			prompt = "E   Open the Scrapbook"
+			if pressed:
+				open_scrapbook()
 		else:
 			var building: TownBuilding = building_near(player)
 			if building == null:
@@ -257,6 +263,12 @@ func perks() -> TownPerks:
 func start_weapon_id() -> StringName:
 	var hero: Player = Players.all(get_tree())[0]
 	return perks().starting_weapon(UPGRADE_POOL, hero.stats.starting_weapon).id
+
+
+## Opens the Scrapbook; the town waits until it closes.
+func open_scrapbook() -> void:
+	process_mode = Node.PROCESS_MODE_DISABLED
+	book.open(save)
 
 
 ## Shows the starting weapon choice; the town waits until it closes.

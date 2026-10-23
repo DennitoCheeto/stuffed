@@ -7,6 +7,8 @@ extends Node
 ## Weapons ask it for zombies near a point and deal damage through it.
 ## Zombies live under the `actors` node, which sits at the world origin.
 
+## A zombie (or boss) was added to the run.
+signal zombie_added(zombie: Zombie)
 signal zombie_killed(zombie: Zombie)
 ## A zombie took damage (damage numbers, hit sound).
 signal zombie_hit(zombie: Zombie, amount: float)
@@ -119,6 +121,7 @@ func _add(stats: EnemyStats, at: Vector2, elite: EliteRules, boss: BossDef) -> Z
 	actors.add_child(zombie)
 	zombies.append(zombie)
 	_grid.insert(zombie, at)
+	zombie_added.emit(zombie)
 	return zombie
 
 

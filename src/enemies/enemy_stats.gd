@@ -6,6 +6,8 @@ enum Look { SHAMBLER, RUNNER, FROG, PIG, ELEPHANT, SOCK_KING }
 enum XpSize { SMALL, MEDIUM, BIG }
 
 @export var display_name: String = "Zombie"
+## What the Scrapbook says about it (spec 03 §8).
+@export_multiline var scrapbook_text: String = ""
 ## Which felt puppet is drawn.
 @export var look: Look = Look.SHAMBLER
 @export var max_health: float = 10.0

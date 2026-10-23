@@ -5,6 +5,7 @@
 [resource]
 script = ExtResource("1_stats")
 display_name = "Runner"
+scrapbook_text = "Fast and fragile. Keep moving or it catches you."
 look = 1
 max_health = 5.0
 move_speed = 125.0

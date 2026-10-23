@@ -153,6 +153,7 @@ func _ready() -> void:
 	enemies.setup(actors, effects, arena.play_rect(), rules.max_enemies_alive, furniture)
 	projectiles.setup(enemies, arena.play_rect(), furniture)
 	enemies.projectiles = projectiles
+	enemies.zombie_added.connect(_on_zombie_added)
 	enemies.zombie_killed.connect(_on_zombie_killed)
 	enemies.zombie_hit.connect(_on_zombie_hit)
 	enemies.zombie_winding_up.connect(func(_zombie: Zombie) -> void: Sfx.play(&"puff"))
@@ -243,9 +244,25 @@ func spawn_player(index: int, at: Vector2) -> Player:
 	player.dashed.connect(func(_from: Vector2, _direction: Vector2) -> void: Sfx.play(&"dash"))
 	player.celebrated.connect(func() -> void: Sfx.play(&"quack"))
 	player.evolved.connect(_on_player_evolved.bind(player))
+	player.loadout_changed.connect(_note_loadout.bind(player))
 	actors.add_child(player)
 	player.progress.leveled_up.connect(_on_leveled_up.bind(player))
 	return player
+
+
+## The Scrapbook (spec 03 §8) gets every weapon (evolutions too) and item a hero owns.
+func _note_loadout(player: Player) -> void:
+	for owned: Weapon in player.weapons():
+		haul.see(ScrapbookRules.WEAPONS, String(owned.stats.id))
+	for id: StringName in player.item_levels:
+		haul.see(ScrapbookRules.ITEMS, String(id))
+
+
+## The Scrapbook gets every zombie type that showed up (an elite also counts as its type).
+func _on_zombie_added(zombie: Zombie) -> void:
+	if zombie.is_elite():
+		haul.see(ScrapbookRules.ENEMIES, ScrapbookRules.ELITE_ID)
+	haul.see(ScrapbookRules.ENEMIES, ScrapbookRules.enemy_id(zombie.stats))
 
 
 ## Stops everything in the run (zombies, timer, players) until every reason is lifted.
@@ -789,6 +806,7 @@ func _on_floor_pickup_touched(pickup: FloorPickup, player: Player) -> void:
 		"name": kind.display_name, "time": elapsed, "player": player.player_index
 	}
 	floor_pickup_log.append(entry)
+	haul.see(ScrapbookRules.FLOOR_PICKUPS, String(kind.id))
 	match kind.id:
 		&"magnet":
 			pickups.attract_all(player)

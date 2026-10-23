@@ -5,6 +5,7 @@
 [resource]
 script = ExtResource("1_stats")
 display_name = "Shambler"
+scrapbook_text = "Slow and soft, but never alone. The basic horde."
 look = 0
 max_health = 10.0
 move_speed = 45.0

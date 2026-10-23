@@ -1,8 +1,8 @@
 class_name TitleScreen
 extends Control
 ## The first screen: "Stuffed", Continue (or New game the first time) and Quit. Continue and
-## New game open the town. Works with mouse and keyboard. With a saved town it also offers
-## "Start over", which asks twice before the town is deleted.
+## New game open the town. Works with mouse and keyboard. With a saved town it also offers the
+## Scrapbook (spec 03 §8) and "Start over", which asks twice before the town is deleted.
 
 signal start_requested
 signal quit_requested
@@ -16,6 +16,11 @@ const ASKS: PackedStringArray = [
 
 ## Main sets this before the screen is shown: a saved town exists.
 var has_save: bool = false
+## Main sets this too: the saved town (what the Scrapbook shows).
+var save: TownSave = TownSave.new()
+## Opens the Scrapbook (only with a saved town).
+var scrapbook_button: Button
+var book: ScrapbookBook = ScrapbookBook.new()
 var start_over_button: Button
 ## The confirm box (question + Yes / No), hidden until "Start over" is pressed.
 var confirm_box: VBoxContainer
@@ -36,6 +41,7 @@ func _ready() -> void:
 	start_button.text = start_text()
 	# Built first: the copies of the Quit button must not carry its connection.
 	_build_start_over()
+	_build_scrapbook()
 	start_button.pressed.connect(start_requested.emit)
 	quit_button.pressed.connect(quit_requested.emit)
 	start_button.grab_focus()
@@ -60,6 +66,7 @@ func _on_yes() -> void:
 	_close_confirm()
 	has_save = false
 	start_over_button.visible = false
+	scrapbook_button.visible = false
 	start_button.text = start_text()
 	start_over_requested.emit()
 
@@ -113,3 +120,27 @@ func _build_start_over() -> void:
 	no_button.text = "No, keep my town"
 	confirm_box.add_child(no_button)
 	no_button.pressed.connect(_close_confirm)
+
+
+## Opens the Scrapbook over the title; the menu comes back when it closes.
+func open_scrapbook() -> void:
+	start_button.get_parent().visible = false
+	book.open(save)
+
+
+func _on_book_closed() -> void:
+	start_button.get_parent().visible = true
+	scrapbook_button.grab_focus()
+
+
+## A "Scrapbook" button between Continue and Quit (with a saved town).
+func _build_scrapbook() -> void:
+	var menu: Control = start_button.get_parent()
+	scrapbook_button = quit_button.duplicate() as Button
+	scrapbook_button.text = "Scrapbook"
+	scrapbook_button.visible = has_save
+	menu.add_child(scrapbook_button)
+	menu.move_child(scrapbook_button, quit_button.get_index())
+	scrapbook_button.pressed.connect(open_scrapbook)
+	add_child(book)
+	book.closed.connect(_on_book_closed)

@@ -6,6 +6,7 @@
 script = ExtResource("1_def")
 id = "robbar"
 display_name = "Robbar"
+scrapbook_text = "A smol chonky seal. Mostly naps, sometimes wiggles."
 shape = 3
 body_color = Color(0.79, 0.81, 0.83, 1)
 accent_color = Color(0.95, 0.95, 0.94, 1)

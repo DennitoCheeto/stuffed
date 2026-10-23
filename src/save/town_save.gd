@@ -4,8 +4,9 @@ extends RefCounted
 ## levels, plushies, Scrapbook, run count and a run that was still going when the game closed.
 ## Written to disk by SaveStore. Unlocks (weapons, rerolls, ...) follow from the building levels.
 
-## Bump when the meaning of a field changes; from_dict upgrades older saves.
-const VERSION: int = 2
+## Bump when the meaning of a field changes; from_dict upgrades older saves. Version 3: the
+## Scrapbook also lists plushies rescued before it existed.
+const VERSION: int = 3
 ## Plushie ids of the placeholder plushies (version 1) -> the real plushies that replaced them.
 const OLD_PLUSHIE_IDS: Dictionary[String, String] = {
 	"kitty": "pip",
@@ -98,13 +99,18 @@ func waiting_plushies() -> PackedStringArray:
 
 
 ## Adds `share` of a run's haul to the jars (rounded up; coins get `coin_bonus` more, from
-## plushies in town) and takes in its freed plushie.
+## plushies in town), takes in its freed plushie and puts all it found into the Scrapbook.
 func bank(haul: RunHaul, share: float, coin_bonus: float = 0.0) -> void:
 	var kept: Dictionary[String, int] = haul.kept(share, coin_bonus)
 	for id: String in kept:
 		materials[id] = material(id) + kept[id]
-	if not haul.rescued.is_empty() and not plushies.has(haul.rescued):
-		plushies[haul.rescued] = "waiting"
+	if not haul.rescued.is_empty():
+		mark_seen(ScrapbookRules.PLUSHIES, haul.rescued)
+		if not plushies.has(haul.rescued):
+			plushies[haul.rescued] = "waiting"
+	for page: String in haul.seen:
+		for id: String in haul.seen[page]:
+			mark_seen(page, id)
 
 
 ## A run that never finished (the game closed) counts as given up: `share` of it is banked.
@@ -118,26 +124,52 @@ func settle_unfinished_run(share: float, coin_bonus: float = 0.0) -> bool:
 
 
 func mark_seen(page: String, id: String) -> void:
-	var ids: PackedStringArray = seen.get(page, PackedStringArray())
-	if not ids.has(id):
-		ids.append(id)
-	seen[page] = ids
+	add_seen(seen, page, id)
 
 
 func has_seen(page: String, id: String) -> bool:
 	return seen.has(page) and seen[page].has(id)
 
 
+## Adds `id` to Scrapbook page `page` in `pages` (page -> ids), once.
+static func add_seen(
+	pages: Dictionary[String, PackedStringArray], page: String, id: String
+) -> void:
+	var ids: PackedStringArray = pages.get(page, PackedStringArray())
+	if ids.has(id):
+		return
+	ids.append(id)
+	pages[page] = ids
+
+
+## Scrapbook pages (page -> ids) as plain arrays for JSON.
+static func pages_to_dict(pages: Dictionary[String, PackedStringArray]) -> Dictionary:
+	var result: Dictionary = {}
+	for page: String in pages:
+		result[page] = Array(pages[page])
+	return result
+
+
+## Reads Scrapbook pages saved by `pages_to_dict` (nothing if it's missing or broken).
+static func pages_from(value: Variant) -> Dictionary[String, PackedStringArray]:
+	var result: Dictionary[String, PackedStringArray] = {}
+	if not value is Dictionary:
+		return result
+	var saved: Dictionary = value as Dictionary
+	for key: Variant in saved:
+		var ids: Variant = saved[key]
+		if ids is Array:
+			result[str(key)] = PackedStringArray(ids as Array)
+	return result
+
+
 func to_dict() -> Dictionary:
-	var pages: Dictionary = {}
-	for page: String in seen:
-		pages[page] = Array(seen[page])
 	return {
 		"version": VERSION,
 		"materials": materials.duplicate(),
 		"building_levels": building_levels.duplicate(),
 		"plushies": plushies.duplicate(),
-		"seen": pages,
+		"seen": pages_to_dict(seen),
 		"revealed": Array(revealed),
 		"runs_started": runs_started,
 		"start_weapon": start_weapon,
@@ -152,14 +184,16 @@ static func from_dict(data: Dictionary) -> TownSave:
 		save.materials[key] = int(data["materials"][key])
 	for key: String in _dict(data, "building_levels"):
 		save.building_levels[key] = int(data["building_levels"][key])
-	var old: bool = int(data.get("version", VERSION)) < 2
+	var version: int = int(data.get("version", VERSION))
+	var old: bool = version < 2
 	for key: String in _dict(data, "plushies"):
 		var id: String = OLD_PLUSHIE_IDS.get(key, key) if old else key
 		save.plushies[id] = str(data["plushies"][key])
-	for key: String in _dict(data, "seen"):
-		var ids: Variant = data["seen"][key]
-		if ids is Array:
-			save.seen[key] = PackedStringArray(ids as Array)
+	save.seen = pages_from(data.get("seen", {}))
+	if version < 3:
+		# Plushies rescued before the Scrapbook existed are in the book too.
+		for id: String in save.plushies:
+			save.mark_seen(ScrapbookRules.PLUSHIES, id)
 	var shown: Variant = data.get("revealed", [])
 	if shown is Array:
 		save.revealed = PackedStringArray(shown as Array)

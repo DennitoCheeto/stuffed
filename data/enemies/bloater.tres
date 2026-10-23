@@ -12,6 +12,7 @@ damage = 6.0
 [resource]
 script = ExtResource("1_stats")
 display_name = "Bloater"
+scrapbook_text = "Bursts into a stinky cloud when it pops. Don't stand in it."
 look = 3
 max_health = 14.0
 move_speed = 36.0

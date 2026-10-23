@@ -5,6 +5,7 @@
 [resource]
 script = ExtResource("1_stats")
 display_name = "Tank"
+scrapbook_text = "Big, slow and tough. Hits hard and barely gets pushed back."
 look = 4
 max_health = 70.0
 move_speed = 28.0
