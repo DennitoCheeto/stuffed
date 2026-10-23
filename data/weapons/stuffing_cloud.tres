@@ -72,6 +72,7 @@ card_text = "Even bigger cloud, and damage 5 → 6."
 [resource]
 script = ExtResource("1_stats")
 sound = &"fluff"
+sound_gap = 1.5
 id = &"stuffing_cloud"
 display_name = "Stuffing Cloud"
 behaviour = ExtResource("3_behaviour")

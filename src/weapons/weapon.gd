@@ -17,6 +17,8 @@ var player: Player
 var _cooldown_left: float = FIRST_ATTACK_DELAY
 var _current: WeaponLevel
 var _current_key: Vector2i = Vector2i(-1, -1)
+## Seconds until this weapon may play its sound again (`WeaponStats.sound_gap`).
+var _sound_wait: float = 0.0
 
 
 func setup(weapon_stats: WeaponStats, owner_player: Player) -> void:
@@ -64,13 +66,15 @@ func projectiles() -> ProjectileManager:
 func _physics_process(delta: float) -> void:
 	if player == null or player.is_dead():
 		return
+	_sound_wait -= delta
 	_cooldown_left -= delta * player.attack_speed
 	if _cooldown_left > 0.0:
 		return
 	if attack():
 		_cooldown_left = current().cooldown
-		if stats.sound != &"":
+		if stats.sound != &"" and _sound_wait <= 0.0:
 			Sfx.play(stats.sound, stats.sound_pitch)
+			_sound_wait = stats.sound_gap
 		fired.emit()
 	else:
 		_cooldown_left = RETRY_DELAY

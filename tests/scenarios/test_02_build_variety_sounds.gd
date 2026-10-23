@@ -74,6 +74,21 @@ func test_every_weapon_plays_its_own_sound_when_it_attacks() -> void:
 	assert_eq(silent, PackedStringArray(), "weapons without their sound")
 
 
+func test_the_stuffing_cloud_puffs_often_but_its_sound_comes_rarely() -> void:
+	await _quiet_run()
+	var banane: Player = first_player()
+	_tough_zombie(banane.global_position + Vector2(50, 0))
+	var cloud: WeaponStats = load(WEAPONS_DIR + "stuffing_cloud.tres")
+	assert_gt(cloud.sound_gap, 1.0, "a gap in data")
+	var weapon: Weapon = banane.add_weapon(cloud)
+	var shots: Array[bool] = []
+	weapon.fired.connect(func() -> void: shots.append(true))
+	Sfx.history.clear()
+	await wait_seconds(3.2)
+	assert_gt(shots.size(), 5, "it attacks several times a second")
+	assert_between(Sfx.history.count(&"fluff"), 1, 3, "but its sound plays at most every 1.5 s")
+
+
 func test_an_elite_arriving_has_its_own_sound() -> void:
 	await _quiet_run()
 	run.spawner.spawn_elite(SHAMBLER)

@@ -25,6 +25,9 @@ extends Resource
 ## Sound of one attack (a name in SfxBank) and its pitch (1 = as made).
 @export var sound: StringName = &""
 @export var sound_pitch: float = 1.0
+## At least this many seconds between two of its sounds (0 = every attack). For weapons that
+## attack very often, like the Stuffing Cloud, so they don't get tiring.
+@export var sound_gap: float = 0.0
 ## Level 1 first.
 @export var levels: Array[WeaponLevel] = []
 

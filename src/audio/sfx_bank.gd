@@ -303,10 +303,11 @@ static func _needles(t: float) -> float:
 	return 0.11 * value
 
 
-## Stuffing Cloud: a soft breath of fluff ("fffh"), the quietest weapon (it puffs often).
+## Stuffing Cloud: a soft, low breath of fluff ("fffh"), the quietest weapon (it puffs often, so
+## it only sounds every `sound_gap` seconds).
 static func _fluff(t: float) -> float:
-	var breath: float = Synth.noise(t) * Synth.sine(Synth.sweep(t, 300.0, 120.0, 0.35))
-	return 0.16 * breath * sin(PI * minf(t / 0.35, 1.0))
+	var breath: float = Synth.noise(t) * Synth.sine(Synth.sweep(t, 220.0, 90.0, 0.35))
+	return 0.12 * breath * sin(PI * minf(t / 0.35, 1.0))
 
 
 ## Pincushion Volley (evolved): three pins at once, a bright chord with a little ring.
