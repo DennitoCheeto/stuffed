@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="BuildingDef" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://src/town/building_def.gd" id="1_def"]
+[ext_resource type="Script" path="res://src/town/building_level.gd" id="2_level"]
+
+[sub_resource type="Resource" id="Resource_level_1"]
+script = ExtResource("2_level")
+coins = 120
+stuffing = 0
+thread = 0
+effect = "+2 weapons: Bouncy Yarn Ball, Thimble Mortar"
+
+[sub_resource type="Resource" id="Resource_level_2"]
+script = ExtResource("2_level")
+coins = 350
+stuffing = 12
+thread = 0
+effect = "+2 more weapons: Thread Whip, Zipper Ray"
+
+[sub_resource type="Resource" id="Resource_level_3"]
+script = ExtResource("2_level")
+coins = 700
+stuffing = 25
+thread = 6
+effect = "Choose Banane's starting weapon"
+
+[resource]
+script = ExtResource("1_def")
+id = &"toy_box_armory"
+display_name = "Toy Box Armory"
+summary = "More weapons for your level-up cards"
+levels = Array[ExtResource("2_level")]([SubResource("Resource_level_1"), SubResource("Resource_level_2"), SubResource("Resource_level_3")])
+wall_color = Color(0.79, 0.71, 0.89, 1)
+roof_color = Color(0.49, 0.42, 0.66, 1)

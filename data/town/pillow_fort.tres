@@ -1,12 +1,18 @@
-[gd_resource type="Resource" script_class="TownLayout" load_steps=9 format=3]
+[gd_resource type="Resource" script_class="TownLayout" load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://src/town/town_layout.gd" id="1_layout"]
 [ext_resource type="Script" path="res://src/town/town_spot.gd" id="2_spot"]
+[ext_resource type="Resource" path="res://data/town/buildings/toy_box_armory.tres" id="3_armory"]
+[ext_resource type="Resource" path="res://data/town/buildings/lucky_jar.tres" id="4_lucky_jar"]
+[ext_resource type="Resource" path="res://data/town/buildings/watchtower.tres" id="5_watchtower"]
+[ext_resource type="Resource" path="res://data/town/buildings/snack_bar.tres" id="6_snack_bar"]
+[ext_resource type="Resource" path="res://data/town/buildings/party_shop.tres" id="7_party_shop"]
+[ext_resource type="Resource" path="res://data/town/buildings/plush_hospital.tres" id="8_hospital"]
 
 [sub_resource type="Resource" id="Resource_armory"]
 script = ExtResource("2_spot")
 id = &"toy_box_armory"
-display_name = "Toy Box Armory"
+building = ExtResource("3_armory")
 rect = Rect2(590, 750, 260, 180)
 needs_rebuilds = 0
 needs_rescue = false
@@ -14,7 +20,7 @@ needs_rescue = false
 [sub_resource type="Resource" id="Resource_lucky_jar"]
 script = ExtResource("2_spot")
 id = &"lucky_jar"
-display_name = "Lucky Jar"
+building = ExtResource("4_lucky_jar")
 rect = Rect2(2030, 750, 260, 180)
 needs_rebuilds = 0
 needs_rescue = false
@@ -22,7 +28,7 @@ needs_rescue = false
 [sub_resource type="Resource" id="Resource_watchtower"]
 script = ExtResource("2_spot")
 id = &"watchtower"
-display_name = "Watchtower"
+building = ExtResource("5_watchtower")
 rect = Rect2(850, 290, 260, 180)
 needs_rebuilds = 1
 needs_rescue = false
@@ -30,7 +36,7 @@ needs_rescue = false
 [sub_resource type="Resource" id="Resource_snack_bar"]
 script = ExtResource("2_spot")
 id = &"snack_bar"
-display_name = "Snack Bar"
+building = ExtResource("6_snack_bar")
 rect = Rect2(1770, 290, 260, 180)
 needs_rebuilds = 1
 needs_rescue = false
@@ -38,7 +44,7 @@ needs_rescue = false
 [sub_resource type="Resource" id="Resource_party_shop"]
 script = ExtResource("2_spot")
 id = &"party_shop"
-display_name = "Party Shop"
+building = ExtResource("7_party_shop")
 rect = Rect2(850, 1310, 260, 180)
 needs_rebuilds = 3
 needs_rescue = false
@@ -46,7 +52,7 @@ needs_rescue = false
 [sub_resource type="Resource" id="Resource_hospital"]
 script = ExtResource("2_spot")
 id = &"plush_hospital"
-display_name = "Plush Hospital"
+building = ExtResource("8_hospital")
 rect = Rect2(1770, 1310, 260, 180)
 needs_rebuilds = 0
 needs_rescue = true
@@ -61,6 +67,7 @@ scrapbook_rect = Rect2(1760, 940, 140, 90)
 reach = 90.0
 spawn_position = Vector2(1440, 1075)
 spawn_spacing = 90.0
+fort_piece_every = 3
 spots = Array[ExtResource("2_spot")]([SubResource("Resource_armory"), SubResource("Resource_lucky_jar"), SubResource("Resource_watchtower"), SubResource("Resource_snack_bar"), SubResource("Resource_party_shop"), SubResource("Resource_hospital")])
 cushions = PackedVector2Array(330, 320, 2560, 1520, 420, 1560, 1440, 1600)
 block_piles = PackedVector2Array(2600, 320, 260, 1050)
