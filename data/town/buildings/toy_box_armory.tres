@@ -5,23 +5,23 @@
 
 [sub_resource type="Resource" id="Resource_level_1"]
 script = ExtResource("2_level")
-coins = 120
+coins = 250
 stuffing = 0
 thread = 0
 effect = "+2 weapons: Bouncy Yarn Ball, Thimble Mortar"
 
 [sub_resource type="Resource" id="Resource_level_2"]
 script = ExtResource("2_level")
-coins = 350
-stuffing = 12
+coins = 700
+stuffing = 15
 thread = 0
 effect = "+2 more weapons: Thread Whip, Zipper Ray"
 
 [sub_resource type="Resource" id="Resource_level_3"]
 script = ExtResource("2_level")
-coins = 700
-stuffing = 25
-thread = 6
+coins = 1400
+stuffing = 30
+thread = 8
 effect = "Choose Banane's starting weapon"
 
 [resource]

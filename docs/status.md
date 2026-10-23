@@ -33,7 +33,8 @@ _Last updated: 2026-10-23 (M3-05 ruins and rebuilding)_
   palette, more props/details), after M3 unless the PO wants it sooner.
 - M3-05 quick check (PO, 2026-10-23): rebuilding "feels really good". First run brought home ~1.2k coins and
   bought several buildings at once (prices assumed ~150 per short run). Re-check the economy in the M3 playtest
-  (P-12, P-16); prices live in `data/town/buildings/*.tres`.
+  (P-12, P-16); prices live in `data/town/buildings/*.tres`. PO asked "prices up": raised ~2-2.5x (PR #113),
+  cheapest rebuild now 200 coins, all 6 at level 3 ≈ 17k coins.
 
 ## Playtest notes (M2, first round)
 
