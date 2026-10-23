@@ -21,7 +21,7 @@ func test_the_town_has_the_6_buildings_of_the_spec() -> void:
 	var ids: Array[StringName] = []
 	for spot: TownSpot in LAYOUT.spots:
 		ids.append(spot.id)
-		assert_ne(spot.display_name, "", "%s has a name" % spot.id)
+		assert_ne(spot.display_name(), "", "%s has a name" % spot.id)
 	assert_eq(ids, SPEC_IDS)
 
 

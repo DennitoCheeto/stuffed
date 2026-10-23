@@ -15,6 +15,8 @@ var building_levels: Dictionary[String, int] = {}
 var plushies: Dictionary[String, String] = {}
 ## Scrapbook page -> ids seen on it (e.g. "weapons" -> ["peel_boomerang"]).
 var seen: Dictionary[String, PackedStringArray] = {}
+## Buildings whose "New building!" moment was shown (the yarn fell away).
+var revealed: PackedStringArray = []
 ## Runs started with this town (the first one is run 1).
 var runs_started: int = 0
 ## Banane's chosen starting weapon ("" = his own).
@@ -38,6 +40,36 @@ func rebuilt_count() -> int:
 		if building_levels[id] > 0:
 			count += 1
 	return count
+
+
+## Rebuilds and upgrades done so far (the sum of all building levels).
+func total_levels() -> int:
+	var total: int = 0
+	for id: String in building_levels:
+		total += building_levels[id]
+	return total
+
+
+## Material id -> how much is still missing to pay `cost` (empty = the jars hold enough).
+func missing(cost: Dictionary[String, int]) -> Dictionary[String, int]:
+	var result: Dictionary[String, int] = {}
+	for id: String in cost:
+		if material(id) < cost[id]:
+			result[id] = cost[id] - material(id)
+	return result
+
+
+func can_afford(cost: Dictionary[String, int]) -> bool:
+	return missing(cost).is_empty()
+
+
+## Takes `cost` out of the jars. Does nothing and returns false if they don't hold enough.
+func spend(cost: Dictionary[String, int]) -> bool:
+	if not can_afford(cost):
+		return false
+	for id: String in cost:
+		materials[id] = material(id) - cost[id]
+	return true
 
 
 ## Adds `share` of a run's haul to the jars (rounded up) and takes in its freed plushie.
@@ -80,6 +112,7 @@ func to_dict() -> Dictionary:
 		"building_levels": building_levels.duplicate(),
 		"plushies": plushies.duplicate(),
 		"seen": pages,
+		"revealed": Array(revealed),
 		"runs_started": runs_started,
 		"start_weapon": start_weapon,
 		"unfinished_run": unfinished_run.duplicate(true),
@@ -99,6 +132,9 @@ static func from_dict(data: Dictionary) -> TownSave:
 		var ids: Variant = data["seen"][key]
 		if ids is Array:
 			save.seen[key] = PackedStringArray(ids as Array)
+	var shown: Variant = data.get("revealed", [])
+	if shown is Array:
+		save.revealed = PackedStringArray(shown as Array)
 	save.runs_started = int(data.get("runs_started", 0))
 	save.start_weapon = str(data.get("start_weapon", ""))
 	var unfinished: Variant = data.get("unfinished_run", {})

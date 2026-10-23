@@ -65,15 +65,15 @@ func test_ac37_new_game_opens_the_town_with_fort_door_scrapbook_and_6_ruins() ->
 	assert_not_null(town.fort, "the fort in the middle")
 	assert_true(town.layout.fort_rect.encloses(town.layout.door_rect), "the door is in the fort")
 	assert_not_null(town.scrapbook, "the Scrapbook stand")
-	assert_eq(town.ruins.size(), 6, "6 ruins")
+	assert_eq(town.buildings.size(), 6, "6 ruins")
 	var open_ids: Array[StringName] = []
-	for ruin: TownRuin in town.open_ruins():
+	for ruin: TownBuilding in town.open_buildings():
 		open_ids.append(ruin.spot.id)
 	open_ids.sort()
 	var expected: Array[StringName] = OPEN_FROM_START.duplicate()
 	expected.sort()
 	assert_eq(open_ids, expected, "exactly the Armory and the Lucky Jar can be rebuilt")
-	assert_eq(town.ruins[&"watchtower"].status_label.text, "Rebuild 1 building first")
+	assert_eq(town.buildings[&"watchtower"].status_label.text, "Rebuild 1 building first")
 	assert_eq(main.music.track, &"town", "the town's own music")
 	assert_eq(first_player().weapons().size(), 0, "no weapons at home")
 

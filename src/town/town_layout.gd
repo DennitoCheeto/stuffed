@@ -20,6 +20,8 @@ extends Resource
 @export var spawn_position: Vector2 = Vector2(1440, 1075)
 ## Space between co-op players when they appear.
 @export var spawn_spacing: float = 90.0
+## The fort gets a new piece (flag, lights, ...) after every this many rebuilds/upgrades.
+@export var fort_piece_every: int = 3
 ## The 6 building spots around the fort.
 @export var spots: Array[TownSpot] = []
 ## Cozy props that don't block (drawn on the blanket).

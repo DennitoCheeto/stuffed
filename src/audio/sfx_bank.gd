@@ -46,6 +46,10 @@ const LENGTHS: Dictionary[StringName, float] = {
 	&"party_popper": 0.8,
 	# Town (spec 03).
 	&"way_home": 1.0,
+	&"rebuild": 0.9,
+	&"upgrade": 0.6,
+	&"new_building": 0.9,
+	&"nope": 0.25,
 }
 
 
@@ -114,6 +118,10 @@ static func _weapon_or_moment(sound: StringName) -> Callable:
 		&"ice_crack": _ice_crack,
 		&"party_popper": _party_popper,
 		&"way_home": _way_home,
+		&"rebuild": _rebuild,
+		&"upgrade": _upgrade,
+		&"new_building": _new_building,
+		&"nope": _nope,
 	}
 	return voices[sound]
 
@@ -458,3 +466,44 @@ static func _way_home(t: float) -> float:
 			chime += Synth.sine(Synth.midi_hz(notes[i]) * local) * exp(-4.0 * local)
 	var air: float = Synth.noise(t) * sin(PI * clampf(t / 1.0, 0.0, 1.0))
 	return 0.14 * chime + 0.05 * air
+
+
+## A ruin is rebuilt: a rustle while it shakes, then a big soft felt "fwump" and a warm chime.
+static func _rebuild(t: float) -> float:
+	var flutter: float = 0.5 * (1.0 + sin(TAU * 18.0 * t))
+	var rustle: float = Synth.noise(t) * flutter * clampf(t / 0.3, 0.0, 1.0)
+	if t < 0.32:
+		return 0.12 * rustle
+	var local: float = t - 0.32
+	var fwump: float = Synth.sine(Synth.sweep(local, 150.0, 55.0, 0.2)) * exp(-9.0 * local)
+	var air: float = Synth.noise(t) * exp(-18.0 * local)
+	var chime: float = 0.0
+	for note: float in [72.0, 79.0]:
+		chime += Synth.sine(Synth.midi_hz(note) * local) * exp(-6.0 * local)
+	return 0.45 * fwump + 0.12 * air + 0.07 * chime
+
+
+## A building gets a new level: a smaller "fwump" with a bright little ding.
+static func _upgrade(t: float) -> float:
+	var fwump: float = Synth.sine(Synth.sweep(t, 190.0, 80.0, 0.15)) * exp(-12.0 * t)
+	var ding: float = Synth.sine(Synth.midi_hz(84.0) * t) * exp(-7.0 * t) * minf(t / 0.01, 1.0)
+	return 0.35 * fwump + 0.08 * ding
+
+
+## The zombie yarn falls off a ruin ("New building!"): a soft unravel and a rising chime.
+static func _new_building(t: float) -> float:
+	var unravel: float = Synth.noise(t) * absf(sin(TAU * 9.0 * t)) * exp(-5.0 * t)
+	var chime: float = 0.0
+	var notes: PackedFloat32Array = [67.0, 71.0, 74.0, 79.0]
+	for i: int in notes.size():
+		var start: float = 0.15 + i * 0.1
+		if t >= start:
+			var local: float = t - start
+			chime += Synth.sine(Synth.midi_hz(notes[i]) * local) * exp(-5.0 * local)
+	return 0.08 * unravel + 0.13 * chime
+
+
+## Not enough in the jars: a short, soft low "bmm" (calm, not an alarm).
+static func _nope(t: float) -> float:
+	var tone: float = Synth.triangle(Synth.midi_hz(50.0) * t) * sin(PI * clampf(t / 0.25, 0.0, 1.0))
+	return 0.2 * tone

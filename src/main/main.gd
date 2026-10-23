@@ -59,6 +59,7 @@ func show_town() -> void:
 	pillow_fort.bedroom_requested.connect(start_run)
 	pillow_fort.title_requested.connect(show_title)
 	pillow_fort.quit_requested.connect(quit)
+	pillow_fort.changed.connect(save_now)
 	_switch_to(pillow_fort)
 
 

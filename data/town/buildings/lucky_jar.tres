@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="BuildingDef" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://src/town/building_def.gd" id="1_def"]
+[ext_resource type="Script" path="res://src/town/building_level.gd" id="2_level"]
+
+[sub_resource type="Resource" id="Resource_level_1"]
+script = ExtResource("2_level")
+coins = 100
+stuffing = 0
+thread = 0
+effect = "+1 reroll, skip and banish per run"
+
+[sub_resource type="Resource" id="Resource_level_2"]
+script = ExtResource("2_level")
+coins = 300
+stuffing = 10
+thread = 0
+effect = "+2 rerolls, skips and banishes per run"
+
+[sub_resource type="Resource" id="Resource_level_3"]
+script = ExtResource("2_level")
+coins = 600
+stuffing = 20
+thread = 5
+effect = "+3 rerolls, skips and banishes per run"
+
+[resource]
+script = ExtResource("1_def")
+id = &"lucky_jar"
+display_name = "Lucky Jar"
+summary = "More rerolls, skips and banishes"
+levels = Array[ExtResource("2_level")]([SubResource("Resource_level_1"), SubResource("Resource_level_2"), SubResource("Resource_level_3")])
+wall_color = Color(0.75, 0.88, 0.83, 1)
+roof_color = Color(0.37, 0.62, 0.55, 1)
