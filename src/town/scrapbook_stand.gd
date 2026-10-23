@@ -1,7 +1,7 @@
 class_name ScrapbookStand
 extends Node2D
-## A little stand with a big open book next to the fort: the Scrapbook (spec 03 §8). The book
-## itself opens in M3-11; for now walking up shows "coming soon".
+## A little stand with a big open book next to the fort: the Scrapbook (spec 03 §8). E next to it
+## opens the book (ScrapbookBook).
 
 const STAND_COLOR: Color = Color("#8a7660")
 const COVER_COLOR: Color = Color("#6f8fb8")

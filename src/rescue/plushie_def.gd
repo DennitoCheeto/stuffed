@@ -21,6 +21,8 @@ enum Shape {
 @export var id: String = ""
 ## The name tag, e.g. "Pip".
 @export var display_name: String = ""
+## What the Scrapbook says about them (spec 03 §8).
+@export_multiline var scrapbook_text: String = ""
 @export var shape: Shape = Shape.TEDDY
 @export var body_color: Color = Color("#d9c7b0")
 ## Muzzle, belly or face.

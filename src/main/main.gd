@@ -51,6 +51,7 @@ func show_title() -> void:
 	title.quit_requested.connect(quit)
 	title.start_over_requested.connect(start_over)
 	title.has_save = SaveStore.exists()
+	title.save = town
 	_switch_to(title)
 
 
@@ -115,11 +116,13 @@ func _play_music(track: StringName) -> void:
 	music.play_track(track)
 
 
-## Loads the saved town. A run the game closed during counts as given up (spec 03 §9).
+## Loads the saved town. A run the game closed during counts as given up (spec 03 §9). The
+## Recipes page remembers the evolutions in the saved Scrapbook.
 func load_town() -> void:
 	town = SaveStore.read()
 	if town.settle_unfinished_run(MATERIAL_RULES.keep_share_lost, coin_bonus()):
 		SaveStore.write(town)
+	RecipeBook.load_from(town)
 
 
 ## Saves the town now; a run that is still going is saved with its haul so far, so closing the
@@ -135,6 +138,7 @@ func save_now() -> void:
 func start_over() -> void:
 	SaveStore.delete_all()
 	town = TownSave.new()
+	RecipeBook.load_from(town)
 
 
 ## Extra share of coins every run brings home, from the plushies living in town (spec 03 §7).

@@ -21,6 +21,7 @@ bullet_lifetime = 6.0
 [resource]
 script = ExtResource("1_stats")
 display_name = "Spitter"
+scrapbook_text = "Keeps its distance, puffs up, then spits balls of stuffing at you."
 look = 2
 max_health = 8.0
 move_speed = 70.0

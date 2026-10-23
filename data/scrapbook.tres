@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="ScrapbookRules" load_steps=14 format=3]
+
+[ext_resource type="Script" path="res://src/scrapbook/scrapbook_rules.gd" id="1_rules"]
+[ext_resource type="Resource" path="res://data/upgrade_pool.tres" id="2_pool"]
+[ext_resource type="Script" path="res://src/enemies/enemy_stats.gd" id="3_stats"]
+[ext_resource type="Resource" path="res://data/enemies/shambler.tres" id="4_shambler"]
+[ext_resource type="Resource" path="res://data/enemies/runner.tres" id="5_runner"]
+[ext_resource type="Resource" path="res://data/enemies/spitter.tres" id="6_spitter"]
+[ext_resource type="Resource" path="res://data/enemies/bloater.tres" id="7_bloater"]
+[ext_resource type="Resource" path="res://data/enemies/tank.tres" id="8_tank"]
+[ext_resource type="Resource" path="res://data/elite_rules.tres" id="9_elite"]
+[ext_resource type="Script" path="res://src/enemies/boss_def.gd" id="10_boss"]
+[ext_resource type="Resource" path="res://data/bosses/big_ted.tres" id="11_ted"]
+[ext_resource type="Resource" path="res://data/bosses/sock_puppet_king.tres" id="12_king"]
+[ext_resource type="Resource" path="res://data/floor_pickup_rules.tres" id="13_pickups"]
+[ext_resource type="Resource" path="res://data/town/rescue_rules.tres" id="14_rescue"]
+
+[resource]
+script = ExtResource("1_rules")
+pool = ExtResource("2_pool")
+enemies = Array[ExtResource("3_stats")]([ExtResource("4_shambler"), ExtResource("5_runner"), ExtResource("6_spitter"), ExtResource("7_bloater"), ExtResource("8_tank")])
+elite_rules = ExtResource("9_elite")
+elite_body = ExtResource("4_shambler")
+elite_name = "Elite"
+elite_text = "Any zombie can come as an elite: bigger, much tougher, with a gold patch and a ring of shots. Drops a gift box."
+bosses = Array[ExtResource("10_boss")]([ExtResource("11_ted"), ExtResource("12_king")])
+floor_pickups = ExtResource("13_pickups")
+rescue = ExtResource("14_rescue")

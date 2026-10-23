@@ -8,6 +8,7 @@
 [sub_resource type="Resource" id="Resource_body"]
 script = ExtResource("2_stats")
 display_name = "Sock Puppet King"
+scrapbook_text = "The boss of the Bedroom. Spins spirals of stuffing, calls runners, and lunges once he's angry."
 look = 5
 max_health = 6000.0
 move_speed = 35.0

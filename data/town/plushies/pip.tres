@@ -6,6 +6,7 @@
 script = ExtResource("1_def")
 id = "pip"
 display_name = "Pip"
+scrapbook_text = "A round polar bear in a cozy scarf. Always ready for a cuddle."
 shape = 0
 body_color = Color(0.96, 0.95, 0.93, 1)
 accent_color = Color(0.96, 0.95, 0.93, 1)

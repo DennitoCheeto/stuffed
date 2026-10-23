@@ -6,6 +6,7 @@
 script = ExtResource("1_def")
 id = "bambam"
 display_name = "BamBam"
+scrapbook_text = "A long bear with a bowtie and a heart. Very proper, very soft."
 shape = 2
 body_color = Color(0.78, 0.65, 0.49, 1)
 accent_color = Color(0.96, 0.94, 0.9, 1)

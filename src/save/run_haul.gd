@@ -1,16 +1,24 @@
 class_name RunHaul
 extends RefCounted
-## What a run has collected for the town so far (spec 03 §3): materials and a freed plushie.
-## Saved every few seconds while the run goes, so closing the game never loses it.
+## What a run has collected for the town so far (spec 03 §3): materials, a freed plushie and
+## what it found for the Scrapbook (§8). Saved every few seconds while the run goes, so closing
+## the game never loses it.
 
 ## Material id ("coins", "stuffing", "thread") -> amount collected in this run.
 var materials: Dictionary[String, int] = {}
 ## Id of the plushie freed in this run ("" = none).
 var rescued: String = ""
+## Scrapbook page -> ids seen in this run. All of it goes into the book, whatever share is kept.
+var seen: Dictionary[String, PackedStringArray] = {}
 
 
 func add(material: String, amount: int) -> void:
 	materials[material] = materials.get(material, 0) + amount
+
+
+## Notes `id` on Scrapbook page `page` (e.g. "enemies", "runner").
+func see(page: String, id: String) -> void:
+	TownSave.add_seen(seen, page, id)
 
 
 func amount(material: String) -> int:
@@ -28,7 +36,11 @@ func kept(share: float, coin_bonus: float = 0.0) -> Dictionary[String, int]:
 
 
 func to_dict() -> Dictionary:
-	return {"materials": materials.duplicate(), "rescued": rescued}
+	return {
+		"materials": materials.duplicate(),
+		"rescued": rescued,
+		"seen": TownSave.pages_to_dict(seen),
+	}
 
 
 static func from_dict(data: Dictionary) -> RunHaul:
@@ -38,4 +50,5 @@ static func from_dict(data: Dictionary) -> RunHaul:
 		for key: Variant in saved:
 			haul.materials[str(key)] = int(saved[key])
 	haul.rescued = str(data.get("rescued", ""))
+	haul.seen = TownSave.pages_from(data.get("seen", {}))
 	return haul

@@ -10,6 +10,8 @@ extends Resource
 @export var banner: String = ""
 ## Small line under the banner that says what just happened.
 @export var banner_subtitle: String = ""
+## What the Scrapbook says about it (spec 03 §8).
+@export_multiline var scrapbook_text: String = ""
 ## How likely this kind is compared to the others (40 vs 30 = a bit more often).
 @export var weight: float = 1.0
 ## Sound from SfxBank played when it is grabbed.

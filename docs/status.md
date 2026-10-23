@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-23 (M3-10 Plush Hospital + plushies in town)_
+_Last updated: 2026-10-23 (M3-11 Scrapbook)_
 
 ## Where we are
 
@@ -15,7 +15,7 @@ _Last updated: 2026-10-23 (M3-10 Plush Hospital + plushies in town)_
 | M0 Factory setup | ✅ done (PR #1) |
 | M1 Core run | ✅ accepted 2026-10-21 (PRs #17–#29; playtest P-1 … P-6 passed, 144 fps on the PO's PC) |
 | M2 Build variety | ✅ built (not yet accepted): all 19 tickets merged (PRs #47–#49, #51–#55, #57, #58, #60, #61, #63, #67, #69, #77, #78, #80, #81); + spec 02b floor pickups approved (#83): M2-20 (PR #88), M2-21 (PR #89) and M2-22 (PR #90) merged; PO playtest postponed, played with M3 |
-| M3 Town | 🔨 spec 03 approved (PR #91); issues #92–#103; M3-01 save system (PR #105), M3-02 town + flow (PR #106), M3-03 materials (PR #107), M3-04 Way Home portal (PR #109), M3-05 rebuilding (PR #110), M3-06 Toy Box Armory (PR #114), M3-07 Lucky Jar + Watchtower + Snack Bar (PR #115), M3-08 Party Shop (PR #116), M3-09 rescue in the run (PR #117), M3-10 Plush Hospital + plushies in town |
+| M3 Town | 🔨 spec 03 approved (PR #91); issues #92–#103; M3-01 save system (PR #105), M3-02 town + flow (PR #106), M3-03 materials (PR #107), M3-04 Way Home portal (PR #109), M3-05 rebuilding (PR #110), M3-06 Toy Box Armory (PR #114), M3-07 Lucky Jar + Watchtower + Snack Bar (PR #115), M3-08 Party Shop (PR #116), M3-09 rescue in the run (PR #117), M3-10 Plush Hospital + plushies in town (PR #118), M3-11 Scrapbook |
 
 ## Next step
 
@@ -25,10 +25,11 @@ _Last updated: 2026-10-23 (M3-10 Plush Hospital + plushies in town)_
   "M3 — Town"). M3-01 #92 save system (PR #105) and M3-02 #93 town + title → town → run → "Brought home" flow (PR #106) done.
   M3-03 #94 materials in the run (PR #107), M3-04 #95 Way Home portal (PR #109) and M3-05 #96 ruins and
   rebuilding (PR #110) done. M3-06 #97 Toy Box Armory (PR #114), M3-07 #98 Lucky Jar + Watchtower + Snack Bar (PR #115), M3-08 #99
-  Party Shop (PR #116), M3-09 #100 rescue in the run (PR #117) and M3-10 #101 Plush Hospital + plushies in town done.
+  Party Shop (PR #116), M3-09 #100 rescue in the run (PR #117), M3-10 #101 Plush Hospital + plushies in town (PR #118) and M3-11
+  #102 Scrapbook done.
   The 4 plushies are the girlfriend's: Pip (round polar bear, scarf), Böbö (IKEA brown bear, **no photo yet**: drawn
   as the classic IKEA bear, ask the PO for one), BamBam (long bear, bowtie, heart), Robbar (smol seal).
-  Next: **M3-11** #102 (Scrapbook).
+  Next: **M3-12** #103 (co-op in town, developer menu incl. fill/clear the Scrapbook, town music + sounds).
 - M3 ACs are AC-37 … AC-48, playtest P-12 … P-17.
 - PO ideas for later: a skill / progress tree (own spec, after M3). **Visual pass** for the town and the Bedroom
   (PO, 2026-10-23): "everything is a tiny bit dark" and needs more cool details. Own short art spec (brighter
@@ -214,3 +215,11 @@ _Last updated: 2026-10-23 (M3-10 Plush Hospital + plushies in town)_
   build and on arrival), `town.plushies` (`TownPlushie`), `town.tent` (`PlushieTent`). Coin bonus: `main.coin_bonus()`
   → `RunHaul.kept(share, bonus)`. Save v2 renames the old placeholder ids (`TownSave.OLD_PLUSHIE_IDS`). Scenario
   tests put a plushie down with `town.spawn_plushie(def, at, true)` away from the door (random spots can wave).
+- Scrapbook (M3-11): pages are built from the game's own data by `ScrapbookRules` (`data/scrapbook.tres`: pool,
+  enemy types, elite, bosses, floor pickups, plushies), so a new weapon/enemy/pickup/plushie shows up by itself; it
+  needs a text (weapons: level-1 card text, items: card text, others: `scrapbook_text` in their `.tres`). Page ids
+  are `ScrapbookRules.WEAPONS` ...; enemy ids = `ScrapbookRules.enemy_id(stats)` (snake-case name), elites "elite".
+  The run notes finds in `run.haul.seen` (`haul.see(page, id)`: loadout, `enemies.zombie_added`, floor pickup
+  touch); `TownSave.bank` puts all of them in the book (any keep share). Save v3. `RecipeBook.load_from(save)` in
+  `Main.load_town`. UI: `ScrapbookBook` (`town.book`, `title.book`; `tile_for(id)`, `tabs`, `detail_*`,
+  Q/E turn pages), `ScrapbookPicture.is_silhouette()`.
