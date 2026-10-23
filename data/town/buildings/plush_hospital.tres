@@ -5,23 +5,23 @@
 
 [sub_resource type="Resource" id="Resource_level_1"]
 script = ExtResource("2_level")
-coins = 250
+coins = 500
 stuffing = 0
 thread = 0
 effect = "Room for 2 rescued plushies"
 
 [sub_resource type="Resource" id="Resource_level_2"]
 script = ExtResource("2_level")
-coins = 500
-stuffing = 15
+coins = 1000
+stuffing = 20
 thread = 0
 effect = "Room for 4 rescued plushies"
 
 [sub_resource type="Resource" id="Resource_level_3"]
 script = ExtResource("2_level")
-coins = 850
-stuffing = 30
-thread = 8
+coins = 1700
+stuffing = 40
+thread = 10
 effect = "Room for 6 rescued plushies"
 
 [resource]

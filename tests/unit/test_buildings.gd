@@ -3,8 +3,9 @@ extends GutTest
 
 const LAYOUT: TownLayout = preload("res://data/town/pillow_fort.tres")
 const BUILDINGS_DIR: String = "res://data/town/buildings/"
-## What a ~5-minute first run that dies brings home (spec 03 §3: half of ~250-300 coins).
-const FIRST_RUN_COINS: int = 150
+## A first run brings home a few hundred coins (a long one ~1.2k, PO 2026-10-23): it pays for
+## the first building, but not for several (prices raised on the PO's request).
+const FIRST_RUN_COINS: int = 300
 
 
 func _defs() -> Array[BuildingDef]:
@@ -49,8 +50,8 @@ func test_the_first_building_comes_after_one_short_run() -> void:
 	for spot: TownSpot in LAYOUT.spots:
 		if not spot.starts_locked():
 			cheapest = mini(cheapest, spot.building.levels[0].coins)
-	assert_lte(cheapest, FIRST_RUN_COINS, "a 5-minute first run that dies pays for one (P-16)")
-	assert_gt(cheapest, 50, "but it still feels earned")
+	assert_lte(cheapest, FIRST_RUN_COINS, "a first run pays for one (P-16)")
+	assert_gte(cheapest, 150, "but not for several at once")
 
 
 func test_the_jars_pay_only_when_they_hold_enough() -> void:

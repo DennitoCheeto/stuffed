@@ -5,23 +5,23 @@
 
 [sub_resource type="Resource" id="Resource_level_1"]
 script = ExtResource("2_level")
-coins = 300
+coins = 600
 stuffing = 0
 thread = 0
 effect = "Floor pickups drop 15% more often"
 
 [sub_resource type="Resource" id="Resource_level_2"]
 script = ExtResource("2_level")
-coins = 550
-stuffing = 18
+coins = 1100
+stuffing = 25
 thread = 0
 effect = "Floor pickups drop 30% more often"
 
 [sub_resource type="Resource" id="Resource_level_3"]
 script = ExtResource("2_level")
-coins = 900
-stuffing = 30
-thread = 8
+coins = 1800
+stuffing = 40
+thread = 10
 effect = "Floor pickups 45% more often, the first after 15 s"
 
 [resource]
