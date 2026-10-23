@@ -42,6 +42,8 @@ const MUFFLING: Array[StringName] = [&"pause", &"level_up", &"goal"]
 @export var floor_pickup_rules: FloorPickupRules
 ## What kills, gift boxes and the win add to the haul (spec 03 §3).
 @export var material_rules: MaterialRules
+## The Way Home portal after Big Ted (spec 03 §4).
+@export var way_home_rules: WayHomeRules
 
 ## Seconds since the run started.
 var elapsed: float = 0.0
@@ -84,6 +86,8 @@ var pickup_arrows: PickupArrows = PickupArrows.new()
 var haul: RunHaul = RunHaul.new()
 ## Separate randomness for materials, so they don't change the zombies or the cards.
 var material_rng: RandomNumberGenerator = RandomNumberGenerator.new()
+## The open Way Home portal (null before Big Ted is beaten and after the King is).
+var way_home: WayHomePortal
 
 ## False while the goal pops the horde (those zombies drop no XP).
 var _drops_enabled: bool = true
@@ -337,6 +341,7 @@ func _reach_goal() -> void:
 	goal_done = true
 	goal_time = elapsed
 	boss_fight = false
+	close_way_home()
 	music_requested.emit(&"run")
 	_at_goal = true
 	spawner.active = false
@@ -494,6 +499,8 @@ func _on_zombie_killed(zombie: Zombie) -> void:
 	Sfx.play(&"boss_down" if zombie.is_boss() else &"pop")
 	if zombie.is_boss():
 		_note_boss_defeat(zombie)
+		if not is_final_boss(zombie):
+			open_way_home(zombie.position)
 	if _drops_enabled:
 		pickups.drop(zombie.xp_button(), zombie.position)
 		_collect_kill(zombie)
@@ -536,6 +543,52 @@ func _collect_kill(zombie: Zombie) -> void:
 		zombie.stats.display_name, zombie.is_elite(), material_rng
 	)
 	collect(amounts, zombie.position, zombie.is_elite() or zombie.is_boss())
+
+
+## Opens the Way Home portal (spec 03 §4) a few steps from the player nearest to `near`, towards
+## the middle of the room, with a banner and a sound. One per run, never after the King is beaten.
+func open_way_home(near: Vector2) -> WayHomePortal:
+	if goal_done or over or is_instance_valid(way_home):
+		return way_home
+	way_home = WayHomePortal.new()
+	way_home.setup(way_home_rules)
+	way_home.position = _way_home_spot(near)
+	way_home.entered.connect(_on_way_home_entered)
+	floor_items.add_child(way_home)
+	var data: WayHomeRules = way_home_rules
+	var soft_blue: Color = WayHomePortal.GLOW_COLOR
+	hud.show_banner(data.banner, data.banner_subtitle, data.banner_seconds, soft_blue)
+	Sfx.play(data.sound)
+	return way_home
+
+
+## The portal closes once the King is beaten ("End run" does its job from then on).
+func close_way_home() -> void:
+	if is_instance_valid(way_home):
+		way_home.queue_free()
+	way_home = null
+
+
+func _way_home_spot(near: Vector2) -> Vector2:
+	var from: Vector2 = _nearest_player(near).global_position
+	var toward: Vector2 = from.direction_to(arena.center())
+	if toward == Vector2.ZERO:
+		toward = Vector2.UP
+	var area: Rect2 = arena.play_rect().grow(-way_home_rules.wall_margin)
+	var spot: Vector2 = from + toward * way_home_rules.open_distance
+	spot = spot.clamp(area.position, area.end)
+	return enemies.obstacles.push_out(spot, way_home_rules.stand_radius)
+
+
+## The ring is full: everybody goes home with the whole haul (no victory bonus).
+func _on_way_home_entered(_player: Player) -> void:
+	if over:
+		return
+	over = true
+	spawner.active = false
+	enemies.calm = true
+	Sfx.play(way_home_rules.sound, 1.3)
+	finished.emit(make_result("way_home"))
 
 
 func _on_player_evolved(new_weapon: Weapon, player: Player) -> void:

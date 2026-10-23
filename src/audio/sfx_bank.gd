@@ -44,6 +44,8 @@ const LENGTHS: Dictionary[StringName, float] = {
 	&"snow_globe": 0.7,
 	&"ice_crack": 0.4,
 	&"party_popper": 0.8,
+	# Town (spec 03).
+	&"way_home": 1.0,
 }
 
 
@@ -111,6 +113,7 @@ static func _weapon_or_moment(sound: StringName) -> Callable:
 		&"snow_globe": _snow_globe,
 		&"ice_crack": _ice_crack,
 		&"party_popper": _party_popper,
+		&"way_home": _way_home,
 	}
 	return voices[sound]
 
@@ -442,3 +445,16 @@ static func _party_popper(t: float) -> float:
 	if t >= 0.05:
 		rustle = _crackle(t * 1.7, 1.3) * minf((t - 0.05) / 0.1, 1.0)
 	return 0.3 * pop + 0.25 * thump + 0.2 * crack + 0.12 * rustle
+
+
+## The Way Home portal opens: a soft airy whoosh under a calm chime going up (no alarm).
+static func _way_home(t: float) -> float:
+	var chime: float = 0.0
+	var notes: PackedFloat32Array = [72.0, 76.0, 79.0, 84.0]
+	for i: int in notes.size():
+		var start: float = i * 0.12
+		if t >= start:
+			var local: float = t - start
+			chime += Synth.sine(Synth.midi_hz(notes[i]) * local) * exp(-4.0 * local)
+	var air: float = Synth.noise(t) * sin(PI * clampf(t / 1.0, 0.0, 1.0))
+	return 0.14 * chime + 0.05 * air
