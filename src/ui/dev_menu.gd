@@ -153,6 +153,7 @@ func _build() -> void:
 	_row(column, ["Spawn elite", "Drop gift box"], [_spawn_elite, _drop_gift_box])
 	_build_floor_drops(column)
 	_row(column, ["Spawn Big Ted", "Jump to Big Ted"], [_spawn_mini_boss, _jump_to_mini_boss])
+	_row(column, ["Open Way Home"], [_open_way_home])
 	_row(column, ["Spawn the King", "Jump to the King"], [_spawn_boss, _jump_to_boss])
 	var evolutions: Array[EvolutionDef] = run.upgrade_pool.evolutions
 	for first: int in range(0, evolutions.size(), 2):
@@ -315,6 +316,11 @@ func _build_floor_drops(parent: Control) -> void:
 ## A floor pickup a few steps to the left of player 1.
 func _drop_floor_pickup(id: StringName) -> void:
 	run.drop_floor_pickup(id, _player().global_position + Vector2(-80.0, 0.0))
+
+
+## Opens the Way Home portal near player 1 (spec 03 §10).
+func _open_way_home() -> void:
+	run.open_way_home(_player().global_position)
 
 
 ## A gift box a few steps to the right of player 1.

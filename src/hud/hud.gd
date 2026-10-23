@@ -76,9 +76,12 @@ func show_boss(boss: Zombie) -> void:
 	boss_bar.visible = true
 
 
-## The big arrival banner for `seconds`.
-func show_banner(title: String, subtitle: String, seconds: float) -> void:
+## The big arrival banner for `seconds`, its title in `color`.
+func show_banner(
+	title: String, subtitle: String, seconds: float, color: Color = BANNER_COLOR
+) -> void:
 	banner_title.text = title
+	banner_title.add_theme_color_override("font_color", color)
 	banner_subtitle.text = subtitle
 	banner_subtitle.visible = not subtitle.is_empty()
 	_banner_left = seconds

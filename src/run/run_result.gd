@@ -15,7 +15,8 @@ var killed_by: String = ""
 ## Picked cards in order, e.g. "Quick Feet 2".
 var upgrades: PackedStringArray = []
 var seed_value: int = 0
-## How the run ended: "died" or "ended" (End run after the goal).
+## How the run ended: "died", "ended" (End run after the goal), "quit" (gave up) or "way_home"
+## (the Way Home portal).
 var ending: String = "died"
 ## Evolutions in order: {"weapon": evolved name, "time": run seconds, "player": 0-based index}.
 var evolutions: Array[Dictionary] = []
@@ -48,4 +49,6 @@ func run_end() -> String:
 func title() -> String:
 	if won:
 		return "You survived!"
+	if ending == "way_home":
+		return "Home safe!"
 	return "You gave up" if ending == "quit" else "Banane got stuffed"
