@@ -33,6 +33,7 @@ static func to_entry(result: RunResult) -> Dictionary:
 		"materials_kept": result.materials_kept.duplicate(),
 		"run_end": result.run_end(),
 		"unlocked_weapons": Array(result.unlocked_weapons),
+		"rescue": _rescue_or_null(result.rescue),
 	}
 
 
@@ -49,6 +50,16 @@ static func _timed(events: Array[Dictionary]) -> Array[Dictionary]:
 ## Null in the log for "didn't happen" (-1 in the result).
 static func _time_or_null(seconds: float) -> Variant:
 	return null if seconds < 0.0 else snappedf(seconds, 0.1)
+
+
+## The rescue with its times rounded to 0.1 s (null = no rescue appeared).
+static func _rescue_or_null(rescue: Dictionary) -> Variant:
+	if rescue.is_empty():
+		return null
+	var entry: Dictionary = rescue.duplicate()
+	entry["time"] = snappedf(float(rescue["time"]), 0.1)
+	entry["freed_at"] = _time_or_null(float(rescue["freed_at"]))
+	return entry
 
 
 ## Adds one line for `result`. Returns false if the file couldn't be written.

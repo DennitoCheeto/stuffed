@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="PlushieDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rescue/plushie_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = "kitty"
+display_name = "Kitty"
+body_color = Color(0.62, 0.64, 0.7, 1)
+accent_color = Color(0.95, 0.9, 0.92, 1)
+ears = 2

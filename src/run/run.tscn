@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=3]
+[gd_scene load_steps=23 format=3]
 
 [ext_resource type="Script" path="res://src/run/run.gd" id="1_run"]
 [ext_resource type="Resource" path="res://data/run_rules.tres" id="2_rules"]
@@ -21,6 +21,7 @@
 [ext_resource type="Resource" path="res://data/floor_pickup_rules.tres" id="19_floor"]
 [ext_resource type="Resource" path="res://data/town/material_rules.tres" id="20_materials"]
 [ext_resource type="Resource" path="res://data/town/way_home_rules.tres" id="21_way_home"]
+[ext_resource type="Resource" path="res://data/town/rescue_rules.tres" id="22_rescue"]
 
 [node name="Run" type="Node2D"]
 script = ExtResource("1_run")
@@ -30,6 +31,7 @@ gift_box_rules = ExtResource("18_gift")
 floor_pickup_rules = ExtResource("19_floor")
 material_rules = ExtResource("20_materials")
 way_home_rules = ExtResource("21_way_home")
+rescue_rules = ExtResource("22_rescue")
 
 [node name="Arena" parent="." instance=ExtResource("3_arena")]
 
