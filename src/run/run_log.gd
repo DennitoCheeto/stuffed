@@ -32,6 +32,7 @@ static func to_entry(result: RunResult) -> Dictionary:
 		"materials_collected": result.materials_collected.duplicate(),
 		"materials_kept": result.materials_kept.duplicate(),
 		"run_end": result.run_end(),
+		"unlocked_weapons": Array(result.unlocked_weapons),
 	}
 
 

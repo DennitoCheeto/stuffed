@@ -14,6 +14,8 @@ signal quit_requested
 signal changed
 
 const PLAYER_SCENE: PackedScene = preload("res://src/player/player.tscn")
+## The level-up cards (weapon names and icons for the Toy Box Armory).
+const UPGRADE_POOL: UpgradePool = preload("res://data/upgrade_pool.tres")
 const PROMPT_COLOR: Color = Color("#f4efe6")
 const BANNER_COLOR: Color = Color("#cfe3f0")
 ## Seconds after a rebuild before new buildings are revealed and the fort grows (after the pop).
@@ -46,6 +48,10 @@ var banner: VBoxContainer
 var banner_title: Label
 var banner_subtitle: Label
 var menu: TownMenu = TownMenu.new()
+## Choosing Banane's starting weapon (Toy Box Armory, level 3).
+var picker: StartWeaponPicker = StartWeaponPicker.new()
+## "New weapons for your cards!" when an Armory level adds weapons.
+var unlock_toast: WeaponUnlockToast = WeaponUnlockToast.new()
 
 ## Set once the Bedroom door was used (one press = one run).
 var _leaving: bool = false
@@ -91,6 +97,9 @@ func _ready() -> void:
 	menu.resumed.connect(func() -> void: process_mode = Node.PROCESS_MODE_INHERIT)
 	menu.title_requested.connect(title_requested.emit)
 	menu.quit_requested.connect(quit_requested.emit)
+	add_child(picker)
+	picker.chosen.connect(_on_start_weapon_chosen)
+	picker.closed.connect(func() -> void: process_mode = Node.PROCESS_MODE_INHERIT)
 
 
 func _physics_process(delta: float) -> void:
@@ -109,7 +118,7 @@ func _physics_process(delta: float) -> void:
 			if building == null:
 				continue
 			if pressed:
-				try_build(building)
+				interact(building)
 			if shown == null:
 				shown = building
 				prompt = BuildingCard.action_text(building, save)
@@ -200,10 +209,72 @@ func try_build(building: TownBuilding) -> bool:
 	var new_level: int = building.level + 1
 	save.building_levels[String(building.spot.id)] = new_level
 	building.play_build(new_level)
+	if not next.unlocks_weapons.is_empty():
+		unlock_toast.show_weapons(_weapons(next.unlocks_weapons))
 	refresh()
 	_settle_left = AFTER_BUILD_SECONDS
 	changed.emit()
 	return true
+
+
+## What pressing E next to `building` does: choose the starting weapon at a fully built Toy
+## Box Armory, else rebuild or upgrade it.
+func interact(building: TownBuilding) -> void:
+	if can_choose_start_weapon(building):
+		open_weapon_picker()
+	else:
+		try_build(building)
+
+
+## True when E at `building` opens the starting weapon choice (nothing left to upgrade there).
+func can_choose_start_weapon(building: TownBuilding) -> bool:
+	if building.is_busy() or building.building.next(building.level) != null:
+		return false
+	return building.building.chooses_start_weapon(building.level)
+
+
+## What the town's buildings change in the next run.
+func perks() -> TownPerks:
+	return TownPerks.from_save(save, layout)
+
+
+## The weapon Banane starts the next run with (its upgrade pool id).
+func start_weapon_id() -> StringName:
+	var hero: Player = Players.all(get_tree())[0]
+	return perks().starting_weapon(UPGRADE_POOL, hero.stats.starting_weapon).id
+
+
+## Shows the starting weapon choice; the town waits until it closes.
+func open_weapon_picker() -> void:
+	process_mode = Node.PROCESS_MODE_DISABLED
+	_banner_left = 0.0
+	banner.visible = false
+	unlock_toast.visible = false
+	picker.open(perks().open_weapons(UPGRADE_POOL), start_weapon_id())
+
+
+func _on_start_weapon_chosen(id: StringName) -> void:
+	save.start_weapon = String(id)
+	var weapon: UpgradeDef = UPGRADE_POOL.find(id)
+	Sfx.play(weapon.weapon.sound, weapon.weapon.sound_pitch)
+	changed.emit()
+
+
+## The pool entries of the weapons `ids`.
+func _weapons(ids: Array[StringName]) -> Array[UpgradeDef]:
+	var result: Array[UpgradeDef] = []
+	for id: StringName in ids:
+		var weapon: UpgradeDef = UPGRADE_POOL.find(id)
+		if weapon != null:
+			result.append(weapon)
+	return result
+
+
+## An extra line on the info card: the starting weapon at a building that lets you choose it.
+func _note_for(building: TownBuilding) -> String:
+	if not building.building.chooses_start_weapon(building.level):
+		return ""
+	return "Starting weapon: " + UPGRADE_POOL.find(start_weapon_id()).display_name
 
 
 ## Updates the jars and every sign for what's in the jars now.
@@ -294,7 +365,7 @@ func _is_open(spot: TownSpot) -> bool:
 
 func _show_card(building: TownBuilding, player: Player) -> void:
 	var above: bool = player.global_position.y > building.spot.rect.get_center().y
-	card.show_for(building, save, above)
+	card.show_for(building, save, above, _note_for(building))
 
 
 func _build_walls() -> void:
@@ -353,3 +424,4 @@ func _build_hud() -> void:
 	banner.add_child(banner_title)
 	banner_subtitle = TownArt.label("", 30)
 	banner.add_child(banner_subtitle)
+	hud.add_child(unlock_toast)

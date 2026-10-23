@@ -9,6 +9,7 @@ coins = 250
 stuffing = 0
 thread = 0
 effect = "+2 weapons: Bouncy Yarn Ball, Thimble Mortar"
+unlocks_weapons = Array[StringName]([&"bouncy_yarn_ball", &"thimble_mortar"])
 
 [sub_resource type="Resource" id="Resource_level_2"]
 script = ExtResource("2_level")
@@ -16,6 +17,7 @@ coins = 700
 stuffing = 15
 thread = 0
 effect = "+2 more weapons: Thread Whip, Zipper Ray"
+unlocks_weapons = Array[StringName]([&"thread_whip", &"zipper_ray"])
 
 [sub_resource type="Resource" id="Resource_level_3"]
 script = ExtResource("2_level")
@@ -23,6 +25,7 @@ coins = 1400
 stuffing = 30
 thread = 8
 effect = "Choose Banane's starting weapon"
+start_weapon_choice = true
 
 [resource]
 script = ExtResource("1_def")

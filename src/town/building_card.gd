@@ -21,6 +21,8 @@ var title_label: Label
 var level_label: Label
 var now_label: Label
 var next_label: Label
+## An extra line some buildings add ("Starting weapon: Peel Boomerang").
+var note_label: Label
 var cost_row: HBoxContainer
 var cost_counters: Dictionary[String, JarCounter] = {}
 ## "E  Rebuild", "Needs 40 more coins", "Fully upgraded!" or what unlocks it.
@@ -47,6 +49,7 @@ func _init() -> void:
 	level_label = _line(box, 20, SOFT_COLOR)
 	now_label = _line(box, 22, TownArt.TEXT_COLOR)
 	next_label = _line(box, 22, SOFT_COLOR)
+	note_label = _line(box, 22, ACTION_COLOR)
 	cost_row = HBoxContainer.new()
 	cost_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	cost_row.add_theme_constant_override(&"separation", 22)
@@ -55,8 +58,8 @@ func _init() -> void:
 
 
 ## Shows the card for `target` with the town's jars in `save`, above the building or (when the
-## player stands above it) below its sign.
-func show_for(target: TownBuilding, save: TownSave, above: bool) -> void:
+## player stands above it) below its sign, with an extra `note` line if there is one.
+func show_for(target: TownBuilding, save: TownSave, above: bool, note: String = "") -> void:
 	building = target
 	var def: BuildingDef = target.building
 	title_label.text = def.display_name
@@ -69,6 +72,8 @@ func show_for(target: TownBuilding, save: TownSave, above: bool) -> void:
 		var next: BuildingLevel = def.next(target.level)
 		next_label.text = "" if next == null else "Next level: " + next.effect
 	next_label.visible = not next_label.text.is_empty()
+	note_label.text = note
+	note_label.visible = not note.is_empty()
 	_show_cost(target, save)
 	action_label.text = action_text(target, save)
 	var missing: bool = target.unlocked and not save.missing(_cost(target)).is_empty()
@@ -102,6 +107,8 @@ static func action_text(target: TownBuilding, save: TownSave) -> String:
 		return target.spot.unlock_hint()
 	var next: BuildingLevel = target.building.next(target.level)
 	if next == null:
+		if target.building.chooses_start_weapon(target.level):
+			return "E   Choose starting weapon"
 		return "Fully upgraded!"
 	var missing: Dictionary[String, int] = save.missing(next.cost())
 	if not missing.is_empty():

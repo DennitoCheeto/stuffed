@@ -10,6 +10,8 @@ const TOWN_SCENE: PackedScene = preload("res://src/town/town.tscn")
 const RUN_SCENE: PackedScene = preload("res://src/run/run.tscn")
 const END_SCENE: PackedScene = preload("res://src/ui/end_screen.tscn")
 const MATERIAL_RULES: MaterialRules = preload("res://data/town/material_rules.tres")
+## Where the town's buildings stand (their levels decide what changes in a run).
+const TOWN_LAYOUT: TownLayout = preload("res://data/town/pillow_fort.tres")
 
 ## Tests turn this off so "Quit" doesn't close the test runner.
 var quit_enabled: bool = true
@@ -69,6 +71,7 @@ func start_run(seed_value: int = 0) -> void:
 	run.finished.connect(show_end)
 	run.gave_up.connect(show_end)
 	run.seed_value = seed_value
+	run.perks = TownPerks.from_save(town, TOWN_LAYOUT)
 	run.restart_requested.connect(start_run)
 	run.music_requested.connect(_play_music)
 	run.checkpoint_due.connect(save_now)

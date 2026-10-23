@@ -88,6 +88,8 @@ var haul: RunHaul = RunHaul.new()
 var material_rng: RandomNumberGenerator = RandomNumberGenerator.new()
 ## The open Way Home portal (null before Big Ted is beaten and after the King is).
 var way_home: WayHomePortal
+## What the town's buildings change in this run (Main sets it before adding the run).
+var perks: TownPerks = TownPerks.new()
 
 ## False while the goal pops the horde (those zombies drop no XP).
 var _drops_enabled: bool = true
@@ -214,6 +216,7 @@ func spawn_player(index: int, at: Vector2) -> Player:
 	player.player_index = index
 	player.position = at
 	player.card_controls = CardControls.new(upgrade_pool)
+	player.starting_weapon = perks.starting_weapon(upgrade_pool, player.stats.starting_weapon)
 	player.died.connect(_on_player_died)
 	player.hurt.connect(_on_player_hurt)
 	player.dashed.connect(func(_from: Vector2, _direction: Vector2) -> void: Sfx.play(&"dash"))
@@ -277,7 +280,7 @@ func _show_next_level_up(with_moment: bool) -> void:
 	var controls: CardControls = player.card_controls
 	level_up_screen.show_controls(controls)
 	var offers: Array[UpgradeOffer] = upgrade_pool.roll(
-		player.upgrade_levels(), upgrade_rng, controls.banished
+		player.upgrade_levels(), upgrade_rng, _excluded(controls)
 	)
 	level_up_screen.open(offers, with_moment)
 
@@ -295,7 +298,7 @@ func _on_reroll_requested() -> void:
 	if not controls.use_reroll():
 		return
 	var offers: Array[UpgradeOffer] = upgrade_pool.roll(
-		player.upgrade_levels(), upgrade_rng, controls.banished, _ids_on_screen()
+		player.upgrade_levels(), upgrade_rng, _excluded(controls), _ids_on_screen()
 	)
 	level_up_screen.show_controls(controls)
 	level_up_screen.show_offers(offers)
@@ -320,11 +323,18 @@ func _on_banish_requested(index: int) -> void:
 	var banished_card: UpgradeDef = offers[index].upgrade
 	if banished_card.kind == UpgradeDef.Kind.SNACK or not controls.banish(banished_card.id):
 		return
-	var excluded: Array[StringName] = controls.banished.duplicate()
+	var excluded: Array[StringName] = _excluded(controls)
 	excluded.append_array(_ids_on_screen())
 	offers[index] = upgrade_pool.roll(player.upgrade_levels(), upgrade_rng, excluded, [], 1)[0]
 	level_up_screen.show_controls(controls)
 	level_up_screen.show_offers(offers)
+
+
+## Cards that must not come up: banished ones and weapons the town hasn't unlocked yet.
+func _excluded(controls: CardControls) -> Array[StringName]:
+	var excluded: Array[StringName] = controls.banished.duplicate()
+	excluded.append_array(perks.locked_weapons)
+	return excluded
 
 
 func _ids_on_screen() -> Array[StringName]:
@@ -391,6 +401,8 @@ func make_result(ending: String) -> RunResult:
 	result.boss_defeated_at = boss_defeated_at
 	result.floor_pickups = floor_pickup_log.duplicate(true)
 	result.materials_collected = haul.materials.duplicate()
+	for weapon: UpgradeDef in perks.open_weapons(upgrade_pool):
+		result.unlocked_weapons.append(String(weapon.id))
 	return result
 
 

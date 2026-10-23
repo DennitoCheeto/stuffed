@@ -56,6 +56,8 @@ var bonus_version: int = 0
 var items: Array[UpgradeDef] = []
 ## Level of each item picked this run, by id (weapons keep their own level).
 var item_levels: Dictionary[StringName, int] = {}
+## The weapon this hero starts the run with (null = the hero's own; set before adding the hero).
+var starting_weapon: WeaponStats
 ## Every card picked this run, in order, e.g. "Quick Feet 2" (for the end screen and run log).
 var picked_upgrades: PackedStringArray = []
 ## Rerolls, skips and banishes left this run (the run sets it up when it spawns the player).
@@ -86,8 +88,10 @@ func _ready() -> void:
 		slippery.name = "Slippery"
 		add_child(slippery)
 		slippery.setup(self)
-	if armed and stats.starting_weapon != null:
-		add_weapon(stats.starting_weapon)
+	if starting_weapon == null:
+		starting_weapon = stats.starting_weapon
+	if armed and starting_weapon != null:
+		add_weapon(starting_weapon)
 
 
 func _physics_process(delta: float) -> void:
