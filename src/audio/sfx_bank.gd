@@ -50,6 +50,8 @@ const LENGTHS: Dictionary[StringName, float] = {
 	&"upgrade": 0.6,
 	&"new_building": 0.9,
 	&"nope": 0.25,
+	&"help": 0.5,
+	&"rescued": 0.9,
 }
 
 
@@ -122,6 +124,8 @@ static func _weapon_or_moment(sound: StringName) -> Callable:
 		&"upgrade": _upgrade,
 		&"new_building": _new_building,
 		&"nope": _nope,
+		&"help": _help,
+		&"rescued": _rescued,
 	}
 	return voices[sound]
 
@@ -508,3 +512,34 @@ static func _new_building(t: float) -> float:
 static func _nope(t: float) -> float:
 	var tone: float = Synth.triangle(Synth.midi_hz(50.0) * t) * sin(PI * clampf(t / 0.25, 0.0, 1.0))
 	return 0.2 * tone
+
+
+## A tangled plushie calls for help: two small rubber-toy squeaks going up ("hel-p!"), soft.
+static func _help(t: float) -> float:
+	var squeak: float = 0.0
+	var starts: PackedFloat32Array = [0.0, 0.2]
+	for i: int in starts.size():
+		var local: float = t - starts[i]
+		if local < 0.0 or local > 0.22:
+			continue
+		var pitch: float = Synth.midi_hz(81.0 + 4.0 * i) * (1.0 + 0.25 * local / 0.22)
+		var wobble: float = 1.0 + 0.03 * sin(TAU * 30.0 * local)
+		var shape: float = sin(PI * local / 0.22)
+		squeak += Synth.triangle(pitch * wobble * local) * shape
+	return 0.22 * squeak
+
+
+## A plushie is freed: a happy squeak, then a warm chime going up (it hops into the backpack).
+static func _rescued(t: float) -> float:
+	var squeak: float = 0.0
+	if t < 0.18:
+		var pitch: float = Synth.midi_hz(84.0) * (1.0 + 0.4 * t / 0.18)
+		squeak = Synth.triangle(pitch * t) * sin(PI * t / 0.18)
+	var chime: float = 0.0
+	var notes: PackedFloat32Array = [72.0, 76.0, 79.0, 84.0]
+	for i: int in notes.size():
+		var start: float = 0.15 + i * 0.09
+		if t >= start:
+			var local: float = t - start
+			chime += Synth.sine(Synth.midi_hz(notes[i]) * local) * exp(-5.0 * local)
+	return 0.18 * squeak + 0.12 * chime

@@ -9,6 +9,8 @@ const COUNT_SECONDS: float = 1.2
 const PLIP_GAP: float = 0.07
 const HEADING_COLOR: Color = Color("#cfe3f0")
 const NOTE_COLOR: Color = Color("#b8b2c4")
+## The rescued plushie line (soft lilac, like its ring in the run).
+const RESCUE_COLOR: Color = Color("#d4b8ff")
 
 ## Material id -> amount brought home this run.
 var kept: Dictionary[String, int] = {}
@@ -16,6 +18,8 @@ var kept: Dictionary[String, int] = {}
 var jars_before: Dictionary[String, int] = {}
 var heading: Label
 var note_label: Label
+## "Bunny is coming home!" (hidden when nobody was rescued).
+var rescue_label: Label
 ## Material id -> "+12" counter (this run).
 var gained: Dictionary[String, JarCounter] = {}
 ## Material id -> total in the jars.
@@ -37,6 +41,10 @@ func _init() -> void:
 	note_label = TownArt.label("", 22)
 	note_label.add_theme_color_override(&"font_color", NOTE_COLOR)
 	add_child(note_label)
+	rescue_label = TownArt.label("", 28)
+	rescue_label.add_theme_color_override(&"font_color", RESCUE_COLOR)
+	rescue_label.visible = false
+	add_child(rescue_label)
 	var gained_row: HBoxContainer = _row(48)
 	var totals_row: HBoxContainer = _row(36)
 	var jars_label: Label = TownArt.label("In your jars:", 22)
@@ -60,6 +68,12 @@ func show_haul(
 	_plips = 0
 	_counting = true
 	_show_at(0.0)
+
+
+## Shows that the plushie `plushie_name` was rescued in this run and moves into town.
+func show_rescue(plushie_name: String) -> void:
+	rescue_label.text = "%s is coming home!" % plushie_name
+	rescue_label.visible = true
 
 
 ## What the note under the heading says for a kept share.

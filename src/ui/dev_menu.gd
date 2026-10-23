@@ -153,7 +153,7 @@ func _build() -> void:
 	_row(column, ["Spawn elite", "Drop gift box"], [_spawn_elite, _drop_gift_box])
 	_build_floor_drops(column)
 	_row(column, ["Spawn Big Ted", "Jump to Big Ted"], [_spawn_mini_boss, _jump_to_mini_boss])
-	_row(column, ["Open Way Home"], [_open_way_home])
+	_row(column, ["Open Way Home", "Start rescue now"], [_open_way_home, _start_rescue])
 	_row(column, ["Spawn the King", "Jump to the King"], [_spawn_boss, _jump_to_boss])
 	var evolutions: Array[EvolutionDef] = run.upgrade_pool.evolutions
 	for first: int in range(0, evolutions.size(), 2):
@@ -321,6 +321,11 @@ func _drop_floor_pickup(id: StringName) -> void:
 ## Opens the Way Home portal near player 1 (spec 03 §10).
 func _open_way_home() -> void:
 	run.open_way_home(_player().global_position)
+
+
+## A tangled plushie appears now (spec 03 §10), even in a run without a planned rescue.
+func _start_rescue() -> void:
+	run.start_rescue()
 
 
 ## A gift box a few steps to the right of player 1.

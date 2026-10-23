@@ -1,7 +1,7 @@
 class_name PickupArrows
 extends Control
-## Small arrows at the screen edge that point to floor pickups (spec 02b §4) and the Way Home
-## portal (spec 03 §4) when they are out of sight.
+## Small arrows at the screen edge that point to floor pickups (spec 02b §4), the Way Home
+## portal (spec 03 §4) and a tangled plushie (spec 03 §7) when they are out of sight.
 
 ## Arrows sit this far inside the screen edge, in pixels.
 const MARGIN: float = 44.0
@@ -62,6 +62,9 @@ func _arrow_color(item: Node) -> Color:
 	var portal: WayHomePortal = item as WayHomePortal
 	if portal != null and not portal.used:
 		return WayHomePortal.GLOW_COLOR
+	var plushie: TangledPlushie = item as TangledPlushie
+	if plushie != null and not plushie.used:
+		return TangledPlushie.GLOW_COLOR
 	return Color.TRANSPARENT
 
 

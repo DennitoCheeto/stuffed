@@ -12,6 +12,8 @@ const END_SCENE: PackedScene = preload("res://src/ui/end_screen.tscn")
 const MATERIAL_RULES: MaterialRules = preload("res://data/town/material_rules.tres")
 ## Where the town's buildings stand (their levels decide what changes in a run).
 const TOWN_LAYOUT: TownLayout = preload("res://data/town/pillow_fort.tres")
+## Who can be rescued in a run (for the name on the "Brought home" screen).
+const RESCUE_RULES: RescueRules = preload("res://data/town/rescue_rules.tres")
 
 ## Tests turn this off so "Quit" doesn't close the test runner.
 var quit_enabled: bool = true
@@ -76,6 +78,8 @@ func start_run(seed_value: int = 0) -> void:
 	run.music_requested.connect(_play_music)
 	run.checkpoint_due.connect(save_now)
 	town.runs_started += 1
+	run.run_number = town.runs_started
+	run.rescued_before = PackedStringArray(town.plushies.keys())
 	town.unfinished_run = run.haul.to_dict()
 	SaveStore.write(town)
 	_play_music(&"run")
@@ -95,6 +99,9 @@ func show_end(result: RunResult) -> void:
 	var end: EndScreen = END_SCENE.instantiate()
 	end.show_result(result)
 	end.brought_home.show_haul(kept, before, share)
+	var rescued: PlushieDef = RESCUE_RULES.find(result.rescued_plushie())
+	if rescued != null:
+		end.brought_home.show_rescue(rescued.display_name)
 	end.try_again_requested.connect(start_run)
 	end.fort_requested.connect(show_town)
 	_switch_to(end)

@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="RescueRules" load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://src/rescue/rescue_rules.gd" id="1_rules"]
+[ext_resource type="Script" path="res://src/rescue/plushie_def.gd" id="6_def"]
+[ext_resource type="Resource" path="res://data/town/plushies/bunny.tres" id="2_bunny"]
+[ext_resource type="Resource" path="res://data/town/plushies/bear.tres" id="3_bear"]
+[ext_resource type="Resource" path="res://data/town/plushies/kitty.tres" id="4_kitty"]
+[ext_resource type="Resource" path="res://data/town/plushies/froggy.tres" id="5_froggy"]
+
+[resource]
+script = ExtResource("1_rules")
+plushies = Array[ExtResource("6_def")]([ExtResource("2_bunny"), ExtResource("3_bear"), ExtResource("4_kitty"), ExtResource("5_froggy")])
+first_run = 2
+chance = 0.5
+earliest_seconds = 120.0
+latest_seconds = 360.0
+fill_seconds = 3.0
+stand_radius = 72.0
+min_distance = 900.0
+max_distance = 1500.0
+wall_margin = 140.0
+help_banner = "A plushie needs help!"
+help_subtitle = "Follow the arrow and stand next to it"
+freed_banner = "%s is safe!"
+freed_subtitle = "In your backpack: it comes home even if you fall"
+banner_seconds = 2.5
+help_sound = &"help"
+freed_sound = &"rescued"

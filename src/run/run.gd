@@ -44,6 +44,8 @@ const MUFFLING: Array[StringName] = [&"pause", &"level_up", &"goal"]
 @export var material_rules: MaterialRules
 ## The Way Home portal after Big Ted (spec 03 §4).
 @export var way_home_rules: WayHomeRules
+## Rescued plushies in the run (spec 03 §7).
+@export var rescue_rules: RescueRules
 
 ## Seconds since the run started.
 var elapsed: float = 0.0
@@ -90,6 +92,17 @@ var material_rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var way_home: WayHomePortal
 ## What the town's buildings change in this run (Main sets it before adding the run).
 var perks: TownPerks = TownPerks.new()
+## This run's number for the town (1 = its first run; 0 = no town, so no rescue). Set by Main.
+var run_number: int = 0
+## Ids of the plushies the town already has (they are never rescued again). Set by Main.
+var rescued_before: PackedStringArray = []
+## Separate randomness for the rescue, so it doesn't change the zombies or the cards.
+var rescue_rng: RandomNumberGenerator = RandomNumberGenerator.new()
+## This run's rescue (null = none), and the tangled plushie once it has appeared.
+var rescue_plan: RescuePlan
+var rescue: TangledPlushie
+## For the run log: {"plushie", "time", "freed", "freed_at"} (empty = no rescue appeared).
+var rescue_log: Dictionary = {}
 
 ## False while the goal pops the horde (those zombies drop no XP).
 var _drops_enabled: bool = true
@@ -131,6 +144,8 @@ func _ready() -> void:
 	upgrade_rng.seed = seed_value * 31 + 7
 	pickup_rng.seed = seed_value * 17 + 3
 	material_rng.seed = seed_value * 13 + 5
+	rescue_rng.seed = seed_value * 7 + 11
+	rescue_plan = rescue_rules.plan(run_number, rescued_before, rescue_rng)
 	floor_pickup_drops = FloorPickupDrops.new(
 		floor_pickup_rules, pickup_rng, perks.pickup_gap_cut, perks.first_pickup_at
 	)
@@ -188,6 +203,8 @@ func _physics_process(delta: float) -> void:
 	if endless:
 		_update_endless_scaling()
 	spawner.tick(elapsed, delta)
+	if rescue_plan != null and rescue_log.is_empty() and elapsed >= rescue_plan.at_seconds:
+		start_rescue()
 	_show_clock()
 
 
@@ -405,6 +422,7 @@ func make_result(ending: String) -> RunResult:
 	result.boss_defeated_at = boss_defeated_at
 	result.floor_pickups = floor_pickup_log.duplicate(true)
 	result.materials_collected = haul.materials.duplicate()
+	result.rescue = rescue_log.duplicate()
 	for weapon: UpgradeDef in perks.open_weapons(upgrade_pool):
 		result.unlocked_weapons.append(String(weapon.id))
 	return result
@@ -605,6 +623,60 @@ func _on_way_home_entered(_player: Player) -> void:
 	enemies.calm = true
 	Sfx.play(way_home_rules.sound, 1.3)
 	finished.emit(make_result("way_home"))
+
+
+## The rescue appears (spec 03 §7): a tangled plushie somewhere in the Bedroom, an edge arrow, a
+## banner and one "help!" squeak. One per run; `who` = null takes the planned plushie (or, for
+## the developer menu, any plushie the town doesn't have yet). Returns null if it can't appear.
+func start_rescue(who: PlushieDef = null) -> TangledPlushie:
+	if not rescue_log.is_empty() or over or goal_done:
+		return rescue
+	if who == null and rescue_plan != null:
+		who = rescue_plan.plushie
+	if who == null:
+		who = rescue_rules.pick_plushie(rescued_before, rescue_rng)
+	if who == null:
+		return null
+	rescue = TangledPlushie.new()
+	rescue.setup(rescue_rules, who)
+	rescue.position = _rescue_spot()
+	rescue.freed.connect(_on_plushie_freed)
+	floor_items.add_child(rescue)
+	rescue_log = {"plushie": who.id, "time": elapsed, "freed": false, "freed_at": -1.0}
+	var data: RescueRules = rescue_rules
+	var lilac: Color = TangledPlushie.GLOW_COLOR
+	hud.show_banner(data.help_banner, data.help_subtitle, data.banner_seconds, lilac)
+	Sfx.play(data.help_sound)
+	return rescue
+
+
+## A free spot on the floor some way from the players (usually off screen).
+func _rescue_spot() -> Vector2:
+	var data: RescueRules = rescue_rules
+	var from: Vector2 = Players.centroid(get_tree())
+	var area: Rect2 = arena.play_rect().grow(-data.wall_margin)
+	var furniture: Obstacles = enemies.obstacles
+	for attempt: int in 20:
+		var away: float = rescue_rng.randf_range(data.min_distance, data.max_distance)
+		var spot: Vector2 = from + Vector2.from_angle(rescue_rng.randf() * TAU) * away
+		if area.has_point(spot) and not furniture.blocks(spot, data.stand_radius):
+			return spot
+	var fallback: Vector2 = from.move_toward(arena.center(), data.min_distance)
+	return furniture.push_out(fallback.clamp(area.position, area.end), data.stand_radius)
+
+
+## The ring is full: the plushie is in the backpack and comes home however the run ends.
+func _on_plushie_freed(_player: Player) -> void:
+	var who: PlushieDef = rescue.plushie
+	haul.rescued = who.id
+	rescue_log["freed"] = true
+	rescue_log["freed_at"] = elapsed
+	var data: RescueRules = rescue_rules
+	var title: String = data.freed_banner % who.display_name
+	hud.show_banner(title, data.freed_subtitle, data.banner_seconds, TangledPlushie.GLOW_COLOR)
+	Sfx.play(data.freed_sound)
+	# Saved right away: closing the game now still brings it home.
+	checkpoint_due.emit()
 
 
 func _on_player_evolved(new_weapon: Weapon, player: Player) -> void:

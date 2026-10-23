@@ -34,6 +34,9 @@ var materials_collected: Dictionary[String, int] = {}
 var materials_kept: Dictionary[String, int] = {}
 ## Weapons that could come up on cards this run (upgrade pool ids; the Toy Box Armory adds more).
 var unlocked_weapons: PackedStringArray = []
+## The rescue (spec 03 §7): {"plushie": id, "time": run seconds it appeared, "freed": bool,
+## "freed_at": run seconds or -1}. Empty = no rescue appeared in this run.
+var rescue: Dictionary = {}
 
 
 ## How the run ended for the town (spec 03 §10): "king", "way_home", "died" or "gave_up".
@@ -46,6 +49,13 @@ func run_end() -> String:
 		"quit":
 			return "gave_up"
 	return "died"
+
+
+## Id of the plushie freed in this run ("" = none).
+func rescued_plushie() -> String:
+	if rescue.get("freed", false):
+		return str(rescue["plushie"])
+	return ""
 
 
 func title() -> String:
