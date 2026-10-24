@@ -303,6 +303,9 @@ func test_ac49_level_up_cards_never_tilt_and_lift_on_focus() -> void:
 	await _settle()
 	assert_almost_eq(first.lift_amount(), UiFeel.STYLE.hover_lift, 0.5, "the focused card lifts")
 	assert_almost_eq(first.face.rotation, 0.0, 0.001, "and doesn't turn")
+	assert_almost_eq(first.grow_amount(), 1.0, 0.001, "and keeps its size (#151)")
+	for card: UpgradeCard in screen.cards:
+		assert_eq(card.size, first.size, "all three cards have one size")
 	assert_almost_eq(screen.cards[1].lift_amount(), 0.0, 0.5, "the others rest")
 	Sfx.history.clear()
 	await tap_action("ui_right")

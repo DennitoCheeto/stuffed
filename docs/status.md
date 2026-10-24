@@ -48,6 +48,12 @@ _Last updated: 2026-10-24 (M3.5-08 town cards, Scrapbook, HUD: all M3.5 tickets 
   pass or the siege is specced.
 - Economy (M3-05/PR #113): cheapest rebuild 200 coins, all 6 at level 3 ≈ 17k coins.
 
+## Playtest notes (M3.5, 2026-10-24, first look)
+
+- "Looks really nice", "It feels amazing!!!! i like all that alot. menus feel good" (P-18 / P-19 positive).
+- Selected level-up card looked taller (it grew 5%): now cards only lift (#151, PR #152). Rest of the playtest
+  (end screen P-20, readability P-21, Speedy Stitcher 9:00 question) still open.
+
 ## Playtest notes (M2 + M3, 2026-10-24)
 
 - Town still doesn't look very appealing → spec 05. Evolved weapons could be more exciting → evolution pass.
