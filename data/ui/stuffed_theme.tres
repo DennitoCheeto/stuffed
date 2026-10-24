@@ -1,0 +1,16 @@
+[gd_resource type="Theme" load_steps=3 format=3]
+
+[ext_resource type="FontFile" path="res://assets/fonts/Nunito.ttf" id="1_nunito"]
+
+[sub_resource type="FontVariation" id="FontVariation_body"]
+base_font = ExtResource("1_nunito")
+variation_opentype = {
+2003265652: 700
+}
+
+[resource]
+default_font = SubResource("FontVariation_body")
+FeltLabel/base_type = &"Label"
+FeltLabel/colors/font_color = Color(0.231, 0.184, 0.29, 1)
+FeltLabelSoft/base_type = &"Label"
+FeltLabelSoft/colors/font_color = Color(0.416, 0.353, 0.29, 1)

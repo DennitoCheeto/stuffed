@@ -26,8 +26,10 @@ _Last updated: 2026-10-24 (M2 + M3 accepted; end screen fix; UI research 02; spe
   arcade (https://claude.ai/artifact/JGFf3Co4vVR6emnQvs4Q4q). PO picked **a mix of A + B** ("Stitched
   Scrapbook": A's felt patches/sewn buttons as structure, B's tilt/tape/hand-written/photos/stickers as life; mockup
   "Mix" on the canvas). **Spec 04 approved** (PR #123; `docs/specs/04-ui-and-juice.md`, AC-49 … AC-57,
-  P-18 … P-21). Milestone **M3.5 — UI and juice**, issues **#124–#131** (M3.5-01 … 08). **Next: M3.5-01 style
-  foundation (#124)**, then 02 fit check, 03 weapon stats, 04 end screen, 05 run titles, 06–08 restyle screens. (2) Spec 05 town + Bedroom visual pass ("still not too appealing", "a tiny bit dark"). (3) Evolution
+  P-18 … P-21). Milestone **M3.5 — UI and juice**, issues **#124–#131** (M3.5-01 … 08). M3.5-01 style
+  foundation (#124): PR open. **Next: M3.5-02 fit check (#125)**, then 03 weapon stats, 04 end screen, 05 run
+  titles, 06–08 restyle screens. (2) Spec 05 town + Bedroom visual pass ("still not too appealing", "a tiny bit
+  dark"). (3) Evolution
   "wow" pass (new behaviour + bigger moment per evolution). (4) Skill / progress tree spec, then M4 night siege.
 - **PO decision (2026-10-24): rescued plushies become playable heroes in M5** (Pip, Böbö, BamBam, Robbar; rescue
   = unlock). Goes into the M5 spec. Böbö still has no photo (drawn as the classic IKEA bear).
@@ -233,3 +235,13 @@ _Last updated: 2026-10-24 (M2 + M3 accepted; end screen fix; UI research 02; spe
   next level, even on a locked ruin. Town sounds: `coin` (burst piece lands, `RunJars.JAR_PITCH`), `page`, `hello`
   (`PlushieTownRules.wave_sound`). F1 in tests: send `KEY_F1` with `sender.key_down`, not `tap_action("dev_menu")`.
   The run/boss music has random hiss, so only title/town are checked for an exact loop.
+- UI style (spec 04, M3.5-01): pieces in `src/ui/style/` (`FeltPanel`, `SewnButton`, `FabricTag`, `Sticker`,
+  `TapeStrip`, `PhotoFrame`, `HandTitle`), colours `UiColors`, fonts `UiFonts` (`assets/fonts/`, OFL), juice numbers
+  `data/ui/ui_style.tres` (`UiFeel.STYLE`, `UiFeel.reduced()`). Containers reset their children's rotation/scale:
+  moving pieces extend `Wobbly` (fixed layout frame + moving `body`; `tilt`, `lift`, `grow`, `spin`, `fade`).
+  Panel content goes into `panel.content`. `SewnButton` keeps `text` (the face copies it in `_draw`); tests read
+  `lift_amount()`, `grow_amount()`, `is_raised()`, `box.press`. Screens: `ScreenMotion.open(parts)` /
+  `close(parts, done)`; any key or click finishes the motion. Project theme `data/ui/stuffed_theme.tres` (default
+  font Nunito; `FeltLabel` variation = ink on felt). Felt shapes skip empty rects (triangulation errors fail GUT).
+  Settings are saved: `GameSettings.save()` / `load_saved()` (Main `_ready`), scenario tests use
+  `user://test_settings.json`. Look check: scratch `extends SceneTree` gallery + `--write-movie` (see above).

@@ -2,7 +2,8 @@ class_name PauseMenu
 extends CanvasLayer
 ## The Esc menu: Resume, damage numbers on/off, Master / Effects / Music volume, Recipes, Give up
 ## (back home with half the haul).
-## Changes take effect right away. Keeps running while the run is frozen.
+## Changes take effect right away and are saved (GameSettings). Keeps running while the run is
+## frozen.
 
 signal resumed
 signal quit_requested
@@ -11,6 +12,8 @@ signal quit_requested
 var upgrade_pool: UpgradePool
 var recipes_button: Button
 var recipes_page: RecipesPage
+## "Reduced menu animations" (spec 04 §3), built from the damage numbers switch.
+var reduced_motion_check: CheckButton
 
 @onready var panel: PanelContainer = $Panel
 @onready var resume_button: Button = %ResumeButton
@@ -24,6 +27,7 @@ var recipes_page: RecipesPage
 func _ready() -> void:
 	visible = false
 	_build_recipes()
+	_build_reduced_motion()
 	resume_button.pressed.connect(close)
 	quit_button.pressed.connect(quit_requested.emit)
 	damage_numbers_check.toggled.connect(_on_damage_numbers_toggled)
@@ -39,6 +43,7 @@ func is_open() -> bool:
 func open() -> void:
 	_show_main()
 	damage_numbers_check.set_pressed_no_signal(GameSettings.damage_numbers)
+	reduced_motion_check.set_pressed_no_signal(GameSettings.reduced_motion)
 	master_slider.set_value_no_signal(GameSettings.volume(&"Master"))
 	effects_slider.set_value_no_signal(GameSettings.volume(&"Effects"))
 	music_slider.set_value_no_signal(GameSettings.volume(&"Music"))
@@ -50,6 +55,7 @@ func close() -> void:
 	if not visible:
 		return
 	visible = false
+	GameSettings.save()
 	resumed.emit()
 
 
@@ -61,6 +67,12 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _on_damage_numbers_toggled(on: bool) -> void:
 	GameSettings.damage_numbers = on
+	GameSettings.save()
+
+
+func _on_reduced_motion_toggled(on: bool) -> void:
+	GameSettings.reduced_motion = on
+	GameSettings.save()
 
 
 func _on_volume_changed(value: float, bus: StringName) -> void:
@@ -92,3 +104,12 @@ func _build_recipes() -> void:
 	recipes_page.visible = false
 	add_child(recipes_page)
 	recipes_page.back_pressed.connect(_show_main)
+
+
+## A "Reduced menu animations" switch under "Damage numbers", styled the same.
+func _build_reduced_motion() -> void:
+	reduced_motion_check = damage_numbers_check.duplicate() as CheckButton
+	reduced_motion_check.text = "Reduced menu animations"
+	reduced_motion_check.unique_name_in_owner = false
+	damage_numbers_check.add_sibling(reduced_motion_check)
+	reduced_motion_check.toggled.connect(_on_reduced_motion_toggled)

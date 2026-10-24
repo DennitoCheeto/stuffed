@@ -7,6 +7,7 @@ const MAIN_SCENE: PackedScene = preload("res://src/main/main.tscn")
 const FPS: float = 60.0
 const TEST_LOG: String = "user://test_run_log.jsonl"
 const TEST_SAVE: String = "user://test_save.json"
+const TEST_SETTINGS: String = "user://test_settings.json"
 
 var main: Main
 var sender: GutInputSender
@@ -20,6 +21,8 @@ func before_each() -> void:
 	DirAccess.remove_absolute(TEST_LOG)
 	SaveStore.path = TEST_SAVE
 	SaveStore.delete_all()
+	GameSettings.path = TEST_SETTINGS
+	DirAccess.remove_absolute(TEST_SETTINGS)
 	main = MAIN_SCENE.instantiate()
 	main.quit_enabled = false
 	add_child_autofree(main)
