@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-24 (#135 settings everywhere + M3.5-03 weapon stats merged; M3.5-02 PR #138 waits for CI)_
+_Last updated: 2026-10-24 (#135 settings everywhere, M3.5-02 fit check, M3.5-03 weapon stats merged)_
 
 ## Where we are
 
@@ -28,9 +28,8 @@ _Last updated: 2026-10-24 (#135 settings everywhere + M3.5-03 weapon stats merge
   "Mix" on the canvas). **Spec 04 approved** (PR #123; `docs/specs/04-ui-and-juice.md`, AC-49 … AC-57,
   P-18 … P-21). Milestone **M3.5 — UI and juice**, issues **#124–#131** (M3.5-01 … 08). M3.5-01 style
   foundation (#124): merged (PR #133). PO feedback #135 (Settings from fort + title): merged (PR #136). M3.5-03 weapon
-  stats (#126): merged (PR #137). M3.5-02 fit check (#125): **PR #138 green tests, waiting** — GitHub Actions stopped
-  starting jobs on 2026-10-24 ("payments failed or spending limit", private repo): PO must fix billing, then re-run
-  CI on #138 and on main (the "latest" build lacks #137). **Next: M3.5-04 end screen (#127)**, then 05 run
+  stats (#126): merged (PR #137). M3.5-02 fit check (#125): merged (PR #138).
+  The repo is **public** since 2026-10-24 (free Actions minutes ran out while private; public = unlimited). **Next: M3.5-04 end screen (#127)**, then 05 run
   titles, 06–08 restyle screens. (2) Spec 05 town + Bedroom visual pass ("still not too appealing", "a tiny bit
   dark"). (3) Evolution
   "wow" pass (new behaviour + bigger moment per evolution). (4) Skill / progress tree spec, then M4 night siege.
