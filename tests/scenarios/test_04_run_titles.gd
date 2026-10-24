@@ -70,10 +70,12 @@ func test_ac54_earned_titles_slap_on_and_new_only_the_first_time() -> void:
 	await _quiet_run()
 	await _fight()
 	await _open_gift_boxes(3)
-	Sfx.history.clear()
 	var end: EndScreen = await _give_up()
 	if end == null:
 		return
+	# The jars stop counting (their coin sounds would push the thwaps out of the history).
+	end.brought_home.finish()
+	Sfx.history.clear()
 	var weapon: String = str(WeaponReport.star_of(end.result, 0).get("id", ""))
 	var expected: PackedStringArray = ["weapon_star:" + weapon, "gift_grabber"]
 	assert_eq(end.result.titles, expected, "weapon title, then Gift Grabber (list order)")
