@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="UiStyle" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/ui/style/ui_style.gd" id="1_style"]
+
+[resource]
+script = ExtResource("1_style")
+hover_lift = 8.0
+hover_grow = 1.05
+press_squish = 0.92
+spring_seconds = 0.22
+disabled_fade = 0.55
+nope_spin = 5.0
+nope_seconds = 0.3
+open_drop = 48.0
+open_spin = 3.0
+open_stagger = 0.08
+open_seconds = 0.35
+close_drop = 30.0
+close_seconds = 0.18
+slap_grow = 1.6
+slap_spin = 8.0
+slap_seconds = 0.3

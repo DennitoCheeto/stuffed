@@ -30,6 +30,7 @@ var player_count: int = 1
 
 
 func _ready() -> void:
+	GameSettings.load_saved()
 	load_town()
 	FeltAtlas.bake(self)
 	Sfx.attach(self)

@@ -38,6 +38,10 @@ window/stretch/aspect="expand"
 
 enabled=PackedStringArray("res://addons/gut/plugin.cfg")
 
+[gui]
+
+theme/custom="res://data/ui/stuffed_theme.tres"
+
 [input]
 
 p1_move_left={

@@ -56,6 +56,13 @@ const LENGTHS: Dictionary[StringName, float] = {
 	&"coin": 0.14,
 	&"page": 0.3,
 	&"hello": 0.3,
+	# Menus (spec 04 §7): soft, quieter than any enemy sound.
+	&"ui_hover": 0.08,
+	&"ui_press": 0.14,
+	&"ui_nope": 0.22,
+	&"ui_open": 0.3,
+	&"sticker": 0.22,
+	&"star": 0.9,
 }
 
 
@@ -133,6 +140,12 @@ static func _weapon_or_moment(sound: StringName) -> Callable:
 		&"coin": _coin,
 		&"page": _page,
 		&"hello": _hello,
+		&"ui_hover": _ui_hover,
+		&"ui_press": _ui_press,
+		&"ui_nope": _ui_nope,
+		&"ui_open": _ui_open,
+		&"sticker": _sticker,
+		&"star": _star,
 	}
 	return voices[sound]
 
@@ -573,3 +586,55 @@ static func _hello(t: float) -> float:
 		return 0.0
 	var pitch: float = Synth.midi_hz(86.0) * (1.0 + 0.2 * t / length)
 	return 0.14 * Synth.triangle(pitch * t) * sin(PI * t / length)
+
+
+## Hover / focus on a menu button: a tiny muffled felt "pat".
+static func _ui_hover(t: float) -> float:
+	var thump: float = Synth.sine(Synth.sweep(t, 260.0, 170.0, 0.08)) * Synth.pluck(t, 0.004, 45.0)
+	return 0.16 * thump + 0.03 * Synth.noise(t) * exp(-80.0 * t)
+
+
+## Pressing a menu button: a soft rubbery "boop".
+static func _ui_press(t: float) -> float:
+	var boop: float = Synth.sine(Synth.sweep(t, 540.0, 330.0, 0.12)) * Synth.pluck(t, 0.006, 24.0)
+	return 0.22 * boop
+
+
+## Pressing a disabled button: two low blips going down ("nuh-uh").
+static func _ui_nope(t: float) -> float:
+	var blip: float = 0.0
+	var starts: PackedFloat32Array = [0.0, 0.11]
+	for i: int in starts.size():
+		var local: float = t - starts[i]
+		if local < 0.0 or local > 0.1:
+			continue
+		blip += Synth.triangle(Synth.midi_hz(52.0 - 3.0 * i) * local) * sin(PI * local / 0.1)
+	return 0.17 * blip
+
+
+## A menu opens: a short, soft cloth "whoosh".
+static func _ui_open(t: float) -> float:
+	var shape: float = sin(PI * clampf(t / 0.3, 0.0, 1.0))
+	var air: float = Synth.noise(t) * shape * shape
+	var tone: float = Synth.sine(Synth.sweep(t, 180.0, 360.0, 0.3)) * shape
+	return 0.1 * air + 0.06 * tone
+
+
+## A sticker slaps on: a quick papery "thwap".
+static func _sticker(t: float) -> float:
+	var slap: float = Synth.noise(t) * exp(-38.0 * t)
+	var thump: float = Synth.sine(Synth.sweep(t, 300.0, 140.0, 0.1)) * exp(-22.0 * t)
+	return 0.16 * slap + 0.14 * thump
+
+
+## The Star of the run: a little fanfare going up (C, E, G, high C).
+static func _star(t: float) -> float:
+	var notes: PackedFloat32Array = [72.0, 76.0, 79.0, 84.0]
+	var music: float = 0.0
+	for i: int in notes.size():
+		var local: float = t - i * 0.12
+		if local < 0.0:
+			continue
+		var decay: float = 9.0 if i < notes.size() - 1 else 4.0
+		music += Synth.triangle(Synth.midi_hz(notes[i]) * local) * Synth.pluck(local, 0.01, decay)
+	return 0.13 * music

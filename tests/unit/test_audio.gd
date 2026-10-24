@@ -141,3 +141,16 @@ func test_every_music_track_stays_in_range_and_town_is_the_calmest() -> void:
 		if track != &"town":
 			assert_lt(MusicPlayer.TRACKS[&"town"][0], bpm, "town is slower than %s" % track)
 	music.free()
+
+
+## Spec 04 §7: the menu sounds exist and stay soft, never close to enemy danger.
+func test_menu_sounds_are_softer_than_enemy_danger() -> void:
+	var quietest_danger: float = INF
+	for sound: StringName in DANGER:
+		quietest_danger = minf(quietest_danger, _loudness(sound))
+	var menu: Array[StringName] = [&"ui_hover", &"ui_press", &"ui_nope", &"ui_open", &"sticker"]
+	menu.append(&"star")
+	for sound: StringName in menu:
+		assert_true(SfxBank.LENGTHS.has(sound), "%s exists" % sound)
+		assert_lt(_loudness(sound), quietest_danger, "%s is softer than danger" % sound)
+	assert_lt(_loudness(&"ui_hover"), _loudness(&"ui_press"), "hover is the softest touch")
