@@ -24,8 +24,10 @@ const DEPTH: float = 6.0
 
 ## The gold "go on" button (one per screen) or a cream one.
 var main: bool = false
-## False = hover / focus only lifts it (cards that must keep one size side by side).
-var grows_on_hover: bool = true
+## False = hover / focus doesn't lift or grow it (cards that must stay in line, one size).
+var moves_on_hover: bool = true
+## True = a gold outline ring and gold stitches show while it is raised (hovered / focused).
+var ring_on_raise: bool = false
 ## What shows and moves: the felt body with the caption.
 var face: PanelContainer = PanelContainer.new()
 var caption: Label = Label.new()
@@ -95,6 +97,11 @@ func _init(words: String = "", is_main: bool = false, font_size: int = 26) -> vo
 func set_stitch(color: Color) -> void:
 	_base_stitch = color
 	box.stitch = color.lightened(0.35) if is_raised() else color
+
+
+## True while the gold outline ring shows (for tests).
+func is_ringed() -> bool:
+	return box.ring.a > 0.0
 
 
 ## How far the face is lifted right now (px) and its size (1 = normal), for tests.
@@ -200,10 +207,14 @@ func _go_to_pose() -> void:
 	if _held and not disabled:
 		size_to = style.press_squish
 		press = 1.0
-	elif is_raised():
+	elif is_raised() and moves_on_hover:
 		lift = style.hover_lift
-		size_to = style.hover_grow if grows_on_hover else 1.0
+		size_to = style.hover_grow
 	box.stitch = _base_stitch.lightened(0.35) if is_raised() else _base_stitch
+	var ringed: bool = ring_on_raise and is_raised()
+	box.ring = UiColors.GOLD if ringed else Color(UiColors.GOLD, 0.0)
+	if ringed:
+		box.stitch = UiColors.GOLD_EDGE
 	face.modulate.a = style.disabled_fade if disabled else 1.0
 	if _tween != null:
 		_tween.kill()

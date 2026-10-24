@@ -281,7 +281,7 @@ func test_ac49_the_level_up_cards_are_felt_patches_with_sewn_buttons() -> void:
 		assert_eq(button.key_tag.label.text, button.key_label.text)
 
 
-func test_ac49_level_up_cards_never_tilt_and_lift_on_focus() -> void:
+func test_ac49_level_up_cards_never_move_and_the_chosen_one_has_a_gold_ring() -> void:
 	var run: Run = await start_run()
 	run.spawner.active = false
 	disarm(first_player())
@@ -301,18 +301,27 @@ func test_ac49_level_up_cards_never_tilt_and_lift_on_focus() -> void:
 	var first: UpgradeCard = screen.cards[0]
 	assert_true(first.has_focus(), "keyboard ready on card 1")
 	await _settle()
-	assert_almost_eq(first.lift_amount(), UiFeel.STYLE.hover_lift, 0.5, "the focused card lifts")
+	assert_true(first.is_ringed(), "the chosen card has a gold ring")
+	assert_almost_eq(first.lift_amount(), 0.0, 0.001, "and stays in line (#153)")
 	assert_almost_eq(first.face.rotation, 0.0, 0.001, "and doesn't turn")
 	assert_almost_eq(first.grow_amount(), 1.0, 0.001, "and keeps its size (#151)")
 	for card: UpgradeCard in screen.cards:
 		assert_eq(card.size, first.size, "all three cards have one size")
-	assert_almost_eq(screen.cards[1].lift_amount(), 0.0, 0.5, "the others rest")
+		assert_eq(card.face.global_position.y, first.face.global_position.y, "all in one line")
+	assert_false(screen.cards[1].is_ringed(), "the others rest")
 	Sfx.history.clear()
 	await tap_action("ui_right")
 	await _settle()
 	assert_true(screen.cards[1].has_focus(), "arrow keys move along the cards")
-	assert_almost_eq(screen.cards[1].lift_amount(), UiFeel.STYLE.hover_lift, 0.5)
-	assert_almost_eq(first.lift_amount(), 0.0, 0.5, "card 1 settles back")
+	assert_true(screen.cards[1].is_ringed())
+	assert_false(first.is_ringed(), "card 1 loses its ring")
+	# (The headless test window has GUT's own panel over that spot: send the hover itself.)
+	screen.cards[2].mouse_entered.emit()
+	await _settle()
+	assert_true(screen.cards[2].has_focus(), "the mouse moves the choice")
+	assert_true(screen.cards[2].is_ringed())
+	assert_false(screen.cards[1].is_ringed(), "only one card is ever chosen")
+	assert_almost_eq(screen.cards[2].lift_amount(), 0.0, 0.001, "hovered cards stay in line")
 	assert_true(Sfx.history.has(&"ui_hover"), "felt pat")
 
 
