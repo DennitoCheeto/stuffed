@@ -34,6 +34,7 @@ static func to_entry(result: RunResult) -> Dictionary:
 		"run_end": result.run_end(),
 		"unlocked_weapons": Array(result.unlocked_weapons),
 		"rescue": _rescue_or_null(result.rescue),
+		"weapons": result.weapons.duplicate(true),
 	}
 
 

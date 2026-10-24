@@ -52,6 +52,8 @@ var max_alive: int = 500
 var health_scale: float = 1.0
 var damage_scale: float = 1.0
 var kills: int = 0
+## Damage, kills and time held per weapon and player (spec 04 §4.1).
+var tally: WeaponTally = WeaponTally.new()
 var zombies: Array[Zombie] = []
 ## While calm (goal reached), zombies stand still and can't hurt anyone.
 var calm: bool = false
@@ -125,15 +127,34 @@ func _add(stats: EnemyStats, at: Vector2, elite: EliteRules, boss: BossDef) -> Z
 	return zombie
 
 
-## Hurts a zombie and pushes it. Returns true if it died.
-func damage(zombie: Zombie, amount: float, push: Vector2 = Vector2.ZERO) -> bool:
+## Hurts a zombie and pushes it. Returns true if it died. `by` = the weapon that hit (it gets the
+## damage and the kill in the tally).
+func damage(
+	zombie: Zombie, amount: float, push: Vector2 = Vector2.ZERO, by: Weapon = null
+) -> bool:
 	if not is_instance_valid(zombie) or zombie.dead:
 		return false
+	var dealt: float = clampf(amount, 0.0, maxf(zombie.health, 0.0))
+	var died: bool = _hurt(zombie, amount, push)
+	tally.add_hit(by, dealt, died)
+	return died
+
+
+## Like `damage`, from something that isn't a weapon (`source` = WeaponTally.PARTY_POPPER ...).
+func damage_from(source: StringName, zombie: Zombie, amount: float) -> bool:
+	if not is_instance_valid(zombie) or zombie.dead:
+		return false
+	var dealt: float = clampf(amount, 0.0, maxf(zombie.health, 0.0))
+	var died: bool = _hurt(zombie, amount, Vector2.ZERO)
+	tally.add_other(source, dealt, died)
+	return died
+
+
+func _hurt(zombie: Zombie, amount: float, push: Vector2) -> bool:
 	zombie_hit.emit(zombie, amount)
 	if zombie.take_damage(amount, push):
 		_burst_into_cloud(zombie)
-		_remove(zombie, true)
-		return true
+		return _remove(zombie, true)
 	return false
 
 
@@ -141,7 +162,8 @@ func damage(zombie: Zombie, amount: float, push: Vector2 = Vector2.ZERO) -> bool
 func kill_all() -> void:
 	for zombie: Zombie in zombies.duplicate():
 		zombie.dead = true
-		_remove(zombie, true)
+		if _remove(zombie, true):
+			tally.add_other(WeaponTally.OTHER, 0.0, true)
 
 
 ## Pops every zombie, nearest to `center` first, spread over `duration` seconds: a satisfying
@@ -159,7 +181,8 @@ func pop_all_in_chain(center: Vector2, duration: float) -> void:
 			var zombie: Zombie = queue.pop_front()
 			if is_instance_valid(zombie) and not zombie.dead:
 				zombie.dead = true
-				_remove(zombie, true)
+				if _remove(zombie, true):
+					tally.add_other(WeaponTally.GOAL_POPS, 0.0, true)
 		await get_tree().physics_frame
 
 
@@ -354,10 +377,11 @@ func _touch_players(zombie: Zombie, players: Array[Player]) -> void:
 			player.take_hit(zombie.contact_damage, zombie.display_name)
 
 
-func _remove(zombie: Zombie, with_burst: bool) -> void:
+## Takes a popped zombie out (counted as a kill). False if it was already gone.
+func _remove(zombie: Zombie, with_burst: bool) -> bool:
 	var index: int = zombies.find(zombie)
 	if index == -1:
-		return
+		return false
 	zombies[index] = zombies[zombies.size() - 1]
 	zombies.pop_back()
 	kills += 1
@@ -368,6 +392,7 @@ func _remove(zombie: Zombie, with_burst: bool) -> void:
 		burst.global_position = zombie.global_position
 		burst.launch(zombie.puppet, _cosmetic_rng)
 	zombie.queue_free()
+	return true
 
 
 ## Where a zombie wants to go: straight at its target, or (ranged zombies) to a spot at their

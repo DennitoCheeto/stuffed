@@ -28,7 +28,8 @@ func launch(from: Weapon, direction: Vector2) -> void:
 		var to_zombie: Vector2 = zombie.position - global_position
 		if absf(direction.angle_to(to_zombie)) > half_width:
 			continue
-		manager.enemies.damage(zombie, numbers.damage, to_zombie.normalized() * push_strength)
+		var push: Vector2 = to_zombie.normalized() * push_strength
+		manager.enemies.damage(zombie, numbers.damage, push, weapon)
 
 
 func advance(delta: float) -> bool:

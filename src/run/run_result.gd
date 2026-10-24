@@ -10,6 +10,12 @@ var survived_seconds: float = 0.0
 var endless_seconds: float = 0.0
 var level: int = 1
 var kills: int = 0
+## Damage that landed in the whole run (the sum of `weapons`).
+var total_damage: float = 0.0
+## Per weapon and player, biggest damage first (spec 04 §4.1, WeaponTallyEntry.to_dict): id, name,
+## player (-1 = not a weapon, e.g. the Party Popper), weapon, damage, kills, seconds_held, level,
+## evolved. The kills add up to `kills`.
+var weapons: Array[Dictionary] = []
 ## What hit Banane last before he fell ("" if he didn't fall).
 var killed_by: String = ""
 ## Picked cards in order, e.g. "Quick Feet 2".

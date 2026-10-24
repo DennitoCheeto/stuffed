@@ -210,6 +210,9 @@ func _physics_process(delta: float) -> void:
 	if endless:
 		_update_endless_scaling()
 	spawner.tick(elapsed, delta)
+	for player: Player in Players.all(get_tree()):
+		if not player.is_dead():
+			enemies.tally.hold(player, delta)
 	if rescue_plan != null and rescue_log.is_empty() and elapsed >= rescue_plan.at_seconds:
 		start_rescue()
 	_show_clock()
@@ -434,6 +437,8 @@ func make_result(ending: String) -> RunResult:
 	result.endless_seconds = endless_seconds()
 	result.level = first.progress.level
 	result.kills = enemies.kills
+	result.weapons = enemies.tally.to_list()
+	result.total_damage = enemies.tally.total_damage
 	result.killed_by = first.last_hit_by if first.is_dead() else ""
 	result.upgrades = first.picked_upgrades
 	result.seed_value = seed_value
@@ -707,6 +712,7 @@ func _on_player_evolved(new_weapon: Weapon, player: Player) -> void:
 		"weapon": new_weapon.stats.display_name, "time": elapsed, "player": player.player_index
 	}
 	evolution_log.append(entry)
+	enemies.tally.evolve(new_weapon)
 
 
 func _on_player_died(_player: Player) -> void:
@@ -847,7 +853,7 @@ func party_pop(player: Player) -> void:
 			hit = zombie.max_health * data.popper_boss_share
 		elif zombie.is_elite():
 			hit = zombie.max_health * data.popper_elite_share
-		enemies.damage(zombie, hit)
+		enemies.damage_from(WeaponTally.PARTY_POPPER, zombie, hit)
 	var seconds: float = data.popper_seconds
 	var confetti: ConfettiBlast = ConfettiBlast.new(player.global_position, view, seconds, randi())
 	effects.add_child(confetti)

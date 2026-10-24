@@ -124,7 +124,7 @@ func _land() -> void:
 	Sfx.play(&"hit", 0.7)
 	for zombie: Zombie in manager.enemies.query_circle(global_position, blast_radius()):
 		var push: Vector2 = global_position.direction_to(zombie.position) * weapon.stats.knockback
-		manager.enemies.damage(zombie, _numbers.damage, push)
+		manager.enemies.damage(zombie, _numbers.damage, push, weapon)
 	for dust: Sprite2D in _dust:
 		dust.visible = true
 
