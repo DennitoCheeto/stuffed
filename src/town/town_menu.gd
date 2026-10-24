@@ -80,4 +80,3 @@ func show_settings() -> void:
 func _on_settings_closed() -> void:
 	panel.visible = true
 	settings_button.grab_focus()
-
