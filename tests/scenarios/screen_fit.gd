@@ -53,9 +53,7 @@ static func _walk(
 		_walk(child, screen, box, in_world, found)
 
 
-static func _check(
-	control: Control, screen: Rect2, box: Control, found: PackedStringArray
-) -> void:
+static func _check(control: Control, screen: Rect2, box: Control, found: PackedStringArray) -> void:
 	var checked: bool = (
 		control is BaseButton
 		or control is Label
