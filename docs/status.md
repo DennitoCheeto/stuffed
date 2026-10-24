@@ -3,42 +3,40 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-24 (M3-12 co-op in town, dev menu, sounds; M3 fully built)_
+_Last updated: 2026-10-24 (M2 + M3 accepted; end screen fix; UI research 02)_
 
 ## Where we are
 
 | Milestone | State |
 |-----------|-------|
-| Research | ✅ `docs/research/01-bullet-heaven-market-research.md` |
+| Research | ✅ `docs/research/01-bullet-heaven-market-research.md`, `02-game-ui-research.md` (UI, 2026-10-24) |
 | Vision | ✅ approved 2026-10-21 (`docs/specs/00-product-vision.md`) |
 | Art direction | ✅ felt style "B — Soft", puppet animation (`docs/art/`) |
 | M0 Factory setup | ✅ done (PR #1) |
 | M1 Core run | ✅ accepted 2026-10-21 (PRs #17–#29; playtest P-1 … P-6 passed, 144 fps on the PO's PC) |
-| M2 Build variety | ✅ built (not yet accepted): all 19 tickets merged (PRs #47–#49, #51–#55, #57, #58, #60, #61, #63, #67, #69, #77, #78, #80, #81); + spec 02b floor pickups approved (#83): M2-20 (PR #88), M2-21 (PR #89) and M2-22 (PR #90) merged; PO playtest postponed, played with M3 |
-| M3 Town | 🔨 spec 03 approved (PR #91); issues #92–#103; M3-01 save system (PR #105), M3-02 town + flow (PR #106), M3-03 materials (PR #107), M3-04 Way Home portal (PR #109), M3-05 rebuilding (PR #110), M3-06 Toy Box Armory (PR #114), M3-07 Lucky Jar + Watchtower + Snack Bar (PR #115), M3-08 Party Shop (PR #116), M3-09 rescue in the run (PR #117), M3-10 Plush Hospital + plushies in town (PR #118), M3-11 Scrapbook (PR #119), M3-12 co-op in town + dev menu + sounds: **all 12 tickets built, waiting for the PO playtest** |
+| M2 Build variety | ✅ accepted 2026-10-24 (played with M3): all 19 tickets merged (PRs #47–#49, #51–#55, #57, #58, #60, #61, #63, #67, #69, #77, #78, #80, #81); + spec 02b floor pickups approved (#83): M2-20 (PR #88), M2-21 (PR #89) and M2-22 (PR #90) merged |
+| M3 Town | ✅ accepted 2026-10-24: spec 03 approved (PR #91); issues #92–#103; M3-01 save system (PR #105), M3-02 town + flow (PR #106), M3-03 materials (PR #107), M3-04 Way Home portal (PR #109), M3-05 rebuilding (PR #110), M3-06 Toy Box Armory (PR #114), M3-07 Lucky Jar + Watchtower + Snack Bar (PR #115), M3-08 Party Shop (PR #116), M3-09 rescue in the run (PR #117), M3-10 Plush Hospital + plushies in town (PR #118), M3-11 Scrapbook (PR #119), M3-12 co-op in town + dev menu + sounds (PR #120) |
 
 ## Next step
 
-- M2 is fully built (spec 02 + §20 fixes + spec 02b floor pickups, PRs up to #90). The PO **postponed the M2
-  acceptance playtest** (2026-10-22): P-1 … P-11 get played later, together with M3.
-- **Spec 03 (M3 Town) approved** (PR #91, `docs/specs/03-town.md`). Issues **#92–#103** (M3-01 … M3-12, milestone
-  "M3 — Town"). M3-01 #92 save system (PR #105) and M3-02 #93 town + title → town → run → "Brought home" flow (PR #106) done.
-  M3-03 #94 materials in the run (PR #107), M3-04 #95 Way Home portal (PR #109) and M3-05 #96 ruins and
-  rebuilding (PR #110) done. M3-06 #97 Toy Box Armory (PR #114), M3-07 #98 Lucky Jar + Watchtower + Snack Bar (PR #115), M3-08 #99
-  Party Shop (PR #116), M3-09 #100 rescue in the run (PR #117), M3-10 #101 Plush Hospital + plushies in town (PR #118) and M3-11
-  #102 Scrapbook (PR #119) and M3-12 #103 co-op in town, town developer menu, sounds pass done.
-  The 4 plushies are the girlfriend's: Pip (round polar bear, scarf), Böbö (IKEA brown bear, **no photo yet**: drawn
-  as the classic IKEA bear, ask the PO for one), BamBam (long bear, bowtie, heart), Robbar (smol seal).
-  Next: **PO playtest of M2 + M3 together** (M2 P-1 … P-11, M3 P-12 … P-17) on the "latest" build, then the
-  M3 acceptance. After that: visual pass for town + Bedroom, skill tree spec.
-- M3 ACs are AC-37 … AC-48, playtest P-12 … P-17.
-- PO ideas for later: a skill / progress tree (own spec, after M3). **Visual pass** for the town and the Bedroom
-  (PO, 2026-10-23): "everything is a tiny bit dark" and needs more cool details. Own short art spec (brighter
-  palette, more props/details), after M3 unless the PO wants it sooner.
-- M3-05 quick check (PO, 2026-10-23): rebuilding "feels really good". First run brought home ~1.2k coins and
-  bought several buildings at once (prices assumed ~150 per short run). Re-check the economy in the M3 playtest
-  (P-12, P-16); prices live in `data/town/buildings/*.tres`. PO asked "prices up": raised ~2-2.5x (PR #113),
-  cheapest rebuild now 200 coins, all 6 at level 3 ≈ 17k coins.
+- **M2 + M3 accepted** (PO, 2026-10-24: "very good progress"). End-screen buttons fell off the screen: fixed (#121).
+- PO-approved order: (1) **spec 04 UI and juice** (one themed menu style, juicy buttons, new end screen with
+  per-weapon damage/kills/DPS + "Star of the run" + run titles; screens always fit 1920×1080 and 16:10). Input:
+  `docs/research/02-game-ui-research.md` and the mockup canvas with looks A Sewing box / B Scrapbook / C Toy-box
+  arcade (https://claude.ai/artifact/JGFf3Co4vVR6emnQvs4Q4q). **Waiting for the PO to pick a look**, then write
+  spec 04. (2) Spec 05 town + Bedroom visual pass ("still not too appealing", "a tiny bit dark"). (3) Evolution
+  "wow" pass (new behaviour + bigger moment per evolution). (4) Skill / progress tree spec, then M4 night siege.
+- **PO decision (2026-10-24): rescued plushies become playable heroes in M5** (Pip, Böbö, BamBam, Robbar; rescue
+  = unlock). Goes into the M5 spec. Böbö still has no photo (drawn as the classic IKEA bear).
+- PO idea (2026-10-24, "idk"): **walk into the buildings** (interiors). Park it; ask again when the town visual
+  pass or the siege is specced.
+- Economy (M3-05/PR #113): cheapest rebuild 200 coins, all 6 at level 3 ≈ 17k coins.
+
+## Playtest notes (M2 + M3, 2026-10-24)
+
+- Town still doesn't look very appealing → spec 05. Evolved weapons could be more exciting → evolution pass.
+- "We REALLY need to work on the UI": basic, not fun. End screen "really bad": wants weapons with stats
+  (damage done), buttons slipped out of the viewport → spec 04 (+ fix #121).
 
 ## Playtest notes (M2, first round)
 

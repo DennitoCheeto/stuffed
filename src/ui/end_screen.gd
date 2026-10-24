@@ -14,14 +14,14 @@ var brought_home: BroughtHomePanel = BroughtHomePanel.new()
 @onready var stats_label: Label = %StatsLabel
 @onready var upgrades_label: Label = %UpgradesLabel
 @onready var seed_label: Label = %SeedLabel
+## Right column: what the run brought home (left column: the run's stats).
+@onready var home_column: VBoxContainer = %HomeColumn
 @onready var fort_button: Button = %FortButton
 @onready var try_again_button: Button = %TryAgainButton
 
 
 func _ready() -> void:
-	var center: Control = seed_label.get_parent()
-	center.add_child(brought_home)
-	center.move_child(brought_home, seed_label.get_index() + 1)
+	home_column.add_child(brought_home)
 	fort_button.pressed.connect(fort_requested.emit)
 	try_again_button.pressed.connect(try_again_requested.emit)
 	fort_button.grab_focus()
