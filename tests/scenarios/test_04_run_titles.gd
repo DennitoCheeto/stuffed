@@ -76,7 +76,7 @@ func test_ac54_earned_titles_slap_on_and_new_only_the_first_time() -> void:
 		return
 	var weapon: String = str(WeaponReport.star_of(end.result, 0).get("id", ""))
 	var expected: PackedStringArray = ["weapon_star:" + weapon, "gift_grabber"]
-	assert_eq(end.result.titles, expected, "weapon title and Gift Grabber (same rarity: list order)")
+	assert_eq(end.result.titles, expected, "weapon title, then Gift Grabber (list order)")
 	var words: String = end.result.weapon_titles.get(weapon, "")
 	assert_ne(words, "", "the weapon has its own title")
 	assert_eq(_texts(end.title_stickers), PackedStringArray([words, "Gift Grabber"]))
