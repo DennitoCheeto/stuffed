@@ -37,6 +37,9 @@ func test_buttons_fit_on_screen_with_everything_shown() -> void:
 	end.brought_home.show_haul(kept, before, 0.5, 0.1)
 	end.brought_home.show_rescue("BamBam")
 	await wait_process_frames(3)
+	# The screen's resting layout (not mid drop-in) is what has to fit.
+	end.motion.finish()
+	await wait_process_frames(1)
 	var screen: Rect2 = Rect2(Vector2.ZERO, SCREEN)
 	for button: Button in [end.fort_button, end.try_again_button]:
 		var rect: Rect2 = button.get_global_rect()

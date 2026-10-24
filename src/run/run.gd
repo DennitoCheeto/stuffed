@@ -441,6 +441,8 @@ func make_result(ending: String) -> RunResult:
 	result.total_damage = enemies.tally.total_damage
 	result.killed_by = first.last_hit_by if first.is_dead() else ""
 	result.upgrades = first.picked_upgrades
+	result.player_count = Players.all(get_tree()).size()
+	result.items = _items_of_everyone()
 	result.seed_value = seed_value
 	result.evolutions = evolution_log.duplicate(true)
 	result.rerolls_used = first.card_controls.rerolls_used
@@ -454,6 +456,18 @@ func make_result(ending: String) -> RunResult:
 	for weapon: UpgradeDef in perks.open_weapons(upgrade_pool):
 		result.unlocked_weapons.append(String(weapon.id))
 	return result
+
+
+## Every player's items with their levels (end screen tags).
+func _items_of_everyone() -> Array[Dictionary]:
+	var items: Array[Dictionary] = []
+	for player: Player in Players.all(get_tree()):
+		for item: UpgradeDef in player.items:
+			var entry: Dictionary = {"id": String(item.id), "name": item.display_name}
+			entry["level"] = player.item_levels.get(item.id, 0)
+			entry["player"] = player.player_index
+			items.append(entry)
+	return items
 
 
 func _show_clock() -> void:

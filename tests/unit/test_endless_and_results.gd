@@ -33,20 +33,19 @@ func _result(won: bool) -> RunResult:
 	return result
 
 
-func test_end_screen_lines_for_a_win_in_endless() -> void:
+func test_end_screen_line_for_a_win_in_endless() -> void:
 	var lines: PackedStringArray = EndScreen.stat_lines(_result(true))
 	assert_eq(_result(true).title(), "You survived!")
-	assert_has(lines, "Time survived: 6:01")
-	assert_has(lines, "Endless: +1:01")
-	assert_has(lines, "Level: 12")
-	assert_has(lines, "Zombies stuffed: 834")
-	assert_has(lines, "Got stuffed by: Runner")
+	assert_has(lines, "5:00 + 1:01 endless")
+	assert_has(lines, "Level 12")
+	assert_has(lines, "834 zombies stuffed")
+	assert_has(lines, "Got stuffed by Runner")
 
 
-func test_end_screen_lines_for_a_loss() -> void:
+func test_end_screen_line_for_a_loss() -> void:
 	var loss: RunResult = _result(false)
 	assert_eq(loss.title(), "Banane got stuffed")
-	for line: String in EndScreen.stat_lines(loss):
-		assert_false(line.begins_with("Endless"), "no endless line without endless")
-	assert_eq(EndScreen.upgrades_text(loss), "Upgrades: Quick Feet 1, Peel Boomerang 2")
-	assert_eq(EndScreen.upgrades_text(RunResult.new()), "Upgrades: none")
+	var lines: PackedStringArray = EndScreen.stat_lines(loss)
+	assert_has(lines, "Survived 6:01")
+	for line: String in lines:
+		assert_false(line.contains("endless"), "no endless part without endless")

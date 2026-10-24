@@ -36,11 +36,11 @@ func test_ac22_dying_before_the_goal_shows_the_stats() -> void:
 	if end == null:
 		return
 	assert_eq(end.title_label.text, "Banane got stuffed")
-	assert_string_contains(end.stats_label.text, "Time survived: 1:23")
-	assert_string_contains(end.stats_label.text, "Level: 1")
-	assert_string_contains(end.stats_label.text, "Zombies stuffed: 1")
-	assert_string_contains(end.stats_label.text, "Got stuffed by: Shambler")
-	assert_eq(end.upgrades_label.text, "Upgrades: Quick Feet 1")
+	assert_string_contains(end.stats_label.text, "Survived 1:23")
+	assert_string_contains(end.stats_label.text, "Level 1")
+	assert_string_contains(end.stats_label.text, "1 zombie stuffed")
+	assert_string_contains(end.stats_label.text, "Got stuffed by Shambler")
+	assert_eq(end.item_tag_texts(), PackedStringArray(["Quick Feet 1"]), "items as tags")
 	assert_eq(end.seed_label.text, "Seed %d" % end.result.seed_value)
 
 

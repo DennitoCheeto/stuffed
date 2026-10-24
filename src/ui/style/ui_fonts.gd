@@ -35,3 +35,15 @@ static func _weighted(file: FontFile, family: String, weight: int) -> Font:
 		font.variation_opentype = {tag: weight}
 		_cache[key] = font
 	return _cache[key]
+
+
+## A plain label in `font` (default: body text) for felt panels.
+static func label(words: String, font_size: int, color: Color, font: Font = null) -> Label:
+	var result: Label = Label.new()
+	result.text = words
+	result.add_theme_font_override(&"font", font if font != null else body())
+	result.add_theme_font_size_override(&"font_size", font_size)
+	result.add_theme_color_override(&"font_color", color)
+	result.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	result.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return result

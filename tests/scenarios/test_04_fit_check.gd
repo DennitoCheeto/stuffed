@@ -77,9 +77,10 @@ func test_the_check_catches_a_button_off_screen_and_cut_text() -> void:
 
 ## Boots the game in a window of `window` px and opens every screen with busy content.
 func _visit_all(window: Vector2i) -> void:
-	# Screens rest at once: their final layout is what the player looks at.
-	GameSettings.reduced_motion = true
 	await _boot(window)
+	# Screens rest at once: their final layout is what the player looks at. (After the boot: Main
+	# loads the saved settings, which would switch it back.)
+	GameSettings.reduced_motion = true
 	var title: TitleScreen = main.current_screen as TitleScreen
 	await _check("title (new game)")
 	title.open_settings()
@@ -211,9 +212,22 @@ func _max_the_town(town: Town) -> void:
 	await wait_seconds(2.0)
 
 
-## 6 weapons (long names), every item slot, all at their top level.
+## 6 weapons (long names), every item slot, all at their top level; player 2 gets the same build
+## (two full weapon columns on the end screen).
 func _fill_the_build(run: Run) -> void:
 	run.dev_menu.max_everything()
+	var players: Array[Player] = Players.all(run.get_tree())
+	var first: Player = players[0]
+	for other: Player in players.slice(1):
+		for weapon: Weapon in other.weapons():
+			weapon.get_parent().remove_child(weapon)
+			weapon.free()
+		for weapon: Weapon in first.weapons():
+			var copy: Weapon = other.add_weapon(weapon.stats)
+			while copy.level < weapon.level:
+				copy.level_up()
+		other.items = first.items.duplicate()
+		other.item_levels = first.item_levels.duplicate()
 
 
 func _free_a_plushie(run: Run) -> void:
