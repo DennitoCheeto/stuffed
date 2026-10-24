@@ -6,6 +6,9 @@ extends Control
 signal try_again_requested
 signal fort_requested
 
+## The upgrade list shows about 4 lines, more scroll.
+const UPGRADES_HEIGHT: float = 140.0
+
 var result: RunResult
 ## The haul counting into the jars (spec 03 §2.6).
 var brought_home: BroughtHomePanel = BroughtHomePanel.new()
@@ -25,6 +28,24 @@ func _ready() -> void:
 	fort_button.pressed.connect(fort_requested.emit)
 	try_again_button.pressed.connect(try_again_requested.emit)
 	fort_button.grab_focus()
+	_scroll_upgrades()
+
+
+## A long upgrade list scrolls inside its box instead of being cut off (spec 04 §5).
+func _scroll_upgrades() -> void:
+	var scroll: ScrollContainer = ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(upgrades_label.custom_minimum_size.x, UPGRADES_HEIGHT)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	var column: Node = upgrades_label.get_parent()
+	var index: int = upgrades_label.get_index()
+	column.remove_child(upgrades_label)
+	scroll.add_child(upgrades_label)
+	column.add_child(scroll)
+	column.move_child(scroll, index)
+	upgrades_label.max_lines_visible = -1
+	upgrades_label.text_overrun_behavior = TextServer.OVERRUN_NO_TRIMMING
+	upgrades_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
 
 ## Fills the screen with `run_result`. Call before or after adding to the tree.
