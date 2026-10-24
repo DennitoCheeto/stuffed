@@ -35,6 +35,12 @@ const TAPE_SIZE: Vector2 = Vector2(90, 26)
 	set(value):
 		depth = value
 		emit_changed()
+## An outline ring around the face (a selected card), drawn outside the rect; alpha 0 = none.
+@export var ring: Color = Color(0, 0, 0, 0):
+	set(value):
+		ring = value
+		emit_changed()
+@export var ring_width: float = 5.0
 ## Soft drop shadow below the patch (alpha 0 = none).
 @export var shadow: Color = Color(0, 0, 0, 0)
 @export var shadow_offset: float = 8.0
@@ -107,6 +113,9 @@ func _draw(to_canvas_item: RID, rect: Rect2) -> void:
 		var bottom: Rect2 = Rect2(rect.position + Vector2(0, depth), rect.size - Vector2(0, depth))
 		_polygon(to_canvas_item, FeltDraw.rounded(bottom, radius), edge)
 	var face: Rect2 = face_rect(rect)
+	if ring.a > 0.0:
+		var halo: Rect2 = face.grow(ring_width)
+		_polygon(to_canvas_item, FeltDraw.rounded(halo, radius + ring_width), ring)
 	_polygon(to_canvas_item, FeltDraw.rounded(face, radius), fill)
 	var stitches: PackedVector2Array = stitch_points(rect)
 	if not stitches.is_empty():
