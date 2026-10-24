@@ -3,6 +3,7 @@ extends Control
 ## The first screen: "Stuffed", Continue (or New game the first time) and Quit. Continue and
 ## New game open the town. Works with mouse and keyboard. With a saved town it also offers the
 ## Scrapbook (spec 03 §8) and "Start over", which asks twice before the town is deleted.
+## Settings opens the shared SettingsPanel (spec 04 §6.1).
 
 signal start_requested
 signal quit_requested
@@ -21,6 +22,8 @@ var save: TownSave = TownSave.new()
 ## Opens the Scrapbook (only with a saved town).
 var scrapbook_button: Button
 var book: ScrapbookBook = ScrapbookBook.new()
+var settings_button: Button
+var settings: SettingsPanel = SettingsPanel.new()
 var start_over_button: Button
 ## The confirm box (question + Yes / No), hidden until "Start over" is pressed.
 var confirm_box: VBoxContainer
@@ -42,6 +45,7 @@ func _ready() -> void:
 	# Built first: the copies of the Quit button must not carry its connection.
 	_build_start_over()
 	_build_scrapbook()
+	_build_settings()
 	start_button.pressed.connect(start_requested.emit)
 	quit_button.pressed.connect(quit_requested.emit)
 	start_button.grab_focus()
@@ -87,6 +91,8 @@ func _show_confirm() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if settings.visible:
+		return
 	if confirm_step > 0 and event.is_action_pressed(&"pause"):
 		get_viewport().set_input_as_handled()
 		_close_confirm()
@@ -144,3 +150,25 @@ func _build_scrapbook() -> void:
 	scrapbook_button.pressed.connect(open_scrapbook)
 	add_child(book)
 	book.closed.connect(_on_book_closed)
+
+
+## A "Settings" button right above Quit; the page hides the menu while it is open.
+func _build_settings() -> void:
+	var menu: Control = start_button.get_parent()
+	settings_button = quit_button.duplicate() as Button
+	settings_button.text = "Settings"
+	menu.add_child(settings_button)
+	menu.move_child(settings_button, quit_button.get_index())
+	settings_button.pressed.connect(open_settings)
+	add_child(settings)
+	settings.closed.connect(_on_settings_closed)
+
+
+func open_settings() -> void:
+	start_button.get_parent().visible = false
+	settings.open()
+
+
+func _on_settings_closed() -> void:
+	start_button.get_parent().visible = true
+	settings_button.grab_focus()

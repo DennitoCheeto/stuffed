@@ -1,6 +1,7 @@
 class_name TownMenu
 extends CanvasLayer
-## The Esc menu in town: back to the fort, the title screen, or quit the game.
+## The Esc menu in town: back to the fort, Settings (the shared SettingsPanel), the title screen,
+## or quit the game.
 ## Keeps working while the town is paused.
 
 signal resumed
@@ -8,8 +9,12 @@ signal title_requested
 signal quit_requested
 
 var resume_button: Button
+var settings_button: Button
 var title_button: Button
 var quit_button: Button
+var settings: SettingsPanel = SettingsPanel.new()
+
+var _box: VBoxContainer = VBoxContainer.new()
 
 
 func _init() -> void:
@@ -20,7 +25,7 @@ func _init() -> void:
 	shade.color = Color(0.05, 0.04, 0.08, 0.6)
 	shade.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(shade)
-	var box: VBoxContainer = VBoxContainer.new()
+	var box: VBoxContainer = _box
 	box.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 	box.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	box.grow_vertical = Control.GROW_DIRECTION_BOTH
@@ -30,10 +35,14 @@ func _init() -> void:
 	box.add_child(heading)
 	resume_button = _button(box, "Back to the fort")
 	resume_button.pressed.connect(close)
+	settings_button = _button(box, "Settings")
+	settings_button.pressed.connect(show_settings)
 	title_button = _button(box, "Title screen")
 	title_button.pressed.connect(title_requested.emit)
 	quit_button = _button(box, "Quit game")
 	quit_button.pressed.connect(quit_requested.emit)
+	add_child(settings)
+	settings.closed.connect(_on_settings_closed)
 
 
 func is_open() -> bool:
@@ -41,6 +50,8 @@ func is_open() -> bool:
 
 
 func open() -> void:
+	settings.visible = false
+	_box.visible = true
 	visible = true
 	resume_button.grab_focus()
 
@@ -53,9 +64,20 @@ func close() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if visible and event.is_action_pressed(&"pause"):
+	if visible and not settings.visible and event.is_action_pressed(&"pause"):
 		get_viewport().set_input_as_handled()
 		close()
+
+
+## Shows the Settings page instead of the menu.
+func show_settings() -> void:
+	_box.visible = false
+	settings.open()
+
+
+func _on_settings_closed() -> void:
+	_box.visible = true
+	settings_button.grab_focus()
 
 
 func _button(box: VBoxContainer, text: String) -> Button:

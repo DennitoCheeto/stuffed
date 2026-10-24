@@ -119,10 +119,11 @@ func test_ac29_give_up_shows_the_end_screen_and_logs_the_run() -> void:
 func test_ac30_damage_numbers_toggle_takes_effect_immediately() -> void:
 	run = await start_run()
 	await _press("pause")
+	run.pause_menu.show_settings()
 	var was: bool = GameSettings.damage_numbers
-	run.pause_menu.damage_numbers_check.button_pressed = not was
+	run.pause_menu.settings.damage_numbers_check.button_pressed = not was
 	assert_eq(GameSettings.damage_numbers, not was)
-	run.pause_menu.damage_numbers_check.button_pressed = was
+	run.pause_menu.settings.damage_numbers_check.button_pressed = was
 	assert_eq(GameSettings.damage_numbers, was)
 
 
@@ -130,8 +131,11 @@ func test_ac30_volume_sliders_take_effect_immediately() -> void:
 	run = await start_run()
 	await _press("pause")
 	var menu: PauseMenu = run.pause_menu
+	menu.show_settings()
 	var sliders: Dictionary[StringName, HSlider] = {
-		&"Master": menu.master_slider, &"Effects": menu.effects_slider, &"Music": menu.music_slider
+		&"Master": menu.settings.master_slider,
+		&"Effects": menu.settings.effects_slider,
+		&"Music": menu.settings.music_slider,
 	}
 	for bus: StringName in sliders:
 		var before: float = GameSettings.volume(bus)

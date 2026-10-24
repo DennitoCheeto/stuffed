@@ -180,8 +180,8 @@ func test_ac56_reduced_menu_animations_is_saved_and_skips_the_motion() -> void:
 	await wait_process_frames(2)
 	var menu: PauseMenu = run.pause_menu
 	assert_true(menu.is_open(), "pause menu open")
-	assert_eq(menu.reduced_motion_check.text, "Reduced menu animations")
-	menu.reduced_motion_check.button_pressed = true
+	assert_eq(menu.settings.reduced_motion_check.text, "Reduced menu animations")
+	menu.settings.reduced_motion_check.button_pressed = true
 	assert_true(GameSettings.reduced_motion, "on right away")
 	assert_true(FileAccess.file_exists(TEST_SETTINGS), "saved to the test settings file")
 	GameSettings.reduced_motion = false
