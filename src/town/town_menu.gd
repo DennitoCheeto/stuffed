@@ -1,45 +1,46 @@
 class_name TownMenu
 extends CanvasLayer
-## The Esc menu in town: back to the fort, Settings (the shared SettingsPanel), the title screen,
-## or quit the game.
-## Keeps working while the town is paused.
+## The Esc menu in town (look from spec 04): back to the fort, Settings (the shared
+## SettingsPanel), the title screen, or quit the game. Keeps working while the town is paused.
 
 signal resumed
 signal title_requested
 signal quit_requested
 
-var resume_button: Button
-var settings_button: Button
-var title_button: Button
-var quit_button: Button
-var settings: SettingsPanel = SettingsPanel.new()
+const BUTTON_WIDTH: float = 380.0
 
-var _box: VBoxContainer = VBoxContainer.new()
+var resume_button: SewnButton = SewnButton.new("Back to the fort", true, 32)
+var settings_button: SewnButton = SewnButton.new("Settings")
+var title_button: SewnButton = SewnButton.new("Title screen")
+var quit_button: SewnButton = SewnButton.new("Quit game")
+var settings: SettingsPanel = SettingsPanel.new()
+## The felt patch with the buttons (hidden while Settings is open).
+var panel: FeltPanel = FeltPanel.new(-1.5)
+var motion: ScreenMotion = ScreenMotion.new()
 
 
 func _init() -> void:
 	layer = 20
 	visible = false
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	var shade: ColorRect = ColorRect.new()
-	shade.color = Color(0.05, 0.04, 0.08, 0.6)
-	shade.set_anchors_preset(Control.PRESET_FULL_RECT)
-	add_child(shade)
-	var box: VBoxContainer = _box
-	box.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-	box.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	box.grow_vertical = Control.GROW_DIRECTION_BOTH
-	box.add_theme_constant_override(&"separation", 18)
-	add_child(box)
-	var heading: Label = TownArt.label("The Pillow Fort", 56)
-	box.add_child(heading)
-	resume_button = _button(box, "Back to the fort")
+	add_child(motion)
+	add_child(MenuCloth.new(0.8, 0.3))
+	var center: CenterContainer = CenterContainer.new()
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(center)
+	panel.add_tape(0.5, -3.0, UiColors.TAPE_TEAL)
+	center.add_child(panel)
+	var box: VBoxContainer = VBoxContainer.new()
+	box.add_theme_constant_override(&"separation", 16)
+	panel.content.add_child(box)
+	box.add_child(HandTitle.new("The Pillow Fort", 56, UiColors.PURPLE, -2.5))
+	# Buttons fill the column: it sets their width.
+	box.custom_minimum_size.x = BUTTON_WIDTH
+	for button: SewnButton in [resume_button, settings_button, title_button, quit_button]:
+		box.add_child(button)
 	resume_button.pressed.connect(close)
-	settings_button = _button(box, "Settings")
 	settings_button.pressed.connect(show_settings)
-	title_button = _button(box, "Title screen")
 	title_button.pressed.connect(title_requested.emit)
-	quit_button = _button(box, "Quit game")
 	quit_button.pressed.connect(quit_requested.emit)
 	add_child(settings)
 	settings.closed.connect(_on_settings_closed)
@@ -51,8 +52,9 @@ func is_open() -> bool:
 
 func open() -> void:
 	settings.visible = false
-	_box.visible = true
+	panel.visible = true
 	visible = true
+	motion.open([panel])
 	resume_button.grab_focus()
 
 
@@ -71,20 +73,11 @@ func _unhandled_input(event: InputEvent) -> void:
 
 ## Shows the Settings page instead of the menu.
 func show_settings() -> void:
-	_box.visible = false
+	panel.visible = false
 	settings.open()
 
 
 func _on_settings_closed() -> void:
-	_box.visible = true
+	panel.visible = true
 	settings_button.grab_focus()
 
-
-func _button(box: VBoxContainer, text: String) -> Button:
-	var button: Button = Button.new()
-	button.text = text
-	button.custom_minimum_size = Vector2(380, 68)
-	button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	button.add_theme_font_size_override(&"font_size", 32)
-	box.add_child(button)
-	return button

@@ -158,7 +158,7 @@ func _on_mouse_exited() -> void:
 
 
 func _on_focus_entered() -> void:
-	if not disabled and _moved_by_keyboard():
+	if not disabled and moved_by_keyboard():
 		Sfx.play(&"ui_hover")
 	_go_to_pose()
 
@@ -212,7 +212,7 @@ func _go_to_pose() -> void:
 	_tween.tween_property(box, "press", press, style.spring_seconds * 0.5)
 
 
-static func _moved_by_keyboard() -> bool:
+static func moved_by_keyboard() -> bool:
 	for action: StringName in NAVIGATION:
 		if InputMap.has_action(action) and Input.is_action_pressed(action):
 			return true

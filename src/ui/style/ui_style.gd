@@ -16,6 +16,10 @@ extends Resource
 ## The "nope" wiggle of a pressed disabled button: degrees and length.
 @export var nope_spin: float = 5.0
 @export var nope_seconds: float = 0.3
+## Slider knobs and switches: how much the knob grows on hover / focus, and how long a switch
+## knob takes to slide across.
+@export var knob_grow: float = 1.2
+@export var switch_seconds: float = 0.16
 
 @export_group("Screens")
 ## Opening: panels drop in from this high (px), with this extra tilt (degrees), one after the

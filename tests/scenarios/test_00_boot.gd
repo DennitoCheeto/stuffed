@@ -5,7 +5,7 @@ extends "res://tests/scenarios/run_scenario.gd"
 func test_start_screen_shows_title_and_version() -> void:
 	var title: TitleScreen = main.current_screen as TitleScreen
 	assert_not_null(title, "the game opens on the title screen")
-	assert_eq(title.title_label.text, "STUFFED")
+	assert_eq(title.title_label.text, "Stuffed")
 	assert_eq(title.version_label.text, GameInfo.version_label())
 
 
