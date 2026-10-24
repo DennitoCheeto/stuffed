@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-24 (M3.5-01 UI style foundation merged)_
+_Last updated: 2026-10-24 (#135 settings everywhere, M3.5-02 fit check, M3.5-03 weapon stats merged)_
 
 ## Where we are
 
@@ -27,7 +27,9 @@ _Last updated: 2026-10-24 (M3.5-01 UI style foundation merged)_
   Scrapbook": A's felt patches/sewn buttons as structure, B's tilt/tape/hand-written/photos/stickers as life; mockup
   "Mix" on the canvas). **Spec 04 approved** (PR #123; `docs/specs/04-ui-and-juice.md`, AC-49 … AC-57,
   P-18 … P-21). Milestone **M3.5 — UI and juice**, issues **#124–#131** (M3.5-01 … 08). M3.5-01 style
-  foundation (#124): merged (PR #133). **Next: M3.5-02 fit check (#125)**, then 03 weapon stats, 04 end screen, 05 run
+  foundation (#124): merged (PR #133). PO feedback #135 (Settings from fort + title): merged (PR #136). M3.5-03 weapon
+  stats (#126): merged (PR #137). M3.5-02 fit check (#125): merged (PR #138).
+  The repo is **public** since 2026-10-24 (free Actions minutes ran out while private; public = unlimited). **Next: M3.5-04 end screen (#127)**, then 05 run
   titles, 06–08 restyle screens. (2) Spec 05 town + Bedroom visual pass ("still not too appealing", "a tiny bit
   dark"). (3) Evolution
   "wow" pass (new behaviour + bigger moment per evolution). (4) Skill / progress tree spec, then M4 night siege.
@@ -79,7 +81,7 @@ _Last updated: 2026-10-24 (M3.5-01 UI style foundation merged)_
 - Godot on Linux CI often hangs at exit after all tests ran (most runs since M2-12, even docs-only PRs).
   `tools/test.sh` handles it (PR #65): 30 s after `junit.xml` is written it stops Godot and judges the run by
   the report ("Godot did not quit ... stopping it" in the log is fine). A hang *during* the tests still hits the
-  12-min job timeout: then look for a real cause. Timing asserts in scenarios: allow one frame (PR #64).
+  20-min job timeout: then look for a real cause. Timing asserts in scenarios: allow one frame (PR #64).
 - Level-up screen: Reroll (R) / Skip (S) / Banish (B, then 1/2/3). Counts per run + skip heal in `upgrade_pool.tres`,
   per player in `Player.card_controls` (`CardControls`). `UpgradePool.roll(levels, rng, excluded, avoid, count)`:
   banished ids go in `excluded`. S is also "move down": watch for accidental skips in the playtest.
@@ -96,7 +98,7 @@ _Last updated: 2026-10-24 (M3.5-01 UI style foundation merged)_
 - Headless has no mouse position: `PlayerInput` remembers mouse-motion events. Tests convert world → canvas →
   window coordinates (`get_canvas_transform()`, then `get_screen_transform()`) before sending mouse motion.
 - Don't touch DisplayServer/Input (e.g. the cursor) in `_exit_tree` of long-lived nodes: the Linux test run hung
-  at exit once (PR #29). The CI test job now times out after 12 minutes.
+  at exit once (PR #29). The CI test job now times out after 20 minutes (raised from 12 on 2026-10-24: 645 tests take ~9 min + setup).
 - Enemies: types are `EnemyStats` .tres + a look (`ZombieLook.for_look`, parts merged in `all_parts`). Ranged:
   `EnemyStats.attack` (`SpitAttack`, wind-up/puff in `EnemyManager._attack`). Burst on death:
   `EnemyStats.death_cloud` (`EnemyCloud`, hostile, pooled). Schedule = `SpawnSchedule.entries` (`SpawnEntry`);
@@ -245,3 +247,14 @@ _Last updated: 2026-10-24 (M3.5-01 UI style foundation merged)_
   font Nunito; `FeltLabel` variation = ink on felt). Felt shapes skip empty rects (triangulation errors fail GUT).
   Settings are saved: `GameSettings.save()` / `load_saved()` (Main `_ready`), scenario tests use
   `user://test_settings.json`. Look check: scratch `extends SceneTree` gallery + `--write-movie` (see above).
+- Settings (#135): one `SettingsPanel` (`src/settings/`), opened via `pause_menu.settings`, `town.menu.settings`,
+  `title.settings` (`show_settings()` / `open_settings()`); Back/Esc returns to the menu. Tests open it first
+  (the switches sync from `GameSettings` in `open()`).
+- Fit check (M3.5-02, AC-55): `tests/scenarios/test_04_fit_check.gd` boots the game in a stretched SubViewport at
+  4 window sizes and checks every screen with `screen_fit.gd` (buttons/panels 24 px margin, labels inside the
+  window and their box, nothing cut off). New screens: add a step to `_visit_all` and bump the count.
+- Weapon stats (M3.5-03): `run.enemies.tally` (`WeaponTally`). New damage paths must pass the weapon:
+  `enemies.damage(zombie, amount, push, weapon)`, or `enemies.damage_from(WeaponTally.X, zombie, amount)` for
+  non-weapon sources; code that removes zombies must add the kill to the tally, or the totals stop adding up.
+  `RunResult.weapons` / `total_damage`, log field `weapons`.
+- Local only: `test_03_town_flow` "Esc in town" fails when run alone on the dev PC (passes in the full run and CI).
