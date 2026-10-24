@@ -31,6 +31,7 @@ static func _weighted(file: FontFile, family: String, weight: int) -> Font:
 	if not _cache.has(key):
 		var font: FontVariation = FontVariation.new()
 		font.base_font = file
-		font.variation_opentype = {TextServerManager.get_primary_interface().name_to_tag("wght"): weight}
+		var tag: int = TextServerManager.get_primary_interface().name_to_tag("wght")
+		font.variation_opentype = {tag: weight}
 		_cache[key] = font
 	return _cache[key]
