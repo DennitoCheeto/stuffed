@@ -1,31 +1,54 @@
 class_name PauseMenu
 extends CanvasLayer
-## The Esc menu: Resume, Settings (the shared SettingsPanel), Recipes, Give up (back home with
-## half the haul). Keeps running while the run is frozen.
+## The Esc menu (spec 04 §6.2): a taped felt patch on the dimmed cloth with Resume (the gold
+## button), Settings (the shared SettingsPanel), Recipes and Give up (back home with half the
+## haul). Keeps running while the run is frozen. Built in code (pause_menu.tscn is only the root).
 
 signal resumed
 signal quit_requested
 
+const BUTTON_WIDTH: float = 360.0
+
 ## The evolutions to list on the Recipes page (the run sets it).
 var upgrade_pool: UpgradePool
-var recipes_button: Button
-var recipes_page: RecipesPage
 ## Damage numbers, reduced menu animations and volumes (spec 04 §6.2).
 var settings: SettingsPanel = SettingsPanel.new()
-
-@onready var panel: PanelContainer = $Panel
-@onready var resume_button: Button = %ResumeButton
-@onready var settings_button: Button = %SettingsButton
-@onready var quit_button: Button = %QuitButton
+var cloth: MenuCloth = MenuCloth.new(0.82, 0.35)
+var panel: FeltPanel = FeltPanel.new(1.5)
+var heading: HandTitle = HandTitle.new("Paused", 64, UiColors.PURPLE, -3.0)
+var resume_button: SewnButton = SewnButton.new("Resume", true, 32)
+var settings_button: SewnButton = SewnButton.new("Settings")
+var recipes_button: SewnButton = SewnButton.new("Recipes")
+var quit_button: SewnButton = SewnButton.new("Give up")
+var recipes_page: RecipesPage = RecipesPage.new()
+var motion: ScreenMotion = ScreenMotion.new()
 
 
 func _ready() -> void:
 	visible = false
-	_build_recipes()
+	add_child(motion)
+	add_child(cloth)
+	var center: CenterContainer = CenterContainer.new()
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(center)
+	panel.add_tape(0.5, 3.0)
+	center.add_child(panel)
+	var column: VBoxContainer = VBoxContainer.new()
+	column.add_theme_constant_override(&"separation", 16)
+	panel.content.add_child(column)
+	column.add_child(heading)
+	# Buttons fill the column: it sets their width.
+	column.custom_minimum_size.x = BUTTON_WIDTH
+	for button: SewnButton in [resume_button, settings_button, recipes_button, quit_button]:
+		column.add_child(button)
+	recipes_page.visible = false
+	add_child(recipes_page)
+	recipes_page.back_pressed.connect(_show_main)
 	add_child(settings)
 	settings.closed.connect(_on_settings_closed)
 	resume_button.pressed.connect(close)
 	settings_button.pressed.connect(show_settings)
+	recipes_button.pressed.connect(show_recipes)
 	quit_button.pressed.connect(quit_requested.emit)
 
 
@@ -36,12 +59,14 @@ func is_open() -> bool:
 func open() -> void:
 	_show_main()
 	visible = true
+	motion.open([panel])
 	resume_button.grab_focus()
 
 
 func close() -> void:
 	if not visible:
 		return
+	motion.finish()
 	settings.visible = false
 	visible = false
 	GameSettings.save()
@@ -75,21 +100,11 @@ func show_recipes() -> void:
 
 
 func _show_main() -> void:
+	var from_recipes: bool = recipes_page.visible
 	recipes_page.visible = false
 	settings.visible = false
 	panel.visible = true
-	resume_button.grab_focus()
-
-
-## A Recipes button above Quit, and the page it opens (both styled like the menu).
-func _build_recipes() -> void:
-	recipes_button = resume_button.duplicate() as Button
-	recipes_button.text = "Recipes"
-	quit_button.add_sibling(recipes_button)
-	quit_button.get_parent().move_child(recipes_button, quit_button.get_index())
-	recipes_button.pressed.connect(show_recipes)
-	var back: Button = resume_button.duplicate() as Button
-	recipes_page = RecipesPage.new(panel.get_theme_stylebox("panel"), back)
-	recipes_page.visible = false
-	add_child(recipes_page)
-	recipes_page.back_pressed.connect(_show_main)
+	if from_recipes:
+		recipes_button.grab_focus()
+	else:
+		resume_button.grab_focus()

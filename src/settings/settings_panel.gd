@@ -12,27 +12,27 @@ const LABEL_WIDTH: float = 170.0
 const SLIDER_WIDTH: float = 360.0
 const FONT_SIZE: int = 26
 
-var damage_numbers_check: CheckButton
-var reduced_motion_check: CheckButton
-var master_slider: HSlider
-var effects_slider: HSlider
-var music_slider: HSlider
+var damage_numbers_check: FeltSwitch
+var reduced_motion_check: FeltSwitch
+var master_slider: ThreadSlider
+var effects_slider: ThreadSlider
+var music_slider: ThreadSlider
 var back_button: SewnButton
 var panel: FeltPanel = FeltPanel.new(-1.5)
+var motion: ScreenMotion = ScreenMotion.new()
 
 
 func _init() -> void:
 	layer = 40
 	visible = false
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	var shade: ColorRect = ColorRect.new()
-	shade.color = Color(UiColors.CLOTH.darkened(0.55), 0.75)
-	shade.set_anchors_preset(Control.PRESET_FULL_RECT)
-	add_child(shade)
+	add_child(motion)
+	# The menu that opens the page already lays its cloth behind it: this one only dims a little.
+	add_child(MenuCloth.new(0.35, 0.5, true))
 	var center: CenterContainer = CenterContainer.new()
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(center)
-	panel.add_tape(0.5, -3.0)
+	panel.add_tape(0.5, -3.0).add_tape(0.94, 7.0, UiColors.TAPE_TEAL)
 	center.add_child(panel)
 	var column: VBoxContainer = VBoxContainer.new()
 	column.add_theme_constant_override("separation", 16)
@@ -57,12 +57,12 @@ func is_open() -> bool:
 
 ## Shows the page with the current settings.
 func open() -> void:
-	damage_numbers_check.set_pressed_no_signal(GameSettings.damage_numbers)
-	reduced_motion_check.set_pressed_no_signal(GameSettings.reduced_motion)
+	damage_numbers_check.show_pressed(GameSettings.damage_numbers)
+	reduced_motion_check.show_pressed(GameSettings.reduced_motion)
 	for bus: StringName in VOLUMES:
 		slider_for(bus).set_value_no_signal(GameSettings.volume(bus))
 	visible = true
-	panel.rest()
+	motion.open([panel])
 	back_button.grab_focus()
 
 
@@ -75,7 +75,7 @@ func close() -> void:
 	closed.emit()
 
 
-func slider_for(bus: StringName) -> HSlider:
+func slider_for(bus: StringName) -> ThreadSlider:
 	match bus:
 		&"Master":
 			return master_slider
@@ -104,34 +104,24 @@ func _on_volume_changed(value: float, bus: StringName) -> void:
 	GameSettings.set_volume(bus, value)
 
 
-func _switch(column: VBoxContainer, words: String) -> CheckButton:
-	var check: CheckButton = CheckButton.new()
-	check.text = words
-	check.add_theme_font_override("font", UiFonts.body())
-	check.add_theme_font_size_override("font_size", FONT_SIZE)
-	for color: StringName in [&"font_color", &"font_hover_color", &"font_pressed_color"]:
-		check.add_theme_color_override(color, UiColors.INK)
-	check.add_theme_color_override(&"font_focus_color", UiColors.PURPLE)
-	check.add_theme_color_override(&"font_hover_pressed_color", UiColors.PURPLE)
+func _switch(column: VBoxContainer, words: String) -> FeltSwitch:
+	var check: FeltSwitch = FeltSwitch.new(words, FONT_SIZE)
 	column.add_child(check)
 	return check
 
 
-func _slider(column: VBoxContainer, bus: StringName) -> HSlider:
+func _slider(column: VBoxContainer, bus: StringName) -> ThreadSlider:
 	var row: HBoxContainer = HBoxContainer.new()
+	row.add_theme_constant_override(&"separation", 12)
 	column.add_child(row)
-	var label: Label = Label.new()
-	label.text = String(bus)
+	var label: Label = UiFonts.label(String(bus), FONT_SIZE, UiColors.INK)
 	label.custom_minimum_size = Vector2(LABEL_WIDTH, 0)
-	label.add_theme_font_override("font", UiFonts.body())
-	label.add_theme_font_size_override("font_size", FONT_SIZE)
-	label.add_theme_color_override("font_color", UiColors.INK)
 	row.add_child(label)
-	var slider: HSlider = HSlider.new()
+	var slider: ThreadSlider = ThreadSlider.new()
 	slider.max_value = 1.0
 	slider.step = 0.05
 	slider.value = 1.0
-	slider.custom_minimum_size = Vector2(SLIDER_WIDTH, 0)
+	slider.custom_minimum_size.x = SLIDER_WIDTH
 	slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	slider.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	slider.value_changed.connect(_on_volume_changed.bind(bus))

@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-24 (M3.5-05 run titles)_
+_Last updated: 2026-10-24 (M3.5-06 title, pause, settings)_
 
 ## Where we are
 
@@ -28,8 +28,8 @@ _Last updated: 2026-10-24 (M3.5-05 run titles)_
   "Mix" on the canvas). **Spec 04 approved** (PR #123; `docs/specs/04-ui-and-juice.md`, AC-49 … AC-57,
   P-18 … P-21). Milestone **M3.5 — UI and juice**, issues **#124–#131** (M3.5-01 … 08). M3.5-01 style
   foundation (#124): merged (PR #133). PO feedback #135 (Settings from fort + title): merged (PR #136). M3.5-03 weapon
-  stats (#126): merged (PR #137). M3.5-02 fit check (#125): merged (PR #138). M3.5-04 end screen (#127): merged (PR #140). M3.5-05 run titles (#128): merged (PR #141).
-  The repo is **public** since 2026-10-24 (free Actions minutes ran out while private; public = unlimited). **Next: M3.5-06 title, pause and settings screens (#129)**, then 07–08.
+  stats (#126): merged (PR #137). M3.5-02 fit check (#125): merged (PR #138). M3.5-04 end screen (#127): merged (PR #140). M3.5-05 run titles (#128): merged (PR #141). M3.5-06 title, pause, settings (#129): PR open.
+  The repo is **public** since 2026-10-24 (free Actions minutes ran out while private; public = unlimited). **Next: M3.5-07 level-up, gift box, goal screen (#130)**, then 08.
   Ask the PO: Speedy Stitcher is "King beaten before 9:00" (spec said 7:00, but the King only comes at 8:00).
   (2) Spec 05 town + Bedroom visual pass ("still not too appealing", "a tiny bit
   dark"). (3) Evolution
@@ -271,3 +271,11 @@ _Last updated: 2026-10-24 (M3.5-05 run titles)_
   (`titles_seen`). Run facts for titles: `run.unhurt` (`UnhurtClock`), `run.gift_boxes_opened`,
   `run.lowest_health_at_goal`, `TownSave.new_entries(haul)`; floor pickup log entries now carry `id`. End screen:
   `end.show_titles(titles, gap)`, `title_stickers`, `new_stickers`, `slap_order`; log field `titles`.
+- Menu look (M3.5-06): title, pause (+ Recipes), town Esc menu and Settings are built in code (their .tscn is only
+  the root). Background = `MenuCloth` (felt cloth; `opacity` < 1 over a run/town, `plain` = only a dim layer).
+  Settings: `ThreadSlider` (thread + sewing-button knob, `knob_center()`, `knob_grow`) and `FeltSwitch` (toggle
+  Button, `slide`, `show_pressed(on)` = no slide), knobs drawn by `SewingButtonArt`. A `SewnButton` resets its own
+  `custom_minimum_size` (`_fit`): set a menu's button width on the column instead. AC-49 check:
+  `unthemed(root)` in `test_04_menu_look.gd` (plain Button/slider/ColorRect, flat panels, other fonts): later
+  tickets add their screens there. Clicks in tests: wait `open_seconds` first (panels drop in), and wait a frame
+  after `tap_action("ui_accept")` (buttons fire on release).
