@@ -124,3 +124,18 @@ func test_no_settings_file_means_defaults() -> void:
 	GameSettings.load_saved()
 	assert_false(GameSettings.reduced_motion, "full animations by default")
 	assert_true(GameSettings.damage_numbers, "damage numbers on by default")
+
+
+func test_the_soft_edge_of_a_felt_shape_lies_just_outside_it() -> void:
+	var square: PackedVector2Array = FeltDraw.rounded(Rect2(0, 0, 100, 60), 10.0)
+	var outer: PackedVector2Array = FeltDraw.feathered(square, 2.0)
+	assert_eq(outer.size(), square.size(), "one outer point per edge point")
+	var center: Vector2 = Vector2(50, 30)
+	for index: int in square.size():
+		var inside: float = square[index].distance_to(center)
+		assert_gt(outer[index].distance_to(center), inside, "point %d moves outwards" % index)
+		assert_almost_eq(outer[index].distance_to(square[index]), 2.0, 0.6, "by about the width")
+	var reversed: PackedVector2Array = square.duplicate()
+	reversed.reverse()
+	var flipped: PackedVector2Array = FeltDraw.feathered(reversed, 2.0)
+	assert_gt(flipped[0].distance_to(center), reversed[0].distance_to(center), "either direction")

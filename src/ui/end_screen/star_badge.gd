@@ -15,8 +15,8 @@ func _init(side: float = 40.0) -> void:
 func _draw() -> void:
 	var radius: float = minf(size.x, size.y) / 2.0
 	var center: Vector2 = size / 2.0
-	draw_colored_polygon(star(center, radius), UiColors.GOLD_EDGE)
-	draw_colored_polygon(star(center, radius - 3.0), UiColors.GOLD)
+	FeltDraw.fill(self, star(center, radius), UiColors.GOLD_EDGE)
+	FeltDraw.fill(self, star(center, radius - 3.0), UiColors.GOLD)
 
 
 ## The outline of a five-pointed star around `center`, point up.
