@@ -36,6 +36,9 @@ _Last updated: 2026-10-24 (M3.5-06 title, pause, settings)_
   "wow" pass (new behaviour + bigger moment per evolution). (4) Skill / progress tree spec, then M4 night siege.
 - **PO decision (2026-10-24): rescued plushies become playable heroes in M5** (Pip, Böbö, BamBam, Robbar; rescue
   = unlock). Goes into the M5 spec. Böbö still has no photo (drawn as the classic IKEA bear).
+- PO feedback (2026-10-24): rough felt edges fixed (#145, PR #146). Plushies: Robbar needs work, Böbö should look
+  like the IKEA bear, all need a walking animation like Banane → issue #147 (asked the PO: own ticket after M3.5 or
+  part of spec 05; needs photos of Robbar and Böbö).
 - PO idea (2026-10-24, "idk"): **walk into the buildings** (interiors). Park it; ask again when the town visual
   pass or the siege is specced.
 - Economy (M3-05/PR #113): cheapest rebuild 200 coins, all 6 at level 3 ≈ 17k coins.
@@ -279,3 +282,5 @@ _Last updated: 2026-10-24 (M3.5-06 title, pause, settings)_
   `unthemed(root)` in `test_04_menu_look.gd` (plain Button/slider/ColorRect, flat panels, other fonts): later
   tickets add their screens there. Clicks in tests: wait `open_seconds` first (panels drop in), and wait a frame
   after `tap_action("ui_accept")` (buttons fire on release).
+- Smooth edges (#145): filled UI shapes go through `FeltDraw.fill(canvas, points, color)` / `fill_smooth(rid, ...)`
+  (fill + a 1.2 px fade ring outside the edge). Plain `draw_colored_polygon` has jagged edges: don't use it in UI.
