@@ -12,9 +12,7 @@ signal endless_chosen
 ## Picks are ignored this long after opening, so a key held from playing doesn't pick.
 const INPUT_DELAY: float = 0.3
 const TITLE: String = "You beat the Bedroom!"
-const SUBTITLE: String = (
-	"The Sock Puppet King is stuffed. Call it a win, or see how far your build carries you?"
-)
+const SUBTITLE: String = "The Sock Puppet King is stuffed. Call it a win, or see how far you get?"
 const BUTTON_WIDTH: float = 520.0
 
 var cloth: MenuCloth = MenuCloth.new(0.8, 0.3)

@@ -276,4 +276,3 @@ func _build_confetti() -> void:
 	colors.offsets = PackedFloat32Array([0.0, 0.25, 0.5, 0.75, 1.0])
 	confetti.color_initial_ramp = colors
 	add_child(confetti)
-
