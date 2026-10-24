@@ -81,7 +81,7 @@ _Last updated: 2026-10-24 (#135 settings everywhere, M3.5-02 fit check, M3.5-03 
 - Godot on Linux CI often hangs at exit after all tests ran (most runs since M2-12, even docs-only PRs).
   `tools/test.sh` handles it (PR #65): 30 s after `junit.xml` is written it stops Godot and judges the run by
   the report ("Godot did not quit ... stopping it" in the log is fine). A hang *during* the tests still hits the
-  12-min job timeout: then look for a real cause. Timing asserts in scenarios: allow one frame (PR #64).
+  20-min job timeout: then look for a real cause. Timing asserts in scenarios: allow one frame (PR #64).
 - Level-up screen: Reroll (R) / Skip (S) / Banish (B, then 1/2/3). Counts per run + skip heal in `upgrade_pool.tres`,
   per player in `Player.card_controls` (`CardControls`). `UpgradePool.roll(levels, rng, excluded, avoid, count)`:
   banished ids go in `excluded`. S is also "move down": watch for accidental skips in the playtest.
@@ -98,7 +98,7 @@ _Last updated: 2026-10-24 (#135 settings everywhere, M3.5-02 fit check, M3.5-03 
 - Headless has no mouse position: `PlayerInput` remembers mouse-motion events. Tests convert world → canvas →
   window coordinates (`get_canvas_transform()`, then `get_screen_transform()`) before sending mouse motion.
 - Don't touch DisplayServer/Input (e.g. the cursor) in `_exit_tree` of long-lived nodes: the Linux test run hung
-  at exit once (PR #29). The CI test job now times out after 12 minutes.
+  at exit once (PR #29). The CI test job now times out after 20 minutes (raised from 12 on 2026-10-24: 645 tests take ~9 min + setup).
 - Enemies: types are `EnemyStats` .tres + a look (`ZombieLook.for_look`, parts merged in `all_parts`). Ranged:
   `EnemyStats.attack` (`SpitAttack`, wind-up/puff in `EnemyManager._attack`). Burst on death:
   `EnemyStats.death_cloud` (`EnemyCloud`, hostile, pooled). Schedule = `SpawnSchedule.entries` (`SpawnEntry`);
