@@ -5,7 +5,9 @@ extends "res://tests/scenarios/run_scenario.gd"
 ## Button, plain slider or ColorRect is left. Settings' sliders are a thread with a sewing-button
 ## knob and its switches are felt switches; both react to mouse and keyboard. The level-up cards
 ## are felt patches that lift but never tilt, Reroll / Skip / Banish are sewn buttons with
-## fabric-tag keys, and the gift box moment and the goal screen are felt too.
+## fabric-tag keys, and the gift box moment and the goal screen are felt too. In town (M3.5-08)
+## the building card, the start weapon picker, the unlock toast, the "New building!" banner and
+## the prompt are felt, and the Scrapbook has fabric-tag tabs and photo entries.
 
 const FONT_FILES: Array[FontFile] = [UiFonts.FREDOKA, UiFonts.PATRICK_HAND, UiFonts.NUNITO]
 ## A spring is done after its length plus a little margin.
@@ -360,3 +362,103 @@ func test_ac49_the_goal_screen_is_felt() -> void:
 	assert_true(goal.sticker.is_visible_in_tree(), "a sticker slaps on")
 	goal.visible = false
 	run.unfreeze(&"goal")
+
+
+## Puts Banane right below `id`'s spot (in reach of its card) and returns its building.
+func _stand_at(town: Town, id: StringName) -> TownBuilding:
+	var building: TownBuilding = town.buildings[id]
+	var rect: Rect2 = building.spot.rect
+	first_player().global_position = Vector2(rect.get_center().x, rect.end.y + 40.0)
+	await wait_physics_frames(2)
+	return building
+
+
+func test_ac49_the_building_card_is_a_taped_crooked_felt_patch() -> void:
+	main.town.materials["coins"] = 50
+	var town: Town = await go_to_town()
+	await _stand_at(town, &"toy_box_armory")
+	var card: BuildingCard = town.card
+	assert_true(card.visible, "the card shows")
+	var found: PackedStringArray = unthemed(card)
+	assert_eq(found.size(), 0, "the card is all felt: %s" % [found])
+	assert_true(card.box is StyleBoxFelt, "a felt patch")
+	assert_false(card.box.tape_spots.is_empty(), "taped on")
+	assert_ne(card.rotation, 0.0, "a little crooked")
+	assert_eq(card.title_label.get_theme_font(&"font"), UiFonts.hand(), "hand-written name")
+	assert_true(card.level_tag.is_visible_in_tree(), "the level on a fabric tag")
+	assert_eq(card.level_label.text, "Ruin")
+	for counter: JarCounter in card.cost_counters.values():
+		var ink: Color = counter.amount_label.get_theme_color(&"font_color")
+		assert_eq(ink, UiColors.INK, "the price is ink on felt")
+	var tag: StyleBox = town.prompt_label.get_theme_stylebox(&"normal")
+	assert_true(tag is StyleBoxFelt, "the prompt sits on a fabric tag")
+
+
+func test_ac49_the_start_weapon_picker_is_felt_with_sewn_tiles() -> void:
+	var town: Town = await go_to_town()
+	town.open_weapon_picker()
+	await wait_seconds(UiFeel.STYLE.open_seconds + SETTLE)
+	var picker: StartWeaponPicker = town.picker
+	_assert_themed(picker, "start weapon picker")
+	assert_true(picker.cloth.is_visible_in_tree(), "the felt cloth is behind it")
+	assert_eq(picker.title.label.get_theme_font(&"font"), UiFonts.hand(), "hand-written title")
+	assert_gt(picker.tiles.size(), 0)
+	var now: SewnButton = picker.tiles[picker.current]
+	assert_eq(_count(now, FabricTag), 1, "the current weapon has its Now tag")
+	assert_true(now.has_focus(), "keyboard ready on the current weapon")
+	await _settle()
+	assert_almost_eq(now.lift_amount(), UiFeel.STYLE.hover_lift, 0.5, "the focused tile lifts")
+	picker.close()
+
+
+func test_ac49_the_unlock_toast_and_the_new_building_banner_are_felt() -> void:
+	var town: Town = await go_to_town()
+	var pool: UpgradePool = Town.UPGRADE_POOL
+	var weapons: Array[UpgradeDef] = []
+	for id: StringName in [&"thimble_mortar", &"bouncy_yarn_ball"]:
+		weapons.append(pool.find(id))
+	town.unlock_toast.show_weapons(weapons)
+	await wait_process_frames(2)
+	var toast: WeaponUnlockToast = town.unlock_toast
+	var found: PackedStringArray = unthemed(toast)
+	assert_eq(found.size(), 0, "the toast is all felt: %s" % [found])
+	assert_false(toast.box.tape_spots.is_empty(), "taped on")
+	assert_eq(toast.title_label.get_theme_font(&"font"), UiFonts.hand(), "hand-written title")
+	town.show_banner("New building!", "Lucky Jar can be rebuilt now")
+	await wait_seconds(UiFeel.STYLE.open_seconds + SETTLE)
+	assert_true(town.is_banner_showing())
+	found = unthemed(town.banner)
+	assert_eq(found.size(), 0, "the banner is all felt: %s" % [found])
+	assert_true(town.banner is FeltPanel, "a felt patch")
+	assert_eq(town.banner_title.get_theme_font(&"font"), UiFonts.hand(), "hand-written title")
+	assert_almost_eq(town.banner.lift, 0.0, 0.5, "dropped into place")
+
+
+func test_ac49_the_scrapbook_has_fabric_tag_tabs_and_photo_entries() -> void:
+	main.town.mark_seen(ScrapbookRules.WEAPONS, "peel_boomerang")
+	var town: Town = await go_to_town()
+	town.open_scrapbook()
+	await wait_seconds(UiFeel.STYLE.open_seconds + SETTLE)
+	var book: ScrapbookBook = town.book
+	_assert_themed(book, "scrapbook")
+	assert_true(book.cloth.is_visible_in_tree(), "the felt cloth is behind it")
+	for tab: Button in book.tabs:
+		assert_true(tab is SewnButton, "%s is a fabric tag button" % tab.text)
+	var open_tab: SewnButton = book.tabs[0] as SewnButton
+	assert_eq(open_tab.box.fill, ScrapbookBook.TAB_ON_COLOR, "the open page's tag is marked")
+	assert_eq((book.tabs[1] as SewnButton).box.fill, ScrapbookBook.TAB_COLOR)
+	var photo: ScrapbookTile = book.tile_for("peel_boomerang")
+	assert_eq(photo.box.fill, UiColors.PHOTO, "a found entry is a photo")
+	assert_false(photo.box.tape_spots.is_empty(), "taped in")
+	assert_ne(photo.lean(), 0.0, "a bit crooked")
+	var waiting: ScrapbookTile = book.tile_for("zipper_ray")
+	assert_true(waiting.box.tape_spots.is_empty(), "no photo yet: a plain felt patch")
+	assert_eq(waiting.lean(), 0.0)
+	assert_true(book.detail_photo is PhotoFrame, "the details show a taped photo")
+	assert_eq(book.detail_name.get_theme_font(&"font"), UiFonts.hand(), "hand-written name")
+	assert_true(photo.has_focus())
+	await _settle()
+	assert_almost_eq(photo.lift_amount(), UiFeel.STYLE.hover_lift, 0.5, "the focused photo lifts")
+	book.turn(1)
+	assert_eq((book.tabs[1] as SewnButton).box.fill, ScrapbookBook.TAB_ON_COLOR, "the tag follows")
+	book.close()

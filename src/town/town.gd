@@ -22,8 +22,7 @@ const UPGRADE_POOL: UpgradePool = preload("res://data/upgrade_pool.tres")
 const RESCUE_RULES: RescueRules = preload("res://data/town/rescue_rules.tres")
 ## How plushies walk, sit and wave at home.
 const PLUSHIE_RULES: PlushieTownRules = preload("res://data/town/plushie_town_rules.tres")
-const PROMPT_COLOR: Color = Color("#f4efe6")
-const BANNER_COLOR: Color = Color("#cfe3f0")
+const PROMPT_COLOR: Color = UiColors.INK
 ## Seconds after a rebuild before new buildings are revealed and the fort grows (after the pop).
 const AFTER_BUILD_SECONDS: float = 1.0
 ## Seconds after arriving before buildings unlocked during the run are revealed.
@@ -55,8 +54,8 @@ var jars: Dictionary[String, JarCounter] = {}
 var prompt_label: Label
 ## The info card next to the building a player stands at.
 var card: BuildingCard = BuildingCard.new()
-## "New building!" when a ruin's yarn falls away.
-var banner: VBoxContainer
+## "New building!" when a ruin's yarn falls away: a taped felt patch with a hand-written title.
+var banner: FeltPanel = FeltPanel.new(-2.0)
 var banner_title: Label
 var banner_subtitle: Label
 var menu: TownMenu = TownMenu.new()
@@ -74,6 +73,7 @@ var _leaving: bool = false
 ## Counts down to revealing new buildings and growing the fort (0 = nothing waiting).
 var _settle_left: float = 0.0
 var _banner_left: float = 0.0
+var _banner_drop: Tween
 
 
 func _ready() -> void:
@@ -413,6 +413,23 @@ func show_banner(title: String, subtitle: String) -> void:
 	_banner_left = BANNER_SECONDS
 	banner.modulate.a = 1.0
 	banner.visible = true
+	_drop_banner()
+
+
+## The banner drops in from above with a little overshoot (not with reduced menu animations).
+func _drop_banner() -> void:
+	if _banner_drop != null:
+		_banner_drop.kill()
+	banner.rest()
+	if UiFeel.reduced() or not is_inside_tree():
+		return
+	var style: UiStyle = UiFeel.STYLE
+	banner.lift = style.open_drop
+	banner.fade = 0.0
+	_banner_drop = create_tween().set_parallel()
+	var drop: PropertyTweener = _banner_drop.tween_property(banner, "lift", 0.0, style.open_seconds)
+	drop.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_banner_drop.tween_property(banner, "fade", 1.0, style.open_seconds * 0.4)
 
 
 func is_banner_showing() -> bool:
@@ -557,24 +574,36 @@ func _build_hud() -> void:
 		var counter: JarCounter = JarCounter.new(material)
 		row.add_child(counter)
 		jars[material] = counter
-	prompt_label = TownArt.label("", 34)
-	prompt_label.add_theme_color_override(&"font_color", PROMPT_COLOR)
+	prompt_label = UiFonts.label("", 30, PROMPT_COLOR, UiFonts.heading())
+	prompt_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var tag: StyleBoxFelt = StyleBoxFelt.new(UiColors.TAG, UiColors.TAG_STITCH)
+	tag.radius = 14.0
+	tag.stitch_inset = 5.0
+	tag.stitch_width = 2.0
+	tag.shadow = UiColors.SHADOW
+	tag.shadow_offset = 4.0
+	tag.pad(24, 6)
+	prompt_label.add_theme_stylebox_override(&"normal", tag)
 	prompt_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
 	prompt_label.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	prompt_label.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	prompt_label.offset_bottom = -60.0
 	prompt_label.visible = false
 	hud.add_child(prompt_label)
-	banner = VBoxContainer.new()
+	banner.add_tape(0.5, 3.0, UiColors.TAPE_TEAL)
 	banner.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
 	banner.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	banner.offset_top = 110.0
 	banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	banner.visible = false
 	hud.add_child(banner)
-	banner_title = TownArt.label("", 60)
-	banner_title.add_theme_color_override(&"font_color", BANNER_COLOR)
-	banner.add_child(banner_title)
-	banner_subtitle = TownArt.label("", 30)
-	banner.add_child(banner_subtitle)
+	var lines: VBoxContainer = VBoxContainer.new()
+	lines.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	banner.content.add_child(lines)
+	var heading: HandTitle = HandTitle.new("", 60, UiColors.PURPLE, 0.0)
+	banner_title = heading.label
+	lines.add_child(heading)
+	banner_subtitle = UiFonts.label("", 26, UiColors.INK)
+	banner_subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lines.add_child(banner_subtitle)
 	hud.add_child(unlock_toast)

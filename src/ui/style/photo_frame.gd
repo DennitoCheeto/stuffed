@@ -28,9 +28,9 @@ func _init(
 	column.add_theme_constant_override("separation", 4)
 	frame.add_child(column)
 	picture.custom_minimum_size = picture_size
-	var backing: StyleBoxFlat = StyleBoxFlat.new()
-	backing.bg_color = UiColors.FELT
-	backing.set_corner_radius_all(4)
+	var backing: StyleBoxFelt = StyleBoxFelt.new(UiColors.FELT, UiColors.FELT)
+	backing.radius = 4.0
+	backing.stitch_inset = 0.0
 	picture.add_theme_stylebox_override("panel", backing)
 	column.add_child(picture)
 	caption.text = words

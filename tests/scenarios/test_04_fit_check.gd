@@ -91,6 +91,8 @@ func _visit_all(window: Vector2i) -> void:
 	var town: Town = main.current_screen as Town
 	await _max_the_town(town)
 	await _check("town")
+	_town_moments(town)
+	await _check("town (toast, banner, prompt)")
 	town.open_menu()
 	await _check("town menu")
 	town.menu.show_settings()
@@ -121,14 +123,19 @@ func _visit_all(window: Vector2i) -> void:
 	town.enter_bedroom()
 	await _frames()
 	await _visit_run(main.current_screen as Run)
-	assert_eq(checked.size(), 18, "every screen checked: %s" % [checked])
+	assert_eq(checked.size(), 19, "every screen checked: %s" % [checked])
 
 
 func _visit_run(run: Run) -> void:
 	run.rescue_plan = null
 	run.spawner.active = false
 	_fill_the_build(run)
-	await _check("run (HUD)")
+	# The King far away (no arrival moment): only his bar and a banner are needed.
+	var far: Vector2 = Players.all(run.get_tree())[0].position + Vector2(3000, 0)
+	var boss: Zombie = run.enemies.spawn_boss(run.spawner.schedule.boss, far)
+	run.hud.show_boss(boss)
+	run.hud.show_banner(boss.display_name, "The biggest sock of them all", 5.0)
+	await _check("run (HUD, boss bar, banner)")
 	run.pause()
 	await _check("pause menu")
 	run.pause_menu.show_settings()
@@ -211,6 +218,20 @@ func _max_the_town(town: Town) -> void:
 		town.save.materials[material] = 99999
 	town.refresh()
 	await wait_seconds(2.0)
+
+
+## The town's moments at once with long words: Banane at a building (card and prompt), the
+## "New weapons" toast with four long names and a "New buildings!" banner for three.
+func _town_moments(town: Town) -> void:
+	var rect: Rect2 = town.buildings[&"toy_box_armory"].spot.rect
+	Players.all(town.get_tree())[0].global_position = Vector2(rect.get_center().x, rect.end.y + 40)
+	var weapons: Array[UpgradeDef] = []
+	for id: StringName in [&"sewing_pin_sniper", &"orbiting_needles", &"bouncy_yarn_ball"]:
+		weapons.append(Town.UPGRADE_POOL.find(id))
+	weapons.append(Town.UPGRADE_POOL.find(&"thimble_mortar"))
+	town.unlock_toast.show_weapons(weapons)
+	var names: String = "Toy Box Armory and Plush Hospital and Party Shop"
+	town.show_banner("New buildings!", "%s can be rebuilt now" % names)
 
 
 ## 6 weapons (long names), every item slot, all at their top level; player 2 gets the same build
