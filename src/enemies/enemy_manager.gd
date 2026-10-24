@@ -129,9 +129,7 @@ func _add(stats: EnemyStats, at: Vector2, elite: EliteRules, boss: BossDef) -> Z
 
 ## Hurts a zombie and pushes it. Returns true if it died. `by` = the weapon that hit (it gets the
 ## damage and the kill in the tally).
-func damage(
-	zombie: Zombie, amount: float, push: Vector2 = Vector2.ZERO, by: Weapon = null
-) -> bool:
+func damage(zombie: Zombie, amount: float, push: Vector2 = Vector2.ZERO, by: Weapon = null) -> bool:
 	if not is_instance_valid(zombie) or zombie.dead:
 		return false
 	var dealt: float = clampf(amount, 0.0, maxf(zombie.health, 0.0))
