@@ -75,6 +75,7 @@ sound = &"fluff"
 sound_gap = 1.5
 id = &"stuffing_cloud"
 display_name = "Stuffing Cloud"
+run_title = "Cloud Captain"
 behaviour = ExtResource("3_behaviour")
 knockback = 40.0
 hit_radius = 0.0

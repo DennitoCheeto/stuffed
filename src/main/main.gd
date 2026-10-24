@@ -16,6 +16,8 @@ const TOWN_LAYOUT: TownLayout = preload("res://data/town/pillow_fort.tres")
 const RESCUE_RULES: RescueRules = preload("res://data/town/rescue_rules.tres")
 ## Plushies living in town add coins to every run.
 const PLUSHIE_RULES: PlushieTownRules = preload("res://data/town/plushie_town_rules.tres")
+## Which run titles a finished run earns (spec 04 §4.2).
+const RUN_TITLES: RunTitleRules = preload("res://data/ui/run_titles.tres")
 
 ## Tests turn this off so "Quit" doesn't close the test runner.
 var quit_enabled: bool = true
@@ -103,6 +105,7 @@ func show_end(result: RunResult) -> void:
 	var before: Dictionary[String, int] = town.materials.duplicate()
 	var share: float = MATERIAL_RULES.keep_share(result)
 	var bonus: float = coin_bonus()
+	var titles: Array[RunTitle] = _earn_titles(result)
 	var kept: Dictionary[String, int] = _bank_run(share, bonus)
 	result.materials_kept = kept
 	RunLog.append(result)
@@ -110,6 +113,7 @@ func show_end(result: RunResult) -> void:
 	_play_music(&"town")
 	var end: EndScreen = END_SCENE.instantiate()
 	end.show_result(result)
+	end.show_titles(titles, RUN_TITLES.slap_gap)
 	end.brought_home.show_haul(kept, before, share, bonus)
 	var rescued: PlushieDef = RESCUE_RULES.find(result.rescued_plushie())
 	if rescued != null:
@@ -117,6 +121,19 @@ func show_end(result: RunResult) -> void:
 	end.try_again_requested.connect(start_run)
 	end.fort_requested.connect(show_town)
 	_switch_to(end)
+
+
+## The run titles `result` earned (rarest first); first-time ones are marked new and remembered
+## (saved with the haul right after).
+func _earn_titles(result: RunResult) -> Array[RunTitle]:
+	var run: Run = current_screen as Run
+	if run != null:
+		result.new_scrapbook_entries = town.new_entries(run.haul)
+	var titles: Array[RunTitle] = RUN_TITLES.pick(result)
+	for title: RunTitle in titles:
+		title.is_new = town.note_title(title.id)
+		result.titles.append(title.id)
+	return titles
 
 
 func _play_music(track: StringName) -> void:

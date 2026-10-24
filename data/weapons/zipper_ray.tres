@@ -74,6 +74,7 @@ script = ExtResource("1_stats")
 sound = &"zip"
 id = &"zipper_ray"
 display_name = "Zipper Ray"
+run_title = "Zipper Zapper"
 behaviour = ExtResource("3_behaviour")
 knockback = 30.0
 hit_radius = 12.0

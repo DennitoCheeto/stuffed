@@ -48,6 +48,18 @@ var unlocked_weapons: PackedStringArray = []
 ## The rescue (spec 03 §7): {"plushie": id, "time": run seconds it appeared, "freed": bool,
 ## "freed_at": run seconds or -1}. Empty = no rescue appeared in this run.
 var rescue: Dictionary = {}
+## Gift boxes opened (the King's big one too).
+var gift_boxes_opened: int = 0
+## The longest time any hero went without taking damage, in seconds.
+var longest_unhurt_seconds: float = 0.0
+## When the King fell: the lowest health share (0..1) of the heroes still standing (-1 = not beaten).
+var lowest_health_at_goal: float = -1.0
+## Scrapbook entries this run found for the first time (set by Main from the save).
+var new_scrapbook_entries: int = 0
+## Weapon id -> its run title ("Mortar Maniac"), for the weapons the heroes had at the end.
+var weapon_titles: Dictionary[String, String] = {}
+## The run titles it earned (RunTitle.id), rarest first (set by Main).
+var titles: PackedStringArray = []
 
 
 ## How the run ended for the town (spec 03 §10): "king", "way_home", "died" or "gave_up".

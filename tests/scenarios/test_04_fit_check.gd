@@ -161,6 +161,7 @@ func _visit_run(run: Run) -> void:
 	await _frames()
 	var end: EndScreen = main.current_screen as EndScreen
 	end.brought_home.finish()
+	_longest_titles(end)
 	await _check("end screen")
 
 
@@ -228,6 +229,17 @@ func _fill_the_build(run: Run) -> void:
 				copy.level_up()
 		other.items = first.items.duplicate()
 		other.item_levels = first.item_levels.duplicate()
+
+
+## The two longest titles that can come together, both new (with their "New!" stickers).
+func _longest_titles(end: EndScreen) -> void:
+	var titles: Array[RunTitle] = []
+	for words: String in ["Endless Explorer", "Evolution Expert"]:
+		var title: RunTitle = RunTitle.new(words, words, 4)
+		title.is_new = true
+		titles.append(title)
+	end.title_label.text = "Banane got stuffed"
+	end.show_titles(titles)
 
 
 func _free_a_plushie(run: Run) -> void:

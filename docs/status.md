@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-24 (M3.5-04 new end screen)_
+_Last updated: 2026-10-24 (M3.5-05 run titles)_
 
 ## Where we are
 
@@ -28,9 +28,10 @@ _Last updated: 2026-10-24 (M3.5-04 new end screen)_
   "Mix" on the canvas). **Spec 04 approved** (PR #123; `docs/specs/04-ui-and-juice.md`, AC-49 … AC-57,
   P-18 … P-21). Milestone **M3.5 — UI and juice**, issues **#124–#131** (M3.5-01 … 08). M3.5-01 style
   foundation (#124): merged (PR #133). PO feedback #135 (Settings from fort + title): merged (PR #136). M3.5-03 weapon
-  stats (#126): merged (PR #137). M3.5-02 fit check (#125): merged (PR #138). M3.5-04 end screen (#127): merged (PR #140).
-  The repo is **public** since 2026-10-24 (free Actions minutes ran out while private; public = unlimited). **Next: M3.5-05 run titles (#128)**,
-  then 06–08 restyle screens. (2) Spec 05 town + Bedroom visual pass ("still not too appealing", "a tiny bit
+  stats (#126): merged (PR #137). M3.5-02 fit check (#125): merged (PR #138). M3.5-04 end screen (#127): merged (PR #140). M3.5-05 run titles (#128): PR open.
+  The repo is **public** since 2026-10-24 (free Actions minutes ran out while private; public = unlimited). **Next: M3.5-06 title, pause and settings screens (#129)**, then 07–08.
+  Ask the PO: Speedy Stitcher is "King beaten before 9:00" (spec said 7:00, but the King only comes at 8:00).
+  (2) Spec 05 town + Bedroom visual pass ("still not too appealing", "a tiny bit
   dark"). (3) Evolution
   "wow" pass (new behaviour + bigger moment per evolution). (4) Skill / progress tree spec, then M4 night siege.
 - **PO decision (2026-10-24): rescued plushies become playable heroes in M5** (Pip, Böbö, BamBam, Robbar; rescue
@@ -264,3 +265,9 @@ _Last updated: 2026-10-24 (M3.5-04 new end screen)_
   `end.sticker_row`. `brought_home.show_rescue(name, def)` adds the plushie photo. Fit check: Main loads the
   settings on boot, so set `GameSettings.reduced_motion` *after* booting or screens are measured mid-motion.
 - Local only: `test_03_town_flow` "Esc in town" fails when run alone on the dev PC (passes in the full run and CI).
+- Run titles (M3.5-05): list in `data/ui/run_titles.tres` (`RunTitleRules` of `RunTitleDef`: id, text with
+  `{weapon}` / `{kills}`, `check` enum + `amount`, rarity, bad). Weapon titles are `WeaponStats.run_title`. Main
+  picks them in `show_end` (`_earn_titles`, before banking) and marks first-timers via `TownSave.note_title`
+  (`titles_seen`). Run facts for titles: `run.unhurt` (`UnhurtClock`), `run.gift_boxes_opened`,
+  `run.lowest_health_at_goal`, `TownSave.new_entries(haul)`; floor pickup log entries now carry `id`. End screen:
+  `end.show_titles(titles, gap)`, `title_stickers`, `new_stickers`, `slap_order`; log field `titles`.

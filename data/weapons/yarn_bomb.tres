@@ -33,6 +33,7 @@ script = ExtResource("1_stats")
 sound = &"sticky"
 id = &"yarn_bomb"
 display_name = "Yarn Bomb"
+run_title = "Yarn Bomber"
 behaviour = ExtResource("3_behaviour")
 knockback = 220.0
 hit_radius = 18.0

@@ -74,6 +74,7 @@ script = ExtResource("1_stats")
 sound = &"cannon"
 id = &"yarn_cannon"
 display_name = "Yarn Cannon"
+run_title = "Cannon Champ"
 behaviour = ExtResource("3_behaviour")
 knockback = 220.0
 hit_radius = 16.0

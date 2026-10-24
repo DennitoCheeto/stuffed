@@ -31,6 +31,7 @@ script = ExtResource("1_stats")
 sound = &"volley"
 id = &"pincushion_volley"
 display_name = "Pincushion Volley"
+run_title = "Pincushion Pro"
 behaviour = ExtResource("3_behaviour")
 knockback = 90.0
 hit_radius = 7.0

@@ -5,6 +5,8 @@ extends Resource
 ## Stable name for upgrades, saves and the run log.
 @export var id: StringName = &""
 @export var display_name: String = "Weapon"
+## Its run title when it did most of the damage (spec 04 §4.2), e.g. "Mortar Maniac".
+@export var run_title: String = ""
 ## The script that makes the weapon work (a Weapon subclass).
 @export var behaviour: Script
 ## Push given to zombies it hits, in pixels per second.

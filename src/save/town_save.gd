@@ -27,6 +27,8 @@ var seen: Dictionary[String, PackedStringArray] = {}
 var revealed: PackedStringArray = []
 ## Runs started with this town (the first one is run 1).
 var runs_started: int = 0
+## Run titles earned before (RunTitle.id); a first-time title gets a "New!" sticker.
+var titles_seen: PackedStringArray = []
 ## Banane's chosen starting weapon ("" = his own).
 var start_weapon: String = ""
 ## The haul of a run that was still going when last saved (RunHaul.to_dict(); empty = none).
@@ -113,6 +115,27 @@ func bank(haul: RunHaul, share: float, coin_bonus: float = 0.0) -> void:
 			mark_seen(page, id)
 
 
+## How many Scrapbook entries `haul` found that the book doesn't have yet (its freed plushie too).
+func new_entries(haul: RunHaul) -> int:
+	var found: Dictionary[String, PackedStringArray] = haul.seen.duplicate(true)
+	if not haul.rescued.is_empty():
+		add_seen(found, ScrapbookRules.PLUSHIES, haul.rescued)
+	var count: int = 0
+	for page: String in found:
+		for id: String in found[page]:
+			if not has_seen(page, id):
+				count += 1
+	return count
+
+
+## Remembers run title `id`. Returns true if it was never earned before.
+func note_title(id: String) -> bool:
+	if titles_seen.has(id):
+		return false
+	titles_seen.append(id)
+	return true
+
+
 ## A run that never finished (the game closed) counts as given up: `share` of it is banked.
 ## Returns true if there was one.
 func settle_unfinished_run(share: float, coin_bonus: float = 0.0) -> bool:
@@ -173,6 +196,7 @@ func to_dict() -> Dictionary:
 		"revealed": Array(revealed),
 		"runs_started": runs_started,
 		"start_weapon": start_weapon,
+		"titles_seen": Array(titles_seen),
 		"unfinished_run": unfinished_run.duplicate(true),
 	}
 
@@ -199,6 +223,9 @@ static func from_dict(data: Dictionary) -> TownSave:
 		save.revealed = PackedStringArray(shown as Array)
 	save.runs_started = int(data.get("runs_started", 0))
 	save.start_weapon = str(data.get("start_weapon", ""))
+	var titles: Variant = data.get("titles_seen", [])
+	if titles is Array:
+		save.titles_seen = PackedStringArray(titles as Array)
 	var unfinished: Variant = data.get("unfinished_run", {})
 	if unfinished is Dictionary:
 		var saved: Dictionary = unfinished as Dictionary
