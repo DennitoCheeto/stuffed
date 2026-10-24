@@ -24,6 +24,8 @@ const DEPTH: float = 6.0
 
 ## The gold "go on" button (one per screen) or a cream one.
 var main: bool = false
+## False = hover / focus only lifts it (cards that must keep one size side by side).
+var grows_on_hover: bool = true
 ## What shows and moves: the felt body with the caption.
 var face: PanelContainer = PanelContainer.new()
 var caption: Label = Label.new()
@@ -200,7 +202,7 @@ func _go_to_pose() -> void:
 		press = 1.0
 	elif is_raised():
 		lift = style.hover_lift
-		size_to = style.hover_grow
+		size_to = style.hover_grow if grows_on_hover else 1.0
 	box.stitch = _base_stitch.lightened(0.35) if is_raised() else _base_stitch
 	face.modulate.a = style.disabled_fade if disabled else 1.0
 	if _tween != null:
