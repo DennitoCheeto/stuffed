@@ -64,7 +64,8 @@ func advance(delta: float) -> bool:
 		_last_hit = id
 		_already_hit[id] = true
 		hits += 1
-		manager.enemies.damage(zombie, _numbers.damage, _direction * weapon.stats.knockback)
+		var push: Vector2 = _direction * weapon.stats.knockback
+		manager.enemies.damage(zombie, _numbers.damage, push, weapon)
 		if hits >= max_hits():
 			return false
 		_direction = _next_direction(zombie)

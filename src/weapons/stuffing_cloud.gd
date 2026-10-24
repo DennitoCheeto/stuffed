@@ -15,7 +15,7 @@ func attack() -> bool:
 	var center: Vector2 = player.global_position
 	for zombie: Zombie in manager.query_circle(center, numbers.area):
 		var push: Vector2 = center.direction_to(zombie.position) * stats.knockback
-		manager.damage(zombie, numbers.damage, push)
+		manager.damage(zombie, numbers.damage, push, self)
 	cloud.puff()
 	return true
 

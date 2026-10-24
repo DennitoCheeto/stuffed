@@ -60,5 +60,5 @@ func advance(delta: float) -> bool:
 		if _cooldowns.has(id):
 			continue
 		_cooldowns[id] = weapon.stats.hit_interval
-		manager.enemies.damage(zombie, hurt, Vector2.ZERO)
+		manager.enemies.damage(zombie, hurt, Vector2.ZERO, weapon)
 	return true
