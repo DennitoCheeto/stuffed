@@ -38,3 +38,5 @@ extends Resource
 ## The tent's sign while plushies wait in it.
 @export var waiting_text: String = "Waiting for a Hospital bed"
 @export var moved_in_sound: StringName = &"rescued"
+## A small squeak when a plushie waves at a player.
+@export var wave_sound: StringName = &"hello"

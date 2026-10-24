@@ -11,6 +11,8 @@ const JAR_ALPHA: float = 0.85
 ## How much a jar grows when a piece lands, and how fast it settles back.
 const BUMP_SCALE: float = 0.25
 const BUMP_DECAY: float = 4.0
+## Each jar tinks at its own pitch when a burst piece lands in it (quieter than XP, spec 03 §11).
+const JAR_PITCH: Dictionary[String, float] = {"coins": 1.0, "stuffing": 0.8, "thread": 1.2}
 
 ## Material id -> its counter.
 var counters: Dictionary[String, JarCounter] = {}
@@ -63,6 +65,7 @@ func burst(amounts: Dictionary[String, int], from: Vector2) -> MaterialBurst:
 
 func _bump(material: String) -> void:
 	_bumps[material] = 1.0
+	Sfx.play(&"coin", JAR_PITCH.get(material, 1.0))
 
 
 func _process(delta: float) -> void:

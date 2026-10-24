@@ -81,8 +81,10 @@ func test_ac39_an_elite_gives_extra_and_a_burst_flies_to_the_jars() -> void:
 		if not materials.has(piece["material"]):
 			materials.append(piece["material"])
 	assert_eq(materials.size(), 2, "coins and tufts")
+	Sfx.history.clear()
 	await wait_seconds(burst.duration() + 0.2)
 	assert_true(run.hud.jars.bursts.is_empty(), "all pieces landed and the burst is gone")
+	assert_true(Sfx.history.has(&"coin"), "pieces tink softly into the jars")
 
 
 func test_ac39_opening_a_gift_box_adds_thread() -> void:

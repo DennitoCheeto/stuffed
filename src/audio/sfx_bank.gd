@@ -52,6 +52,10 @@ const LENGTHS: Dictionary[StringName, float] = {
 	&"nope": 0.25,
 	&"help": 0.5,
 	&"rescued": 0.9,
+	# Town and Scrapbook (spec 03 §11): small and soft.
+	&"coin": 0.14,
+	&"page": 0.3,
+	&"hello": 0.3,
 }
 
 
@@ -126,6 +130,9 @@ static func _weapon_or_moment(sound: StringName) -> Callable:
 		&"nope": _nope,
 		&"help": _help,
 		&"rescued": _rescued,
+		&"coin": _coin,
+		&"page": _page,
+		&"hello": _hello,
 	}
 	return voices[sound]
 
@@ -543,3 +550,26 @@ static func _rescued(t: float) -> float:
 			var local: float = t - start
 			chime += Synth.sine(Synth.midi_hz(notes[i]) * local) * exp(-5.0 * local)
 	return 0.18 * squeak + 0.12 * chime
+
+
+## A burst piece lands in its jar: a tiny felt "tink", much softer than an XP plip.
+static func _coin(t: float) -> float:
+	var tink: float = Synth.sine(2100.0 * t) * exp(-45.0 * t)
+	return 0.16 * (tink + 0.3 * Synth.sine(3150.0 * t) * exp(-60.0 * t))
+
+
+## A Scrapbook page turns: a quick papery "fffp".
+static func _page(t: float) -> float:
+	var flutter: float = 0.5 * (1.0 + sin(TAU * 40.0 * t))
+	var paper: float = Synth.noise(t) * flutter * sin(PI * clampf(t / 0.3, 0.0, 1.0))
+	var flap: float = Synth.sine(Synth.sweep(t, 220.0, 120.0, 0.3)) * exp(-14.0 * t)
+	return 0.16 * paper + 0.1 * flap
+
+
+## A plushie in town waves at a player: one small, happy rubber squeak.
+static func _hello(t: float) -> float:
+	var length: float = 0.26
+	if t > length:
+		return 0.0
+	var pitch: float = Synth.midi_hz(86.0) * (1.0 + 0.2 * t / length)
+	return 0.14 * Synth.triangle(pitch * t) * sin(PI * t / length)

@@ -10,6 +10,8 @@ const TEST_SAVE: String = "user://test_save.json"
 
 var main: Main
 var sender: GutInputSender
+## Input actions a test added for another player (removed after each test).
+var _added_actions: Array[StringName] = []
 
 
 func before_each() -> void:
@@ -28,6 +30,9 @@ func before_each() -> void:
 func after_each() -> void:
 	sender.release_all()
 	sender.clear()
+	for action: StringName in _added_actions:
+		InputMap.erase_action(action)
+	_added_actions.clear()
 
 
 ## Goes to the town the way the player does (New game / Continue on the title screen, or Back to
@@ -57,6 +62,16 @@ func start_run() -> Run:
 ## the Armory unlocks. Call it before start_run().
 func unlock_all_weapons() -> void:
 	main.town.building_levels["toy_box_armory"] = 2
+
+
+## Gives player `index` (1 = player 2) controls for this test: "p2_move_left", "p2_interact", ...
+## There are no keys for them yet (co-op joining comes later), tests press them directly.
+func add_controls(index: int) -> void:
+	for control: String in ["move_left", "move_right", "move_up", "move_down", "dash", "interact"]:
+		var action: StringName = StringName("p%d_%s" % [index + 1, control])
+		if not InputMap.has_action(action):
+			InputMap.add_action(action, 0.2)
+			_added_actions.append(action)
 
 
 func first_player() -> Player:

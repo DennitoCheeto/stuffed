@@ -33,6 +33,8 @@ const DEATH_PAUSE: float = 1.5
 const HIT_STOP_TIME: float = 0.06
 ## Freezes that muffle the music (a hit-stop is too short to bother).
 const MUFFLING: Array[StringName] = [&"pause", &"level_up", &"goal"]
+## Gap between heroes when several players start a run together.
+const PLAYER_SPACING: float = 90.0
 
 @export var rules: RunRules
 @export var upgrade_pool: UpgradePool
@@ -92,6 +94,8 @@ var material_rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var way_home: WayHomePortal
 ## What the town's buildings change in this run (Main sets it before adding the run).
 var perks: TownPerks = TownPerks.new()
+## How many heroes start the run (everybody who left the town together). Set by Main.
+var player_count: int = 1
 ## This run's number for the town (1 = its first run; 0 = no town, so no rescue). Set by Main.
 var run_number: int = 0
 ## Ids of the plushies the town already has (they are never rescued again). Set by Main.
@@ -187,6 +191,8 @@ func _ready() -> void:
 	dev_menu.setup(self)
 	dev_menu.restart_requested.connect(restart_requested.emit)
 	var first: Player = spawn_player(0, arena.center())
+	for index: int in range(1, player_count):
+		spawn_player(index, arena.center() + Vector2(PLAYER_SPACING * index, 0.0))
 	hud.follow_player(first, upgrade_pool)
 	camera.set_bounds(arena.outer_rect())
 	camera.snap_to_players()

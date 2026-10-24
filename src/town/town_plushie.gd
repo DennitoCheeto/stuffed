@@ -155,6 +155,7 @@ func _start_wave(player: Player) -> void:
 	_left = rules.wave_seconds
 	_wave_wait = rules.wave_seconds + rules.wave_cooldown
 	waves += 1
+	Sfx.play(rules.wave_sound)
 	_look_at(player.global_position)
 
 

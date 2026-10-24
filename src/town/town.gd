@@ -10,6 +10,8 @@ extends Node2D
 signal bedroom_requested
 signal title_requested
 signal quit_requested
+## The developer menu's "Reset town": Main starts a fresh town.
+signal reset_requested
 ## The town changed (a rebuild, an upgrade, a revealed building): Main saves it.
 signal changed
 
@@ -33,6 +35,8 @@ const BANNER_FADE: float = 0.5
 
 ## The saved town (Main sets it before adding the town to the tree).
 var save: TownSave = TownSave.new()
+## How many players walk around (Main sets it: everybody who came home from the run).
+var player_count: int = 1
 var floor_art: TownFloor
 var fort: TownFort
 var scrapbook: ScrapbookStand
@@ -62,6 +66,8 @@ var picker: StartWeaponPicker = StartWeaponPicker.new()
 var unlock_toast: WeaponUnlockToast = WeaponUnlockToast.new()
 ## The Scrapbook, opened (E at its stand).
 var book: ScrapbookBook = ScrapbookBook.new()
+## Developer shortcuts (F1, spec 03 §10).
+var dev_menu: TownDevMenu = TownDevMenu.new()
 
 ## Set once the Bedroom door was used (one press = one run).
 var _leaving: bool = false
@@ -98,7 +104,8 @@ func _ready() -> void:
 		if save.plushies[id] == "in_town" and who != null:
 			spawn_plushie(who, random_town_spot(), true)
 	refresh_tent()
-	spawn_player(0)
+	for index: int in maxi(player_count, 1):
+		spawn_player(index)
 	add_child(card)
 	camera = PlayersCamera.new()
 	camera.name = "Camera"
@@ -119,6 +126,8 @@ func _ready() -> void:
 	picker.closed.connect(func() -> void: process_mode = Node.PROCESS_MODE_INHERIT)
 	add_child(book)
 	book.closed.connect(func() -> void: process_mode = Node.PROCESS_MODE_INHERIT)
+	add_child(dev_menu)
+	dev_menu.setup(self)
 
 
 func _physics_process(delta: float) -> void:
@@ -227,6 +236,21 @@ func try_build(building: TownBuilding) -> bool:
 	if not save.spend(next.cost()):
 		Sfx.play(&"nope")
 		return false
+	_raise(building, next)
+	return true
+
+
+## Developer menu: the next level of `building` for free, even if it's still tangled in yarn.
+func dev_build(building: TownBuilding) -> bool:
+	var next: BuildingLevel = building.building.next(building.level)
+	if building.is_busy() or next == null:
+		return false
+	_raise(building, next)
+	return true
+
+
+## Gives `building` its next level `next` (already paid for) and plays the moment.
+func _raise(building: TownBuilding, next: BuildingLevel) -> void:
 	var new_level: int = building.level + 1
 	save.building_levels[String(building.spot.id)] = new_level
 	building.play_build(new_level)
@@ -235,7 +259,6 @@ func try_build(building: TownBuilding) -> bool:
 	refresh()
 	_settle_left = AFTER_BUILD_SECONDS
 	changed.emit()
-	return true
 
 
 ## What pressing E next to `building` does: choose the starting weapon at a fully built Toy
