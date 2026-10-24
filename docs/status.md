@@ -29,7 +29,7 @@ _Last updated: 2026-10-24 (M3.5-07 level-up, gift box, goal screen)_
   P-18 … P-21). Milestone **M3.5 — UI and juice**, issues **#124–#131** (M3.5-01 … 08). M3.5-01 style
   foundation (#124): merged (PR #133). PO feedback #135 (Settings from fort + title): merged (PR #136). M3.5-03 weapon
   stats (#126): merged (PR #137). M3.5-02 fit check (#125): merged (PR #138). M3.5-04 end screen (#127): merged (PR #140). M3.5-05 run titles (#128): merged (PR #141). M3.5-06 title, pause, settings (#129): merged (PR #143).
-  M3.5-07 level-up, gift box, goal screen (#130): merged (PR after #148).
+  M3.5-07 level-up, gift box, goal screen (#130): merged (PR #149).
   The repo is **public** since 2026-10-24 (free Actions minutes ran out while private; public = unlimited). **Next: M3.5-08 town cards,
   Scrapbook, HUD (#131)**, then the M3.5 playtest (P-18 … P-21).
   Ask the PO: Speedy Stitcher is "King beaten before 9:00" (spec said 7:00, but the King only comes at 8:00).
