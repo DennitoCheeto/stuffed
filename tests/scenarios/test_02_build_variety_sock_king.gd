@@ -197,8 +197,7 @@ func test_ac18_beating_him_pops_all_drops_a_big_box_and_offers_the_choice() -> v
 	assert_gte(boomerang.level, 4, "more inside: at least 3 level-ups")
 	await wait_for_goal_screen(run)
 	assert_true(run.goal_screen.is_open(), "then End run / Keep going")
-	var title: Label = run.goal_screen.get_node("%TitleLabel") as Label
-	assert_eq(title.text, "You beat the Bedroom!")
+	assert_eq(run.goal_screen.title_label.text, "You beat the Bedroom!")
 
 
 func test_ac19_dying_before_the_king_is_beaten_is_a_loss() -> void:

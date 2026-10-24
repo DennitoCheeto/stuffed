@@ -98,7 +98,7 @@ func test_ac29_used_up_button_greys_out_and_says_none_left() -> void:
 	assert_true(button.status_label.visible, "the none-left text is shown")
 	assert_eq(button.status_label.text, "none left")
 	assert_false(button.dots.visible, "no dots")
-	assert_lt(button.modulate.a, 1.0, "greyed out")
+	assert_lt(button.face.modulate.a, 1.0, "greyed out")
 	assert_false(screen.skip_button.disabled, "the others still work")
 
 

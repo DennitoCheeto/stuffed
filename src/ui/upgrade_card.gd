@@ -1,68 +1,82 @@
 class_name UpgradeCard
-extends Button
-## One level-up card: key number, icon, name, "New!" / "Lv 2 → 3", one line of what it does and,
-## for weapons that can evolve, the icon of their partner item (spec 02 §5, §11).
+extends SewnButton
+## One level-up card as a felt patch (spec 02 §5, §11; spec 04 §6.3): the key number and
+## "New!" / "Lv 2 → 3" on fabric tags, the icon, the name, one line of what it does and, for
+## weapons that can evolve, the icon of their partner item. Lifts on hover / focus like every
+## sewn button but never tilts while the player chooses: cards must read at a glance.
 
 const CARD_SIZE: Vector2 = Vector2(340, 400)
-const CARD_COLOR: Color = Color("#2a2633")
-const EDGE_COLOR: Color = Color("#4a4358")
-const HIGHLIGHT_COLOR: Color = Color("#f2b52e")
 ## While choosing a card to banish: how far (radians) and how fast (per second) the card wiggles.
 const WIGGLE_ANGLE: float = 0.035
 const WIGGLE_SPEED: float = 9.0
+## New upgrades get a teal tag, level-ups a plain one.
+const NEW_TAG: Color = UiColors.STICKER_TEAL
 
 var offer: UpgradeOffer
 ## "Evolves with": the partner item's name and icon (weapons that can evolve only).
 var partner_row: HBoxContainer = HBoxContainer.new()
 var partner_icon: UpgradeIcon = UpgradeIcon.new()
-var partner_label: Label = Label.new()
+var partner_label: Label = UiFonts.label("", 17, UiColors.INK_SOFT)
 ## The scissors mark shown while choosing a card to banish.
 var banish_mark: UpgradeIcon = UpgradeIcon.new()
 var marked: bool = false
+## The key number and the level on fabric tags.
+var key_tag: FabricTag = FabricTag.new("1", UiColors.TAG, UiColors.INK, 20)
+var level_tag: FabricTag = FabricTag.new("", UiColors.TAG, UiColors.INK, 20)
+var name_label: Label = UiFonts.label("", 32, UiColors.INK, UiFonts.heading(600))
+var text_label: Label = UiFonts.label("", 21, UiColors.INK_SOFT)
 
-var _key_label: Label = Label.new()
 var _icon: UpgradeIcon = UpgradeIcon.new()
-var _name_label: Label = Label.new()
-var _level_label: Label = Label.new()
-var _text_label: Label = Label.new()
 var _wiggle_time: float = 0.0
 
 
 func _init() -> void:
-	custom_minimum_size = CARD_SIZE
-	focus_mode = Control.FOCUS_ALL
-	add_theme_stylebox_override("normal", _panel(EDGE_COLOR))
-	add_theme_stylebox_override("hover", _panel(HIGHLIGHT_COLOR.darkened(0.3)))
-	add_theme_stylebox_override("pressed", _panel(HIGHLIGHT_COLOR))
-	add_theme_stylebox_override("focus", _panel(HIGHLIGHT_COLOR, false))
+	super("", false)
+	box.radius = 26.0
+	box.stitch_inset = 11.0
+	box.pad(26, 20)
+	face.custom_minimum_size = CARD_SIZE
+	caption.visible = false
 	var column: VBoxContainer = VBoxContainer.new()
-	column.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT, Control.PRESET_MODE_MINSIZE, 28)
-	column.alignment = BoxContainer.ALIGNMENT_BEGIN
 	column.add_theme_constant_override("separation", 10)
 	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(column)
-	_style(_key_label, 24, Color("#a9a3b8"))
+	face.add_child(column)
+	var tags: HBoxContainer = HBoxContainer.new()
+	tags.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var gap: Control = Control.new()
+	gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	for part: Control in [key_tag, gap, level_tag]:
+		tags.add_child(part)
+	column.add_child(tags)
 	_icon.custom_minimum_size = Vector2(100, 100)
 	_icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_style(_name_label, 34, Color("#f7f3ea"))
-	_style(_level_label, 24, Color("#f2b52e"))
-	_style(_text_label, 22, Color("#d8d4e0"))
-	_text_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	for part: Control in [_key_label, _icon, _name_label, _level_label, _text_label]:
-		column.add_child(part)
+	column.add_child(_icon)
+	for label: Label in [name_label, text_label, partner_label]:
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	column.add_child(name_label)
+	column.add_child(text_label)
+	var filler: Control = Control.new()
+	filler.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	filler.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	column.add_child(filler)
 	partner_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	partner_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	partner_icon.custom_minimum_size = Vector2(40, 40)
 	partner_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_style(partner_label, 18, Color("#a9a3b8"))
+	# Wraps instead of widening the card: all three cards keep the same width.
+	partner_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	partner_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	partner_row.add_child(partner_label)
 	partner_row.add_child(partner_icon)
 	column.add_child(partner_row)
 	banish_mark.icon = &"scissors"
 	banish_mark.custom_minimum_size = Vector2(64, 64)
 	banish_mark.size = banish_mark.custom_minimum_size
-	banish_mark.position = Vector2(CARD_SIZE.x - 76, 12)
+	# Top middle, half over the edge: it never hides the key or the level.
+	banish_mark.position = Vector2(CARD_SIZE.x / 2.0 - 32.0, -34.0)
 	banish_mark.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	banish_mark.visible = false
 	add_child(banish_mark)
@@ -71,11 +85,18 @@ func _init() -> void:
 ## Shows `card_offer` as card number `number` (1-3).
 func show_offer(card_offer: UpgradeOffer, number: int) -> void:
 	offer = card_offer
-	_key_label.text = "[%d]" % number
+	key_tag.label.text = str(number)
 	_icon.icon = offer.upgrade.icon
-	_name_label.text = offer.upgrade.display_name
-	_level_label.text = offer.level_text()
-	_text_label.text = offer.description()
+	name_label.text = offer.upgrade.display_name
+	level_tag.label.text = offer.level_text()
+	level_tag.visible = level_tag.label.text != ""
+	var fresh: bool = offer.next_level <= 1
+	level_tag.box.fill = NEW_TAG if fresh else UiColors.TAG
+	level_tag.box.stitch = level_tag.box.fill.darkened(0.28)
+	level_tag.label.add_theme_color_override(
+		&"font_color", UiColors.STICKER_TEAL_INK if fresh else UiColors.INK
+	)
+	text_label.text = offer.description()
 	partner_row.visible = offer.partner != null
 	if offer.partner != null:
 		partner_label.text = "Evolves with %s" % offer.partner.display_name
@@ -97,23 +118,3 @@ func _process(delta: float) -> void:
 	_wiggle_time += delta
 	pivot_offset = size / 2.0
 	rotation = sin(_wiggle_time * WIGGLE_SPEED) * WIGGLE_ANGLE
-
-
-## A felt card panel; `filled` false draws only the edge (the focus ring on top of the card).
-func _panel(edge: Color, filled: bool = true) -> StyleBoxFlat:
-	var panel: StyleBoxFlat = StyleBoxFlat.new()
-	panel.bg_color = CARD_COLOR
-	panel.draw_center = filled
-	panel.border_color = edge
-	panel.set_border_width_all(4)
-	panel.set_corner_radius_all(18)
-	panel.shadow_color = Color(0, 0, 0, 0.35)
-	panel.shadow_size = 8 if filled else 0
-	return panel
-
-
-func _style(label: Label, font_size: int, color: Color) -> void:
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.add_theme_font_size_override("font_size", font_size)
-	label.add_theme_color_override("font_color", color)
-	label.mouse_filter = Control.MOUSE_FILTER_IGNORE

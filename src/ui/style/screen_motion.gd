@@ -15,8 +15,9 @@ func _init() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
 
-## Drops `parts` in, one after the other, with the "ui_open" whoosh.
-func open(parts: Array[Wobbly]) -> void:
+## Drops `parts` in, one after the other, with the "ui_open" whoosh. `turn` false = straight
+## down, no extra tilt (level-up cards are read while they land).
+func open(parts: Array[Wobbly], turn: bool = true) -> void:
 	finish()
 	Sfx.play(&"ui_open")
 	var style: UiStyle = UiFeel.STYLE
@@ -29,7 +30,7 @@ func open(parts: Array[Wobbly]) -> void:
 	for index: int in parts.size():
 		var part: Wobbly = parts[index]
 		part.lift = style.open_drop
-		part.spin = style.open_spin
+		part.spin = style.open_spin if turn else 0.0
 		part.fade = 0.0
 		var delay: float = index * style.open_stagger
 		var drop: PropertyTweener = _tween.tween_property(part, "lift", 0.0, style.open_seconds)
