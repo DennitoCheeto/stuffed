@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-24 (M2 + M3 accepted; end screen fix; UI research 02)_
+_Last updated: 2026-10-24 (M2 + M3 accepted; end screen fix; UI research 02; spec 04 drafted)_
 
 ## Where we are
 
@@ -23,8 +23,10 @@ _Last updated: 2026-10-24 (M2 + M3 accepted; end screen fix; UI research 02)_
 - PO-approved order: (1) **spec 04 UI and juice** (one themed menu style, juicy buttons, new end screen with
   per-weapon damage/kills/DPS + "Star of the run" + run titles; screens always fit 1920×1080 and 16:10). Input:
   `docs/research/02-game-ui-research.md` and the mockup canvas with looks A Sewing box / B Scrapbook / C Toy-box
-  arcade (https://claude.ai/artifact/JGFf3Co4vVR6emnQvs4Q4q). **Waiting for the PO to pick a look**, then write
-  spec 04. (2) Spec 05 town + Bedroom visual pass ("still not too appealing", "a tiny bit dark"). (3) Evolution
+  arcade (https://claude.ai/artifact/JGFf3Co4vVR6emnQvs4Q4q). PO picked **a mix of A + B** ("Stitched
+  Scrapbook": A's felt patches/sewn buttons as structure, B's tilt/tape/hand-written/photos/stickers as life; mockup
+  "Mix" on the canvas). **Spec 04 drafted** (`docs/specs/04-ui-and-juice.md`, milestone M3.5, AC-49 … AC-57,
+  P-18 … P-21, 8 tickets): **waiting for PO approval** (spec PR), then issues. (2) Spec 05 town + Bedroom visual pass ("still not too appealing", "a tiny bit dark"). (3) Evolution
   "wow" pass (new behaviour + bigger moment per evolution). (4) Skill / progress tree spec, then M4 night siege.
 - **PO decision (2026-10-24): rescued plushies become playable heroes in M5** (Pip, Böbö, BamBam, Robbar; rescue
   = unlock). Goes into the M5 spec. Böbö still has no photo (drawn as the classic IKEA bear).
