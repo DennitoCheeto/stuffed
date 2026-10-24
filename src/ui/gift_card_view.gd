@@ -1,38 +1,50 @@
 class_name GiftCardView
-extends PanelContainer
-## One big card on the gift box screen (spec 02 §20): felt icon (old → new for an evolution),
-## name, level change and one line of what it does. Looks like a level-up card.
+extends Wobbly
+## One big card on the gift box screen (spec 02 §20, spec 04 §6.4): a felt patch taped onto the
+## cloth, a little crooked, with the felt icon (old → new for an evolution), the name, the level
+## change on a fabric tag and one line of what it does. Evolutions get pink stitches and tape.
 
 const CARD_SIZE: Vector2 = Vector2(320, 380)
 const EVOLUTION_SIZE: Vector2 = Vector2(460, 380)
-const CARD_COLOR: Color = Color("#2a2633")
-const EDGE_COLOR: Color = Color("#f2b52e")
-const EVOLUTION_EDGE_COLOR: Color = Color("#ff7ad9")
+const EVOLUTION_STITCH: Color = Color("#d0679f")
 
 var card: GiftCard
+var patch: PanelContainer = PanelContainer.new()
+var box: StyleBoxFelt = StyleBoxFelt.new()
 var icon: UpgradeIcon = UpgradeIcon.new()
 ## Evolutions only: the weapon it evolved from, left of an arrow.
 var from_icon: UpgradeIcon = UpgradeIcon.new()
-var arrow_label: Label = Label.new()
-var title_label: Label = Label.new()
-var level_label: Label = Label.new()
-var text_label: Label = Label.new()
+var arrow_label: Label = UiFonts.label("→", 48, UiColors.INK, UiFonts.heading())
+var title_label: Label = UiFonts.label("", 32, UiColors.INK, UiFonts.heading(600))
+var level_tag: FabricTag
+var level_label: Label
+var text_label: Label = UiFonts.label("", 21, UiColors.INK_SOFT)
 
 
-func _init(shown: GiftCard) -> void:
+func _init(shown: GiftCard, degrees: float = 0.0) -> void:
 	card = shown
+	var evolution: bool = card.is_evolution()
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	custom_minimum_size = EVOLUTION_SIZE if card.is_evolution() else CARD_SIZE
-	add_theme_stylebox_override(
-		"panel", _panel(EVOLUTION_EDGE_COLOR if card.is_evolution() else EDGE_COLOR)
-	)
+	patch.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	patch.custom_minimum_size = EVOLUTION_SIZE if evolution else CARD_SIZE
+	box.shadow = UiColors.SHADOW
+	box.pad(24, 26)
+	if evolution:
+		box.stitch = EVOLUTION_STITCH
+		box.add_tape(0.3, -6.0, UiColors.TAPE_PINK)
+		box.add_tape(0.7, 5.0, UiColors.TAPE_PINK)
+	else:
+		box.add_tape(0.5, 4.0 if degrees < 0.0 else -4.0, UiColors.TAPE_GOLD)
+	patch.add_theme_stylebox_override(&"panel", box)
+	set_body(patch)
+	tilt = degrees
 	var column: VBoxContainer = VBoxContainer.new()
-	column.add_theme_constant_override("separation", 12)
+	column.add_theme_constant_override(&"separation", 12)
 	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(column)
+	patch.add_child(column)
 	var icons: HBoxContainer = HBoxContainer.new()
 	icons.alignment = BoxContainer.ALIGNMENT_CENTER
-	icons.add_theme_constant_override("separation", 16)
+	icons.add_theme_constant_override(&"separation", 16)
 	icons.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	column.add_child(icons)
 	for part: UpgradeIcon in [from_icon, icon]:
@@ -40,38 +52,22 @@ func _init(shown: GiftCard) -> void:
 		part.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	from_icon.icon = card.from_icon
 	icon.icon = card.icon
-	_style(arrow_label, 48, Color("#f7f3ea"))
-	arrow_label.text = "→"
-	from_icon.visible = card.is_evolution()
-	arrow_label.visible = card.is_evolution()
+	from_icon.visible = evolution
+	arrow_label.visible = evolution
 	icons.add_child(from_icon)
 	icons.add_child(arrow_label)
 	icons.add_child(icon)
-	_style(title_label, 34, Color("#f7f3ea"))
 	title_label.text = card.title
-	_style(level_label, 28, EVOLUTION_EDGE_COLOR if card.is_evolution() else EDGE_COLOR)
-	level_label.text = card.level_text
-	_style(text_label, 22, Color("#d8d4e0"))
+	var tag_fill: Color = UiColors.STICKER_PINK if evolution else UiColors.TAG
+	var tag_ink: Color = UiColors.STICKER_PINK_INK if evolution else UiColors.INK
+	level_tag = FabricTag.new(card.level_text, tag_fill, tag_ink, 22)
+	level_tag.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	level_label = level_tag.label
+	level_tag.visible = card.level_text != ""
 	text_label.text = card.text
-	text_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	for part: Label in [title_label, level_label, text_label]:
-		column.add_child(part)
-
-
-func _panel(edge: Color) -> StyleBoxFlat:
-	var panel: StyleBoxFlat = StyleBoxFlat.new()
-	panel.bg_color = CARD_COLOR
-	panel.border_color = edge
-	panel.set_border_width_all(4)
-	panel.set_corner_radius_all(18)
-	panel.set_content_margin_all(24)
-	panel.shadow_color = Color(0, 0, 0, 0.35)
-	panel.shadow_size = 8
-	return panel
-
-
-func _style(label: Label, font_size: int, color: Color) -> void:
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.add_theme_font_size_override("font_size", font_size)
-	label.add_theme_color_override("font_color", color)
-	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	for label: Label in [title_label, text_label]:
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	column.add_child(title_label)
+	column.add_child(level_tag)
+	column.add_child(text_label)

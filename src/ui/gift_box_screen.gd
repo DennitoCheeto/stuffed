@@ -3,7 +3,9 @@ extends CanvasLayer
 ## The gift box moment (spec 02 §6, §20): the game pauses, a big box wobbles, the lid pops off
 ## with confetti while Banane puts his sunglasses on (about 1 second; a key or click skips to the
 ## contents). Then the contents stay on screen as big cards until the player confirms with
-## Continue, Enter, Space or E. Keeps running while the run is frozen.
+## Continue, Enter, Space or E. Keeps running while the run is frozen. In the Stitched Scrapbook
+## look (spec 04 §6.4): the felt cloth over the dimmed run, a hand-written title, the contents as
+## taped felt patches that drop in, and Continue as the gold sewn button.
 
 ## The moment is over (confirmed).
 signal finished
@@ -15,15 +17,14 @@ const ART_OFFSET_X: float = 300.0
 const TITLE: String = "Gift box!"
 const EVOLUTION_TITLE: String = "Evolution!"
 ## Evolutions get their own colour and more confetti: they should feel bigger.
-const EVOLUTION_COLOR: Color = Color("#ff7ad9")
+const EVOLUTION_COLOR: Color = UiColors.STICKER_PINK
 const CONFETTI: int = 90
 const EVOLUTION_CONFETTI: int = 220
 const OPENING_HINT: String = "Any key: skip"
 const CONTINUE_TEXT: String = "Continue  [Enter / Space / E]"
-const HIGHLIGHT_COLOR: Color = Color("#f2b52e")
-const TEXT_COLOR: Color = Color("#f7f3ea")
-const OUTLINE_COLOR: Color = Color("#141218")
-const BUTTON_COLOR: Color = Color("#2a2633")
+const HIGHLIGHT_COLOR: Color = UiColors.GOLD
+## The cards sit a little crooked, each its own way (degrees).
+const CARD_TILTS: Array[float] = [-2.0, 1.5, -1.0, 2.0, -1.5]
 const CONFETTI_COLORS: PackedColorArray = [
 	Color("#f2b52e"), Color("#4fc3f7"), Color("#f08a3c"), Color("#b388ff"), Color("#7bd88f")
 ]
@@ -52,10 +53,13 @@ var evolution: bool = false
 ## The contents shown, one card each.
 var cards: Array[GiftCardView] = []
 var art: GiftBoxArt
-var title_label: Label
+var cloth: MenuCloth = MenuCloth.new(0.72, 0.3)
+var title: HandTitle = HandTitle.new(TITLE, 84, HIGHLIGHT_COLOR, -3.0)
+var title_label: Label = title.label
 var hint_label: Label
 var card_row: HBoxContainer
-var continue_button: Button = Button.new()
+var continue_button: SewnButton = SewnButton.new(CONTINUE_TEXT, true, 28)
+var motion: ScreenMotion = ScreenMotion.new()
 var confetti: CPUParticles2D
 
 var _gift: GiftContents
@@ -114,6 +118,7 @@ func confirm() -> void:
 func close() -> void:
 	if not visible:
 		return
+	motion.finish()
 	visible = false
 	finished.emit()
 
@@ -190,29 +195,40 @@ func _show_contents() -> void:
 	contents_time = 0.0
 	art.visible = false
 	hint_label.visible = false
+	var parts: Array[Wobbly] = []
 	for card: GiftCard in _gift.cards():
-		var view: GiftCardView = GiftCardView.new(card)
+		var tilt: float = CARD_TILTS[cards.size() % CARD_TILTS.size()]
+		var view: GiftCardView = GiftCardView.new(card, tilt)
 		card_row.add_child(view)
 		cards.append(view)
+		parts.append(view)
 	card_row.visible = true
 	continue_button.disabled = true
 	continue_button.visible = true
+	motion.open(parts)
 
 
 func _build() -> void:
-	var dim: ColorRect = ColorRect.new()
-	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	dim.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	dim.color = Color(0.08, 0.07, 0.1, 0.55)
-	add_child(dim)
-	title_label = _label(TITLE, 72, HIGHLIGHT_COLOR, 120.0)
+	add_child(motion)
+	add_child(cloth)
+	title.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	title.offset_left = -600.0
+	title.offset_right = 600.0
+	title.offset_top = 110.0
+	add_child(title)
 	art = GiftBoxArt.new()
 	art.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 	# Beside the middle of the screen, so Banane (in the middle) is seen putting his shades on.
 	art.position.x += ART_OFFSET_X
 	art.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(art)
-	hint_label = _label(OPENING_HINT, 22, Color("#9a93a8"), 960.0)
+	hint_label = UiFonts.label(OPENING_HINT, 26, UiColors.FELT, UiFonts.hand())
+	hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	hint_label.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	hint_label.offset_left = -600.0
+	hint_label.offset_right = 600.0
+	hint_label.offset_top = 960.0
+	add_child(hint_label)
 	card_row = HBoxContainer.new()
 	card_row.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 	card_row.offset_left = -900.0
@@ -228,20 +244,12 @@ func _build() -> void:
 
 
 func _build_continue() -> void:
-	continue_button.text = CONTINUE_TEXT
 	continue_button.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 	continue_button.offset_left = -260.0
 	continue_button.offset_right = 260.0
 	continue_button.offset_top = 230.0
 	continue_button.offset_bottom = 310.0
 	continue_button.focus_mode = Control.FOCUS_NONE
-	continue_button.add_theme_font_size_override("font_size", 30)
-	continue_button.add_theme_color_override("font_color", TEXT_COLOR)
-	continue_button.add_theme_color_override("font_disabled_color", Color("#6f6a7a"))
-	continue_button.add_theme_stylebox_override("normal", _panel(HIGHLIGHT_COLOR))
-	continue_button.add_theme_stylebox_override("hover", _panel(HIGHLIGHT_COLOR.lightened(0.3)))
-	continue_button.add_theme_stylebox_override("pressed", _panel(TEXT_COLOR))
-	continue_button.add_theme_stylebox_override("disabled", _panel(Color("#4a4358")))
 	continue_button.pressed.connect(confirm)
 	add_child(continue_button)
 
@@ -269,28 +277,3 @@ func _build_confetti() -> void:
 	confetti.color_initial_ramp = colors
 	add_child(confetti)
 
-
-func _panel(edge: Color) -> StyleBoxFlat:
-	var panel: StyleBoxFlat = StyleBoxFlat.new()
-	panel.bg_color = BUTTON_COLOR
-	panel.border_color = edge
-	panel.set_border_width_all(4)
-	panel.set_corner_radius_all(14)
-	return panel
-
-
-## A centred line of text whose top is `top` pixels from the top of the screen.
-func _label(text: String, font_size: int, color: Color, top: float) -> Label:
-	var label: Label = Label.new()
-	label.text = text
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.set_anchors_preset(Control.PRESET_CENTER_TOP)
-	label.offset_left = -600.0
-	label.offset_right = 600.0
-	label.offset_top = top
-	label.add_theme_font_size_override("font_size", font_size)
-	label.add_theme_color_override("font_color", color)
-	label.add_theme_color_override("font_outline_color", OUTLINE_COLOR)
-	label.add_theme_constant_override("outline_size", 10)
-	add_child(label)
-	return label

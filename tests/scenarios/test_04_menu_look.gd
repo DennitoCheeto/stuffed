@@ -1,9 +1,11 @@
 extends "res://tests/scenarios/run_scenario.gd"
-## Scenario (spec 04 §6.1-6.2, AC-49, M3.5-06): the title screen, the pause menu (and its
+## Scenario (spec 04 §6.1-6.4, AC-49, M3.5-06 + 07): the title screen, the pause menu (and its
 ## Recipes page), the town's Esc menu and Settings use the Stitched Scrapbook pieces: felt
 ## panels, sewn buttons, the three fonts, the felt cloth behind them; no old grey box, plain
 ## Button, plain slider or ColorRect is left. Settings' sliders are a thread with a sewing-button
-## knob and its switches are felt switches; both react to mouse and keyboard.
+## knob and its switches are felt switches; both react to mouse and keyboard. The level-up cards
+## are felt patches that lift but never tilt, Reroll / Skip / Banish are sewn buttons with
+## fabric-tag keys, and the gift box moment and the goal screen are felt too.
 
 const FONT_FILES: Array[FontFile] = [UiFonts.FREDOKA, UiFonts.PATRICK_HAND, UiFonts.NUNITO]
 ## A spring is done after its length plus a little margin.
@@ -241,3 +243,120 @@ func test_the_felt_switch_flips_with_a_click_or_enter_and_slides_its_knob() -> v
 	title.open_settings()
 	assert_true(switch.button_pressed, "opening shows the saved setting")
 	assert_eq(switch.slide, 1.0, "the knob is already on the right side")
+
+
+## Starts a quiet run and levels Banane up once; returns once the cards can be picked.
+func _level_up_run() -> Run:
+	var run: Run = await start_run()
+	run.spawner.active = false
+	disarm(first_player())
+	var hero: Player = first_player()
+	hero.add_xp(hero.progress.xp_needed() - hero.progress.xp)
+	await wait_for_signal(run.level_up_screen.cards_shown, 3.0)
+	await wait_seconds(UiFeel.STYLE.open_seconds + SETTLE)
+	return run
+
+
+func _gift_showing(run: Run) -> bool:
+	return run.gift_screen.showing_contents
+
+
+func test_ac49_the_level_up_cards_are_felt_patches_with_sewn_buttons() -> void:
+	var run: Run = await _level_up_run()
+	var screen: LevelUpScreen = run.level_up_screen
+	var found: PackedStringArray = unthemed(screen)
+	assert_eq(found.size(), 0, "level-up is all felt: %s" % [found])
+	assert_true(screen.cloth.is_visible_in_tree(), "the felt cloth is behind the cards")
+	assert_eq(screen.title_label.get_theme_font(&"font"), UiFonts.hand(), "hand-written title")
+	assert_eq(screen.cards.size(), 3)
+	for card: UpgradeCard in screen.cards:
+		assert_true(card is SewnButton, "a card reacts like a sewn button")
+		assert_true(card.box is StyleBoxFelt, "a felt patch")
+		assert_true(card.key_tag.is_visible_in_tree(), "the key number on a fabric tag")
+	for button: CardControlButton in screen.controls():
+		assert_true(button is SewnButton, "%s is a sewn button" % button.title_label.text)
+		assert_true(button.key_tag is FabricTag, "the key on a fabric tag")
+		assert_eq(button.key_tag.label.text, button.key_label.text)
+
+
+func test_ac49_level_up_cards_never_tilt_and_lift_on_focus() -> void:
+	var run: Run = await start_run()
+	run.spawner.active = false
+	disarm(first_player())
+	var screen: LevelUpScreen = run.level_up_screen
+	var hero: Player = first_player()
+	hero.add_xp(hero.progress.xp_needed() - hero.progress.xp)
+	await wait_for_signal(screen.cards_shown, 3.0)
+	var dropped: float = 0.0
+	var turned: float = 0.0
+	for i: int in 20:
+		dropped = maxf(dropped, screen.cards_holder.lift)
+		turned = maxf(turned, absf(screen.cards_holder.spin + screen.cards_holder.tilt))
+		await wait_process_frames(1)
+	assert_gt(dropped, 0.0, "the cards drop in")
+	assert_almost_eq(turned, 0.0, 0.001, "straight, without any tilt")
+	await wait_seconds(UiFeel.STYLE.open_seconds + SETTLE)
+	var first: UpgradeCard = screen.cards[0]
+	assert_true(first.has_focus(), "keyboard ready on card 1")
+	await _settle()
+	assert_almost_eq(first.lift_amount(), UiFeel.STYLE.hover_lift, 0.5, "the focused card lifts")
+	assert_almost_eq(first.face.rotation, 0.0, 0.001, "and doesn't turn")
+	assert_almost_eq(screen.cards[1].lift_amount(), 0.0, 0.5, "the others rest")
+	Sfx.history.clear()
+	await tap_action("ui_right")
+	await _settle()
+	assert_true(screen.cards[1].has_focus(), "arrow keys move along the cards")
+	assert_almost_eq(screen.cards[1].lift_amount(), UiFeel.STYLE.hover_lift, 0.5)
+	assert_almost_eq(first.lift_amount(), 0.0, 0.5, "card 1 settles back")
+	assert_true(Sfx.history.has(&"ui_hover"), "felt pat")
+
+
+func test_a_used_up_card_button_says_nope() -> void:
+	var run: Run = await _level_up_run()
+	var screen: LevelUpScreen = run.level_up_screen
+	for i: int in 3:
+		await tap_action("reroll_cards")
+		await wait_process_frames(2)
+	assert_true(screen.reroll_button.disabled, "no rerolls left")
+	Sfx.history.clear()
+	await tap_action("reroll_cards")
+	assert_true(Sfx.history.has(&"ui_nope"), "nope sound")
+	assert_true(screen.reroll_button.is_wiggling(), "nope wiggle")
+
+
+func test_ac49_the_gift_box_moment_is_felt() -> void:
+	var run: Run = await start_run()
+	run.spawner.active = false
+	disarm(first_player())
+	run.pickups.buttons.clear()
+	run.drop_gift_box(first_player().position)
+	await wait_until(_gift_showing.bind(run), 5.0)
+	var gift: GiftBoxScreen = run.gift_screen
+	await wait_seconds(UiFeel.STYLE.open_seconds + SETTLE)
+	var found: PackedStringArray = unthemed(gift)
+	assert_eq(found.size(), 0, "gift box is all felt: %s" % [found])
+	assert_true(gift.cloth.is_visible_in_tree(), "the felt cloth is behind it")
+	assert_eq(gift.title_label.get_theme_font(&"font"), UiFonts.hand(), "hand-written title")
+	assert_true(gift.continue_button.main, "Continue is the gold button")
+	assert_gt(gift.cards.size(), 0)
+	for card: GiftCardView in gift.cards:
+		assert_true(card.box is StyleBoxFelt, "a felt patch")
+		assert_false(card.box.tape_spots.is_empty(), "taped on")
+		assert_true(card.level_tag is FabricTag, "the level on a fabric tag")
+
+
+func test_ac49_the_goal_screen_is_felt() -> void:
+	var run: Run = await start_run()
+	run.spawner.active = false
+	run.freeze(&"goal")
+	run.goal_screen.open()
+	await wait_seconds(UiFeel.STYLE.open_seconds + SETTLE)
+	var goal: GoalScreen = run.goal_screen
+	_assert_themed(goal, "goal screen")
+	assert_eq(goal.title_label.get_theme_font(&"font"), UiFonts.hand(), "hand-written title")
+	assert_true(goal.end_button.main, "End run is the gold button")
+	assert_false(goal.endless_button.main)
+	assert_true(goal.end_button.has_focus(), "keyboard ready")
+	assert_true(goal.sticker.is_visible_in_tree(), "a sticker slaps on")
+	goal.visible = false
+	run.unfreeze(&"goal")

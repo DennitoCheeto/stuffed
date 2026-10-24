@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-24 (M3.5-06 title, pause, settings)_
+_Last updated: 2026-10-24 (M3.5-07 level-up, gift box, goal screen)_
 
 ## Where we are
 
@@ -29,7 +29,9 @@ _Last updated: 2026-10-24 (M3.5-06 title, pause, settings)_
   P-18 … P-21). Milestone **M3.5 — UI and juice**, issues **#124–#131** (M3.5-01 … 08). M3.5-01 style
   foundation (#124): merged (PR #133). PO feedback #135 (Settings from fort + title): merged (PR #136). M3.5-03 weapon
   stats (#126): merged (PR #137). M3.5-02 fit check (#125): merged (PR #138). M3.5-04 end screen (#127): merged (PR #140). M3.5-05 run titles (#128): merged (PR #141). M3.5-06 title, pause, settings (#129): merged (PR #143).
-  The repo is **public** since 2026-10-24 (free Actions minutes ran out while private; public = unlimited). **Next: M3.5-07 level-up, gift box, goal screen (#130)**, then 08.
+  M3.5-07 level-up, gift box, goal screen (#130): merged (PR after #148).
+  The repo is **public** since 2026-10-24 (free Actions minutes ran out while private; public = unlimited). **Next: M3.5-08 town cards,
+  Scrapbook, HUD (#131)**, then the M3.5 playtest (P-18 … P-21).
   Ask the PO: Speedy Stitcher is "King beaten before 9:00" (spec said 7:00, but the King only comes at 8:00).
   (2) Spec 05 town + Bedroom visual pass ("still not too appealing", "a tiny bit
   dark"). (3) Evolution
@@ -37,8 +39,8 @@ _Last updated: 2026-10-24 (M3.5-06 title, pause, settings)_
 - **PO decision (2026-10-24): rescued plushies become playable heroes in M5** (Pip, Böbö, BamBam, Robbar; rescue
   = unlock). Goes into the M5 spec. Böbö still has no photo (drawn as the classic IKEA bear).
 - PO feedback (2026-10-24): rough felt edges fixed (#145, PR #146). Plushies: Robbar needs work, Böbö should look
-  like the IKEA bear, all need a walking animation like Banane → issue #147 (asked the PO: own ticket after M3.5 or
-  part of spec 05; needs photos of Robbar and Böbö).
+  like the IKEA bear, all need a walking animation like Banane → issue #147 (PO: **own ticket after M3.5**. Böbö "a bit more
+  chonky", Robbar's "face looks a bit weird"; the PO sent new photos but they didn't reach the chat: ask again).
 - PO idea (2026-10-24, "idk"): **walk into the buildings** (interiors). Park it; ask again when the town visual
   pass or the siege is specced.
 - Economy (M3-05/PR #113): cheapest rebuild 200 coins, all 6 at level 3 ≈ 17k coins.
@@ -282,5 +284,10 @@ _Last updated: 2026-10-24 (M3.5-06 title, pause, settings)_
   `unthemed(root)` in `test_04_menu_look.gd` (plain Button/slider/ColorRect, flat panels, other fonts): later
   tickets add their screens there. Clicks in tests: wait `open_seconds` first (panels drop in), and wait a frame
   after `tap_action("ui_accept")` (buttons fire on release).
+- Level-up, gift box, goal (M3.5-07): built in code. `UpgradeCard` and `CardControlButton` are `SewnButton`s (content
+  in `face`, `caption` hidden, size via `face.custom_minimum_size`); key / level on `FabricTag`s (`key_tag`,
+  `level_tag`). Cards drop in with `motion.open([cards_holder], false)` (`turn` false = no tilt) and their arrow-key
+  neighbours are set by hand (`_link_focus`; Godot's guess jumped to the buttons). `GiftCardView` is a `Wobbly`
+  (`box`, `level_tag`). Disabled Reroll/Skip/Banish say "nope" on R/S/B. CPUParticles2D has no `alpha_curve`.
 - Smooth edges (#145): filled UI shapes go through `FeltDraw.fill(canvas, points, color)` / `fill_smooth(rid, ...)`
   (fill + a 1.2 px fade ring outside the edge). Plain `draw_colored_polygon` has jagged edges: don't use it in UI.
