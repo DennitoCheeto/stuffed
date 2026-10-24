@@ -15,4 +15,4 @@ func _init(own: Color = UiColors.TAPE_GOLD, length: float = 90.0, width: float =
 func _draw() -> void:
 	if size.x < 8.0 or size.y < 4.0:
 		return
-	draw_colored_polygon(FeltDraw.tape(size / 2.0, size.x, size.y, 0.0), color)
+	FeltDraw.fill(self, FeltDraw.tape(size / 2.0, size.x, size.y, 0.0), color)

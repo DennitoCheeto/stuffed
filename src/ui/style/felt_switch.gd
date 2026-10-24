@@ -91,7 +91,7 @@ func _draw() -> void:
 	var track: Rect2 = track_rect()
 	var on_color: Color = UiColors.THREAD.darkened(0.25)
 	var fill: Color = UiColors.STITCH.lerp(on_color, slide)
-	draw_colored_polygon(FeltDraw.rounded(track, track.size.y / 2.0), fill)
+	FeltDraw.fill(self, FeltDraw.rounded(track, track.size.y / 2.0), fill)
 	var stitches: PackedVector2Array = FeltDraw.dashes(
 		FeltDraw.rounded(track.grow(-5.0), track.size.y / 2.0 - 5.0), 5.0, 4.0
 	)

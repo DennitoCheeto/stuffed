@@ -32,4 +32,4 @@ func _draw() -> void:
 func _round(rect: Rect2, color: Color) -> void:
 	var points: PackedVector2Array = FeltDraw.rounded(rect, rect.size.y / 2.0)
 	if points.size() >= 3:
-		draw_colored_polygon(points, color)
+		FeltDraw.fill(self, points, color)

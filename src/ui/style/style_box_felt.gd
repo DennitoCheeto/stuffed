@@ -113,7 +113,4 @@ func _draw(to_canvas_item: RID, rect: Rect2) -> void:
 
 
 func _polygon(item: RID, points: PackedVector2Array, color: Color) -> void:
-	if points.size() < 3:
-		return
-	var colors: PackedColorArray = [color]
-	RenderingServer.canvas_item_add_polygon(item, points, colors)
+	FeltDraw.fill_smooth(item, points, color)
