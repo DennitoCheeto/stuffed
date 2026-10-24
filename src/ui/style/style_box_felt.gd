@@ -54,6 +54,17 @@ func _init(own_fill: Color = UiColors.FELT, own_stitch: Color = UiColors.STITCH)
 	stitch = own_stitch
 
 
+## The HUD's quiet backing (spec 04 §2.3): dark felt, a thin soft stitch, no shadow or tape.
+static func hud(corner: float = 12.0, inset: float = 4.0) -> StyleBoxFelt:
+	var box: StyleBoxFelt = StyleBoxFelt.new(UiColors.HUD_FELT, UiColors.HUD_STITCH)
+	box.radius = corner
+	box.stitch_inset = inset
+	box.stitch_width = 1.5
+	box.stitch_dash = 6.0
+	box.stitch_gap = 4.0
+	return box
+
+
 ## Sets the space kept free for content inside the patch (the stitches and the edge included).
 func pad(sides: float, top_bottom: float) -> StyleBoxFelt:
 	content_margin_left = sides

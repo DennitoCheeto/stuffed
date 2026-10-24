@@ -56,10 +56,9 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _build() -> void:
 	var panel: PanelContainer = PanelContainer.new()
-	var style: StyleBoxFlat = StyleBoxFlat.new()
-	style.bg_color = PANEL_COLOR
-	style.set_corner_radius_all(10)
-	style.set_content_margin_all(12)
+	var style: StyleBoxFelt = StyleBoxFelt.hud(12.0)
+	style.fill = PANEL_COLOR
+	style.pad(14, 14)
 	panel.add_theme_stylebox_override("panel", style)
 	panel.position = Vector2(16, 110)
 	add_child(panel)
@@ -68,7 +67,7 @@ func _build() -> void:
 	panel.add_child(column)
 	var title: Label = Label.new()
 	title.text = "Developer menu (F1)"
-	title.add_theme_color_override("font_color", Color("#f2b52e"))
+	title.add_theme_color_override("font_color", UiColors.GOLD)
 	column.add_child(title)
 	_row(column, [GIVE_MATERIALS, EMPTY_JARS], [give_materials, empty_jars])
 	for spot: TownSpot in town.layout.spots:

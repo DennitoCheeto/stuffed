@@ -43,3 +43,24 @@ const XP: Color = Color("#7cc96b")
 ## Fabric tags.
 const TAG: Color = Color("#eadfca")
 const TAG_STITCH: Color = Color("#b8a27a")
+## HUD (spec 04 §2.3): quiet dark felt backings with a soft stitch, light text.
+const HUD_FELT: Color = Color(0.17, 0.14, 0.24, 0.82)
+const HUD_STITCH: Color = Color(0.66, 0.6, 0.8, 0.55)
+const HUD_TEXT: Color = Color("#f6ecd9")
+const HUD_OUTLINE: Color = Color("#1c1826")
+## The hero's health: a soft rose (never the red of danger; green is XP).
+const HEALTH: Color = Color("#e891aa")
+
+## Danger colours (vision §6): saturated red to orange. Enemies own them; menus and the HUD's own
+## parts never use them.
+const DANGER_HUE_LOW: float = 35.0 / 360.0
+const DANGER_HUE_HIGH: float = 335.0 / 360.0
+const DANGER_SATURATION: float = 0.45
+const DANGER_VALUE: float = 0.35
+
+
+## True for a colour that reads as enemy danger (red / orange, saturated and bright enough).
+static func is_danger(color: Color) -> bool:
+	if color.a <= 0.0 or color.s < DANGER_SATURATION or color.v < DANGER_VALUE:
+		return false
+	return color.h < DANGER_HUE_LOW or color.h > DANGER_HUE_HIGH

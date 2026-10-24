@@ -131,10 +131,9 @@ func _process(_delta: float) -> void:
 
 func _build() -> void:
 	var panel: PanelContainer = PanelContainer.new()
-	var style: StyleBoxFlat = StyleBoxFlat.new()
-	style.bg_color = PANEL_COLOR
-	style.set_corner_radius_all(10)
-	style.set_content_margin_all(12)
+	var style: StyleBoxFelt = StyleBoxFelt.hud(12.0)
+	style.fill = PANEL_COLOR
+	style.pad(14, 14)
 	panel.add_theme_stylebox_override("panel", style)
 	panel.position = Vector2(16, 90)
 	add_child(panel)
@@ -214,7 +213,7 @@ func _build_spawns(parent: Control) -> void:
 func _title(parent: Control, text: String) -> void:
 	var label: Label = Label.new()
 	label.text = text
-	label.add_theme_color_override("font_color", Color("#f2b52e"))
+	label.add_theme_color_override("font_color", UiColors.GOLD)
 	parent.add_child(label)
 
 

@@ -3,22 +3,28 @@ extends PanelContainer
 ## The small card next to a building while a player stands there (spec 03 §5): name, level,
 ## what it does now, what the next level adds, the price with jar icons (grey + the missing
 ## amount when the jars don't hold enough) and what E does. Lives in the town's world space.
+## A taped-on felt patch, a little crooked, with a hand-written name and the level on a fabric
+## tag (spec 04 §6.6); it pops in when it moves to another building.
 
 const WIDTH: float = 440.0
 ## Space between the card and the building (or its sign).
 const GAP: float = 18.0
 ## Height of the sign under a building (the card goes below it when the player is above).
 const SIGN_HEIGHT: float = 120.0
-const BACK_COLOR: Color = Color(0.11, 0.09, 0.16, 0.88)
-const EDGE_COLOR: Color = Color("#cfe3f0")
-const SOFT_COLOR: Color = Color("#cfc8dc")
-const ACTION_COLOR: Color = Color("#f6e7b0")
-const MISSING_COLOR: Color = Color("#a9b8d0")
+## Resting tilt in degrees and how small it starts when it pops in.
+const TILT: float = -1.5
+## Room for the hand-written name next to the level tag.
+const TITLE_WIDTH: float = 230.0
+const POP_FROM: float = 0.9
+const ACTION_COLOR: Color = UiColors.PURPLE
+const MISSING_COLOR: Color = UiColors.INK_SOFT
 
 ## The building the card shows (null = hidden).
 var building: TownBuilding
 var title_label: Label
-var level_label: Label
+## The level on a fabric tag ("Ruin", "Level 2 of 3").
+var level_tag: FabricTag = FabricTag.new("", UiColors.TAG, UiColors.INK, 18)
+var level_label: Label = level_tag.label
 var now_label: Label
 var next_label: Label
 ## An extra line some buildings add ("Starting weapon: Peel Boomerang").
@@ -27,6 +33,9 @@ var cost_row: HBoxContainer
 var cost_counters: Dictionary[String, JarCounter] = {}
 ## "E  Rebuild", "Needs 40 more coins", "Fully upgraded!" or what unlocks it.
 var action_label: Label
+var box: StyleBoxFelt = StyleBoxFelt.new()
+
+var _pop: Tween
 
 
 func _init() -> void:
@@ -35,31 +44,39 @@ func _init() -> void:
 	z_index = 20
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	custom_minimum_size = Vector2(WIDTH, 0.0)
-	var back: StyleBoxFlat = StyleBoxFlat.new()
-	back.bg_color = BACK_COLOR
-	back.border_color = EDGE_COLOR
-	back.set_border_width_all(3)
-	back.set_corner_radius_all(18)
-	back.set_content_margin_all(18)
-	add_theme_stylebox_override(&"panel", back)
-	var box: VBoxContainer = VBoxContainer.new()
-	box.add_theme_constant_override(&"separation", 6)
-	add_child(box)
-	title_label = _line(box, 30, TownArt.TEXT_COLOR)
-	level_label = _line(box, 20, SOFT_COLOR)
-	now_label = _line(box, 22, TownArt.TEXT_COLOR)
-	next_label = _line(box, 22, SOFT_COLOR)
-	note_label = _line(box, 22, ACTION_COLOR)
+	box.shadow = UiColors.SHADOW
+	box.pad(26, 22)
+	box.add_tape(0.5, 4.0, UiColors.TAPE_TEAL)
+	add_theme_stylebox_override(&"panel", box)
+	var column: VBoxContainer = VBoxContainer.new()
+	column.add_theme_constant_override(&"separation", 6)
+	add_child(column)
+	var top: HBoxContainer = HBoxContainer.new()
+	top.add_theme_constant_override(&"separation", 12)
+	column.add_child(top)
+	title_label = UiFonts.label("", 38, UiColors.PURPLE, UiFonts.hand())
+	title_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	# A fixed width, so the wrapped name knows its height before the first layout.
+	title_label.custom_minimum_size = Vector2(TITLE_WIDTH, 0.0)
+	top.add_child(title_label)
+	level_tag.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	top.add_child(level_tag)
+	now_label = _line(column, 22, UiColors.INK)
+	next_label = _line(column, 21, UiColors.INK_SOFT)
+	note_label = _line(column, 21, UiColors.TEAL)
 	cost_row = HBoxContainer.new()
 	cost_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	cost_row.add_theme_constant_override(&"separation", 22)
-	box.add_child(cost_row)
-	action_label = _line(box, 24, ACTION_COLOR)
+	column.add_child(cost_row)
+	action_label = _line(column, 24, ACTION_COLOR, UiFonts.heading())
+	action_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
 
 ## Shows the card for `target` with the town's jars in `save`, above the building or (when the
 ## player stands above it) below its sign, with an extra `note` line if there is one.
 func show_for(target: TownBuilding, save: TownSave, above: bool, note: String = "") -> void:
+	var moved: bool = building != target or not visible
 	building = target
 	var def: BuildingDef = target.building
 	title_label.text = def.display_name
@@ -85,6 +102,10 @@ func show_for(target: TownBuilding, save: TownSave, above: bool, note: String = 
 	if not above:
 		top = rect.end.y + SIGN_HEIGHT
 	position = Vector2(rect.get_center().x - size.x / 2.0, top)
+	pivot_offset = size / 2.0
+	rotation = deg_to_rad(TILT)
+	if moved:
+		_pop_in()
 
 
 func hide_card() -> void:
@@ -132,7 +153,7 @@ func _show_cost(target: TownBuilding, save: TownSave) -> void:
 	var cost: Dictionary[String, int] = _cost(target)
 	cost_row.visible = target.unlocked and not cost.is_empty()
 	for material: String in cost:
-		var counter: JarCounter = JarCounter.new(material, 24, 32.0)
+		var counter: JarCounter = JarCounter.new(material, 24, 32.0).on_felt()
 		counter.show_amount(cost[material])
 		if save.material(material) < cost[material]:
 			counter.modulate = TownBuilding.SHORT_TINT
@@ -148,10 +169,21 @@ static func _cost(target: TownBuilding) -> Dictionary[String, int]:
 	return result
 
 
-func _line(box: VBoxContainer, font_size: int, color: Color) -> Label:
-	var line: Label = TownArt.label("", font_size)
-	line.add_theme_color_override(&"font_color", color)
+## Pops the card in (a little small, then springs to size), unless menus move less.
+func _pop_in() -> void:
+	if _pop != null:
+		_pop.kill()
+	if UiFeel.reduced() or not is_inside_tree():
+		scale = Vector2.ONE
+		return
+	scale = Vector2.ONE * POP_FROM
+	_pop = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_pop.tween_property(self, "scale", Vector2.ONE, UiFeel.STYLE.spring_seconds)
+
+
+func _line(column: VBoxContainer, font_size: int, color: Color, font: Font = null) -> Label:
+	var line: Label = UiFonts.label("", font_size, color, font)
 	line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	line.custom_minimum_size = Vector2(WIDTH - 40.0, 0.0)
-	box.add_child(line)
+	line.custom_minimum_size = Vector2(WIDTH - 52.0, 0.0)
+	column.add_child(line)
 	return line

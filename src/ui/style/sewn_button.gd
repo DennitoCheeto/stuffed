@@ -89,6 +89,12 @@ func _init(words: String = "", is_main: bool = false, font_size: int = 26) -> vo
 	gui_input.connect(_on_gui_input)
 
 
+## Gives the button its own stitch colour (it still brightens when raised).
+func set_stitch(color: Color) -> void:
+	_base_stitch = color
+	box.stitch = color.lightened(0.35) if is_raised() else color
+
+
 ## How far the face is lifted right now (px) and its size (1 = normal), for tests.
 func lift_amount() -> float:
 	return lifted

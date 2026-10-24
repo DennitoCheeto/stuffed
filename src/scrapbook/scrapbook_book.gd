@@ -5,6 +5,8 @@ extends CanvasLayer
 ## felt picture and name; unseen ones a silhouette and "?". The entry in focus shows its text
 ## (and a weapon's evolution partner) next to the grid. Arrow keys / mouse pick an entry, Q / E
 ## or the tabs turn the page, Esc closes. Keeps working while the town or title is paused.
+## Stitched Scrapbook look (spec 04 §6.7): the felt cloth, the book is a taped felt patch with a
+## hand-written title, the tabs are fabric tags and the entries are photos (ScrapbookTile).
 
 ## The book was closed.
 signal closed
@@ -16,12 +18,11 @@ const ROWS: int = 3
 const GAP: int = 14
 const DETAIL_WIDTH: float = 500.0
 const DETAIL_PICTURE: float = 200.0
-const COVER_COLOR: Color = Color("#6f8fb8")
-const PAPER_COLOR: Color = Color("#f6f0e3")
-const INK_COLOR: Color = Color("#3b3346")
-const NOTE_COLOR: Color = Color("#8a5a2b")
-const TAB_COLOR: Color = Color("#dfe8f2")
-const TAB_ON_COLOR: Color = Color("#f2b52e")
+const INK_COLOR: Color = UiColors.INK
+const NOTE_COLOR: Color = UiColors.TEAL
+## Fabric-tag tabs: plain, and the open page's.
+const TAB_COLOR: Color = UiColors.TAG
+const TAB_ON_COLOR: Color = UiColors.STICKER_TEAL
 const UNSEEN_TEXT: String = "Not found yet."
 ## How to fill each page (shown for an unseen entry).
 const HOW_TO_FIND: Dictionary[String, String] = {
@@ -42,9 +43,15 @@ var tiles: Array[ScrapbookTile] = []
 ## The entry shown in the details (null = none).
 var shown: ScrapbookEntry
 var detail_picture: ScrapbookPicture
+## The taped photo around the detail picture.
+var detail_photo: PhotoFrame
 var detail_name: Label
 var detail_text: Label
 var detail_note: Label
+
+var cloth: MenuCloth = MenuCloth.new(0.94)
+var cover: FeltPanel = FeltPanel.new(-0.8)
+var motion: ScreenMotion = ScreenMotion.new()
 
 var _tab_row: HBoxContainer
 var _grid: GridContainer
@@ -54,20 +61,18 @@ func _init() -> void:
 	layer = 19
 	visible = false
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	var shade: ColorRect = ColorRect.new()
-	shade.color = Color(0.05, 0.04, 0.08, 0.85)
-	shade.set_anchors_preset(Control.PRESET_FULL_RECT)
-	add_child(shade)
-	var cover: PanelContainer = PanelContainer.new()
-	cover.add_theme_stylebox_override(&"panel", _box(PAPER_COLOR, COVER_COLOR, 14, 28))
-	cover.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-	cover.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	cover.grow_vertical = Control.GROW_DIRECTION_BOTH
-	add_child(cover)
+	add_child(cloth)
+	add_child(motion)
+	var center: CenterContainer = CenterContainer.new()
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(center)
+	cover.add_tape(0.12, -6.0).add_tape(0.88, 5.0, UiColors.TAPE_PINK)
+	center.add_child(cover)
 	var column: VBoxContainer = VBoxContainer.new()
-	column.add_theme_constant_override(&"separation", 18)
-	cover.add_child(column)
-	column.add_child(TownArt.label("Scrapbook", 56))
+	column.add_theme_constant_override(&"separation", 16)
+	cover.content.add_child(column)
+	column.add_child(HandTitle.new("Scrapbook", 60))
 	_tab_row = HBoxContainer.new()
 	_tab_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	_tab_row.add_theme_constant_override(&"separation", 10)
@@ -85,7 +90,8 @@ func _init() -> void:
 	)
 	body.add_child(_grid)
 	body.add_child(_build_details())
-	var hint: Label = _ink("Arrows / mouse: look   Q / E: turn the page   Esc: close", 22)
+	var hint: Label = _ink("Arrows / mouse: look   Q / E: turn the page   Esc: close", 20)
+	hint.add_theme_color_override(&"font_color", UiColors.INK_SOFT)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	column.add_child(hint)
 
@@ -101,11 +107,13 @@ func open(town_save: TownSave) -> void:
 	_build_tabs()
 	visible = true
 	show_page(0)
+	motion.open([cover])
 
 
 func close() -> void:
 	if not visible:
 		return
+	motion.finish()
 	visible = false
 	closed.emit()
 
@@ -118,13 +126,15 @@ func show_page(index: int) -> void:
 		old.queue_free()
 	tiles.clear()
 	var page: ScrapbookPage = pages[page_index]
-	for entry: ScrapbookEntry in page.entries:
-		var tile: ScrapbookTile = ScrapbookTile.new(entry, page.is_seen(entry, save))
+	for spot: int in page.entries.size():
+		var entry: ScrapbookEntry = page.entries[spot]
+		var tile: ScrapbookTile = ScrapbookTile.new(entry, page.is_seen(entry, save), spot)
 		tile.looked_at.connect(show_details)
 		_grid.add_child(tile)
 		tiles.append(tile)
 	for i: int in tabs.size():
 		tabs[i].button_pressed = i == page_index
+		(tabs[i] as SewnButton).box.fill = TAB_ON_COLOR if i == page_index else TAB_COLOR
 	if tiles.is_empty():
 		show_details(null)
 	else:
@@ -193,19 +203,7 @@ func _build_tabs() -> void:
 		old.queue_free()
 	tabs.clear()
 	for i: int in pages.size():
-		var tab: Button = Button.new()
-		tab.text = pages[i].count_text(save)
-		tab.toggle_mode = true
-		tab.focus_mode = Control.FOCUS_NONE
-		tab.add_theme_font_size_override(&"font_size", 24)
-		tab.add_theme_color_override(&"font_color", INK_COLOR)
-		tab.add_theme_color_override(&"font_pressed_color", INK_COLOR)
-		tab.add_theme_color_override(&"font_hover_color", INK_COLOR)
-		tab.add_theme_color_override(&"font_hover_pressed_color", INK_COLOR)
-		tab.add_theme_stylebox_override(&"normal", _tab_box(TAB_COLOR))
-		tab.add_theme_stylebox_override(&"hover", _tab_box(TAB_COLOR.lightened(0.4)))
-		tab.add_theme_stylebox_override(&"pressed", _tab_box(TAB_ON_COLOR))
-		tab.add_theme_stylebox_override(&"hover_pressed", _tab_box(TAB_ON_COLOR))
+		var tab: SewnButton = _tab(pages[i].count_text(save))
 		tab.pressed.connect(show_page.bind(i))
 		_tab_row.add_child(tab)
 		tabs.append(tab)
@@ -215,14 +213,20 @@ func _build_details() -> Control:
 	var details: VBoxContainer = VBoxContainer.new()
 	details.custom_minimum_size = Vector2(DETAIL_WIDTH, 0.0)
 	details.add_theme_constant_override(&"separation", 12)
+	var photo_size: Vector2 = Vector2(DETAIL_PICTURE, DETAIL_PICTURE)
+	detail_photo = PhotoFrame.new("", photo_size, 2.5, UiColors.TAPE_GOLD)
+	detail_photo.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	details.add_child(detail_photo)
 	detail_picture = ScrapbookPicture.new(DETAIL_PICTURE)
-	details.add_child(detail_picture)
-	detail_name = _ink("", 38)
+	detail_photo.picture.add_child(detail_picture)
+	detail_name = _ink("", 42)
+	detail_name.add_theme_font_override(&"font", UiFonts.hand())
+	detail_name.add_theme_color_override(&"font_color", UiColors.PURPLE)
 	detail_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	details.add_child(detail_name)
-	detail_text = _ink("", 26)
+	detail_text = _ink("", 24)
 	details.add_child(detail_text)
-	detail_note = _ink("", 24)
+	detail_note = _ink("", 22)
 	detail_note.add_theme_color_override(&"font_color", NOTE_COLOR)
 	details.add_child(detail_note)
 	return details
@@ -230,25 +234,25 @@ func _build_details() -> Control:
 
 ## Dark ink on the paper, wrapping.
 func _ink(text: String, font_size: int) -> Label:
-	var label: Label = Label.new()
-	label.text = text
+	var label: Label = UiFonts.label(text, font_size, INK_COLOR)
+	label.vertical_alignment = VERTICAL_ALIGNMENT_TOP
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.custom_minimum_size = Vector2(DETAIL_WIDTH, 0.0)
-	label.add_theme_font_size_override(&"font_size", font_size)
-	label.add_theme_color_override(&"font_color", INK_COLOR)
-	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return label
 
 
-func _tab_box(fill: Color) -> StyleBoxFlat:
-	return _box(fill, COVER_COLOR, 3, 10)
-
-
-func _box(fill: Color, edge: Color, width: int, margin: int) -> StyleBoxFlat:
-	var box: StyleBoxFlat = StyleBoxFlat.new()
-	box.bg_color = fill
-	box.border_color = edge
-	box.set_border_width_all(width)
-	box.set_corner_radius_all(16)
-	box.set_content_margin_all(margin)
-	return box
+## A tab is a small fabric tag you can press (it lifts like every sewn button).
+func _tab(words: String) -> SewnButton:
+	var tab: SewnButton = SewnButton.new(words, false, 22)
+	tab.toggle_mode = true
+	tab.focus_mode = Control.FOCUS_NONE
+	tab.box.fill = TAB_COLOR
+	tab.box.radius = 10.0
+	tab.box.stitch_inset = 4.0
+	tab.box.stitch_width = 2.0
+	tab.box.stitch_dash = 6.0
+	tab.box.stitch_gap = 4.0
+	tab.box.depth = 4.0
+	tab.box.pad(18, 6)
+	tab.set_stitch(UiColors.TAG_STITCH)
+	return tab

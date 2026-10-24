@@ -7,6 +7,7 @@ extends Control
 const SLOT_SIZE: Vector2 = Vector2(44, 44)
 const EMPTY_ALPHA: float = 0.35
 const FRAME_COLOR: Color = Color("#f2c230")
+const LEVEL_COLOR: Color = UiColors.GOLD
 const FRAME_WIDTH: float = 3.0
 const STAR_RADIUS: float = 9.0
 
@@ -38,9 +39,10 @@ func _init() -> void:
 	_level_label.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
 	_level_label.offset_right = 4.0
 	_level_label.offset_bottom = 6.0
+	_level_label.add_theme_font_override("font", UiFonts.heading())
 	_level_label.add_theme_font_size_override("font_size", 18)
-	_level_label.add_theme_color_override("font_color", Color("#f2b52e"))
-	_level_label.add_theme_color_override("font_outline_color", Color("#14101a"))
+	_level_label.add_theme_color_override("font_color", LEVEL_COLOR)
+	_level_label.add_theme_color_override("font_outline_color", UiColors.HUD_OUTLINE)
 	_level_label.add_theme_constant_override("outline_size", 6)
 	_level_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_level_label)
@@ -69,5 +71,5 @@ func _draw_frame() -> void:
 	for i: int in 10:
 		var reach: float = STAR_RADIUS if i % 2 == 0 else STAR_RADIUS * 0.45
 		points.append(star_at + Vector2.from_angle(TAU * i / 10.0 - PI / 2.0) * reach)
-	frame.draw_colored_polygon(points, FRAME_COLOR)
-	frame.draw_polyline(points + PackedVector2Array([points[0]]), Color("#14101a"), 1.5, true)
+	FeltDraw.fill(frame, points, FRAME_COLOR)
+	frame.draw_polyline(points + PackedVector2Array([points[0]]), UiColors.HUD_OUTLINE, 1.5, true)

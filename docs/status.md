@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-24 (M3.5-07 level-up, gift box, goal screen)_
+_Last updated: 2026-10-24 (M3.5-08 town cards, Scrapbook, HUD: all M3.5 tickets done)_
 
 ## Where we are
 
@@ -29,9 +29,10 @@ _Last updated: 2026-10-24 (M3.5-07 level-up, gift box, goal screen)_
   P-18 … P-21). Milestone **M3.5 — UI and juice**, issues **#124–#131** (M3.5-01 … 08). M3.5-01 style
   foundation (#124): merged (PR #133). PO feedback #135 (Settings from fort + title): merged (PR #136). M3.5-03 weapon
   stats (#126): merged (PR #137). M3.5-02 fit check (#125): merged (PR #138). M3.5-04 end screen (#127): merged (PR #140). M3.5-05 run titles (#128): merged (PR #141). M3.5-06 title, pause, settings (#129): merged (PR #143).
-  M3.5-07 level-up, gift box, goal screen (#130): merged (PR #149).
-  The repo is **public** since 2026-10-24 (free Actions minutes ran out while private; public = unlimited). **Next: M3.5-08 town cards,
-  Scrapbook, HUD (#131)**, then the M3.5 playtest (P-18 … P-21).
+  M3.5-07 level-up, gift box, goal screen (#130): merged (PR #149). M3.5-08 town cards, Scrapbook, HUD (#131): PR #150.
+  The repo is **public** since 2026-10-24 (free Actions minutes ran out while private; public = unlimited).
+  **Next: the M3.5 playtest (P-18 … P-21)** with the "latest" build (the PO hasn't tested M3.5-07 yet either).
+  HUD change to mention: health bar is now rose pink (XP is green per spec 04 §2.1).
   Ask the PO: Speedy Stitcher is "King beaten before 9:00" (spec said 7:00, but the King only comes at 8:00).
   (2) Spec 05 town + Bedroom visual pass ("still not too appealing", "a tiny bit
   dark"). (3) Evolution
@@ -40,7 +41,9 @@ _Last updated: 2026-10-24 (M3.5-07 level-up, gift box, goal screen)_
   = unlock). Goes into the M5 spec. Böbö still has no photo (drawn as the classic IKEA bear).
 - PO feedback (2026-10-24): rough felt edges fixed (#145, PR #146). Plushies: Robbar needs work, Böbö should look
   like the IKEA bear, all need a walking animation like Banane → issue #147 (PO: **own ticket after M3.5**. Böbö "a bit more
-  chonky", Robbar's "face looks a bit weird"; the PO sent new photos but they didn't reach the chat: ask again).
+  chonky", Robbar's "face looks a bit weird"). Photos are in #147's comments (Robbar = chubby round seal plush,
+  Böbö = IKEA Djungelskog bear); look notes in the issue. GitHub serves one as AVIF: convert with PowerShell WPF
+  `BitmapDecoder` → PNG to view it.
 - PO idea (2026-10-24, "idk"): **walk into the buildings** (interiors). Park it; ask again when the town visual
   pass or the siege is specced.
 - Economy (M3-05/PR #113): cheapest rebuild 200 coins, all 6 at level 3 ≈ 17k coins.
@@ -291,3 +294,11 @@ _Last updated: 2026-10-24 (M3.5-07 level-up, gift box, goal screen)_
   (`box`, `level_tag`). Disabled Reroll/Skip/Banish say "nope" on R/S/B. CPUParticles2D has no `alpha_curve`.
 - Smooth edges (#145): filled UI shapes go through `FeltDraw.fill(canvas, points, color)` / `fill_smooth(rid, ...)`
   (fill + a 1.2 px fade ring outside the edge). Plain `draw_colored_polygon` has jagged edges: don't use it in UI.
+- Town / Scrapbook / HUD look (M3.5-08): `BuildingCard` is a taped felt PanelContainer (world space, `rotation`
+  tilt, pops in on a new building; `level_label` is `level_tag.label`). `StartWeaponPicker` and `ScrapbookBook`
+  have `cloth`, a `FeltPanel` and `motion`; picker tiles and Scrapbook tabs/tiles are `SewnButton`s
+  (`ScrapbookTile.lean()`, photo = `box.fill == UiColors.PHOTO`). Own stitch colour on a sewn button:
+  `set_stitch(color)` (setting `box.stitch` gets undone on hover). Town `banner` is a `FeltPanel`. HUD (AC-51):
+  backings `StyleBoxFelt.hud()`, bar fills stay `StyleBoxFlat` (a felt shape a few px wide can't be drawn),
+  `UiColors.is_danger(color)` = enemy red/orange; only `hud.boss_bar` may use it (`test_04_hud_look.gd`).
+  The fit check measures without rotation: keep tilts of wide pieces small (≤ 1°) or their edge items "stick out".

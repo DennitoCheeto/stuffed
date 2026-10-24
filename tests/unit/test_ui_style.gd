@@ -3,6 +3,7 @@ extends GutTest
 
 const TEST_SETTINGS: String = "user://test_unit_settings.json"
 const THEME_PATH: String = "res://data/ui/stuffed_theme.tres"
+const UI_COLORS: GDScript = preload("res://src/ui/style/ui_colors.gd")
 
 var _saved_volumes: Dictionary[StringName, float] = {}
 
@@ -139,3 +140,26 @@ func test_the_soft_edge_of_a_felt_shape_lies_just_outside_it() -> void:
 	reversed.reverse()
 	var flipped: PackedVector2Array = FeltDraw.feathered(reversed, 2.0)
 	assert_gt(flipped[0].distance_to(center), reversed[0].distance_to(center), "either direction")
+
+
+func test_danger_colours_belong_to_enemies_only() -> void:
+	assert_true(UiColors.is_danger(Hud.BOSS_COLOR), "the boss bar red is danger")
+	assert_true(UiColors.is_danger(ProjectileLook.BULLET_COLOR), "enemy bullets are danger")
+	assert_true(UiColors.is_danger(Color("#ff7a1a")), "orange is danger")
+	assert_false(UiColors.is_danger(Color(1, 0, 0, 0)), "invisible is not")
+	var constants: Dictionary = UI_COLORS.get_script_constant_map()
+	var checked: int = 0
+	for key: Variant in constants:
+		if constants[key] is Color:
+			checked += 1
+			assert_false(UiColors.is_danger(constants[key]), "UiColors.%s is calm" % key)
+	assert_gt(checked, 20, "every style colour checked")
+	var hud_colors: Dictionary[String, Color] = {
+		"banner": Hud.BANNER_COLOR,
+		"text": Hud.TEXT_COLOR,
+		"evolved frame": LoadoutSlot.FRAME_COLOR,
+		"slot level": LoadoutSlot.LEVEL_COLOR,
+		"jar numbers": JarCounter.TEXT_COLOR,
+	}
+	for key: String in hud_colors:
+		assert_false(UiColors.is_danger(hud_colors[key]), "the HUD %s is calm" % key)

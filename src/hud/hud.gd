@@ -3,14 +3,18 @@ extends CanvasLayer
 ## Run information on top of the game: the timer with the goal, player 1's health, XP, level,
 ## and their weapons and items as two rows of icons with levels (spec 02 §11).
 ## When a boss arrives: a banner with its name, then its big health bar at the top (spec 02 §9).
+## Stays quiet in the Stitched Scrapbook look (spec 04 §2.3): only its fonts, colours and small
+## dark felt backings; nothing tilts, wobbles or is taped on, and only the boss's own bar is red.
 
 const BOSS_BAR_SIZE: Vector2 = Vector2(640.0, 30.0)
 const BOSS_BAR_TOP: float = 84.0
+## The boss is an enemy: its bar may use the danger red (vision §6).
 const BOSS_COLOR: Color = Color("#e0413a")
-const BOSS_BACK_COLOR: Color = Color(0.1, 0.09, 0.12, 0.85)
 const BANNER_COLOR: Color = Color("#ffcf3a")
-const TEXT_COLOR: Color = Color(0.95, 0.93, 0.88, 1)
-const OUTLINE_COLOR: Color = Color(0.08, 0.07, 0.1, 1)
+const TEXT_COLOR: Color = UiColors.HUD_TEXT
+const OUTLINE_COLOR: Color = UiColors.HUD_OUTLINE
+## Space inside the timer and level backings.
+const BACKING_PAD: Vector2 = Vector2(18, 2)
 const BANNER_TOP: float = 170.0
 ## The banner fades out over its last this many seconds.
 const BANNER_FADE: float = 0.5
@@ -47,6 +51,7 @@ var _banner_left: float = 0.0
 
 
 func _ready() -> void:
+	_restyle()
 	_build_boss_bar()
 	_build_banner()
 	jars = RunJars.new()
@@ -154,6 +159,30 @@ func _icon_for(id: StringName) -> StringName:
 	return evolution.icon if evolution != null else &""
 
 
+## The scene's timer, level, health and XP in the new fonts and colours, on dark felt.
+func _restyle() -> void:
+	for label: Label in [timer_label, level_label]:
+		var backing: StyleBoxFelt = StyleBoxFelt.hud(14.0)
+		backing.pad(BACKING_PAD.x, BACKING_PAD.y)
+		label.add_theme_stylebox_override("normal", backing)
+		label.add_theme_font_override("font", UiFonts.heading())
+		label.add_theme_color_override("font_color", TEXT_COLOR)
+		label.add_theme_constant_override("outline_size", 0)
+	# The backings hug their text: the timer grows from the middle, the level from the right.
+	timer_label.offset_left = 0.0
+	timer_label.offset_right = 0.0
+	timer_label.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	level_label.offset_left = level_label.offset_right
+	level_label.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	health_bar.add_theme_stylebox_override("background", StyleBoxFelt.hud(12.0))
+	health_bar.add_theme_stylebox_override("fill", _bar_style(UiColors.HEALTH))
+	health_label.add_theme_font_override("font", UiFonts.body(800))
+	health_label.add_theme_color_override("font_color", TEXT_COLOR)
+	health_label.add_theme_color_override("font_outline_color", OUTLINE_COLOR)
+	xp_bar.add_theme_stylebox_override("background", _bar_style(UiColors.HUD_FELT, 0))
+	xp_bar.add_theme_stylebox_override("fill", _bar_style(UiColors.XP, 0))
+
+
 func _build_boss_bar() -> void:
 	boss_bar = ProgressBar.new()
 	boss_bar.anchor_left = 0.5
@@ -164,11 +193,11 @@ func _build_boss_bar() -> void:
 	boss_bar.offset_bottom = BOSS_BAR_TOP + BOSS_BAR_SIZE.y
 	boss_bar.show_percentage = false
 	boss_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	boss_bar.add_theme_stylebox_override("background", _bar_style(BOSS_BACK_COLOR))
+	boss_bar.add_theme_stylebox_override("background", StyleBoxFelt.hud(12.0))
 	boss_bar.add_theme_stylebox_override("fill", _bar_style(BOSS_COLOR))
 	boss_bar.visible = false
 	add_child(boss_bar)
-	boss_label = _label(22)
+	boss_label = _label(22, UiFonts.heading())
 	boss_label.set_anchors_preset(Control.PRESET_FULL_RECT)
 	boss_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	boss_bar.add_child(boss_label)
@@ -181,15 +210,16 @@ func _build_banner() -> void:
 	banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	banner.visible = false
 	add_child(banner)
-	banner_title = _label(80)
+	banner_title = _label(80, UiFonts.heading())
 	banner_title.add_theme_color_override("font_color", BANNER_COLOR)
 	banner.add_child(banner_title)
-	banner_subtitle = _label(32)
+	banner_subtitle = _label(32, UiFonts.body(800))
 	banner.add_child(banner_subtitle)
 
 
-func _label(font_size: int) -> Label:
+func _label(font_size: int, font: Font) -> Label:
 	var label: Label = Label.new()
+	label.add_theme_font_override("font", font)
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	label.add_theme_color_override("font_color", TEXT_COLOR)
@@ -199,10 +229,12 @@ func _label(font_size: int) -> Label:
 	return label
 
 
-static func _bar_style(color: Color) -> StyleBoxFlat:
+## A plain filled bar (fills stay flat: a felt shape only a few px wide can't be drawn).
+static func _bar_style(color: Color, corner: int = 10) -> StyleBoxFlat:
 	var style: StyleBoxFlat = StyleBoxFlat.new()
 	style.bg_color = color
-	style.set_corner_radius_all(6)
+	style.set_corner_radius_all(corner)
+	style.anti_aliasing = true
 	return style
 
 
