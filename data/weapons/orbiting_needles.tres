@@ -69,6 +69,7 @@ script = ExtResource("1_stats")
 sound = &"needles"
 id = &"orbiting_needles"
 display_name = "Orbiting Needles"
+run_title = "Needle Ninja"
 behaviour = ExtResource("3_behaviour")
 knockback = 60.0
 hit_radius = 10.0

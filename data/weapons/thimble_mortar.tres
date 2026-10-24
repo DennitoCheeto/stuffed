@@ -74,6 +74,7 @@ script = ExtResource("1_stats")
 sound = &"mortar"
 id = &"thimble_mortar"
 display_name = "Thimble Mortar"
+run_title = "Mortar Maniac"
 behaviour = ExtResource("3_behaviour")
 knockback = 150.0
 hit_radius = 0.0

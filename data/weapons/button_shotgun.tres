@@ -69,6 +69,7 @@ script = ExtResource("1_stats")
 sound = &"buttons"
 id = &"button_shotgun"
 display_name = "Button Shotgun"
+run_title = "Button Blaster"
 behaviour = ExtResource("3_behaviour")
 knockback = 280.0
 hit_radius = 9.0

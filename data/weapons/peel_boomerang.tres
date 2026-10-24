@@ -64,6 +64,7 @@ script = ExtResource("1_stats")
 sound = &"throw"
 id = &"peel_boomerang"
 display_name = "Peel Boomerang"
+run_title = "Boomerang Buddy"
 behaviour = ExtResource("3_behaviour")
 knockback = 120.0
 hit_radius = 14.0

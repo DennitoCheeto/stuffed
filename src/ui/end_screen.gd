@@ -19,14 +19,27 @@ const TITLE_SIZE: int = 76
 const RUN_LINE_SIZE: int = 24
 ## The sticker waits for the panels to drop in.
 const STAR_DELAY: float = 0.35
+## Run title stickers: words size, the "New!" size, and their colours and tilts by place.
+const STICKER_SIZE: int = 28
+const NEW_SIZE: int = 18
+const STICKER_FILLS: Array[Color] = [UiColors.STICKER_PINK, UiColors.STICKER_TEAL]
+const STICKER_INKS: Array[Color] = [UiColors.STICKER_PINK_INK, UiColors.STICKER_TEAL_INK]
+const STICKER_TILTS: Array[float] = [-5.0, 4.0]
+const NEW_TILT: float = 10.0
 
 var result: RunResult
 ## The haul counting into the jars (spec 03 §2.6).
 var brought_home: BroughtHomePanel = BroughtHomePanel.new()
 var title: HandTitle = HandTitle.new("You survived!", TITLE_SIZE, WON_COLOR, -2.0)
 var title_label: Label = title.label
-## Run titles go here as stickers (M3.5-05).
+## The run title stickers (spec 04 §4.2), with a "New!" sticker after first-time ones.
 var sticker_row: HBoxContainer = HBoxContainer.new()
+## The run titles shown, their stickers and the "New!" stickers (for tests).
+var titles: Array[RunTitle] = []
+var title_stickers: Array[Sticker] = []
+var new_stickers: Array[Sticker] = []
+## Every title sticker in the order they slap on (each "New!" right after its title).
+var slap_order: Array[Sticker] = []
 ## "8:00 + 1:15 endless · Level 38 · 4,321 zombies stuffed"
 var stats_label: Label = UiFonts.label("", RUN_LINE_SIZE, LIGHT_INK)
 var seed_label: Label = UiFonts.label("", 15, Color(LIGHT_INK, 0.6))
@@ -43,6 +56,8 @@ var motion: ScreenMotion = ScreenMotion.new()
 
 var _columns_row: HBoxContainer = HBoxContainer.new()
 var _star_tween: Tween
+## Seconds between two title stickers slapping on.
+var _title_gap: float = 0.25
 
 
 func _ready() -> void:
@@ -54,6 +69,7 @@ func _ready() -> void:
 	_star_tween = create_tween()
 	_star_tween.tween_interval(UiFeel.seconds(STAR_DELAY))
 	_star_tween.tween_callback(_slap_stars)
+	_queue_title_slaps(_star_tween)
 
 
 ## Fills the screen with `run_result`. Call before or after adding to the tree.
@@ -73,6 +89,34 @@ func show_result(run_result: RunResult) -> void:
 		_columns_row.add_child(column)
 	extras_label.text = extras_text(result)
 	extras_label.visible = not extras_label.text.is_empty()
+
+
+## Sticks the run titles on the page (rarest first); they slap on after the Star of the run,
+## `gap` seconds apart.
+func show_titles(earned: Array[RunTitle], gap: float = 0.25) -> void:
+	for child: Node in sticker_row.get_children():
+		child.queue_free()
+	titles = earned.duplicate()
+	title_stickers.clear()
+	new_stickers.clear()
+	slap_order.clear()
+	_title_gap = gap
+	for i: int in titles.size():
+		var place: int = i % STICKER_FILLS.size()
+		var fill: Color = STICKER_FILLS[place]
+		var sticker: Sticker = Sticker.new(
+			titles[i].text, fill, STICKER_INKS[place], STICKER_TILTS[place], STICKER_SIZE
+		)
+		title_stickers.append(sticker)
+		_stick(sticker)
+		if titles[i].is_new:
+			var badge: Sticker = Sticker.new(
+				"New!", UiColors.GOLD, UiColors.GOLD_INK, NEW_TILT, NEW_SIZE
+			)
+			new_stickers.append(badge)
+			_stick(badge)
+	if is_node_ready():
+		_queue_title_slaps(create_tween())
 
 
 ## The parts of the run line under the title.
@@ -109,6 +153,20 @@ func item_tag_texts() -> PackedStringArray:
 		for tag: FabricTag in column.item_tags:
 			texts.append(tag.label.text)
 	return texts
+
+
+## Puts `sticker` in the row, hidden until it slaps on.
+func _stick(sticker: Sticker) -> void:
+	sticker.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	sticker.fade = 1.0 if UiFeel.reduced() else 0.0
+	sticker_row.add_child(sticker)
+	slap_order.append(sticker)
+
+
+func _queue_title_slaps(tween: Tween) -> void:
+	for sticker: Sticker in slap_order:
+		tween.tween_interval(UiFeel.seconds(_title_gap))
+		tween.tween_callback(sticker.slap)
 
 
 func _slap_stars() -> void:

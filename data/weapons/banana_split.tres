@@ -31,6 +31,7 @@ script = ExtResource("1_stats")
 sound = &"split"
 id = &"banana_split"
 display_name = "Banana Split"
+run_title = "Split Superstar"
 behaviour = ExtResource("3_behaviour")
 knockback = 140.0
 hit_radius = 16.0

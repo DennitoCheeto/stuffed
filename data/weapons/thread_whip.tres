@@ -74,6 +74,7 @@ script = ExtResource("1_stats")
 sound = &"whip"
 id = &"thread_whip"
 display_name = "Thread Whip"
+run_title = "Whip Wizard"
 behaviour = ExtResource("3_behaviour")
 knockback = 160.0
 hit_radius = 0.0

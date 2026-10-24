@@ -107,6 +107,11 @@ var rescue_plan: RescuePlan
 var rescue: TangledPlushie
 ## For the run log: {"plushie", "time", "freed", "freed_at"} (empty = no rescue appeared).
 var rescue_log: Dictionary = {}
+## How long the heroes went without damage, and how many gift boxes were opened (run titles).
+var unhurt: UnhurtClock = UnhurtClock.new()
+var gift_boxes_opened: int = 0
+## The lowest health share of the standing heroes when the King fell (-1 = not yet).
+var lowest_health_at_goal: float = -1.0
 
 ## False while the goal pops the horde (those zombies drop no XP).
 var _drops_enabled: bool = true
@@ -249,7 +254,8 @@ func spawn_player(index: int, at: Vector2) -> Player:
 	player.bonus_max_health = perks.max_health_bonus
 	player.bonus_pickup_share = perks.pickup_range_bonus
 	player.died.connect(_on_player_died)
-	player.hurt.connect(_on_player_hurt)
+	player.hurt.connect(_on_player_hurt.bind(player))
+	unhurt.start(index, elapsed)
 	player.dashed.connect(func(_from: Vector2, _direction: Vector2) -> void: Sfx.play(&"dash"))
 	player.celebrated.connect(func() -> void: Sfx.play(&"quack"))
 	player.evolved.connect(_on_player_evolved.bind(player))
@@ -397,6 +403,7 @@ func _ids_on_screen() -> Array[StringName]:
 func _reach_goal() -> void:
 	goal_done = true
 	goal_time = elapsed
+	lowest_health_at_goal = _lowest_health()
 	boss_fight = false
 	close_way_home()
 	music_requested.emit(&"run")
@@ -453,9 +460,33 @@ func make_result(ending: String) -> RunResult:
 	result.floor_pickups = floor_pickup_log.duplicate(true)
 	result.materials_collected = haul.materials.duplicate()
 	result.rescue = rescue_log.duplicate()
+	result.gift_boxes_opened = gift_boxes_opened
+	result.longest_unhurt_seconds = unhurt.longest_at(elapsed, _standing())
+	result.lowest_health_at_goal = lowest_health_at_goal
+	for player: Player in Players.all(get_tree()):
+		for weapon: Weapon in player.weapons():
+			result.weapon_titles[String(weapon.stats.id)] = weapon.stats.run_title
 	for weapon: UpgradeDef in perks.open_weapons(upgrade_pool):
 		result.unlocked_weapons.append(String(weapon.id))
 	return result
+
+
+## Indexes of the heroes still standing.
+func _standing() -> Array[int]:
+	var standing: Array[int] = []
+	for player: Player in Players.all(get_tree()):
+		if not player.is_dead():
+			standing.append(player.player_index)
+	return standing
+
+
+## The lowest health share (0..1) of the heroes still standing (1 if nobody stands).
+func _lowest_health() -> float:
+	var lowest: float = 1.0
+	for player: Player in Players.all(get_tree()):
+		if not player.is_dead() and player.max_health > 0.0:
+			lowest = minf(lowest, player.health / player.max_health)
+	return lowest
 
 
 ## Every player's items with their levels (end screen tags).
@@ -566,7 +597,8 @@ func _on_pickup_collected(_player: Player, _value: int, chain: int) -> void:
 	Sfx.play(&"pickup", 1.0 + 0.06 * mini(chain - 1, 12))
 
 
-func _on_player_hurt(_amount: float) -> void:
+func _on_player_hurt(_amount: float, player: Player) -> void:
+	unhurt.hurt(player.player_index, elapsed)
 	Sfx.play(&"hurt")
 	camera.shake(0.45)
 
@@ -771,6 +803,7 @@ func drop_gift_box(at: Vector2, big: bool = false) -> GiftBox:
 
 ## The box opens for `player`: its contents are given right away, then the moment plays.
 func _on_gift_box_touched(box: GiftBox, player: Player) -> void:
+	gift_boxes_opened += 1
 	var extra: int = gift_box_rules.big_box_extra_level_ups if box.big else 0
 	var gift: GiftContents = gift_box_rules.contents(
 		player.upgrade_levels(), upgrade_pool, upgrade_rng, extra
@@ -829,7 +862,10 @@ func _on_floor_pickup_touched(pickup: FloorPickup, player: Player) -> void:
 	hud.show_banner(kind.banner, kind.banner_subtitle, floor_pickup_rules.banner_seconds)
 	Sfx.play(kind.sound)
 	var entry: Dictionary = {
-		"name": kind.display_name, "time": elapsed, "player": player.player_index
+		"id": String(kind.id),
+		"name": kind.display_name,
+		"time": elapsed,
+		"player": player.player_index,
 	}
 	floor_pickup_log.append(entry)
 	haul.see(ScrapbookRules.FLOOR_PICKUPS, String(kind.id))
