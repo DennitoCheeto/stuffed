@@ -113,7 +113,7 @@ func show_end(result: RunResult) -> void:
 	end.brought_home.show_haul(kept, before, share, bonus)
 	var rescued: PlushieDef = RESCUE_RULES.find(result.rescued_plushie())
 	if rescued != null:
-		end.brought_home.show_rescue(rescued.display_name)
+		end.brought_home.show_rescue(rescued.display_name, rescued)
 	end.try_again_requested.connect(start_run)
 	end.fort_requested.connect(show_town)
 	_switch_to(end)

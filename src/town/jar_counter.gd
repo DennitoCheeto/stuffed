@@ -31,3 +31,11 @@ func _init(id: String, font_size: int = 28, icon_side: float = 40.0) -> void:
 func show_amount(value: int, prefix: String = "") -> void:
 	shown = value
 	amount_label.text = "%s%d" % [prefix, value]
+
+
+## Dark ink without the outline, for numbers on a cream felt panel (end screen).
+func on_felt(ink: Color = UiColors.INK) -> JarCounter:
+	amount_label.add_theme_color_override(&"font_color", ink)
+	amount_label.add_theme_constant_override(&"outline_size", 0)
+	amount_label.add_theme_font_override(&"font", UiFonts.heading())
+	return self

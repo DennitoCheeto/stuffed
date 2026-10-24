@@ -20,6 +20,11 @@ var weapons: Array[Dictionary] = []
 var killed_by: String = ""
 ## Picked cards in order, e.g. "Quick Feet 2".
 var upgrades: PackedStringArray = []
+## Every player's items at the end (spec 04 §4.1, tags on the end screen): {"player": 0-based index,
+## "id", "name", "level"}.
+var items: Array[Dictionary] = []
+## How many players played (the end screen shows one weapon column each).
+var player_count: int = 1
 var seed_value: int = 0
 ## How the run ended: "died", "ended" (End run after the goal), "quit" (gave up) or "way_home"
 ## (the Way Home portal).
