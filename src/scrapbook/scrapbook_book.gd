@@ -135,7 +135,7 @@ func show_page(index: int) -> void:
 ## Turns `step` pages forward (negative = back).
 func turn(step: int) -> void:
 	show_page(page_index + step)
-	Sfx.play(&"pop", 1.2)
+	Sfx.play(&"page")
 
 
 func current_page() -> ScrapbookPage:

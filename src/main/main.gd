@@ -25,6 +25,8 @@ var current_screen: Node
 var music: MusicPlayer
 ## The saved town (spec 03 §9). Loaded at start, saved after every run and on quit.
 var town: TownSave
+## How many players play together (everybody who came home from the last run walks in town).
+var player_count: int = 1
 
 
 func _ready() -> void:
@@ -63,10 +65,12 @@ func show_town() -> void:
 	SaveStore.write(town)
 	var pillow_fort: Town = TOWN_SCENE.instantiate()
 	pillow_fort.save = town
+	pillow_fort.player_count = player_count
 	pillow_fort.bedroom_requested.connect(start_run)
 	pillow_fort.title_requested.connect(show_title)
 	pillow_fort.quit_requested.connect(quit)
 	pillow_fort.changed.connect(save_now)
+	pillow_fort.reset_requested.connect(_reset_town)
 	_switch_to(pillow_fort)
 
 
@@ -76,6 +80,7 @@ func start_run(seed_value: int = 0) -> void:
 	run.finished.connect(show_end)
 	run.gave_up.connect(show_end)
 	run.seed_value = seed_value
+	run.player_count = player_count
 	run.perks = TownPerks.from_save(town, TOWN_LAYOUT)
 	run.restart_requested.connect(start_run)
 	run.music_requested.connect(_play_music)
@@ -92,6 +97,8 @@ func start_run(seed_value: int = 0) -> void:
 ## The end screen for a finished or given-up run (also written to the run log): its stats and
 ## what it brought home, counting into the jars.
 func show_end(result: RunResult) -> void:
+	# The portal (or the end) takes everybody home, the fallen too.
+	player_count = maxi(Players.all(get_tree()).size(), 1)
 	var before: Dictionary[String, int] = town.materials.duplicate()
 	var share: float = MATERIAL_RULES.keep_share(result)
 	var bonus: float = coin_bonus()
@@ -139,6 +146,12 @@ func start_over() -> void:
 	SaveStore.delete_all()
 	town = TownSave.new()
 	RecipeBook.load_from(town)
+
+
+## The developer menu's "Reset town": a fresh town, right away.
+func _reset_town() -> void:
+	start_over()
+	show_town()
 
 
 ## Extra share of coins every run brings home, from the plushies living in town (spec 03 §7).

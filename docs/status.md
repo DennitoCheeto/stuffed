@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-23 (M3-11 Scrapbook)_
+_Last updated: 2026-10-24 (M3-12 co-op in town, dev menu, sounds; M3 fully built)_
 
 ## Where we are
 
@@ -15,7 +15,7 @@ _Last updated: 2026-10-23 (M3-11 Scrapbook)_
 | M0 Factory setup | ✅ done (PR #1) |
 | M1 Core run | ✅ accepted 2026-10-21 (PRs #17–#29; playtest P-1 … P-6 passed, 144 fps on the PO's PC) |
 | M2 Build variety | ✅ built (not yet accepted): all 19 tickets merged (PRs #47–#49, #51–#55, #57, #58, #60, #61, #63, #67, #69, #77, #78, #80, #81); + spec 02b floor pickups approved (#83): M2-20 (PR #88), M2-21 (PR #89) and M2-22 (PR #90) merged; PO playtest postponed, played with M3 |
-| M3 Town | 🔨 spec 03 approved (PR #91); issues #92–#103; M3-01 save system (PR #105), M3-02 town + flow (PR #106), M3-03 materials (PR #107), M3-04 Way Home portal (PR #109), M3-05 rebuilding (PR #110), M3-06 Toy Box Armory (PR #114), M3-07 Lucky Jar + Watchtower + Snack Bar (PR #115), M3-08 Party Shop (PR #116), M3-09 rescue in the run (PR #117), M3-10 Plush Hospital + plushies in town (PR #118), M3-11 Scrapbook |
+| M3 Town | 🔨 spec 03 approved (PR #91); issues #92–#103; M3-01 save system (PR #105), M3-02 town + flow (PR #106), M3-03 materials (PR #107), M3-04 Way Home portal (PR #109), M3-05 rebuilding (PR #110), M3-06 Toy Box Armory (PR #114), M3-07 Lucky Jar + Watchtower + Snack Bar (PR #115), M3-08 Party Shop (PR #116), M3-09 rescue in the run (PR #117), M3-10 Plush Hospital + plushies in town (PR #118), M3-11 Scrapbook (PR #119), M3-12 co-op in town + dev menu + sounds: **all 12 tickets built, waiting for the PO playtest** |
 
 ## Next step
 
@@ -26,10 +26,11 @@ _Last updated: 2026-10-23 (M3-11 Scrapbook)_
   M3-03 #94 materials in the run (PR #107), M3-04 #95 Way Home portal (PR #109) and M3-05 #96 ruins and
   rebuilding (PR #110) done. M3-06 #97 Toy Box Armory (PR #114), M3-07 #98 Lucky Jar + Watchtower + Snack Bar (PR #115), M3-08 #99
   Party Shop (PR #116), M3-09 #100 rescue in the run (PR #117), M3-10 #101 Plush Hospital + plushies in town (PR #118) and M3-11
-  #102 Scrapbook done.
+  #102 Scrapbook (PR #119) and M3-12 #103 co-op in town, town developer menu, sounds pass done.
   The 4 plushies are the girlfriend's: Pip (round polar bear, scarf), Böbö (IKEA brown bear, **no photo yet**: drawn
   as the classic IKEA bear, ask the PO for one), BamBam (long bear, bowtie, heart), Robbar (smol seal).
-  Next: **M3-12** #103 (co-op in town, developer menu incl. fill/clear the Scrapbook, town music + sounds).
+  Next: **PO playtest of M2 + M3 together** (M2 P-1 … P-11, M3 P-12 … P-17) on the "latest" build, then the
+  M3 acceptance. After that: visual pass for town + Bedroom, skill tree spec.
 - M3 ACs are AC-37 … AC-48, playtest P-12 … P-17.
 - PO ideas for later: a skill / progress tree (own spec, after M3). **Visual pass** for the town and the Bedroom
   (PO, 2026-10-23): "everything is a tiny bit dark" and needs more cool details. Own short art spec (brighter
@@ -223,3 +224,11 @@ _Last updated: 2026-10-23 (M3-11 Scrapbook)_
   touch); `TownSave.bank` puts all of them in the book (any keep share). Save v3. `RecipeBook.load_from(save)` in
   `Main.load_town`. UI: `ScrapbookBook` (`town.book`, `title.book`; `tile_for(id)`, `tabs`, `detail_*`,
   Q/E turn pages), `ScrapbookPicture.is_silhouette()`.
+- Co-op in town (M3-12): `main.player_count` (set in `show_end` from the run's players, dead ones too) → `town.player_count`
+  / `run.player_count` spawn that many heroes. No keys for player 2 yet (joining comes with co-op later): scenario
+  tests call `add_controls(1)` (temporary `p2_*` actions, removed in `after_each`) and press `p2_interact` etc.
+  Town dev menu: `TownDevMenu` (`town.dev_menu`, F1, `press(TownDevMenu.GIVE_MATERIALS)`, `build_label(building)`,
+  "Reset town" needs two presses → `town.reset_requested` → `Main._reset_town`). `town.dev_build(building)` = free
+  next level, even on a locked ruin. Town sounds: `coin` (burst piece lands, `RunJars.JAR_PITCH`), `page`, `hello`
+  (`PlushieTownRules.wave_sound`). F1 in tests: send `KEY_F1` with `sender.key_down`, not `tap_action("dev_menu")`.
+  The run/boss music has random hiss, so only title/town are checked for an exact loop.

@@ -103,3 +103,41 @@ func test_evolved_weapons_sound_fuller_than_before() -> void:
 func test_an_evolution_is_bigger_than_a_gift_box() -> void:
 	assert_gt(_loudness(&"evolution"), _loudness(&"gift_open"), "louder")
 	assert_gt(SfxBank.LENGTHS[&"evolution"], SfxBank.LENGTHS[&"gift_open"], "longer")
+
+
+## Spec 03 §11: everything in town and on the jars is soft, never close to enemy danger.
+func test_town_sounds_are_softer_than_enemy_danger() -> void:
+	var quietest_danger: float = INF
+	for sound: StringName in DANGER:
+		quietest_danger = minf(quietest_danger, _loudness(sound))
+	var town: Array[StringName] = [&"rebuild", &"upgrade", &"new_building", &"nope", &"coin"]
+	town.append_array([&"page", &"hello", &"rescued", &"way_home"])
+	for sound: StringName in town:
+		assert_true(SfxBank.LENGTHS.has(sound), "%s exists" % sound)
+		assert_lt(_loudness(sound), quietest_danger, "%s is softer than danger" % sound)
+
+
+## Spec 03 §11: coins landing in the jars are quieter than XP and much quieter than danger.
+func test_jar_coins_are_quieter_than_xp() -> void:
+	var quietest_danger: float = INF
+	for sound: StringName in DANGER:
+		quietest_danger = minf(quietest_danger, _loudness(sound))
+	assert_lt(_loudness(&"coin"), _loudness(&"pickup"), "quieter than an XP plip")
+	assert_lt(_loudness(&"coin"), quietest_danger * 0.5, "much quieter than danger")
+
+
+func test_every_music_track_stays_in_range_and_town_is_the_calmest() -> void:
+	var music: MusicPlayer = MusicPlayer.new()
+	for track: StringName in MusicPlayer.TRACKS:
+		music.use_track(track)
+		var bpm: float = MusicPlayer.TRACKS[track][0]
+		var loop_seconds: float = 16.0 * 60.0 / bpm
+		for t: float in [0.0, 1.3, 4.7, 9.1]:
+			var value: float = music.sample_at(t)
+			assert_true(absf(value) <= 1.5, "%s in range" % track)
+			if track == &"title" or track == &"town":
+				var again: float = music.sample_at(t + loop_seconds)
+				assert_almost_eq(again, value, 0.001, "%s loops" % track)
+		if track != &"town":
+			assert_lt(MusicPlayer.TRACKS[&"town"][0], bpm, "town is slower than %s" % track)
+	music.free()
