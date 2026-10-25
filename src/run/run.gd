@@ -30,7 +30,6 @@ const CELEBRATION_TIME: float = 1.2
 ## A moment to see Banane fall before the end screen.
 const DEATH_PAUSE: float = 1.5
 ## A tiny freeze on big hits, so they feel heavy.
-const HIT_STOP_TIME: float = 0.06
 ## Freezes that muffle the music (a hit-stop is too short to bother).
 const MUFFLING: Array[StringName] = [&"pause", &"level_up", &"goal"]
 ## Gap between heroes when several players start a run together.
@@ -113,6 +112,8 @@ var gift_boxes_opened: int = 0
 ## The lowest health share of the standing heroes when the King fell (-1 = not yet).
 var lowest_health_at_goal: float = -1.0
 
+## Run time before which no new hit-stop happens (rules.hit_stop_cooldown).
+var _next_hit_stop_at: float = 0.0
 ## False while the goal pops the horde (those zombies drop no XP).
 var _drops_enabled: bool = true
 ## True from the goal until the player has chosen how to go on (the timer waits).
@@ -295,11 +296,15 @@ func unfreeze(reason: StringName) -> void:
 	MusicPlayer.set_muffled(_is_muffled())
 
 
-## A very short freeze on a big hit (e.g. a pin through 3+ zombies).
-func hit_stop(duration: float = HIT_STOP_TIME) -> void:
+## A very short freeze on a big hit (e.g. a pin through 3+ zombies), at most once per
+## `rules.hit_stop_cooldown` seconds of run time.
+func hit_stop() -> void:
+	if elapsed < _next_hit_stop_at:
+		return
+	_next_hit_stop_at = elapsed + rules.hit_stop_cooldown
 	hit_stops += 1
 	freeze(&"hit_stop")
-	var timer: SceneTreeTimer = get_tree().create_timer(duration, true, false, true)
+	var timer: SceneTreeTimer = get_tree().create_timer(rules.hit_stop_seconds, true, false, true)
 	timer.timeout.connect(unfreeze.bind(&"hit_stop"))
 
 

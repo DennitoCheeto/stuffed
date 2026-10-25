@@ -19,6 +19,9 @@ var counters: Dictionary[String, JarCounter] = {}
 ## Bursts still flying (freed when landed).
 var bursts: Array[MaterialBurst] = []
 var _bumps: Dictionary[String, float] = {}
+## The haul to show at the next frame (null = up to date): a crowd dying together updates the
+## numbers once, not once per kill.
+var _pending: RunHaul
 
 
 func _init() -> void:
@@ -33,13 +36,14 @@ func _init() -> void:
 		add_child(counter)
 
 
-## Shows the run's haul so far.
+## Shows the run's haul so far (the numbers change at the next frame).
 func show_haul(haul: RunHaul) -> void:
-	for material: String in counters:
-		counters[material].show_amount(haul.amount(material))
+	_pending = haul
 
 
 func shown(material: String) -> int:
+	if _pending != null:
+		return _pending.amount(material)
 	return counters[material].shown
 
 
@@ -69,6 +73,10 @@ func _bump(material: String) -> void:
 
 
 func _process(delta: float) -> void:
+	if _pending != null:
+		for material: String in counters:
+			counters[material].show_amount(_pending.amount(material))
+		_pending = null
 	for material: String in counters:
 		var bump: float = maxf(_bumps[material] - delta * BUMP_DECAY, 0.0)
 		_bumps[material] = bump

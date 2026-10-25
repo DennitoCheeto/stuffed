@@ -13,7 +13,9 @@ func attack() -> bool:
 	if shots == null:
 		return false
 	var numbers: WeaponLevel = current()
-	var needles: Array[Projectile] = shots.fired_by(self)
+	# Only storm needles: the old Orbiting Needles' shots can still fly right after the evolution.
+	var needles: Array[Projectile] = []
+	needles.assign(shots.fired_by(self).filter(_is_storm_needle))
 	if needles.size() < numbers.count:
 		for i: int in range(needles.size(), numbers.count):
 			var needle: Projectile = shots.spawn(StormNeedleProjectile)
@@ -31,3 +33,7 @@ func _spread(needles: Array[Projectile]) -> void:
 	var start: float = (needles[0] as StormNeedleProjectile).angle
 	for i: int in needles.size():
 		(needles[i] as StormNeedleProjectile).angle = start + TAU * i / needles.size()
+
+
+static func _is_storm_needle(shot: Projectile) -> bool:
+	return shot is StormNeedleProjectile
