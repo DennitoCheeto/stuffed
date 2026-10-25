@@ -35,7 +35,11 @@ const BEAK_COLOR: Color = Color("#f47a3a")
 const LOWER_BEAK_COLOR: Color = Color("#e8692c")
 const FEET_COLOR: Color = Color("#f08a3c")
 const EYE_COLOR: Color = Color("#4a2e1a")
-const SHADOW_COLOR: Color = Color(0.0, 0.0, 0.0, 0.35)
+const SHADOW_COLOR: Color = Color(0.0, 0.0, 0.0, 0.45)
+## The same dark ink outline as the zombies (about 2 px on screen), so Banane stands out on the
+## light Sunny patchwork floors (#172, vision §6).
+const OUTLINE: float = 6.0
+const OUTLINE_COLOR: Color = Color("#1d1a24")
 
 var state: State = State.IDLE
 
@@ -50,6 +54,8 @@ var _root: FeltPiece
 var _foot_left: FeltPiece
 var _foot_right: FeltPiece
 var _head: FeltPiece
+var _hood: FeltPiece
+var _beak: FeltPiece
 var _lower_beak: FeltPiece
 var _eye: FeltPiece
 var _flap_left: FeltPiece
@@ -57,6 +63,7 @@ var _flap_right: FeltPiece
 var _flap_middle: FeltPiece
 var _shades: FeltPiece
 var _quack_label: Label
+var _outlined: Array[FeltPiece] = []
 
 
 func _ready() -> void:
@@ -238,6 +245,11 @@ func _update_invulnerable_blink() -> void:
 	modulate.a = 0.35 if blinking and not shown else 1.0
 
 
+## The felt pieces that carry the ink outline (for tests).
+func outlined_pieces() -> Array[FeltPiece]:
+	return _outlined
+
+
 func _build() -> void:
 	_material = ShaderMaterial.new()
 	_material.shader = FELT_SHADER
@@ -260,6 +272,11 @@ func _build() -> void:
 	body.set_seam(_svg([60, 196, 70, 230, 130, 230, 140, 196]), BODY_SEAM_COLOR)
 	_build_head()
 	_build_flaps()
+	_outlined = [_foot_left, _foot_right, body, _hood, _lower_beak, _beak]
+	_outlined.append_array([_flap_left, _flap_right, _flap_middle])
+	for piece: FeltPiece in _outlined:
+		piece.outline_width = OUTLINE
+		piece.outline_color = OUTLINE_COLOR
 	_quack_label = Label.new()
 	_quack_label.text = "QUACK."
 	_quack_label.position = Vector2(12, -96)
@@ -276,11 +293,11 @@ func _build_head() -> void:
 	var hood_shape: PackedVector2Array = _svg(
 		[60, 150, 52, 85, 64, 28, 100, 24, 136, 28, 148, 85, 140, 150, 125, 136, 75, 136, 60, 150]
 	)
-	var hood: FeltPiece = _head.add_piece(Vector2(100, 140), hood_shape, HOOD_COLOR)
+	_hood = _head.add_piece(Vector2(100, 140), hood_shape, HOOD_COLOR)
 	var hood_seam: PackedVector2Array = _svg(
 		[66, 145, 58, 88, 70, 34, 100, 30, 130, 34, 142, 88, 134, 145]
 	)
-	hood.set_seam(hood_seam, HOOD_SEAM_COLOR)
+	_hood.set_seam(hood_seam, HOOD_SEAM_COLOR)
 	var lower_beak: PackedVector2Array = _svg(
 		[116, 98, 128, 100, 140, 100, 157, 99, 150, 110, 128, 110, 116, 104]
 	)
@@ -288,7 +305,7 @@ func _build_head() -> void:
 	var beak: PackedVector2Array = _svg(
 		[118, 88, 140, 82, 160, 90, 158, 99, 140, 101, 128, 101, 116, 98]
 	)
-	_head.add_piece(Vector2(130, 94), beak, BEAK_COLOR)
+	_beak = _head.add_piece(Vector2(130, 94), beak, BEAK_COLOR)
 	var eye_center: Vector2 = Vector2(108, 78)
 	_eye = _head.add_piece(eye_center, FeltShapes.circle(eye_center, 5.0), EYE_COLOR, false)
 	var shine_center: Vector2 = Vector2(109.5, 76.5)
