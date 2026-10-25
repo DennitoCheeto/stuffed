@@ -3,13 +3,13 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-25 (M3.5 accepted; next: spec 05 town + Bedroom visual pass)_
+_Last updated: 2026-10-25 (spec 05 drafted, PR open; waiting for the PO)_
 
 ## Where we are
 
 | Milestone | State |
 |-----------|-------|
-| Research | ✅ `docs/research/01-bullet-heaven-market-research.md`, `02-game-ui-research.md` (UI, 2026-10-24) |
+| Research | ✅ `docs/research/01-bullet-heaven-market-research.md`, `02-game-ui-research.md` (UI, 2026-10-24), `03-town-and-bedroom-look-research.md` (2026-10-25) |
 | Vision | ✅ approved 2026-10-21 (`docs/specs/00-product-vision.md`) |
 | Art direction | ✅ felt style "B — Soft", puppet animation (`docs/art/`) |
 | M0 Factory setup | ✅ done (PR #1) |
@@ -35,6 +35,16 @@ _Last updated: 2026-10-25 (M3.5 accepted; next: spec 05 town + Bedroom visual pa
   **M3.5 accepted 2026-10-25** (PO: "Ill trust you. M3.5 accepted"; didn't replay the final card lift / lag fix).
   If the PO still notices late-game stutter, profile their exact weapons next (see Gotchas: Crowd deaths).
   **Next: (2) spec 05** below — research + draft a spec PR (the PO approves specs).
+  Spec 05 (2026-10-25): research `docs/research/03-town-and-bedroom-look-research.md` (branch
+  `docs/spec-05-town-bedroom-look`), look canvas https://claude.ai/artifact/WzwePbqRnbNVD5EcRx3vic (today's screenshots +
+  A Sunny Saturday / B Night-light glow / C Sewn diorama, town + Bedroom each). PO: **mix A + C**, wants "moooore
+  details and cooler"; B "too dark" but maybe a night variant for a later level (parked). Round 2 on the canvas
+  ("Sunny patchwork": detailed town + Bedroom, building growth ruin → Lv 3, Bedroom map with zones).
+  PO OK'd the Mix but buildings "a bit too round", wants more texture/detail → round 3 board "Building style"
+  (S1 Felt cut-out / S2 Built toy / **S3 Stitched toy box**, proposed). **Spec 05 drafted**
+  (`docs/specs/05-town-and-bedroom-look.md`, AC-58 … AC-65, P-22 … P-25, milestone M3.6 Sunny patchwork) in the
+  spec PR #160. PO picked **S3 with cleaner borders** (one even ~2 px outline, seams inside the edges; board
+  "Picked: S3, clean borders"), "besides that i love it". **Waiting for the PO to merge #160**, then issues from §10.
   Speedy Stitcher = "King beaten before 9:00": PO OK (2026-10-25).
   (2) Spec 05 town + Bedroom visual pass ("still not too appealing", "a tiny bit
   dark"). (3) Evolution
