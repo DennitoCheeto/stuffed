@@ -77,6 +77,8 @@ static var _current: WorldPalette
 @export_range(0.0, 1.0) var floor_brightness_max: float = 0.95
 ## Colours of one floor group differ by less than this in brightness.
 @export_range(0.0, 1.0) var floor_max_step: float = 0.1
+## How strongly floor patterns (plaid bands, checks) show over the base colour.
+@export_range(0.0, 1.0) var pattern_alpha: float = 0.35
 ## Felt grain on world art (the puppets' felt shader): how strong and how fine.
 @export_range(0.0, 0.5) var grain_strength: float = 0.06
 @export var grain_scale: float = 0.15

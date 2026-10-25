@@ -39,7 +39,7 @@ func _draw_plaid(floor_rect: Rect2) -> void:
 	var x: float = PLAID_STEP / 2.0
 	while x < floor_rect.size.x:
 		var band: Color = WorldPalette.pick(palette.quilt_patches, index)
-		draw_rect(Rect2(x, 0.0, 60.0, floor_rect.size.y), Color(band, 0.6))
+		draw_rect(Rect2(x, 0.0, 60.0, floor_rect.size.y), Color(band, palette.pattern_alpha))
 		draw_dashed_line(
 			Vector2(x + 30.0, 0.0), Vector2(x + 30.0, floor_rect.size.y), palette.quilt_seam, 2.0
 		)
@@ -48,7 +48,7 @@ func _draw_plaid(floor_rect: Rect2) -> void:
 	var y: float = PLAID_STEP / 2.0
 	while y < floor_rect.size.y:
 		var band: Color = WorldPalette.pick(palette.quilt_patches, index)
-		draw_rect(Rect2(0.0, y, floor_rect.size.x, 60.0), Color(band, 0.6))
+		draw_rect(Rect2(0.0, y, floor_rect.size.x, 60.0), Color(band, palette.pattern_alpha))
 		draw_dashed_line(
 			Vector2(0.0, y + 30.0), Vector2(floor_rect.size.x, y + 30.0), palette.quilt_seam, 2.0
 		)
