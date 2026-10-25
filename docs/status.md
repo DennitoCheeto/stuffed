@@ -51,8 +51,11 @@ _Last updated: 2026-10-24 (M3.5-08 town cards, Scrapbook, HUD: all M3.5 tickets 
 ## Playtest notes (M3.5, 2026-10-24, first look)
 
 - "Looks really nice", "It feels amazing!!!! i like all that alot. menus feel good" (P-18 / P-19 positive).
-- Selected level-up card looked taller (it grew 5%): now cards only lift (#151, PR #152). Rest of the playtest
-  (end screen P-20, readability P-21, Speedy Stitcher 9:00 question) still open.
+- Selected level-up card looked taller (it grew 5%, then lifted): now cards never move, the chosen one gets a gold
+  ring and the mouse moves the choice (#151 PR #152, #153 PR #154).
+- 2026-10-25: end screen good (P-20 ✅), zombies readable (P-21 ✅). "Endless +4 min feels reaaally laggy when many
+  die at once, fps 144": hitches from mass deaths + unlimited hit-stops → #155. Speedy Stitcher 9:00 still to ask.
+  After #155: ask the PO to replay endless; if still laggy, profile their exact build (weapons) next.
 
 ## Playtest notes (M2 + M3, 2026-10-24)
 
@@ -308,3 +311,10 @@ _Last updated: 2026-10-24 (M3.5-08 town cards, Scrapbook, HUD: all M3.5 tickets 
   backings `StyleBoxFelt.hud()`, bar fills stay `StyleBoxFlat` (a felt shape a few px wide can't be drawn),
   `UiColors.is_danger(color)` = enemy red/orange; only `hud.boss_bar` may use it (`test_04_hud_look.gd`).
   The fit check measures without rotation: keep tilts of wide pieces small (≤ 1°) or their edge items "stick out".
+- Crowd deaths (#155): killed zombies are hidden at once and freed `EnemyManager.FREE_PER_FRAME` per frame
+  (`dying_count()`), so a zombie node can stay valid (dead, hidden) for a few frames: check `.dead`, not only
+  `is_instance_valid`. Bursts: `MAX_BURSTS` total, `MAX_NEW_BURSTS_PER_FRAME`. `RunJars.show_haul` applies at the
+  next frame (`shown()` is right at once). Hit-stop numbers + cooldown in `run_rules.tres` (`run.hit_stop()`).
+  The lookup grid may hold zombies freed since the last physics tick: check `is_instance_valid(item)` before casting.
+  Shots `fired_by(weapon)` include evolved sparkle pops: filter by class. Stutter check: frame times, not fps
+  (scratch bench: kill 300 at once, print the worst frame; before #155 ~24 ms, after ~7 ms).

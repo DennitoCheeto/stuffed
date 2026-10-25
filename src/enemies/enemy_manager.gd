@@ -36,8 +36,13 @@ const GROUP: StringName = &"enemy_manager"
 const GRID_CELL: float = 48.0
 ## How strongly overlapping zombies push each other apart (0..1 per frame).
 const SEPARATION: float = 0.5
-## At most this many death bursts at once; more kills just pop without flying pieces.
-const MAX_BURSTS: int = 60
+## At most this many death bursts at once, and this many new ones per frame; more kills just
+## pop without flying pieces (when dozens die together, 60 bursts at once made a visible hitch).
+const MAX_BURSTS: int = 40
+const MAX_NEW_BURSTS_PER_FRAME: int = 8
+## Killed zombies are hidden at once but freed a few per frame: freeing hundreds of felt puppets
+## in one frame made a visible hitch when a big crowd died together.
+const FREE_PER_FRAME: int = 30
 
 var actors: Node2D
 var effects: Node2D
@@ -69,6 +74,11 @@ var _cracked: bool = false
 var _grid: SpatialGrid = SpatialGrid.new(GRID_CELL)
 ## Only for looks (shamble phase, burst directions), so it doesn't change the seeded run.
 var _cosmetic_rng: RandomNumberGenerator = RandomNumberGenerator.new()
+## Killed zombies waiting to be freed (hidden, doing nothing).
+var _dying: Array[Zombie] = []
+## Bursts started in the current frame (and which frame that is).
+var _new_bursts: int = 0
+var _burst_frame: int = -1
 
 
 func _ready() -> void:
@@ -187,9 +197,13 @@ func pop_all_in_chain(center: Vector2, duration: float) -> void:
 ## Living zombies whose body touches the circle.
 func query_circle(center: Vector2, radius: float) -> Array[Zombie]:
 	var result: Array[Zombie] = []
-	for item: Object in _grid.candidates(center, radius + GRID_CELL):
+	for item: Variant in _grid.candidates(center, radius + GRID_CELL):
+		# The grid is rebuilt every physics tick; a zombie freed since then must be skipped
+		# before it is cast (casting a freed object is an error).
+		if not is_instance_valid(item):
+			continue
 		var zombie: Zombie = item as Zombie
-		if not is_instance_valid(zombie) or zombie.dead:
+		if zombie == null or zombie.dead:
 			continue
 		var reach: float = radius + zombie.radius()
 		if zombie.position.distance_squared_to(center) <= reach * reach:
@@ -207,6 +221,20 @@ func nearest(point: Vector2, max_distance: float = INF) -> Zombie:
 			best = zombie
 			best_distance = distance
 	return best
+
+
+## Frees a few killed zombies per frame (see FREE_PER_FRAME).
+func _process(_delta: float) -> void:
+	var count: int = mini(FREE_PER_FRAME, _dying.size())
+	for i: int in count:
+		var zombie: Zombie = _dying.pop_back()
+		if is_instance_valid(zombie):
+			zombie.queue_free()
+
+
+## Killed zombies not freed yet (for tests).
+func dying_count() -> int:
+	return _dying.size()
 
 
 func _physics_process(delta: float) -> void:
@@ -384,13 +412,28 @@ func _remove(zombie: Zombie, with_burst: bool) -> bool:
 	zombies.pop_back()
 	kills += 1
 	zombie_killed.emit(zombie)
-	if with_burst and effects != null and effects.get_child_count() < MAX_BURSTS:
+	zombie.dead = true
+	if with_burst and _may_burst():
+		_new_bursts += 1
 		var burst: ZombieBurst = ZombieBurst.new()
 		effects.add_child(burst)
 		burst.global_position = zombie.global_position
 		burst.launch(zombie.puppet, _cosmetic_rng)
-	zombie.queue_free()
+	zombie.visible = false
+	zombie.process_mode = Node.PROCESS_MODE_DISABLED
+	_dying.append(zombie)
 	return true
+
+
+## True if one more death burst fits (in total and in this frame).
+func _may_burst() -> bool:
+	if effects == null or effects.get_child_count() >= MAX_BURSTS:
+		return false
+	var frame: int = Engine.get_process_frames()
+	if frame != _burst_frame:
+		_burst_frame = frame
+		_new_bursts = 0
+	return _new_bursts < MAX_NEW_BURSTS_PER_FRAME
 
 
 ## Where a zombie wants to go: straight at its target, or (ranged zombies) to a spot at their
