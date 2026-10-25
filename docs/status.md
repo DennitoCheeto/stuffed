@@ -43,7 +43,8 @@ _Last updated: 2026-10-25 (spec 05 drafted, PR open; waiting for the PO)_
   PO OK'd the Mix but buildings "a bit too round", wants more texture/detail → round 3 board "Building style"
   (S1 Felt cut-out / S2 Built toy / **S3 Stitched toy box**, proposed). **Spec 05 drafted**
   (`docs/specs/05-town-and-bedroom-look.md`, AC-58 … AC-65, P-22 … P-25, milestone M3.6 Sunny patchwork) in the
-  spec PR: **waiting for the PO's style pick + approval** (PO merges spec PRs). Then: issues from §10.
+  spec PR #160. PO picked **S3 with cleaner borders** (one even ~2 px outline, seams inside the edges; board
+  "Picked: S3, clean borders"), "besides that i love it". **Waiting for the PO to merge #160**, then issues from §10.
   Speedy Stitcher = "King beaten before 9:00": PO OK (2026-10-25).
   (2) Spec 05 town + Bedroom visual pass ("still not too appealing", "a tiny bit
   dark"). (3) Evolution

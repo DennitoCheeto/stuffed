@@ -48,15 +48,18 @@ The rule of the mix: **A brings the light and the scale, C brings the materials.
 - All world colours live in **one data file** (`data/art/world_palette.tres`), so tuning brightness takes minutes
   (hard rule 8).
 
-### 2.2 Building style: "Stitched toy box" (S3)
+### 2.2 Building style: "Stitched toy box" (S3), clean borders
 
-Canvas board "Building style": S1 Felt cut-out, S2 Built toy, **S3 Stitched toy box** (proposal).
+Canvas boards "Building style" (S1 Felt cut-out, S2 Built toy, S3 Stitched toy box) and "Picked: S3, clean
+borders". PO pick (2026-10-25): **S3 "but a little bit more clean borders"**.
 
 - **Hard, chunky shapes**: straight edges and sharp corners, a visible side face and top (3/4 view), small corner
   rounding only. No more soft round blobs.
-- **Dark ink outline** (like the zombies, so the world feels like one family) + a contact shadow on the floor.
-- **Texture**: felt grain on every surface (the game's felt shader), **stitched seams** along edges, and drawn-in
-  materials: wood planks and grain, nails, metal corner brackets, cardboard, glass highlights, thread windings.
+- **One even, clean ink outline** (about 2 px at game size, the same on every piece, like the zombies, so the world
+  feels like one family) + a contact shadow on the floor.
+- **Stitched seams sit inside the shapes** (a few pixels in from the edge), never on top of the outline.
+- **Texture**: felt grain on every surface (the game's felt shader) and drawn-in materials: wood planks and grain,
+  nails, metal corner brackets, cardboard, glass highlights, thread windings.
 - Light from the top-left (vision §8.1 "B — Soft"): top faces lighter, side faces darker.
 
 ## 3. The town
@@ -169,7 +172,8 @@ Canvas board "The whole Bedroom". Each zone has its own props and floor details,
 ## 8. Open questions (my proposal in bold; approving the spec means "yes" to all)
 
 1. The mix: **A's daylight and scale + C's materials ("Sunny patchwork")**?
-2. Building style: **S3 Stitched toy box** (hard shapes, ink outline, felt grain, stitched seams)?
+2. Building style: **S3 Stitched toy box with clean borders** (hard shapes, one even ink outline, felt grain,
+   stitched seams inside the edges)? *(PO picked this, 2026-10-25)*
 3. Text: **no text on built buildings until you walk up; ruins keep a price tag; a "Can build!" tag**? (changes spec
    03 §5, where every ruin had a sign with name, price and effect)
 4. Town **about 20% more compact**?
