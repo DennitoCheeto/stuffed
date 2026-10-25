@@ -53,6 +53,55 @@ static var _current: WorldPalette
 ## See-through warm glow under a lamp.
 @export var lamp_glow: Color = Color.WHITE
 
+@export_group("Buildings")
+## Wood in 3/4 view, lit from the top-left: top faces lightest, side faces darkest.
+@export var wood_top: Color = Color.WHITE
+@export var wood: Color = Color.WHITE
+@export var wood_side: Color = Color.WHITE
+## Plank gaps and grain lines drawn on the wood.
+@export var wood_grain: Color = Color.WHITE
+## The dark inside of an open box.
+@export var box_inside: Color = Color.WHITE
+@export var nail: Color = Color.WHITE
+## Brass corners and clasps, and plain metal (scissors, needles, brackets).
+@export var brass: Color = Color.WHITE
+@export var brass_dark: Color = Color.WHITE
+@export var metal: Color = Color.WHITE
+@export var metal_dark: Color = Color.WHITE
+## Glass: the body, its shaded side and the white shine.
+@export var glass: Color = Color.WHITE
+@export var glass_side: Color = Color.WHITE
+@export var glass_shine: Color = Color.WHITE
+## A gold jar lid and coins.
+@export var gold_lid: Color = Color.WHITE
+@export var gold_lid_dark: Color = Color.WHITE
+@export var coin: Color = Color.WHITE
+@export var coin_rim: Color = Color.WHITE
+## Gingham cloth: the base and its checks.
+@export var gingham: Color = Color.WHITE
+@export var gingham_check: Color = Color.WHITE
+## Ribbons and bows (pink, never red), and plain twine.
+@export var ribbon: Color = Color.WHITE
+@export var ribbon_dark: Color = Color.WHITE
+@export var twine: Color = Color.WHITE
+## Sewing buttons and their holes.
+@export var buttons: Array[Color] = []
+@export var button_hole: Color = Color.WHITE
+## Toys and weapons in the Armory: pencil yellow, pink, teal, lavender, cream.
+@export var toys: Array[Color] = []
+## A sharpened pencil's bare wood.
+@export var pencil_wood: Color = Color.WHITE
+## Paint on a finished building: the main colour and its trim.
+@export var paint: Color = Color.WHITE
+@export var paint_trim: Color = Color.WHITE
+## Paper tags and labels.
+@export var tag: Color = Color.WHITE
+@export var clover: Color = Color.WHITE
+## Fairy light bulbs and their cord.
+@export var fairy_lights: Array[Color] = []
+@export var light_cord: Color = Color.WHITE
+@export var sparkle: Color = Color.WHITE
+
 @export_group("Shared")
 ## The one even outline around world pieces (like the zombies').
 @export var ink: Color = Color.BLACK
@@ -82,6 +131,18 @@ static var _current: WorldPalette
 ## Felt grain on world art (the puppets' felt shader): how strong and how fine.
 @export_range(0.0, 0.5) var grain_strength: float = 0.06
 @export var grain_scale: float = 0.15
+
+@export_group("Building art")
+## The one even ink outline around a building's silhouette (px at game size).
+@export_range(0.0, 8.0) var building_outline: float = 2.0
+## Stitched seams: how far inside the edge, dash and gap length, thread width (px).
+@export var seam_inset: float = 5.0
+@export var seam_dash: float = 5.0
+@export var seam_gap: float = 4.0
+@export var seam_width: float = 1.6
+## A ruin's colours: share of the way to grey, and how much darker.
+@export_range(0.0, 1.0) var ruin_grey: float = 0.5
+@export_range(0.0, 1.0) var ruin_dim: float = 0.06
 
 
 ## The game's palette (loaded once).

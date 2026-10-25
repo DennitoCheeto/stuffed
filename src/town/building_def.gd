@@ -12,6 +12,8 @@ extends Resource
 @export var levels: Array[BuildingLevel] = []
 @export var wall_color: Color = Color("#e6dcc8")
 @export var roof_color: Color = Color("#6f8fb8")
+## World pixels per design unit of its art-kit look (spec 05 §2.2): tunes how big it stands.
+@export var art_scale: float = 1.0
 
 
 func max_level() -> int:

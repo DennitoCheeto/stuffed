@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-25 (#172 part 1 merged; floors toned down after PO feedback)_
+_Last updated: 2026-10-25 (M3.6-02 building art kit in PR)_
 
 ## Where we are
 
@@ -16,7 +16,7 @@ _Last updated: 2026-10-25 (#172 part 1 merged; floors toned down after PO feedba
 | M1 Core run | ✅ accepted 2026-10-21 (PRs #17–#29; playtest P-1 … P-6 passed, 144 fps on the PO's PC) |
 | M2 Build variety | ✅ accepted 2026-10-24 (played with M3): all 19 tickets merged (PRs #47–#49, #51–#55, #57, #58, #60, #61, #63, #67, #69, #77, #78, #80, #81); + spec 02b floor pickups approved (#83): M2-20 (PR #88), M2-21 (PR #89) and M2-22 (PR #90) merged |
 | M3.5 UI and juice | ✅ accepted 2026-10-25: spec 04 (PR #123), M3.5-01 … 08 (PRs #133, #137, #138, #140, #141, #143, #149, #150) + PO fixes #136, #146, #152, #154, #156 (late-game hitches), #158 |
-| M3.6 Sunny patchwork | 🚧 spec 05 approved 2026-10-25 (PR #160; AC-58 … AC-65, P-22 … P-25); milestone M3.6, issues #162–#170 (M3.6-01 … 09); M3.6-01 world palette (#162): merged (PR #171); hero clarity #172 (part 1): in PR |
+| M3.6 Sunny patchwork | 🚧 spec 05 approved 2026-10-25 (PR #160; AC-58 … AC-65, P-22 … P-25); milestone M3.6, issues #162–#170 (M3.6-01 … 09); M3.6-01 world palette (#162): merged (PR #171); hero clarity #172 (part 1): merged (PR #173, floors calmer #174); M3.6-02 art kit + Lucky Jar + Armory (#163): in PR |
 | M3 Town | ✅ accepted 2026-10-24: spec 03 approved (PR #91); issues #92–#103; M3-01 save system (PR #105), M3-02 town + flow (PR #106), M3-03 materials (PR #107), M3-04 Way Home portal (PR #109), M3-05 rebuilding (PR #110), M3-06 Toy Box Armory (PR #114), M3-07 Lucky Jar + Watchtower + Snack Bar (PR #115), M3-08 Party Shop (PR #116), M3-09 rescue in the run (PR #117), M3-10 Plush Hospital + plushies in town (PR #118), M3-11 Scrapbook (PR #119), M3-12 co-op in town + dev menu + sounds (PR #120) |
 
 ## Next step
@@ -46,7 +46,8 @@ _Last updated: 2026-10-25 (#172 part 1 merged; floors toned down after PO feedba
   (`docs/specs/05-town-and-bedroom-look.md`, AC-58 … AC-65, P-22 … P-25, milestone M3.6 Sunny patchwork) in the
   spec PR #160. PO picked **S3 with cleaner borders** (one even ~2 px outline, seams inside the edges; board
   "Picked: S3, clean borders"), "besides that i love it". **Spec 05 approved** (PO merged #160, 2026-10-25). Milestone M3.6 + issues #162–#170 created. M3.6-01 world palette + felt grain (#162): merged (PR #171). PO: floor "looks nice" but the hero blended in → #172: Banane got the zombies' outline + a coloured ring under each hero (part 1, PR open). #172 part 2 (whole-screen clarity ladder: enemies > hero > own shots > pickups) still open; the benchmark frame shows own pins can bury the hero.
-  **Next: M3.6-02 building art kit + Lucky Jar and Armory (#163).**
+  M3.6-02 building art kit + Lucky Jar and Armory (#163): PR open.
+  **Next: M3.6-03 the other four buildings + fort + Scrapbook stand in the kit (#164).**
   Speedy Stitcher = "King beaten before 9:00": PO OK (2026-10-25).
   (2) Spec 05 town + Bedroom visual pass ("still not too appealing", "a tiny bit
   dark"). (3) Evolution
@@ -354,3 +355,15 @@ _Last updated: 2026-10-25 (#172 part 1 merged; floors toned down after PO feedba
   pattern "a tad too strong" → floors ~10% darker (boards ~0.69, rug ~0.77-0.83, quilt ~0.80-0.82 brightness),
   neighbouring colours closer, `WorldPalette.pattern_alpha` (town plaid strength), grain 0.045. Teal/green hero
   rings one shade deeper to keep the contrast rule. If still too bright: lower these in `world_palette.tres`.
+- Building art kit (M3.6-02, spec 05 §2.2): a look is a `BuildingSketch` (`src/town/art/`) built in design units
+  around the building's bottom middle (y up negative), times `BuildingDef.art_scale` (data). `piece`/`block`/
+  `disc`/`rod` get the ink outline (all ink is drawn before all fills, so only the silhouette shows), `shade`/
+  `dot`/`line`/`stripes` don't; `sewn = true` adds a seam `seam_inset` px inside. Numbers (outline, seams,
+  ruin grey) are in `world_palette.tres` ("Building art"). Each look is baked into one `ArrayMesh` (one draw
+  call per building; town went from ~510 to ~440 draw calls). Looks per building: `BuildingLooks.sketch(def,
+  level)` (cached; `KIT_BUILDINGS` lists who has one, the rest still use `BuildingArt`). New look = a
+  `XxxLook.build(level, unit)` + a `match` line in `BuildingLooks._build` + its script in `WORLD_ART_SCRIPTS`.
+  `test_building_looks.gd` checks every level adds a part name, fits the spot, no danger colour and
+  `broken_shapes()` is empty (self-crossing polygons can't be filled). Look check: scratch gallery that calls
+  `BuildingLooks.sketch(def, level).draw(self)` + `--write-movie`. Kit ruins show no loose yarn (locked ones
+  keep the tangle) and no sign post.
