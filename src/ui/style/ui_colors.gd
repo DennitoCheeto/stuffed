@@ -50,6 +50,11 @@ const HUD_TEXT: Color = Color("#f6ecd9")
 const HUD_OUTLINE: Color = Color("#1c1826")
 ## The hero's health: a soft rose (never the red of danger; green is XP).
 const HEALTH: Color = Color("#e891aa")
+## The ring under each player's hero (P1, P2, ...): strong, cool colours that read on the warm
+## floors and never look like danger (#172).
+const PLAYER_MARKERS: Array[Color] = [
+	Color("#1f9e9a"), Color("#7b5cd6"), Color("#2f7fd0"), Color("#3fa34d")
+]
 
 ## Danger colours (vision §6): saturated red to orange. Enemies own them; menus and the HUD's own
 ## parts never use them.

@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://src/player/player.gd" id="1_player"]
 [ext_resource type="Resource" path="res://data/heroes/banane.tres" id="2_stats"]
 [ext_resource type="Script" path="res://src/player/banane_puppet.gd" id="3_puppet"]
 [ext_resource type="Script" path="res://src/player/player_overlay.gd" id="4_overlay"]
 [ext_resource type="Resource" path="res://data/xp_rules.tres" id="5_xp"]
+[ext_resource type="Script" path="res://src/player/hero_marker.gd" id="6_marker"]
 
 [node name="Player" type="CharacterBody2D"]
 collision_layer = 2
@@ -15,6 +16,9 @@ stats = ExtResource("2_stats")
 xp_rules = ExtResource("5_xp")
 
 [node name="Hitbox" type="CollisionShape2D" parent="."]
+
+[node name="Marker" type="Node2D" parent="."]
+script = ExtResource("6_marker")
 
 [node name="Puppet" type="Node2D" parent="."]
 script = ExtResource("3_puppet")

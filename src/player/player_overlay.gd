@@ -8,7 +8,7 @@ const DASH_RING_COLOR: Color = Color(1.0, 1.0, 1.0, 0.6)
 const HEALTH_BACK_COLOR: Color = Color(0.1, 0.09, 0.12, 0.8)
 const HEALTH_FILL_COLOR: Color = Color("#7bd88f")
 const HEALTH_BAR_SIZE: Vector2 = Vector2(44.0, 5.0)
-const HEALTH_BAR_Y: float = 26.0
+const HEALTH_BAR_Y: float = 38.0
 
 var _player: Player
 
