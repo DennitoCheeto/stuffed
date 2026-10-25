@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-25 (spec 05 research + look options; waiting for the PO's pick)_
+_Last updated: 2026-10-25 (spec 05 look round 2: A + C mix; waiting for the PO)_
 
 ## Where we are
 
@@ -37,8 +37,10 @@ _Last updated: 2026-10-25 (spec 05 research + look options; waiting for the PO's
   **Next: (2) spec 05** below — research + draft a spec PR (the PO approves specs).
   Spec 05 (2026-10-25): research `docs/research/03-town-and-bedroom-look-research.md` (branch
   `docs/spec-05-town-bedroom-look`), look canvas https://claude.ai/artifact/WzwePbqRnbNVD5EcRx3vic (today's screenshots +
-  A Sunny Saturday / B Night-light glow / C Sewn diorama, town + Bedroom each). **Waiting for the PO's pick**, then
-  write `docs/specs/05-...md` on that branch.
+  A Sunny Saturday / B Night-light glow / C Sewn diorama, town + Bedroom each). PO: **mix A + C**, wants "moooore
+  details and cooler"; B "too dark" but maybe a night variant for a later level (parked). Round 2 on the canvas
+  ("Sunny patchwork": detailed town + Bedroom, building growth ruin → Lv 3, Bedroom map with zones).
+  **Waiting for the PO's OK on round 2**, then write `docs/specs/05-...md` on that branch.
   Speedy Stitcher = "King beaten before 9:00": PO OK (2026-10-25).
   (2) Spec 05 town + Bedroom visual pass ("still not too appealing", "a tiny bit
   dark"). (3) Evolution
