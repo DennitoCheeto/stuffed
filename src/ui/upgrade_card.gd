@@ -2,9 +2,8 @@ class_name UpgradeCard
 extends SewnButton
 ## One level-up card as a felt patch (spec 02 §5, §11; spec 04 §6.3): the key number and
 ## "New!" / "Lv 2 → 3" on fabric tags, the icon, the name, one line of what it does and, for
-## weapons that can evolve, the icon of their partner item. Reacts to hover / focus, but unlike
-## the other sewn buttons, the chosen card never moves: it gets a gold outline ring. Cards must
-## read at a glance and stay in line, one size.
+## weapons that can evolve, the icon of their partner item. The chosen card lifts and gets a gold
+## outline ring, but never grows or tilts: cards must read at a glance and keep one size.
 
 const CARD_SIZE: Vector2 = Vector2(340, 400)
 ## While choosing a card to banish: how far (radians) and how fast (per second) the card wiggles.
@@ -33,9 +32,9 @@ var _wiggle_time: float = 0.0
 
 func _init() -> void:
 	super("", false)
-	# The cards stay in line and keep one size: the chosen one gets a gold ring instead of
-	# moving (#151, #153). The mouse moves the selection, so only one card is ever chosen.
-	moves_on_hover = false
+	# The chosen card lifts with a gold ring but keeps its size (#151, #153, #157). The mouse
+	# moves the selection, so only one card is ever raised.
+	grows_on_hover = false
 	ring_on_raise = true
 	mouse_entered.connect(grab_focus)
 	box.radius = 26.0

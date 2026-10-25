@@ -33,7 +33,7 @@ _Last updated: 2026-10-24 (M3.5-08 town cards, Scrapbook, HUD: all M3.5 tickets 
   The repo is **public** since 2026-10-24 (free Actions minutes ran out while private; public = unlimited).
   **Next: the M3.5 playtest (P-18 … P-21)** with the "latest" build (the PO hasn't tested M3.5-07 yet either).
   HUD change to mention: health bar is now rose pink (XP is green per spec 04 §2.1).
-  Ask the PO: Speedy Stitcher is "King beaten before 9:00" (spec said 7:00, but the King only comes at 8:00).
+  Speedy Stitcher = "King beaten before 9:00": PO OK (2026-10-25).
   (2) Spec 05 town + Bedroom visual pass ("still not too appealing", "a tiny bit
   dark"). (3) Evolution
   "wow" pass (new behaviour + bigger moment per evolution). (4) Skill / progress tree spec, then M4 night siege.
@@ -51,10 +51,11 @@ _Last updated: 2026-10-24 (M3.5-08 town cards, Scrapbook, HUD: all M3.5 tickets 
 ## Playtest notes (M3.5, 2026-10-24, first look)
 
 - "Looks really nice", "It feels amazing!!!! i like all that alot. menus feel good" (P-18 / P-19 positive).
-- Selected level-up card looked taller (it grew 5%, then lifted): now cards never move, the chosen one gets a gold
-  ring and the mouse moves the choice (#151 PR #152, #153 PR #154).
+- Level-up cards: the PO likes the lift; the problem was card 1 staying raised by keyboard focus while the mouse
+  was elsewhere ("different height" = sits higher). Now: the mouse moves the choice, the chosen card lifts + gold
+  ring, never grows (#151, #153, #157).
 - 2026-10-25: end screen good (P-20 ✅), zombies readable (P-21 ✅). "Endless +4 min feels reaaally laggy when many
-  die at once, fps 144": hitches from mass deaths + unlimited hit-stops → #155. Speedy Stitcher 9:00 still to ask.
+  die at once, fps 144": hitches from mass deaths + unlimited hit-stops → fixed (#155, PR #156).
   After #155: ask the PO to replay endless; if still laggy, profile their exact build (weapons) next.
 
 ## Playtest notes (M2 + M3, 2026-10-24)

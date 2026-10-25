@@ -24,8 +24,8 @@ const DEPTH: float = 6.0
 
 ## The gold "go on" button (one per screen) or a cream one.
 var main: bool = false
-## False = hover / focus doesn't lift or grow it (cards that must stay in line, one size).
-var moves_on_hover: bool = true
+## False = hover / focus only lifts it, without growing (cards that must keep one size).
+var grows_on_hover: bool = true
 ## True = a gold outline ring and gold stitches show while it is raised (hovered / focused).
 var ring_on_raise: bool = false
 ## What shows and moves: the felt body with the caption.
@@ -207,9 +207,9 @@ func _go_to_pose() -> void:
 	if _held and not disabled:
 		size_to = style.press_squish
 		press = 1.0
-	elif is_raised() and moves_on_hover:
+	elif is_raised():
 		lift = style.hover_lift
-		size_to = style.hover_grow
+		size_to = style.hover_grow if grows_on_hover else 1.0
 	box.stitch = _base_stitch.lightened(0.35) if is_raised() else _base_stitch
 	var ringed: bool = ring_on_raise and is_raised()
 	box.ring = UiColors.GOLD if ringed else Color(UiColors.GOLD, 0.0)
