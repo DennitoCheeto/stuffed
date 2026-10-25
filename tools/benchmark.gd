@@ -13,6 +13,8 @@ const SHOTS: int = 600
 const BULLETS: int = 400
 const WARM_UP: float = 1.5
 const SECONDS: float = 6.0
+const BENCH_SAVE: String = "user://benchmark_save.json"
+const BENCH_SETTINGS: String = "user://benchmark_settings.json"
 
 var _run: Run
 var _sniper: Weapon
@@ -25,12 +27,18 @@ func _initialize() -> void:
 
 
 func _start() -> void:
+	# Never touch the player's own save or settings.
+	SaveStore.path = BENCH_SAVE
+	GameSettings.path = BENCH_SETTINGS
 	var main: Main = MAIN_SCENE.instantiate()
 	main.quit_enabled = false
 	root.add_child(main)
 	for i: int in 5:
 		await process_frame
 	(main.current_screen as TitleScreen).start_button.pressed.emit()
+	for i: int in 3:
+		await physics_frame
+	(main.current_screen as Town).enter_bedroom()
 	for i: int in 3:
 		await physics_frame
 	_run = main.current_screen as Run

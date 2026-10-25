@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-25 (spec 05 approved; next: M3.6 issues + ticket 1)_
+_Last updated: 2026-10-25 (M3.6 issues #162–#170 created; M3.6-01 world palette in PR)_
 
 ## Where we are
 
@@ -16,7 +16,7 @@ _Last updated: 2026-10-25 (spec 05 approved; next: M3.6 issues + ticket 1)_
 | M1 Core run | ✅ accepted 2026-10-21 (PRs #17–#29; playtest P-1 … P-6 passed, 144 fps on the PO's PC) |
 | M2 Build variety | ✅ accepted 2026-10-24 (played with M3): all 19 tickets merged (PRs #47–#49, #51–#55, #57, #58, #60, #61, #63, #67, #69, #77, #78, #80, #81); + spec 02b floor pickups approved (#83): M2-20 (PR #88), M2-21 (PR #89) and M2-22 (PR #90) merged |
 | M3.5 UI and juice | ✅ accepted 2026-10-25: spec 04 (PR #123), M3.5-01 … 08 (PRs #133, #137, #138, #140, #141, #143, #149, #150) + PO fixes #136, #146, #152, #154, #156 (late-game hitches), #158 |
-| M3.6 Sunny patchwork | 📝 spec 05 approved 2026-10-25 (PR #160; AC-58 … AC-65, P-22 … P-25); issues not created yet |
+| M3.6 Sunny patchwork | 🚧 spec 05 approved 2026-10-25 (PR #160; AC-58 … AC-65, P-22 … P-25); milestone M3.6, issues #162–#170 (M3.6-01 … 09); M3.6-01 world palette (#162): in PR |
 | M3 Town | ✅ accepted 2026-10-24: spec 03 approved (PR #91); issues #92–#103; M3-01 save system (PR #105), M3-02 town + flow (PR #106), M3-03 materials (PR #107), M3-04 Way Home portal (PR #109), M3-05 rebuilding (PR #110), M3-06 Toy Box Armory (PR #114), M3-07 Lucky Jar + Watchtower + Snack Bar (PR #115), M3-08 Party Shop (PR #116), M3-09 rescue in the run (PR #117), M3-10 Plush Hospital + plushies in town (PR #118), M3-11 Scrapbook (PR #119), M3-12 co-op in town + dev menu + sounds (PR #120) |
 
 ## Next step
@@ -45,7 +45,8 @@ _Last updated: 2026-10-25 (spec 05 approved; next: M3.6 issues + ticket 1)_
   (S1 Felt cut-out / S2 Built toy / **S3 Stitched toy box**, proposed). **Spec 05 drafted**
   (`docs/specs/05-town-and-bedroom-look.md`, AC-58 … AC-65, P-22 … P-25, milestone M3.6 Sunny patchwork) in the
   spec PR #160. PO picked **S3 with cleaner borders** (one even ~2 px outline, seams inside the edges; board
-  "Picked: S3, clean borders"), "besides that i love it". **Spec 05 approved** (PO merged #160, 2026-10-25). **Next: create milestone M3.6 + the 9 issues from spec 05 §10, then ticket 1** (world palette + felt grain + tests).
+  "Picked: S3, clean borders"), "besides that i love it". **Spec 05 approved** (PO merged #160, 2026-10-25). Milestone M3.6 + issues #162–#170 created. M3.6-01 world palette + felt grain (#162): PR open.
+  **Next: M3.6-02 building art kit + Lucky Jar and Armory (#163).**
   Speedy Stitcher = "King beaten before 9:00": PO OK (2026-10-25).
   (2) Spec 05 town + Bedroom visual pass ("still not too appealing", "a tiny bit
   dark"). (3) Evolution
@@ -332,3 +333,15 @@ _Last updated: 2026-10-25 (spec 05 approved; next: M3.6 issues + ticket 1)_
   The lookup grid may hold zombies freed since the last physics tick: check `is_instance_valid(item)` before casting.
   Shots `fired_by(weapon)` include evolved sparkle pops: filter by class. Stutter check: frame times, not fps
   (scratch bench: kill 300 at once, print the worst frame; before #155 ~24 ms, after ~7 ms).
+- World palette (M3.6-01): every town/Bedroom colour lives in `data/art/world_palette.tres` (`WorldPalette`,
+  `WorldPalette.current()`, `pick(colors, i)`). New world art reads colours from it and its script goes into
+  `WORLD_ART_SCRIPTS` in `test_world_palette.gd` (that test fails on any `Color("#..")` / `Color(0.1, ..)` /
+  `Color.RED` in those files). Floor groups (`floor_groups()`) must stay inside the brightness band and
+  `floor_max_step`. World nodes get the felt grain via `material = palette.grain_material()` (costs no draw
+  calls). Trap: warm wood / brown shadows easily count as danger in `UiColors.is_danger` (hue < 35°,
+  saturation ≥ 0.45, value ≥ 0.35): keep wood saturation under ~0.43 and shadows darker than value 0.35.
+  Signs on the light floor: dark ink text with a light outline (`sign_text` / `sign_outline`).
+- Benchmark (`tools/benchmark.gd`) now walks title → fort → Bedroom and uses its own save/settings files.
+  Absolute fps from Claude's sessions on the PO's PC are low (~9 fps on `main` too, 2026-10-25): compare
+  branch vs `main` and draw calls, not against old numbers. Outlined `draw_rect` on every wall block added ~250
+  draw calls: keep repeated small shapes plain or bake them.
