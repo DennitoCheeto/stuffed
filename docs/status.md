@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-24 (M3.5-08 town cards, Scrapbook, HUD: all M3.5 tickets done)_
+_Last updated: 2026-10-25 (M3.5 accepted; next: spec 05 town + Bedroom visual pass)_
 
 ## Where we are
 
@@ -15,6 +15,7 @@ _Last updated: 2026-10-24 (M3.5-08 town cards, Scrapbook, HUD: all M3.5 tickets 
 | M0 Factory setup | ✅ done (PR #1) |
 | M1 Core run | ✅ accepted 2026-10-21 (PRs #17–#29; playtest P-1 … P-6 passed, 144 fps on the PO's PC) |
 | M2 Build variety | ✅ accepted 2026-10-24 (played with M3): all 19 tickets merged (PRs #47–#49, #51–#55, #57, #58, #60, #61, #63, #67, #69, #77, #78, #80, #81); + spec 02b floor pickups approved (#83): M2-20 (PR #88), M2-21 (PR #89) and M2-22 (PR #90) merged |
+| M3.5 UI and juice | ✅ accepted 2026-10-25: spec 04 (PR #123), M3.5-01 … 08 (PRs #133, #137, #138, #140, #141, #143, #149, #150) + PO fixes #136, #146, #152, #154, #156 (late-game hitches), #158 |
 | M3 Town | ✅ accepted 2026-10-24: spec 03 approved (PR #91); issues #92–#103; M3-01 save system (PR #105), M3-02 town + flow (PR #106), M3-03 materials (PR #107), M3-04 Way Home portal (PR #109), M3-05 rebuilding (PR #110), M3-06 Toy Box Armory (PR #114), M3-07 Lucky Jar + Watchtower + Snack Bar (PR #115), M3-08 Party Shop (PR #116), M3-09 rescue in the run (PR #117), M3-10 Plush Hospital + plushies in town (PR #118), M3-11 Scrapbook (PR #119), M3-12 co-op in town + dev menu + sounds (PR #120) |
 
 ## Next step
@@ -31,8 +32,9 @@ _Last updated: 2026-10-24 (M3.5-08 town cards, Scrapbook, HUD: all M3.5 tickets 
   stats (#126): merged (PR #137). M3.5-02 fit check (#125): merged (PR #138). M3.5-04 end screen (#127): merged (PR #140). M3.5-05 run titles (#128): merged (PR #141). M3.5-06 title, pause, settings (#129): merged (PR #143).
   M3.5-07 level-up, gift box, goal screen (#130): merged (PR #149). M3.5-08 town cards, Scrapbook, HUD (#131): PR #150.
   The repo is **public** since 2026-10-24 (free Actions minutes ran out while private; public = unlimited).
-  **Next: the M3.5 playtest (P-18 … P-21)** with the "latest" build (the PO hasn't tested M3.5-07 yet either).
-  HUD change to mention: health bar is now rose pink (XP is green per spec 04 §2.1).
+  **M3.5 accepted 2026-10-25** (PO: "Ill trust you. M3.5 accepted"; didn't replay the final card lift / lag fix).
+  If the PO still notices late-game stutter, profile their exact weapons next (see Gotchas: Crowd deaths).
+  **Next: (2) spec 05** below — research + draft a spec PR (the PO approves specs).
   Speedy Stitcher = "King beaten before 9:00": PO OK (2026-10-25).
   (2) Spec 05 town + Bedroom visual pass ("still not too appealing", "a tiny bit
   dark"). (3) Evolution
