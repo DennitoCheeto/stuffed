@@ -35,3 +35,4 @@ summary = "More weapons for your level-up cards"
 levels = Array[ExtResource("2_level")]([SubResource("Resource_level_1"), SubResource("Resource_level_2"), SubResource("Resource_level_3")])
 wall_color = Color(0.79, 0.71, 0.89, 1)
 roof_color = Color(0.49, 0.42, 0.66, 1)
+art_scale = 1.05

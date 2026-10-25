@@ -1,10 +1,11 @@
 class_name TownBuilding
 extends Node2D
-## One building spot in the Pillow Fort (spec 03 §5, §6, §11). At level 0 it's a wrecked ruin:
-## torn, knocked-over pillows in the building's footprint. A ruin that can't be rebuilt yet is
-## tangled in zombie yarn and its sign says what unlocks it. Rebuilt (level 1-3) it's a cozy
-## felt building that gets bigger and fancier per level. The sign below shows the name, the price
-## of the next level (grey when the jars don't hold enough) and what it does.
+## One building spot in the Pillow Fort (spec 03 §5, §6, §11). At level 0 it's a wrecked ruin.
+## Buildings with an art-kit look (`BuildingLooks`, spec 05 §2.2) show their own object broken or
+## tipped over at level 0 and growing per level; the others still show torn pillows and a cozy
+## felt house per level. A ruin that can't be rebuilt yet is tangled in zombie yarn and its sign
+## says what unlocks it. The sign below shows the name, the price of the next level (grey when
+## the jars don't hold enough) and what it does.
 
 const PIECE_COLORS: Array[Color] = [Color("#8d8799"), Color("#7b8aa0"), Color("#9a9184")]
 const TORN_COLOR: Color = Color("#d9d3c8")
@@ -58,6 +59,7 @@ func _init(town_spot: TownSpot, start_level: int, is_unlocked: bool) -> void:
 
 
 func _ready() -> void:
+	material = WorldPalette.current().grain_material()
 	var rect: Rect2 = spot.rect
 	name_label = TownArt.label("", 26)
 	add_child(name_label)
@@ -109,6 +111,11 @@ func status_text() -> String:
 	if level == 0:
 		return building.summary
 	return building.effect_at(level)
+
+
+## The art-kit look the building shows right now (null: drawn the old way, see BuildingLooks).
+func shown_look() -> BuildingSketch:
+	return BuildingLooks.sketch(building, shown_level)
 
 
 ## True when the price on the sign is shown grey (the jars hold too little of `material`).
@@ -181,12 +188,21 @@ func _draw() -> void:
 	if _shake_left > 0.0:
 		shake = Vector2(sin(_shake_left * 90.0), cos(_shake_left * 70.0)) * SHAKE_PIXELS
 	draw_set_transform(shake)
-	if shown_level > 0:
+	var look: BuildingSketch = shown_look()
+	if look != null:
+		var bottom: Vector2 = Vector2(spot.rect.get_center().x, spot.rect.end.y)
+		draw_set_transform(bottom + shake, 0.0, Vector2.ONE * pop_scale())
+		look.draw(self)
+		draw_set_transform(shake)
+		if shown_level == 0:
+			_draw_ruin_yarn(spot.rect, false)
+	elif shown_level > 0:
 		BuildingArt.draw(self, building, spot.rect, shown_level, pop_scale())
 	else:
 		_draw_ruin(spot.rect)
 	draw_set_transform(Vector2.ZERO)
-	_draw_sign_post(spot.rect)
+	if look == null:
+		_draw_sign_post(spot.rect)
 
 
 func _draw_ruin(rect: Rect2) -> void:
@@ -203,7 +219,16 @@ func _draw_ruin(rect: Rect2) -> void:
 		TownArt.pillow(self, local, PIECE_COLORS[i % PIECE_COLORS.size()])
 		draw_line(local.position + Vector2(10, 12), local.get_center(), TORN_COLOR, 4.0)
 	draw_set_transform(Vector2.ZERO)
-	_draw_yarn(rect, rng, 0, LOOSE_STRANDS, Vector2.ZERO, 1.0)
+	_draw_ruin_yarn(rect, true)
+
+
+## The zombie-yarn tangle while the ruin is locked (falling off when it unlocks); `loose` adds a
+## few stray strands (old-style ruins only: the art-kit ruins show their damage themselves).
+func _draw_ruin_yarn(rect: Rect2, loose: bool) -> void:
+	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
+	rng.seed = hash(spot.id) + 1
+	if loose:
+		_draw_yarn(rect, rng, 0, LOOSE_STRANDS, Vector2.ZERO, 1.0)
 	if not unlocked or is_yarn_falling():
 		var fall: float = _yarn_fall if unlocked else 0.0
 		var drop: Vector2 = Vector2(0.0, YARN_FALL_PIXELS * fall * fall)

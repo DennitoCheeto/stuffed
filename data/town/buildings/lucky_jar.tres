@@ -35,3 +35,4 @@ summary = "More rerolls, skips and banishes"
 levels = Array[ExtResource("2_level")]([SubResource("Resource_level_1"), SubResource("Resource_level_2"), SubResource("Resource_level_3")])
 wall_color = Color(0.75, 0.88, 0.83, 1)
 roof_color = Color(0.37, 0.62, 0.55, 1)
+art_scale = 1.3
