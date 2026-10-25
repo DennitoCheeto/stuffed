@@ -1,32 +1,15 @@
 class_name Arena
 extends Node2D
-## The bedroom floor the run happens on: a felt carpet with a simple pattern (so movement is
+## The bedroom floor the run happens on: warm floorboards with a simple pattern (so movement is
 ## readable) bounded by toy-block walls, with hand-placed furniture (spec 02 §10). Walls and
 ## furniture bodies are built in code. Furniture blocks players (physics), zombies and enemy
-## bullets (through `obstacles`); the players' shots fly over it.
+## bullets (through `obstacles`); the players' shots fly over it. All colours come from the
+## world palette (spec 05 §2.1); the whole room has the felt grain.
 
 const WALL_LAYER: int = 1
-const FLOOR_COLOR: Color = Color("#2b2733")
-const FLOOR_TILE_COLOR: Color = Color("#302b39")
-const FLOOR_STITCH_COLOR: Color = Color(1.0, 1.0, 1.0, 0.05)
-const BLOCK_COLORS: Array[Color] = [
-	Color("#8f4a46"), Color("#46648f"), Color("#a0843f"), Color("#4f7d55")
-]
-const BLOCK_INNER_COLOR: Color = Color(1.0, 1.0, 1.0, 0.1)
-## Furniture felt: muted, so zombies and their bullets always read first (vision §6).
-const SHADOW_COLOR: Color = Color(0.0, 0.0, 0.0, 0.3)
 const SHADOW_OFFSET: Vector2 = Vector2(10.0, 16.0)
-const STITCH_COLOR: Color = Color(1.0, 1.0, 1.0, 0.16)
-## See-through, so the floor pattern still shows movement.
-const RUG_COLOR: Color = Color(0.6, 0.38, 0.3, 0.14)
-const RUG_RING_COLOR: Color = Color(0.7, 0.55, 0.32, 0.14)
-const BED_FRAME_COLOR: Color = Color("#5b4636")
-const BED_BLANKET_COLOR: Color = Color("#3f5672")
-const BED_FOLD_COLOR: Color = Color("#4b6584")
-const PILLOW_COLOR: Color = Color("#8a8494")
-const TOY_BOX_COLOR: Color = Color("#6d4535")
-const TOY_BOX_LID_COLOR: Color = Color("#7f5341")
-const TOY_BOX_BAND_COLOR: Color = Color("#8f7640")
+## How see-through the light marks on toy blocks are.
+const BLOCK_INNER_ALPHA: float = 0.35
 
 ## Size of the walkable floor in pixels (about 4 x 4 screens).
 @export var size: Vector2 = Vector2(7680.0, 4320.0)
@@ -37,8 +20,11 @@ const TOY_BOX_BAND_COLOR: Color = Color("#8f7640")
 ## The furniture of this room (none = an open floor).
 @export var furniture: FurnitureLayout
 
+var palette: WorldPalette = WorldPalette.current()
+
 
 func _ready() -> void:
+	material = palette.grain_material()
 	_build_walls()
 	for rect: Rect2 in _blocking_rects():
 		_add_wall(rect)
@@ -92,7 +78,7 @@ func _add_wall(rect: Rect2) -> void:
 
 
 func _draw() -> void:
-	draw_rect(play_rect(), FLOOR_COLOR)
+	draw_rect(play_rect(), palette.board_colors[0])
 	_draw_carpet_pattern()
 	_draw_blocks()
 	if furniture != null:
@@ -108,13 +94,14 @@ func _draw_carpet_pattern() -> void:
 			if (row + column) % 2 == 0:
 				continue
 			var tile: Rect2 = Rect2(Vector2(column, row) * tile_size, Vector2.ONE * tile_size)
-			draw_rect(tile.intersection(play_rect()), FLOOR_TILE_COLOR)
+			draw_rect(tile.intersection(play_rect()), WorldPalette.pick(palette.board_colors, 1))
+	var seam: Color = palette.board_seam
 	for column: int in range(1, columns):
 		var x: float = column * tile_size
-		draw_dashed_line(Vector2(x, 0.0), Vector2(x, size.y), FLOOR_STITCH_COLOR, 2.0, 10.0)
+		draw_dashed_line(Vector2(x, 0.0), Vector2(x, size.y), seam, 2.0, 10.0)
 	for row: int in range(1, rows):
 		var y: float = row * tile_size
-		draw_dashed_line(Vector2(0.0, y), Vector2(size.x, y), FLOOR_STITCH_COLOR, 2.0, 10.0)
+		draw_dashed_line(Vector2(0.0, y), Vector2(size.x, y), seam, 2.0, 10.0)
 
 
 func _draw_blocks() -> void:
@@ -135,8 +122,8 @@ func _draw_blocks() -> void:
 func _draw_block(top_left: Vector2, index: int) -> void:
 	var t: float = wall_thickness
 	var block: Rect2 = Rect2(top_left, Vector2(t, t))
-	draw_rect(block.grow(-2.0), BLOCK_COLORS[index % BLOCK_COLORS.size()])
-	draw_rect(block.grow(-t * 0.25), BLOCK_INNER_COLOR, false, 3.0)
+	draw_rect(block.grow(-2.0), WorldPalette.pick(palette.wall_blocks, index))
+	draw_rect(block.grow(-t * 0.25), Color(palette.seam_light, BLOCK_INNER_ALPHA), false, 3.0)
 
 
 func _draw_piece(piece: FurniturePiece) -> void:
@@ -171,44 +158,44 @@ func _draw_stitches(rect: Rect2) -> void:
 	]
 	for i: int in corners.size():
 		var next: Vector2 = corners[(i + 1) % corners.size()]
-		draw_dashed_line(corners[i], next, STITCH_COLOR, 3.0, 12.0)
+		draw_dashed_line(corners[i], next, palette.seam_light, 3.0, 12.0)
 
 
 func _draw_shadow(rect: Rect2, corner: float) -> void:
-	_draw_felt(Rect2(rect.position + SHADOW_OFFSET, rect.size), SHADOW_COLOR, corner, false)
+	_draw_felt(Rect2(rect.position + SHADOW_OFFSET, rect.size), palette.shadow, corner, false)
 
 
 func _draw_rug(rect: Rect2) -> void:
 	var corner: float = minf(rect.size.x, rect.size.y) * 0.5
-	_draw_felt(rect, RUG_COLOR, corner, false)
-	_draw_felt(rect.grow(-48.0), RUG_RING_COLOR, corner - 48.0, false)
-	_draw_felt(rect.grow(-110.0), RUG_COLOR, corner - 110.0, false)
+	_draw_felt(rect, palette.rug_border, corner, false)
+	_draw_felt(rect.grow(-48.0), WorldPalette.pick(palette.rug_patches, 0), corner - 48.0, false)
+	_draw_felt(rect.grow(-110.0), WorldPalette.pick(palette.rug_patches, 2), corner - 110.0, false)
 
 
 func _draw_bed(rect: Rect2) -> void:
 	_draw_shadow(rect, 36.0)
-	_draw_felt(rect, BED_FRAME_COLOR, 36.0)
+	_draw_felt(rect, palette.bed_frame, 36.0)
 	var inner: Rect2 = rect.grow(-36.0)
 	var pillow_height: float = inner.size.y * 0.2
 	var pillow: Rect2 = Rect2(inner.position, Vector2(inner.size.x, pillow_height)).grow(-14.0)
-	_draw_felt(pillow, PILLOW_COLOR, 40.0)
+	_draw_felt(pillow, palette.bed_pillow, 40.0)
 	var blanket: Rect2 = Rect2(
 		inner.position + Vector2(0.0, pillow_height), inner.size - Vector2(0.0, pillow_height)
 	)
-	_draw_felt(blanket, BED_BLANKET_COLOR, 28.0)
+	_draw_felt(blanket, palette.bed_blanket, 28.0)
 	var fold: Rect2 = Rect2(blanket.position, Vector2(blanket.size.x, 70.0))
-	_draw_felt(fold, BED_FOLD_COLOR, 28.0, false)
+	_draw_felt(fold, palette.bed_fold, 28.0, false)
 
 
 func _draw_toy_box(rect: Rect2) -> void:
 	_draw_shadow(rect, 24.0)
-	_draw_felt(rect, TOY_BOX_COLOR, 24.0)
+	_draw_felt(rect, palette.toy_box, 24.0)
 	var lid: Rect2 = Rect2(rect.position, Vector2(rect.size.x, rect.size.y * 0.35))
-	_draw_felt(lid.grow(-10.0), TOY_BOX_LID_COLOR, 18.0, false)
+	_draw_felt(lid.grow(-10.0), palette.toy_box_lid, 18.0, false)
 	var band_width: float = 44.0
 	var band_left: float = rect.get_center().x - band_width / 2.0
 	var band: Rect2 = Rect2(band_left, rect.position.y + 6.0, band_width, rect.size.y - 12.0)
-	_draw_felt(band, TOY_BOX_BAND_COLOR, 10.0, false)
+	_draw_felt(band, palette.toy_box_band, 10.0, false)
 
 
 ## Toy blocks stacked in a 2 x 2 tower, seen from above.
@@ -217,6 +204,7 @@ func _draw_tower(rect: Rect2) -> void:
 	var half: Vector2 = rect.size / 2.0
 	for i: int in 4:
 		var cell: Rect2 = Rect2(rect.position + Vector2(i % 2, floorf(i / 2.0)) * half, half)
-		var color: Color = BLOCK_COLORS[(i + int(rect.position.x)) % BLOCK_COLORS.size()]
-		_draw_felt(cell.grow(-3.0), color.darkened(0.25), 10.0, false)
-		draw_rect(cell.grow(-half.x * 0.25), BLOCK_INNER_COLOR, false, 3.0)
+		var color: Color = WorldPalette.pick(palette.tower_blocks, i + int(rect.position.x))
+		_draw_felt(cell.grow(-3.0), color, 10.0, false)
+		var inner: Color = Color(palette.seam_light, BLOCK_INNER_ALPHA)
+		draw_rect(cell.grow(-half.x * 0.25), inner, false, 3.0)

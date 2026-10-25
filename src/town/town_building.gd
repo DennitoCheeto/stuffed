@@ -12,8 +12,6 @@ const TORN_COLOR: Color = Color("#d9d3c8")
 const YARN_COLOR: Color = Color("#8ea283")
 const YARN_DARK_COLOR: Color = Color("#6f8466")
 const SIGN_POST_COLOR: Color = Color("#8a7660")
-const HINT_COLOR: Color = Color("#b9c7b0")
-const OPEN_COLOR: Color = Color("#cfe3f0")
 ## A price the jars can't pay yet.
 const SHORT_TINT: Color = Color(0.55, 0.55, 0.6, 0.75)
 const SIGN_WIDTH: float = 360.0
@@ -84,7 +82,9 @@ func refresh(save: TownSave) -> void:
 		title += "   Lv %d" % level
 	name_label.text = title
 	status_label.text = status_text()
-	status_label.add_theme_color_override(&"font_color", OPEN_COLOR if unlocked else HINT_COLOR)
+	var palette: WorldPalette = WorldPalette.current()
+	var status_color: Color = palette.sign_effect if unlocked else palette.sign_hint
+	status_label.add_theme_color_override(&"font_color", status_color)
 	for counter: JarCounter in cost_counters.values():
 		counter.queue_free()
 	cost_counters.clear()

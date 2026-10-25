@@ -45,7 +45,7 @@ func _draw() -> void:
 	var right: Vector2 = Vector2(WIDTH / 2.0, 0.0)
 	var peak: Vector2 = Vector2(0.0, -HEIGHT)
 	var shadow: PackedVector2Array = PlushieLook.ellipse(Vector2(0, 4), WIDTH * 0.6, 16.0)
-	draw_colored_polygon(shadow, TownArt.SHADOW_COLOR)
+	draw_colored_polygon(shadow, WorldPalette.current().shadow)
 	draw_colored_polygon(PackedVector2Array([left, peak, right]), CLOTH_COLOR)
 	draw_colored_polygon(PackedVector2Array([peak, right, right + Vector2(-30, 0)]), CLOTH_DARK)
 	var door: PackedVector2Array = [Vector2(-26, 0), Vector2(0, -HEIGHT * 0.55), Vector2(26, 0)]
