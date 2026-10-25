@@ -53,7 +53,7 @@ const HEALTH: Color = Color("#e891aa")
 ## The ring under each player's hero (P1, P2, ...): strong, cool colours that read on the warm
 ## floors and never look like danger (#172).
 const PLAYER_MARKERS: Array[Color] = [
-	Color("#1f9e9a"), Color("#7b5cd6"), Color("#2f7fd0"), Color("#3fa34d")
+	Color("#178a86"), Color("#7b5cd6"), Color("#2f7fd0"), Color("#2f8f3e")
 ]
 
 ## Danger colours (vision §6): saturated red to orange. Enemies own them; menus and the HUD's own

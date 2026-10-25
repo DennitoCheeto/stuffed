@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-25 (M3.6-01 merged; hero clarity fix #172 in PR)_
+_Last updated: 2026-10-25 (#172 part 1 merged; floors toned down after PO feedback)_
 
 ## Where we are
 
@@ -350,3 +350,7 @@ _Last updated: 2026-10-25 (M3.6-01 merged; hero clarity fix #172 in PR)_
   colour `UiColors.PLAYER_MARKERS[player_index]`). `test_hero_clarity.gd` checks outline and ring contrast against
   every `WorldPalette.floor_groups()` colour: new floors or new heroes must keep it green. A calm look check:
   scratch script that starts a run, turns `run.spawner.active` off, places the hero and a few zombies, saves a PNG.
+- PO feedback 2026-10-25 on the bright floors: ring "not bad, keep it for now"; floor "a bit too bright" and
+  pattern "a tad too strong" → floors ~10% darker (boards ~0.69, rug ~0.77-0.83, quilt ~0.80-0.82 brightness),
+  neighbouring colours closer, `WorldPalette.pattern_alpha` (town plaid strength), grain 0.045. Teal/green hero
+  rings one shade deeper to keep the contrast rule. If still too bright: lower these in `world_palette.tres`.
