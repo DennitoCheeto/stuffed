@@ -11,6 +11,8 @@ const FRONT_HEIGHTS: Array[float] = [74.0, 84.0, 90.0]
 const DEPTHS: Array[float] = [30.0, 32.0, 34.0]
 ## How far the side and top lean up for every unit of depth (3/4 view).
 const RISE: float = 0.6
+## How far the floor shadow sits right and down of the box's footprint.
+const SHADOW_NUDGE: Vector2 = Vector2(9.0, 5.0)
 
 
 static func build(level: int, unit: float) -> BuildingSketch:
@@ -52,12 +54,14 @@ static func _depth(level: int) -> Vector2:
 	return Vector2(depth, -depth * RISE)
 
 
+## The box's footprint on the floor (front and side bottom edges), nudged right and down: the
+## light comes from the top-left, so a thin shadow shows below the front and along the side.
 static func _floor_shadow(box: Rect2, depth: Vector2) -> PackedVector2Array:
 	return [
-		Vector2(box.position.x - 6.0, 4.0),
-		Vector2(box.end.x + depth.x + 12.0, 4.0),
-		Vector2(box.end.x + depth.x + 22.0, depth.y - 4.0),
-		Vector2(box.position.x + depth.x, depth.y - 4.0),
+		Vector2(box.position.x, 0.0) + SHADOW_NUDGE,
+		Vector2(box.end.x, 0.0) + SHADOW_NUDGE,
+		Vector2(box.end.x, 0.0) + depth + SHADOW_NUDGE,
+		Vector2(box.position.x, 0.0) + depth + SHADOW_NUDGE,
 	]
 
 
