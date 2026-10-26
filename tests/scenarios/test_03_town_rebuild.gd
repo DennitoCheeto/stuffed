@@ -44,7 +44,7 @@ func test_ac42_e_at_a_ruin_rebuilds_it_when_the_jars_hold_enough() -> void:
 	assert_eq(town.card.building, armory)
 	assert_eq(town.card.level_label.text, "Ruin")
 	assert_string_contains(town.card.next_label.text, armory.building.levels[0].effect)
-	assert_false(armory.is_short_of("coins"), "the price on the sign is not grey")
+	assert_false(armory.is_short_of("coins"), "the price on the tag is not grey")
 	assert_eq(town.prompt_label.text, "E   Rebuild")
 	Sfx.history.clear()
 	await _press_e()
@@ -56,9 +56,9 @@ func test_ac42_e_at_a_ruin_rebuilds_it_when_the_jars_hold_enough() -> void:
 	assert_eq(armory.shown_level, 0, "the ruin shakes first")
 	await _settle(town)
 	assert_eq(armory.shown_level, 1, "then pops up as a building")
-	assert_string_contains(armory.name_label.text, "Lv 1")
+	assert_false(armory.price_tag.visible, "built: the price tag is gone")
 	var effect: String = armory.building.levels[0].effect
-	assert_eq(armory.status_label.text, effect, "the sign says what it does")
+	assert_string_contains(town.card.now_label.text, effect, "the card says what it does")
 	assert_eq(town.card.level_label.text, "Level 1 of 3")
 
 
@@ -68,7 +68,7 @@ func test_ac42_without_enough_e_only_shows_the_missing_amount() -> void:
 	var armory: TownBuilding = await _stand_at(town, &"toy_box_armory")
 	var cost: int = armory.building.levels[0].coins
 	var missing: String = "Needs %d more coins" % (cost - 10)
-	assert_true(armory.is_short_of("coins"), "the price on the sign is grey")
+	assert_true(armory.is_short_of("coins"), "the price on the tag is grey")
 	assert_eq(town.prompt_label.text, missing)
 	assert_eq(town.card.action_label.text, missing)
 	assert_true(town.card.cost_counters.has("coins"), "the card shows the price")

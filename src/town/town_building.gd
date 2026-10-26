@@ -3,15 +3,24 @@ extends Node2D
 ## One building spot in the Pillow Fort (spec 03 §5, §6, §11). At level 0 it's a wrecked ruin.
 ## Each building is drawn with the art kit (`BuildingLooks`, spec 05 §2.2): its own object broken
 ## or tipped over at level 0, growing with every level. A ruin that can't be rebuilt yet is
-## tangled in zombie yarn and its sign says what unlocks it. The sign below shows the name, the
-## price of the next level (grey when the jars don't hold enough) and what it does.
+## tangled in zombie yarn. Less text, more town (spec 05 §3.3): names and effects only show on
+## the info card when a player walks up. An open ruin keeps a small price tag (jar icons, grey
+## when the jars don't hold enough) and a golden "Can build!" tag floats over any building whose
+## next level the jars can pay right now.
 
 ## Zombie yarn: a sickly grey-green (never red/orange, that's enemy danger).
 const YARN_COLOR: Color = Color("#8ea283")
 const YARN_DARK_COLOR: Color = Color("#6f8466")
 ## A price the jars can't pay yet.
 const SHORT_TINT: Color = Color(0.55, 0.55, 0.6, 0.75)
-const SIGN_WIDTH: float = 360.0
+## The price tag hangs this far below a ruin's spot.
+const TAG_GAP: float = 14.0
+## The "Can build!" tag floats this far above the top of the drawing and bobs up and down.
+const CAN_BUILD_GAP: float = 26.0
+const CAN_BUILD_BOB_PIXELS: float = 5.0
+const CAN_BUILD_BOB_SPEED: float = 3.2
+const CAN_BUILD_TEXT: String = "Can build!"
+const CAN_BUILD_FONT_SIZE: int = 22
 ## How many yarn strands wrap a locked ruin.
 const TANGLE_STRANDS: int = 8
 ## The rebuild moment: the ruin shakes (matches the "rebuild" sound's rustle), then pops up.
@@ -30,11 +39,19 @@ var level: int = 0
 var shown_level: int = 0
 ## False while tangled in yarn (not rebuildable yet).
 var unlocked: bool = false
-var name_label: Label
-var status_label: Label
+## The small tag under an open ruin with the next level's price.
+var price_tag: PanelContainer = PanelContainer.new()
 ## The next level's price, one counter per material.
-var cost_row: HBoxContainer
+var cost_row: HBoxContainer = HBoxContainer.new()
 var cost_counters: Dictionary[String, JarCounter] = {}
+## Floats over the building while the jars can pay for its next level.
+var can_build_tag: FabricTag = FabricTag.new(
+	CAN_BUILD_TEXT, UiColors.GOLD, UiColors.GOLD_INK, CAN_BUILD_FONT_SIZE
+)
+## True when the jars could pay for the next level at the last refresh.
+var affordable: bool = false
+## True while the info card shows this building (the card says it all, the tag steps aside).
+var card_shown: bool = false
 
 var _shake_left: float = 0.0
 ## 0..1 while popping up, 1 when still.
@@ -42,6 +59,10 @@ var _pop: float = 1.0
 var _pop_from: float = 1.0
 ## 0..1 while the yarn falls off, 1 when done.
 var _yarn_fall: float = 1.0
+var _bob_time: float = 0.0
+## The top of the drawing (above its bottom middle) for the level in `_top_level`, cached.
+var _look_top: float = 0.0
+var _top_level: int = -1
 
 
 func _init(town_spot: TownSpot, start_level: int, is_unlocked: bool) -> void:
@@ -55,57 +76,62 @@ func _init(town_spot: TownSpot, start_level: int, is_unlocked: bool) -> void:
 
 func _ready() -> void:
 	material = WorldPalette.current().grain_material()
-	var rect: Rect2 = spot.rect
-	name_label = TownArt.label("", 26)
-	add_child(name_label)
-	TownArt.center_label(name_label, rect.get_center().x, rect.end.y + 14.0, SIGN_WIDTH)
-	var center: CenterContainer = CenterContainer.new()
-	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	center.position = Vector2(rect.get_center().x - SIGN_WIDTH / 2.0, rect.end.y + 50.0)
-	center.size = Vector2(SIGN_WIDTH, 30.0)
-	add_child(center)
-	cost_row = HBoxContainer.new()
-	cost_row.add_theme_constant_override(&"separation", 18)
-	center.add_child(cost_row)
-	status_label = TownArt.label("", 20)
-	add_child(status_label)
-	TownArt.center_label(status_label, rect.get_center().x, rect.end.y + 84.0, SIGN_WIDTH)
+	var box: StyleBoxFelt = StyleBoxFelt.new(UiColors.TAG, UiColors.TAG.darkened(0.28))
+	box.radius = 8.0
+	box.stitch_inset = 3.0
+	box.stitch_width = 1.5
+	box.stitch_dash = 4.0
+	box.stitch_gap = 3.0
+	box.pad(12, 4)
+	price_tag.add_theme_stylebox_override(&"panel", box)
+	price_tag.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	price_tag.visible = false
+	add_child(price_tag)
+	cost_row.add_theme_constant_override(&"separation", 14)
+	cost_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	price_tag.add_child(cost_row)
+	can_build_tag.visible = false
+	add_child(can_build_tag)
 
 
-## Updates the sign for the town's jars right now.
+## Updates the price tag and the "Can build!" tag for the town's jars right now.
 func refresh(save: TownSave) -> void:
-	var title: String = building.display_name
-	if level > 0:
-		title += "   Lv %d" % level
-	name_label.text = title
-	status_label.text = status_text()
-	var palette: WorldPalette = WorldPalette.current()
-	var status_color: Color = palette.sign_effect if unlocked else palette.sign_hint
-	status_label.add_theme_color_override(&"font_color", status_color)
 	for counter: JarCounter in cost_counters.values():
+		cost_row.remove_child(counter)
 		counter.queue_free()
 	cost_counters.clear()
 	var next: BuildingLevel = building.next(level)
-	cost_row.visible = unlocked and next != null
-	if next == null:
+	affordable = unlocked and next != null and save.can_afford(next.cost())
+	price_tag.visible = unlocked and level == 0 and next != null
+	_update_can_build()
+	if not price_tag.visible:
 		return
 	var cost: Dictionary[String, int] = next.cost()
 	for material: String in cost:
-		var counter: JarCounter = JarCounter.new(material, 20, 26.0)
+		var counter: JarCounter = JarCounter.new(material, 20, 26.0).on_felt()
 		counter.show_amount(cost[material])
 		if save.material(material) < cost[material]:
 			counter.modulate = SHORT_TINT
 		cost_row.add_child(counter)
 		cost_counters[material] = counter
+	price_tag.reset_size()
+	var rect: Rect2 = spot.rect
+	var left: float = rect.get_center().x - price_tag.size.x / 2.0
+	price_tag.position = Vector2(left, rect.end.y + TAG_GAP)
 
 
-## The sign's last line: what unlocks it, what it does, or what it does now.
-func status_text() -> String:
-	if not unlocked:
-		return spot.unlock_hint()
-	if level == 0:
-		return building.summary
-	return building.effect_at(level)
+## True while the golden "Can build!" tag floats over the building.
+func shows_can_build() -> bool:
+	return can_build_tag.visible
+
+
+## Every piece of text the building shows on its own (without a player next to it).
+func shown_texts() -> PackedStringArray:
+	var result: PackedStringArray = []
+	for label: Label in find_children("*", "Label", true, false):
+		if label.is_visible_in_tree() and not label.text.is_empty():
+			result.append(label.text)
+	return result
 
 
 ## The art-kit look the building shows right now.
@@ -148,6 +174,10 @@ func is_yarn_falling() -> bool:
 
 
 func _process(delta: float) -> void:
+	_update_can_build()
+	if can_build_tag.visible:
+		_bob_time += delta
+		_place_can_build()
 	if _shake_left > 0.0:
 		_shake_left -= delta
 		if _shake_left <= 0.0:
@@ -160,6 +190,27 @@ func _process(delta: float) -> void:
 	if _yarn_fall < 1.0:
 		_yarn_fall = minf(_yarn_fall + delta / YARN_FALL_SECONDS, 1.0)
 		queue_redraw()
+
+
+## The tag shows while the jars can pay, but not during the build moment or under the card.
+func _update_can_build() -> void:
+	var wanted: bool = affordable and not is_busy() and not card_shown
+	if wanted and not can_build_tag.visible:
+		can_build_tag.reset_size()
+		_place_can_build()
+	can_build_tag.visible = wanted
+
+
+## Over the top of the drawing, bobbing gently.
+func _place_can_build() -> void:
+	if _top_level != shown_level:
+		_top_level = shown_level
+		_look_top = shown_look().bounds().position.y
+	var bottom: Vector2 = Vector2(spot.rect.get_center().x, spot.rect.end.y)
+	var top: float = bottom.y + _look_top - CAN_BUILD_GAP
+	var bob: float = sin(_bob_time * CAN_BUILD_BOB_SPEED) * CAN_BUILD_BOB_PIXELS
+	var tag_size: Vector2 = can_build_tag.size
+	can_build_tag.position = Vector2(bottom.x - tag_size.x / 2.0, top - tag_size.y + bob)
 
 
 ## Shows the new level, growing from `from` times its size, with a puff of `puff_size`.
