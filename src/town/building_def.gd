@@ -1,8 +1,8 @@
 class_name BuildingDef
 extends Resource
-## A town building (spec 03 §6): its name, what it does, its 3 levels with costs, and its felt
-## colours. Tune it in data/town/buildings/*.tres, not in code. What the levels change in a run
-## is gathered in TownPerks.
+## A town building (spec 03 §6): its name, what it does, its 3 levels with costs, and how big its
+## art-kit look stands. Tune it in data/town/buildings/*.tres, not in code. What the levels
+## change in a run is gathered in TownPerks.
 
 @export var id: StringName = &""
 @export var display_name: String = ""
@@ -10,8 +10,6 @@ extends Resource
 @export var summary: String = ""
 ## Level 1 (the rebuild), 2 and 3.
 @export var levels: Array[BuildingLevel] = []
-@export var wall_color: Color = Color("#e6dcc8")
-@export var roof_color: Color = Color("#6f8fb8")
 ## World pixels per design unit of its art-kit look (spec 05 §2.2): tunes how big it stands.
 @export var art_scale: float = 1.0
 

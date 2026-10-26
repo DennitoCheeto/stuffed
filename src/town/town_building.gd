@@ -1,23 +1,18 @@
 class_name TownBuilding
 extends Node2D
 ## One building spot in the Pillow Fort (spec 03 §5, §6, §11). At level 0 it's a wrecked ruin.
-## Buildings with an art-kit look (`BuildingLooks`, spec 05 §2.2) show their own object broken or
-## tipped over at level 0 and growing per level; the others still show torn pillows and a cozy
-## felt house per level. A ruin that can't be rebuilt yet is tangled in zombie yarn and its sign
-## says what unlocks it. The sign below shows the name, the price of the next level (grey when
-## the jars don't hold enough) and what it does.
+## Each building is drawn with the art kit (`BuildingLooks`, spec 05 §2.2): its own object broken
+## or tipped over at level 0, growing with every level. A ruin that can't be rebuilt yet is
+## tangled in zombie yarn and its sign says what unlocks it. The sign below shows the name, the
+## price of the next level (grey when the jars don't hold enough) and what it does.
 
-const PIECE_COLORS: Array[Color] = [Color("#8d8799"), Color("#7b8aa0"), Color("#9a9184")]
-const TORN_COLOR: Color = Color("#d9d3c8")
 ## Zombie yarn: a sickly grey-green (never red/orange, that's enemy danger).
 const YARN_COLOR: Color = Color("#8ea283")
 const YARN_DARK_COLOR: Color = Color("#6f8466")
-const SIGN_POST_COLOR: Color = Color("#8a7660")
 ## A price the jars can't pay yet.
 const SHORT_TINT: Color = Color(0.55, 0.55, 0.6, 0.75)
 const SIGN_WIDTH: float = 360.0
-## Loose yarn on every ruin; a locked one has this many more strands wrapped round it.
-const LOOSE_STRANDS: int = 4
+## How many yarn strands wrap a locked ruin.
 const TANGLE_STRANDS: int = 8
 ## The rebuild moment: the ruin shakes (matches the "rebuild" sound's rustle), then pops up.
 const SHAKE_SECONDS: float = 0.32
@@ -113,7 +108,7 @@ func status_text() -> String:
 	return building.effect_at(level)
 
 
-## The art-kit look the building shows right now (null: drawn the old way, see BuildingLooks).
+## The art-kit look the building shows right now.
 func shown_look() -> BuildingSketch:
 	return BuildingLooks.sketch(building, shown_level)
 
@@ -187,59 +182,25 @@ func _draw() -> void:
 	var shake: Vector2 = Vector2.ZERO
 	if _shake_left > 0.0:
 		shake = Vector2(sin(_shake_left * 90.0), cos(_shake_left * 70.0)) * SHAKE_PIXELS
+	var bottom: Vector2 = Vector2(spot.rect.get_center().x, spot.rect.end.y)
+	draw_set_transform(bottom + shake, 0.0, Vector2.ONE * pop_scale())
+	shown_look().draw(self)
 	draw_set_transform(shake)
-	var look: BuildingSketch = shown_look()
-	if look != null:
-		var bottom: Vector2 = Vector2(spot.rect.get_center().x, spot.rect.end.y)
-		draw_set_transform(bottom + shake, 0.0, Vector2.ONE * pop_scale())
-		look.draw(self)
-		draw_set_transform(shake)
-		if shown_level == 0:
-			_draw_ruin_yarn(spot.rect, false)
-	elif shown_level > 0:
-		BuildingArt.draw(self, building, spot.rect, shown_level, pop_scale())
-	else:
-		_draw_ruin(spot.rect)
+	if shown_level == 0:
+		_draw_ruin_yarn(spot.rect)
 	draw_set_transform(Vector2.ZERO)
-	if look == null:
-		_draw_sign_post(spot.rect)
 
 
-func _draw_ruin(rect: Rect2) -> void:
-	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
-	rng.seed = hash(spot.id)
-	for i: int in 6:
-		var piece_size: Vector2 = Vector2(rng.randf_range(70, 130), rng.randf_range(50, 90))
-		var at: Vector2 = Vector2(
-			rng.randf_range(rect.position.x, rect.end.x - piece_size.x),
-			rng.randf_range(rect.position.y, rect.end.y - piece_size.y)
-		)
-		draw_set_transform(at + piece_size / 2.0, rng.randf_range(-0.5, 0.5))
-		var local: Rect2 = Rect2(-piece_size / 2.0, piece_size)
-		TownArt.pillow(self, local, PIECE_COLORS[i % PIECE_COLORS.size()])
-		draw_line(local.position + Vector2(10, 12), local.get_center(), TORN_COLOR, 4.0)
-	draw_set_transform(Vector2.ZERO)
-	_draw_ruin_yarn(rect, true)
-
-
-## The zombie-yarn tangle while the ruin is locked (falling off when it unlocks); `loose` adds a
-## few stray strands (old-style ruins only: the art-kit ruins show their damage themselves).
-func _draw_ruin_yarn(rect: Rect2, loose: bool) -> void:
+## The zombie-yarn tangle while the ruin is locked (falling off when it unlocks).
+func _draw_ruin_yarn(rect: Rect2) -> void:
+	if unlocked and not is_yarn_falling():
+		return
 	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 	rng.seed = hash(spot.id) + 1
-	if loose:
-		_draw_yarn(rect, rng, 0, LOOSE_STRANDS, Vector2.ZERO, 1.0)
-	if not unlocked or is_yarn_falling():
-		var fall: float = _yarn_fall if unlocked else 0.0
-		var drop: Vector2 = Vector2(0.0, YARN_FALL_PIXELS * fall * fall)
-		_draw_yarn(rect, rng, LOOSE_STRANDS, TANGLE_STRANDS, drop, 1.0 - fall)
-
-
-## Yarn scribbles across the ruin, moved by `drop` and faded to `alpha` (falling off).
-func _draw_yarn(
-	rect: Rect2, rng: RandomNumberGenerator, first: int, strands: int, drop: Vector2, alpha: float
-) -> void:
-	for i: int in range(first, first + strands):
+	var fall: float = _yarn_fall if unlocked else 0.0
+	var drop: Vector2 = Vector2(0.0, YARN_FALL_PIXELS * fall * fall)
+	var alpha: float = 1.0 - fall
+	for i: int in TANGLE_STRANDS:
 		var from: Vector2 = Vector2(rng.randf_range(rect.position.x, rect.end.x), rect.position.y)
 		var to: Vector2 = Vector2(rng.randf_range(rect.position.x, rect.end.x), rect.end.y)
 		if i % 2 == 1:
@@ -249,8 +210,3 @@ func _draw_yarn(
 		var middle: Vector2 = (from + to) / 2.0 + Vector2(rng.randf_range(-40, 40), 0.0)
 		var line: PackedVector2Array = [from + drop, middle + drop, to + drop]
 		draw_polyline(line, Color(color, alpha), 5.0, true)
-
-
-func _draw_sign_post(rect: Rect2) -> void:
-	var bottom: Vector2 = Vector2(rect.get_center().x, rect.end.y)
-	draw_rect(Rect2(bottom + Vector2(-4, -16), Vector2(8, 26)), SIGN_POST_COLOR)

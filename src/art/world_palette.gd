@@ -101,6 +101,29 @@ static var _current: WorldPalette
 @export var fairy_lights: Array[Color] = []
 @export var light_cord: Color = Color.WHITE
 @export var sparkle: Color = Color.WHITE
+## The Snack Bar's cookie tin (front, side, lid) and its cookies.
+@export var tin: Color = Color.WHITE
+@export var tin_side: Color = Color.WHITE
+@export var tin_lid: Color = Color.WHITE
+@export var cookie: Color = Color.WHITE
+## The Party Shop's strawberry pincushion (pink, never red) and its shaded side.
+@export var pincushion: Color = Color.WHITE
+@export var pincushion_dark: Color = Color.WHITE
+## The Plush Hospital's tissue box, its tissues and the plaster cross.
+@export var tissue_box: Color = Color.WHITE
+@export var tissue_box_side: Color = Color.WHITE
+@export var tissue: Color = Color.WHITE
+@export var plaster: Color = Color.WHITE
+## Little teddy plushies drawn into the buildings (on watch, napping).
+@export var teddy: Color = Color.WHITE
+@export var teddy_dark: Color = Color.WHITE
+## The Pillow Fort: walls, the two cushion towers, the patchwork roof, the glowing Bedroom door.
+@export var fort_wall: Color = Color.WHITE
+@export var fort_wall_side: Color = Color.WHITE
+@export var fort_towers: Array[Color] = []
+@export var fort_roof: Array[Color] = []
+@export var door_glow: Color = Color.WHITE
+@export var door_glow_dark: Color = Color.WHITE
 
 @export_group("Shared")
 ## The one even outline around world pieces (like the zombies').

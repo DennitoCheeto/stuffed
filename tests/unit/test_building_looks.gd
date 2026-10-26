@@ -1,12 +1,33 @@
 extends GutTest
-## The building art kit (spec 05 §2.2, §3.2, AC-60): the Lucky Jar and the Toy Box Armory have
-## their own look for ruin, Lv 1, Lv 2 and Lv 3, each level adds at least one visible piece, the
-## ruin is greyed, every look fits its spot, uses no danger colour and is baked once into a mesh.
+## The building art kit (spec 05 §2.2, §3.2, AC-60): all six town buildings have their own look
+## for ruin, Lv 1, Lv 2 and Lv 3, each level adds at least one visible piece, the ruin is the same
+## object broken and greyed, every look fits its spot, uses no danger colour and is baked once
+## into a mesh. The fort grows a piece at a time and the Scrapbook stand is drawn with the kit too.
 
 const LAYOUT: TownLayout = preload("res://data/town/pillow_fort.tres")
 const PALETTE: WorldPalette = preload("res://data/art/world_palette.tres")
-## Buildings this ticket moved to the kit (M3.6-03 adds the other four).
-const KIT_IDS: Array[StringName] = [&"lucky_jar", &"toy_box_armory"]
+## Every building spot in the town.
+const KIT_IDS: Array[StringName] = [
+	&"toy_box_armory", &"lucky_jar", &"watchtower", &"snack_bar", &"party_shop", &"plush_hospital"
+]
+## What each ruin shows: the same object broken or tipped over.
+const RUIN_PARTS: Dictionary[StringName, Array] = {
+	&"toy_box_armory": [&"broken_box", &"fallen_lid"],
+	&"lucky_jar": [&"tipped_jar", &"spilled_buttons"],
+	&"watchtower": [&"fallen_reels", &"loose_thread"],
+	&"snack_bar": [&"dented_tin", &"fallen_lid", &"crumbs"],
+	&"party_shop": [&"flat_cushion", &"stuffing_tufts", &"fallen_pins"],
+	&"plush_hospital": [&"squashed_box", &"crumpled_tissues"],
+}
+## What Lv 3 of each building shows (spec 05 §3.2).
+const TOP_PARTS: Dictionary[StringName, Array] = {
+	&"toy_box_armory": [&"brass_corners", &"weapon_rack"],
+	&"lucky_jar": [&"gold_lid", &"fairy_lights", &"clover_flag"],
+	&"watchtower": [&"third_reel", &"thimble_lookout", &"telescope", &"plushie_on_watch"],
+	&"snack_bar": [&"cupcake_tower", &"fairy_lights", &"second_table"],
+	&"party_shop": [&"balloons", &"bunting", &"confetti", &"pin_pennants"],
+	&"plush_hospital": [&"windows", &"tissue_puff", &"bed", &"napping_plushie"],
+}
 ## How far a look may stick out of its spot sideways (share of the spot's width).
 const SIDE_ROOM: float = 0.05
 
@@ -26,11 +47,14 @@ func _looks(id: StringName) -> Array[BuildingSketch]:
 	return looks
 
 
-func test_the_jar_and_the_armory_are_drawn_with_the_kit() -> void:
-	for id: StringName in KIT_IDS:
-		assert_true(BuildingLooks.has_look(_spot(id).building), String(id))
-	assert_false(BuildingLooks.has_look(_spot(&"watchtower").building), "moves over in M3.6-03")
-	assert_null(BuildingLooks.sketch(_spot(&"watchtower").building, 1))
+func test_every_building_is_drawn_with_the_kit() -> void:
+	assert_eq(KIT_IDS.size(), LAYOUT.spots.size(), "all six spots")
+	for spot: TownSpot in LAYOUT.spots:
+		assert_has(KIT_IDS, spot.id)
+		assert_true(BuildingLooks.has_look(spot.building), String(spot.id))
+	var unknown: BuildingDef = BuildingDef.new()
+	unknown.id = &"not_a_building"
+	assert_null(BuildingLooks.sketch(unknown, 1), "no look for an unknown building")
 
 
 func test_every_level_has_its_own_look() -> void:
@@ -64,12 +88,17 @@ func test_the_ruin_is_the_same_object_broken_and_greyed() -> void:
 		assert_true(looks[0].greyed, "%s ruin is greyed" % id)
 		for level: int in range(1, looks.size()):
 			assert_false(looks[level].greyed, "%s Lv %d keeps its colours" % [id, level])
-	var jar: PackedStringArray = PackedStringArray(_looks(&"lucky_jar")[0].parts)
-	assert_has(jar, "tipped_jar")
-	assert_has(jar, "spilled_buttons")
-	var armory: PackedStringArray = PackedStringArray(_looks(&"toy_box_armory")[0].parts)
-	assert_has(armory, "broken_box")
-	assert_has(armory, "fallen_lid")
+	for id: StringName in KIT_IDS:
+		var ruin: Array[StringName] = _looks(id)[0].parts
+		for part: StringName in RUIN_PARTS[id]:
+			assert_has(ruin, part, "%s ruin shows %s" % [id, part])
+
+
+func test_level_3_shows_the_full_object() -> void:
+	for id: StringName in KIT_IDS:
+		var top: Array[StringName] = _looks(id)[3].parts
+		for part: StringName in TOP_PARTS[id]:
+			assert_has(top, part, "%s Lv 3 shows %s" % [id, part])
 
 
 func test_a_greyed_colour_is_greyer_and_darker() -> void:

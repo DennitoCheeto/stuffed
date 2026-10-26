@@ -33,5 +33,3 @@ id = &"snack_bar"
 display_name = "Snack Bar"
 summary = "More health for every run"
 levels = Array[ExtResource("2_level")]([SubResource("Resource_level_1"), SubResource("Resource_level_2"), SubResource("Resource_level_3")])
-wall_color = Color(0.95, 0.89, 0.71, 1)
-roof_color = Color(0.56, 0.72, 0.63, 1)

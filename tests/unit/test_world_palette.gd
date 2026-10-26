@@ -5,7 +5,6 @@ extends GutTest
 const PALETTE: WorldPalette = preload("res://data/art/world_palette.tres")
 const ARENA_SCENE: PackedScene = preload("res://src/arena/arena.tscn")
 const TOWN_LAYOUT: TownLayout = preload("res://data/town/pillow_fort.tres")
-const BUILDINGS_DIR: String = "res://data/town/buildings/"
 ## World art that takes every colour from the palette. Spec 05 tickets add their scripts here
 ## as they redraw them (buildings: M3.6-02/03, town ground: M3.6-04, Bedroom: M3.6-07/08).
 const WORLD_ART_SCRIPTS: Array[String] = [
@@ -16,6 +15,15 @@ const WORLD_ART_SCRIPTS: Array[String] = [
 	"res://src/town/art/building_looks.gd",
 	"res://src/town/art/lucky_jar_look.gd",
 	"res://src/town/art/armory_look.gd",
+	"res://src/town/art/look_parts.gd",
+	"res://src/town/art/watchtower_look.gd",
+	"res://src/town/art/snack_bar_look.gd",
+	"res://src/town/art/party_shop_look.gd",
+	"res://src/town/art/hospital_look.gd",
+	"res://src/town/art/fort_look.gd",
+	"res://src/town/art/scrapbook_look.gd",
+	"res://src/town/town_fort.gd",
+	"res://src/town/scrapbook_stand.gd",
 ]
 ## A colour written into the code: Color("#..."), Color(0.1, ...) or a named one like Color.RED.
 ## Color(some_colour, alpha) and Color.TRANSPARENT are fine.
@@ -32,17 +40,6 @@ func test_no_palette_colour_is_a_danger_colour() -> void:
 	assert_gt(colors.size(), 40, "the palette lists all the world's colours")
 	for color: Color in colors:
 		assert_false(UiColors.is_danger(color), "%s is enemy red/orange" % color.to_html())
-
-
-func test_no_building_colour_is_a_danger_colour() -> void:
-	var files: PackedStringArray = DirAccess.get_files_at(BUILDINGS_DIR)
-	assert_gt(files.size(), 0)
-	for file: String in files:
-		if not file.ends_with(".tres"):
-			continue
-		var building: BuildingDef = load(BUILDINGS_DIR + file) as BuildingDef
-		for color: Color in [building.wall_color, building.roof_color]:
-			assert_false(UiColors.is_danger(color), "%s: %s" % [file, color.to_html()])
 
 
 func test_world_art_takes_its_colours_from_the_palette() -> void:
