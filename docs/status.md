@@ -61,6 +61,12 @@ _Last updated: 2026-10-26 (M3.6-04 town ground + compact layout)_
   chonky", Robbar's "face looks a bit weird"). Photos are in #147's comments (Robbar = chubby round seal plush,
   Böbö = IKEA Djungelskog bear); look notes in the issue. GitHub serves one as AVIF: convert with PowerShell WPF
   `BitmapDecoder` → PNG to view it.
+- PO idea (2026-10-26): **use the buildings differently, as a skill tree for upgrades** ("might be more fun, we can add
+  cooler stuff that also makes the player more powerful"). Fold into the planned skill / progress tree spec (step 4
+  in the order above): ask then how buildings and the tree fit together.
+- PO feedback after M3.6-04 (2026-10-26): town "better". Banane's outline looked pixelated + Armory weapon rack
+  messy → #183. Party Shop should be "a real shop", Plush Hospital not a tissue box → #184 (options P1-P3 /
+  H1-H3 on the look canvas, round 4; PO picks, then a spec 05 PR, then a redraw ticket).
 - PO idea (2026-10-24, "idk"): **walk into the buildings** (interiors). Park it; ask again when the town visual
   pass or the siege is specced.
 - Economy (M3-05/PR #113): cheapest rebuild 200 coins, all 6 at level 3 ≈ 17k coins.
@@ -386,3 +392,7 @@ _Last updated: 2026-10-26 (M3.6-04 town ground + compact layout)_
   are `draw_string` in `TownFloor` (reset `draw_set_transform` before drawing more meshes!). Lamps are gone.
   Camera scenario: `test_05_town_ground.gd` (Town in a SubViewport at 1920×1080 / 1920×1200). Town draw calls
   339 → 223.
+- `BuildingSketch.line` with a closed path (last point = first) bakes as a *filled* shape: draw outlines
+  side by side or as an open arc (#183). Puppet pieces (`FeltPiece`) fill with `FeltDraw.fill_smooth` and a
+  feather of ~1.2 screen px (`_feather()` divides by the global scale): Banane is drawn at 0.34, plain polygons
+  looked jagged.
