@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-26 (M3.6-04 town ground + compact layout)_
+_Last updated: 2026-10-26 (M3.6-05 town text; spec 05 theme update PR #186)_
 
 ## Where we are
 
@@ -16,7 +16,7 @@ _Last updated: 2026-10-26 (M3.6-04 town ground + compact layout)_
 | M1 Core run | ✅ accepted 2026-10-21 (PRs #17–#29; playtest P-1 … P-6 passed, 144 fps on the PO's PC) |
 | M2 Build variety | ✅ accepted 2026-10-24 (played with M3): all 19 tickets merged (PRs #47–#49, #51–#55, #57, #58, #60, #61, #63, #67, #69, #77, #78, #80, #81); + spec 02b floor pickups approved (#83): M2-20 (PR #88), M2-21 (PR #89) and M2-22 (PR #90) merged |
 | M3.5 UI and juice | ✅ accepted 2026-10-25: spec 04 (PR #123), M3.5-01 … 08 (PRs #133, #137, #138, #140, #141, #143, #149, #150) + PO fixes #136, #146, #152, #154, #156 (late-game hitches), #158 |
-| M3.6 Sunny patchwork | 🚧 spec 05 approved 2026-10-25 (PR #160; AC-58 … AC-65, P-22 … P-25); milestone M3.6, issues #162–#170 (M3.6-01 … 09); M3.6-01 world palette (#162): merged (PR #171); hero clarity #172 (part 1): merged (PR #173, floors calmer #174); M3.6-02 art kit + Lucky Jar + Armory (#163): merged (PR #175); M3.6-03 other four buildings + fort + Scrapbook stand (#164): merged (PR #179); M3.6-04 town ground + compact layout (#165): merged (PR #181) |
+| M3.6 Sunny patchwork | 🚧 spec 05 approved 2026-10-25 (PR #160; AC-58 … AC-65, P-22 … P-25); milestone M3.6, issues #162–#170 (M3.6-01 … 09); M3.6-01 world palette (#162): merged (PR #171); hero clarity #172 (part 1): merged (PR #173, floors calmer #174); M3.6-02 art kit + Lucky Jar + Armory (#163): merged (PR #175); M3.6-03 other four buildings + fort + Scrapbook stand (#164): merged (PR #179); M3.6-04 town ground + compact layout (#165): merged (PR #181); M3.6-05 town text (#166): merged (PR #188); spec update #186 (Party Shop + Hospital themes, PO merges) → M3.6-10 redraw (#187) |
 | M3 Town | ✅ accepted 2026-10-24: spec 03 approved (PR #91); issues #92–#103; M3-01 save system (PR #105), M3-02 town + flow (PR #106), M3-03 materials (PR #107), M3-04 Way Home portal (PR #109), M3-05 rebuilding (PR #110), M3-06 Toy Box Armory (PR #114), M3-07 Lucky Jar + Watchtower + Snack Bar (PR #115), M3-08 Party Shop (PR #116), M3-09 rescue in the run (PR #117), M3-10 Plush Hospital + plushies in town (PR #118), M3-11 Scrapbook (PR #119), M3-12 co-op in town + dev menu + sounds (PR #120) |
 
 ## Next step
@@ -49,7 +49,8 @@ _Last updated: 2026-10-26 (M3.6-04 town ground + compact layout)_
   M3.6-02 building art kit + Lucky Jar and Armory (#163): merged (PR #175).
   M3.6-03 the other four buildings + fort + Scrapbook stand (#164): merged (PR #179).
   M3.6-04 town ground: quilt, tape measure, thread paths, compact layout, props (#165): merged (PR #181).
-  **Next: M3.6-05 town text: price tags on ruins, text only on approach, "Can build!" tag (#166).**
+  M3.6-05 town text (#166): merged (PR #188).
+  **Next: once the PO merges spec PR #186, M3.6-10 redraw Party Shop + Hospital (#187); else M3.6-06 town life (#167).**
   Speedy Stitcher = "King beaten before 9:00": PO OK (2026-10-25).
   (2) Spec 05 town + Bedroom visual pass ("still not too appealing", "a tiny bit
   dark"). (3) Evolution
@@ -66,7 +67,9 @@ _Last updated: 2026-10-26 (M3.6-04 town ground + compact layout)_
   in the order above): ask then how buildings and the tree fit together.
 - PO feedback after M3.6-04 (2026-10-26): town "better". Banane's outline looked pixelated + Armory weapon rack
   messy → #183. Party Shop should be "a real shop", Plush Hospital not a tissue box → #184 (options P1-P3 /
-  H1-H3 on the look canvas, round 4; PO picks, then a spec 05 PR, then a redraw ticket).
+  H1-H3 on the look canvas, round 4). PO picked **Party Shop = P3 gift-box stack + P1 shopfront** ("I like that it
+  looks like a shop") and **Hospital = H2 dollhouse**; canvas board "Picked: Party Shop P3 + P1, Plush Hospital H2";
+  spec PR #186 (PO merges), redraw ticket #187.
 - PO idea (2026-10-24, "idk"): **walk into the buildings** (interiors). Park it; ask again when the town visual
   pass or the siege is specced.
 - Economy (M3-05/PR #113): cheapest rebuild 200 coins, all 6 at level 3 ≈ 17k coins.
@@ -396,3 +399,7 @@ _Last updated: 2026-10-26 (M3.6-04 town ground + compact layout)_
   side by side or as an open arc (#183). Puppet pieces (`FeltPiece`) fill with `FeltDraw.fill_smooth` and a
   feather of ~1.2 screen px (`_feather()` divides by the global scale): Banane is drawn at 0.34, plain polygons
   looked jagged.
+- Town text (M3.6-05, AC-61): `TownBuilding` has no name/effect labels any more. `price_tag` (open ruins only,
+  `cost_counters`, `is_short_of`), `can_build_tag` (`shows_can_build()`, `affordable` set in `refresh`, hidden while
+  `is_busy()` or `card_shown`), `shown_texts()` for tests. Remove old counters with `remove_child` before
+  `queue_free`, or the tag is sized with them. Scenario: `test_05_town_text.gd`.
