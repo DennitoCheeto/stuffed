@@ -1,6 +1,7 @@
 # 05 — Town and Bedroom look: Sunny patchwork
 
-Status: **DRAFT**, waiting for the product owner's approval.
+Status: **APPROVED** (PO merged PR #160, 2026-10-25). Amended 2026-10-26: new Party Shop and Plush Hospital
+themes (§3.2, issue #184).
 Milestone: **M3.6 — Sunny patchwork** (after M3.5 UI and juice, before the evolution pass and M4 Night siege).
 Based on: the M2 + M3 playtest (2026-10-24: the town is "still not too appealing", everything is "a tiny bit
 dark"), [`../research/03-town-and-bedroom-look-research.md`](../research/03-town-and-bedroom-look-research.md), the
@@ -43,7 +44,7 @@ The rule of the mix: **A brings the light and the scale, C brings the materials.
   competes with zombies.
 - **Sunbeams** are see-through light shapes drawn on top of the floor (no real lighting engine).
 - **Danger colours stay reserved.** No red or orange anywhere in the town or Bedroom art (rule from spec 03 §11 and
-  vision §6). Red items in the mockups become pink, raspberry or teal (the Party Shop's pincushion is a **strawberry
+  vision §6). Red items in the mockups become pink, raspberry or teal (the sewing corner's pincushion is a **strawberry
   pincushion in pink**, scissor handles and the pencil sharpener are teal or violet).
 - All world colours live in **one data file** (`data/art/world_palette.tres`), so tuning brightness takes minutes
   (hard rule 8).
@@ -80,10 +81,12 @@ borders". PO pick (2026-10-25): **S3 "but a little bit more clean borders"**.
 | Lucky Jar | A glass jar of buttons and coins, gingham cloth lid | Tipped-over cracked jar → small jar → full jar with bow → big gold-lid jar, fairy lights, clover flag |
 | Watchtower | Stacked cotton reels, thimble lookout, pencil telescope | Fallen reels → one reel + flag → two reels + ladder → three reels, lookout, telescope, plushie on watch |
 | Snack Bar | A cookie tin with a striped awning | Dented open tin → tin + cookie → awning, spool stool, button table → cupcake tower, lights, two tables |
-| Party Shop | A pink strawberry pincushion with pins as flag poles, balloons | Flat cushion → cushion + pins → balloons → bunting, confetti, pennants on every pin |
-| Plush Hospital | A tissue box with a plaster cross | Squashed box → box + cross → windows, tissue puff → little bed outside with a napping plushie |
+| Party Shop | A stack of gift boxes; the big bottom box is a real shopfront: shop window with shelves, door with a bell, scalloped felt awning, sign board | Squashed box with a loose ribbon → shop box with ribbon band, empty shelves, door → goods in the window (popper, snow globe, magnet), awning, "PARTY SHOP" sign, door bell, second box on top → third box with a bow, balloons, a stand of presents outside |
+| Plush Hospital | A two-floor dollhouse with a mint roof and a cross | Collapsed house, roof fallen off → house, mint roof, door → upstairs ward: plushies in beds seen through the windows → downstairs windows, cross on the roof, flower bushes |
 | Scrapbook stand | An open book on a wooden stand | (no levels) |
 
+- Party Shop and Plush Hospital themes: PO picks 2026-10-26 (#184), canvas board "Picked: Party Shop P3 + P1,
+  Plush Hospital H2" (Party Shop = P3 gift-box shop with P1's shopfront: "I like that it looks like a shop").
 - A **ruin** is the same object broken or tipped over, greyed a little, so you can guess what it becomes.
 - **Locked** ruins keep the zombie-yarn tangle from spec 03.
 
@@ -96,7 +99,7 @@ borders". PO pick (2026-10-25): **S3 "but a little bit more clean borders"**.
 ### 3.4 Life
 
 - Plushies keep their spec 03 behaviour, plus a few **spots** where they like to be: reading by the fort, sitting at
-  the Snack Bar table, napping on the Hospital bed, waving from the Watchtower lookout.
+  the Snack Bar table, sitting on the Hospital's front step, waving from the Watchtower lookout.
 - Small ambient motion: dust sparkles in the sunbeam, bunting and flags flutter, now and then a paper plane glides
   over the town. All cheap (a handful of sprites).
 
