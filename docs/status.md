@@ -361,9 +361,17 @@ _Last updated: 2026-10-25 (M3.6-02 building art kit merged)_
   `dot`/`line`/`stripes` don't; `sewn = true` adds a seam `seam_inset` px inside. Numbers (outline, seams,
   ruin grey) are in `world_palette.tres` ("Building art"). Each look is baked into one `ArrayMesh` (one draw
   call per building; town went from ~510 to ~440 draw calls). Looks per building: `BuildingLooks.sketch(def,
-  level)` (cached; `KIT_BUILDINGS` lists who has one, the rest still use `BuildingArt`). New look = a
+  level)` (cached; all six buildings since M3.6-03, `BuildingArt` is gone). New look = a
   `XxxLook.build(level, unit)` + a `match` line in `BuildingLooks._build` + its script in `WORLD_ART_SCRIPTS`.
   `test_building_looks.gd` checks every level adds a part name, fits the spot, no danger colour and
   `broken_shapes()` is empty (self-crossing polygons can't be filled). Look check: scratch gallery that calls
   `BuildingLooks.sketch(def, level).draw(self)` + `--write-movie`. Kit ruins show no loose yarn (locked ones
   keep the tangle) and no sign post.
+- Kit looks (M3.6-03): shared pieces in `LookParts` (reel, flange, pin flag, fairy lights, bunting, teddy head,
+  oval, `box_shadow` / `footprint_shadow` = footprint nudged right/down by `SHADOW_NUDGE`). Seams are drawn after
+  all fills, so they show through anything in front: keep sewn pieces out from behind other pieces (the fort's
+  wall ends inside the towers, its seams are clipped around the door). Fort: `FortLook.build(layout, pieces)`,
+  `town.fort.look()` (cached per piece count, parts = `TownFort.PIECES` names); stand: `ScrapbookLook` /
+  `ScrapbookStand.look()`. Building size = `art_scale` in the building's `.tres` (watchtower 1.25, jar 1.3,
+  party shop 1.1). `BuildingDef.wall_color`/`roof_color` were removed. Tests: `test_building_looks.gd`
+  (`RUIN_PARTS`, `TOP_PARTS`), `test_fort_look.gd`. Gallery scratch: draw `fort.look()` / sketches + `--write-movie`.

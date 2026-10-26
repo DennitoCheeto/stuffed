@@ -2,11 +2,12 @@ class_name BuildingLooks
 extends RefCounted
 ## Which town buildings are drawn with the art kit (`BuildingSketch`, spec 05 §2.2), and their
 ## looks for ruin (0) and levels 1-3. Each look is built once and kept, so redrawing a building
-## (the build moment, the pop) only replays the finished shapes. Buildings without a kit look
-## yet are still drawn by `BuildingArt` (they move over in M3.6-03).
+## (the build moment, the pop) only replays the finished shapes.
 
 ## Buildings drawn with the kit.
-const KIT_BUILDINGS: Array[StringName] = [&"lucky_jar", &"toy_box_armory"]
+const KIT_BUILDINGS: Array[StringName] = [
+	&"lucky_jar", &"toy_box_armory", &"watchtower", &"snack_bar", &"party_shop", &"plush_hospital"
+]
 
 static var _kept: Dictionary[String, BuildingSketch] = {}
 
@@ -31,4 +32,12 @@ static func _build(building: BuildingDef, level: int) -> BuildingSketch:
 			return LuckyJarLook.build(level, building.art_scale)
 		&"toy_box_armory":
 			return ArmoryLook.build(level, building.art_scale)
+		&"watchtower":
+			return WatchtowerLook.build(level, building.art_scale)
+		&"snack_bar":
+			return SnackBarLook.build(level, building.art_scale)
+		&"party_shop":
+			return PartyShopLook.build(level, building.art_scale)
+		&"plush_hospital":
+			return HospitalLook.build(level, building.art_scale)
 	return null

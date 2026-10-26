@@ -33,5 +33,4 @@ id = &"watchtower"
 display_name = "Watchtower"
 summary = "Grab buttons from further away"
 levels = Array[ExtResource("2_level")]([SubResource("Resource_level_1"), SubResource("Resource_level_2"), SubResource("Resource_level_3")])
-wall_color = Color(0.85, 0.82, 0.77, 1)
-roof_color = Color(0.44, 0.56, 0.72, 1)
+art_scale = 1.25
