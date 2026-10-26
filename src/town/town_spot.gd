@@ -12,6 +12,9 @@ extends Resource
 @export var needs_rebuilds: int = 0
 ## Can only be rebuilt once a rescued plushie has been brought home.
 @export var needs_rescue: bool = false
+## The coloured thread path from the tape measure road to the building (spec 05 §3.1): points
+## along it, drawn smooth. It starts on the road and never crosses anything that blocks.
+@export var thread_path: PackedVector2Array = []
 
 
 func display_name() -> String:

@@ -48,10 +48,24 @@ static var _current: WorldPalette
 ## Loose cushions and toy blocks lying around.
 @export var cushions: Array[Color] = []
 @export var prop_blocks: Array[Color] = []
-@export var lamp_shade: Color = Color.WHITE
-@export var lamp_pole: Color = Color.WHITE
-## See-through warm glow under a lamp.
-@export var lamp_glow: Color = Color.WHITE
+## Tone-on-tone patterns on the quilt patches (gingham checks, polka dots, corduroy ribs), one
+## per patch kind, drawn at `pattern_alpha`.
+@export var quilt_patterns: Array[Color] = []
+## Felt patches (stars, hearts) sewn onto the plain patches.
+@export var quilt_appliques: Array[Color] = []
+## The tape measure road: its face and the stripe along its edges (they lie next to each other).
+@export var road_tape: Array[Color] = []
+## Tick marks and numbers on the tape.
+@export var tape_ticks: Color = Color.WHITE
+## The coloured thread paths to the buildings, one per building.
+@export var thread_paths: Array[Color] = []
+## The rick-rack trim along the pillow walls.
+@export var rick_rack: Color = Color.WHITE
+## Felt flowers: petals and the middle.
+@export var flower_petals: Array[Color] = []
+@export var flower_middle: Color = Color.WHITE
+## Glass marbles (see-through tints; the swirl uses `toys`).
+@export var marbles: Array[Color] = []
 
 @export_group("Buildings")
 ## Wood in 3/4 view, lit from the top-left: top faces lightest, side faces darkest.
@@ -182,7 +196,7 @@ static func brightness(color: Color) -> float:
 
 ## The floor groups: colours in one group lie next to each other on the ground.
 func floor_groups() -> Array[Array]:
-	return [board_colors, rug_patches, quilt_patches]
+	return [board_colors, rug_patches, quilt_patches, road_tape]
 
 
 ## Every colour in the palette, so tests cover new entries by themselves.

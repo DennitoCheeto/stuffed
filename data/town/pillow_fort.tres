@@ -13,63 +13,77 @@
 script = ExtResource("2_spot")
 id = &"toy_box_armory"
 building = ExtResource("3_armory")
-rect = Rect2(590, 750, 260, 180)
+rect = Rect2(560, 670, 260, 180)
 needs_rebuilds = 0
 needs_rescue = false
+thread_path = PackedVector2Array(1246, 1000, 1080, 990, 890, 925, 730, 872, 690, 862)
 
 [sub_resource type="Resource" id="Resource_lucky_jar"]
 script = ExtResource("2_spot")
 id = &"lucky_jar"
 building = ExtResource("4_lucky_jar")
-rect = Rect2(2030, 750, 260, 180)
+rect = Rect2(1680, 670, 260, 180)
 needs_rebuilds = 0
 needs_rescue = false
+thread_path = PackedVector2Array(1249, 1000, 1400, 1000, 1520, 940, 1650, 900, 1810, 862)
 
 [sub_resource type="Resource" id="Resource_watchtower"]
 script = ExtResource("2_spot")
 id = &"watchtower"
 building = ExtResource("5_watchtower")
-rect = Rect2(850, 290, 260, 180)
+rect = Rect2(770, 310, 260, 180)
 needs_rebuilds = 1
 needs_rescue = false
+thread_path = PackedVector2Array(1247, 925, 1100, 935, 1000, 905, 955, 760, 920, 560, 900, 502)
 
 [sub_resource type="Resource" id="Resource_snack_bar"]
 script = ExtResource("2_spot")
 id = &"snack_bar"
 building = ExtResource("6_snack_bar")
-rect = Rect2(1770, 290, 260, 180)
+rect = Rect2(1470, 310, 260, 180)
 needs_rebuilds = 1
 needs_rescue = false
+thread_path = PackedVector2Array(1253, 925, 1400, 935, 1500, 905, 1530, 760, 1570, 560, 1600, 502)
 
 [sub_resource type="Resource" id="Resource_party_shop"]
 script = ExtResource("2_spot")
 id = &"party_shop"
 building = ExtResource("7_party_shop")
-rect = Rect2(850, 1310, 260, 180)
+rect = Rect2(770, 1150, 260, 180)
 needs_rebuilds = 3
 needs_rescue = false
+thread_path = PackedVector2Array(1228, 1240, 1130, 1300, 1060, 1370, 950, 1365, 900, 1345)
 
 [sub_resource type="Resource" id="Resource_hospital"]
 script = ExtResource("2_spot")
 id = &"plush_hospital"
 building = ExtResource("8_hospital")
-rect = Rect2(1770, 1310, 260, 180)
+rect = Rect2(1470, 1150, 260, 180)
 needs_rebuilds = 0
 needs_rescue = true
+thread_path = PackedVector2Array(1230, 1300, 1350, 1370, 1470, 1375, 1570, 1360, 1600, 1345)
 
 [resource]
 script = ExtResource("1_layout")
-size = Vector2(2880, 1800)
+size = Vector2(2500, 1500)
 wall_thickness = 96.0
-fort_rect = Rect2(1240, 700, 400, 300)
-door_rect = Rect2(1395, 900, 90, 100)
-scrapbook_rect = Rect2(1760, 940, 140, 90)
+fort_rect = Rect2(1050, 600, 400, 300)
+door_rect = Rect2(1205, 800, 90, 100)
+scrapbook_rect = Rect2(1560, 955, 140, 90)
 reach = 90.0
-spawn_position = Vector2(1440, 1075)
+spawn_position = Vector2(1250, 975)
 spawn_spacing = 90.0
 fort_piece_every = 3
 spots = Array[ExtResource("2_spot")]([SubResource("Resource_armory"), SubResource("Resource_lucky_jar"), SubResource("Resource_watchtower"), SubResource("Resource_snack_bar"), SubResource("Resource_party_shop"), SubResource("Resource_hospital")])
-cushions = PackedVector2Array(330, 320, 2560, 1520, 420, 1560, 1440, 1600)
-block_piles = PackedVector2Array(2600, 320, 260, 1050)
-lamps = PackedVector2Array(1440, 260, 2620, 1100)
-tent_position = Vector2(2170, 1420)
+max_building_distance = 585.0
+quilt_patch = 250.0
+road = PackedVector2Array(1250, 905, 1246, 1060, 1220, 1220, 1238, 1380, 1265, 1560)
+road_width = 50.0
+cushions = PackedVector2Array(310, 250, 2200, 240, 300, 1290, 2210, 1060)
+block_piles = PackedVector2Array(2270, 760, 250, 760)
+flowers = PackedVector2Array(400, 570, 1250, 300, 2060, 560, 470, 1080, 650, 1420, 1050, 1460, 1400, 1180, 2300, 1400, 2110, 880)
+loose_buttons = PackedVector2Array(350, 640, 1040, 1080, 2130, 980, 710, 1060, 1750, 250, 1340, 1450)
+safety_pins = PackedVector2Array(2040, 400, 500, 1250)
+marbles = PackedVector2Array(2290, 900, 380, 960)
+spools = PackedVector2Array(2280, 560, 500, 350)
+tent_position = Vector2(1910, 1320)
