@@ -3,6 +3,7 @@ extends RefCounted
 ## Shared drawing for the Pillow Fort: world labels for signs and prompts.
 ## Colours come from the world palette (spec 05 §2.1): never the red/orange of enemy danger.
 
+
 ## A label for signs and prompts (world space), centred on `center_x`.
 static func label(text: String, font_size: int) -> Label:
 	var palette: WorldPalette = WorldPalette.current()
