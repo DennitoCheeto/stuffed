@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-26 (M3.6-03 all buildings in the art kit)_
+_Last updated: 2026-10-26 (M3.6-04 town ground + compact layout)_
 
 ## Where we are
 
@@ -16,7 +16,7 @@ _Last updated: 2026-10-26 (M3.6-03 all buildings in the art kit)_
 | M1 Core run | ✅ accepted 2026-10-21 (PRs #17–#29; playtest P-1 … P-6 passed, 144 fps on the PO's PC) |
 | M2 Build variety | ✅ accepted 2026-10-24 (played with M3): all 19 tickets merged (PRs #47–#49, #51–#55, #57, #58, #60, #61, #63, #67, #69, #77, #78, #80, #81); + spec 02b floor pickups approved (#83): M2-20 (PR #88), M2-21 (PR #89) and M2-22 (PR #90) merged |
 | M3.5 UI and juice | ✅ accepted 2026-10-25: spec 04 (PR #123), M3.5-01 … 08 (PRs #133, #137, #138, #140, #141, #143, #149, #150) + PO fixes #136, #146, #152, #154, #156 (late-game hitches), #158 |
-| M3.6 Sunny patchwork | 🚧 spec 05 approved 2026-10-25 (PR #160; AC-58 … AC-65, P-22 … P-25); milestone M3.6, issues #162–#170 (M3.6-01 … 09); M3.6-01 world palette (#162): merged (PR #171); hero clarity #172 (part 1): merged (PR #173, floors calmer #174); M3.6-02 art kit + Lucky Jar + Armory (#163): merged (PR #175); M3.6-03 other four buildings + fort + Scrapbook stand (#164): merged (PR #179) |
+| M3.6 Sunny patchwork | 🚧 spec 05 approved 2026-10-25 (PR #160; AC-58 … AC-65, P-22 … P-25); milestone M3.6, issues #162–#170 (M3.6-01 … 09); M3.6-01 world palette (#162): merged (PR #171); hero clarity #172 (part 1): merged (PR #173, floors calmer #174); M3.6-02 art kit + Lucky Jar + Armory (#163): merged (PR #175); M3.6-03 other four buildings + fort + Scrapbook stand (#164): merged (PR #179); M3.6-04 town ground + compact layout (#165): merged (PR #181) |
 | M3 Town | ✅ accepted 2026-10-24: spec 03 approved (PR #91); issues #92–#103; M3-01 save system (PR #105), M3-02 town + flow (PR #106), M3-03 materials (PR #107), M3-04 Way Home portal (PR #109), M3-05 rebuilding (PR #110), M3-06 Toy Box Armory (PR #114), M3-07 Lucky Jar + Watchtower + Snack Bar (PR #115), M3-08 Party Shop (PR #116), M3-09 rescue in the run (PR #117), M3-10 Plush Hospital + plushies in town (PR #118), M3-11 Scrapbook (PR #119), M3-12 co-op in town + dev menu + sounds (PR #120) |
 
 ## Next step
@@ -48,7 +48,8 @@ _Last updated: 2026-10-26 (M3.6-03 all buildings in the art kit)_
   "Picked: S3, clean borders"), "besides that i love it". **Spec 05 approved** (PO merged #160, 2026-10-25). Milestone M3.6 + issues #162–#170 created. M3.6-01 world palette + felt grain (#162): merged (PR #171). PO: floor "looks nice" but the hero blended in → #172: Banane got the zombies' outline + a coloured ring under each hero (part 1, PR open). #172 part 2 (whole-screen clarity ladder: enemies > hero > own shots > pickups) still open; the benchmark frame shows own pins can bury the hero.
   M3.6-02 building art kit + Lucky Jar and Armory (#163): merged (PR #175).
   M3.6-03 the other four buildings + fort + Scrapbook stand (#164): merged (PR #179).
-  **Next: M3.6-04 town ground: quilt, tape-measure road, thread paths, compact layout, props (#165).**
+  M3.6-04 town ground: quilt, tape measure, thread paths, compact layout, props (#165): merged (PR #181).
+  **Next: M3.6-05 town text: price tags on ruins, text only on approach, "Can build!" tag (#166).**
   Speedy Stitcher = "King beaten before 9:00": PO OK (2026-10-25).
   (2) Spec 05 town + Bedroom visual pass ("still not too appealing", "a tiny bit
   dark"). (3) Evolution
@@ -376,3 +377,12 @@ _Last updated: 2026-10-26 (M3.6-03 all buildings in the art kit)_
   `ScrapbookStand.look()`. Building size = `art_scale` in the building's `.tres` (watchtower 1.25, jar 1.3,
   party shop 1.1). `BuildingDef.wall_color`/`roof_color` were removed. Tests: `test_building_looks.gd`
   (`RUIN_PARTS`, `TOP_PARTS`), `test_fort_look.gd`. Gallery scratch: draw `fort.look()` / sketches + `--write-movie`.
+- Town ground (M3.6-04, spec 05 §3.1): room 2500×1500, buildings within `TownLayout.max_building_distance`
+  (585 px door middle → spot middle, AC-62). `TownGroundLook.layers(layout)` = 4 baked `BuildingSketch` meshes
+  (quilt, paths, props, walls; cached per layout, ~150 ms once): separate layers because the kit draws all ink
+  before all fills. Road = `layout.road` (smoothed, `road_line()`), thread paths = `TownSpot.thread_path`
+  (`thread_line(spot)`), props are `PackedVector2Array`s in `pillow_fort.tres`. Tests check paths never cross a
+  blocking rect and props stay free of buildings: moving a building means moving its path/props too. Tape numbers
+  are `draw_string` in `TownFloor` (reset `draw_set_transform` before drawing more meshes!). Lamps are gone.
+  Camera scenario: `test_05_town_ground.gd` (Town in a SubViewport at 1920×1080 / 1920×1200). Town draw calls
+  339 → 223.
