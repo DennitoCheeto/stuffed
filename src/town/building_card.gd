@@ -7,10 +7,10 @@ extends PanelContainer
 ## tag (spec 04 §6.6); it pops in when it moves to another building.
 
 const WIDTH: float = 440.0
-## Space between the card and the building (or its sign).
+## Space between the card and the building (or its price tag).
 const GAP: float = 18.0
-## Height of the sign under a building (the card goes below it when the player is above).
-const SIGN_HEIGHT: float = 120.0
+## Room for the price tag under a ruin (the card goes below it when the player is above).
+const SIGN_HEIGHT: float = 64.0
 ## Resting tilt in degrees and how small it starts when it pops in.
 const TILT: float = -1.5
 ## Room for the hand-written name next to the level tag.

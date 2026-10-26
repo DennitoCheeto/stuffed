@@ -73,7 +73,8 @@ func test_ac37_new_game_opens_the_town_with_fort_door_scrapbook_and_6_ruins() ->
 	var expected: Array[StringName] = OPEN_FROM_START.duplicate()
 	expected.sort()
 	assert_eq(open_ids, expected, "exactly the Armory and the Lucky Jar can be rebuilt")
-	assert_eq(town.buildings[&"watchtower"].status_label.text, "Rebuild 1 building first")
+	var tower: TownBuilding = town.buildings[&"watchtower"]
+	assert_eq(BuildingCard.action_text(tower, main.town), "Rebuild 1 building first")
 	assert_eq(main.music.track, &"town", "the town's own music")
 	assert_eq(first_player().weapons().size(), 0, "no weapons at home")
 

@@ -155,6 +155,8 @@ func _physics_process(delta: float) -> void:
 				_show_card(building, player)
 	if shown == null:
 		card.hide_card()
+	for id: StringName in buildings:
+		buildings[id].card_shown = buildings[id] == shown
 	prompt_label.text = prompt
 	prompt_label.visible = not prompt.is_empty()
 	if _settle_left > 0.0:
