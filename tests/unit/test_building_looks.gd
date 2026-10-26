@@ -16,8 +16,8 @@ const RUIN_PARTS: Dictionary[StringName, Array] = {
 	&"lucky_jar": [&"tipped_jar", &"spilled_buttons"],
 	&"watchtower": [&"fallen_reels", &"loose_thread"],
 	&"snack_bar": [&"dented_tin", &"fallen_lid", &"crumbs"],
-	&"party_shop": [&"flat_cushion", &"stuffing_tufts", &"fallen_pins"],
-	&"plush_hospital": [&"squashed_box", &"crumpled_tissues"],
+	&"party_shop": [&"squashed_box", &"loose_ribbon", &"fallen_lid"],
+	&"plush_hospital": [&"collapsed_walls", &"fallen_roof", &"door_hole"],
 }
 ## What Lv 3 of each building shows (spec 05 §3.2).
 const TOP_PARTS: Dictionary[StringName, Array] = {
@@ -25,8 +25,19 @@ const TOP_PARTS: Dictionary[StringName, Array] = {
 	&"lucky_jar": [&"gold_lid", &"fairy_lights", &"clover_flag"],
 	&"watchtower": [&"third_reel", &"thimble_lookout", &"telescope", &"plushie_on_watch"],
 	&"snack_bar": [&"cupcake_tower", &"fairy_lights", &"second_table"],
-	&"party_shop": [&"balloons", &"bunting", &"confetti", &"pin_pennants"],
-	&"plush_hospital": [&"windows", &"tissue_puff", &"bed", &"napping_plushie"],
+	&"party_shop": [&"third_box", &"bow", &"balloons", &"present_stand"],
+	&"plush_hospital": [&"downstairs_windows", &"roof_cross", &"flower_bushes"],
+}
+## What Lv 1 and Lv 2 of the redrawn Party Shop and Hospital show (spec 05 §3.2, #187).
+const LEVEL_PARTS: Dictionary[StringName, Array] = {
+	&"party_shop": [
+		[&"shop_box", &"ribbon_band", &"shop_window", &"shelves", &"door"],
+		[&"goods", &"awning", &"sign", &"door_bell", &"second_box"],
+	],
+	&"plush_hospital": [
+		[&"house", &"roof", &"door", &"front_step"],
+		[&"upstairs", &"ward_windows", &"ward_beds", &"plushies_in_bed"],
+	],
 }
 ## How far a look may stick out of its spot sideways (share of the spot's width).
 const SIDE_ROOM: float = 0.05
@@ -99,6 +110,31 @@ func test_level_3_shows_the_full_object() -> void:
 		var top: Array[StringName] = _looks(id)[3].parts
 		for part: StringName in TOP_PARTS[id]:
 			assert_has(top, part, "%s Lv 3 shows %s" % [id, part])
+
+
+func test_party_shop_and_hospital_grow_like_the_picked_mockup() -> void:
+	for id: StringName in LEVEL_PARTS:
+		var looks: Array[BuildingSketch] = _looks(id)
+		for level: int in [1, 2]:
+			for part: StringName in LEVEL_PARTS[id][level - 1]:
+				assert_has(looks[level].parts, part, "%s Lv %d shows %s" % [id, level, part])
+				if level == 2:
+					assert_does_not_have(looks[1].parts, part, "%s: %s is new" % [id, part])
+	var hospital: Array[BuildingSketch] = _looks(&"plush_hospital")
+	var one_storey: float = hospital[1].bounds().size.y
+	assert_gt(hospital[2].bounds().size.y, one_storey * 1.3, "Lv 2 grows an upstairs")
+
+
+func test_the_shop_sign_is_sewn_in_felt_letters() -> void:
+	for text: String in PartyShopLook.SIGN_LINES:
+		for letter: String in text:
+			assert_true(LookParts.GLYPHS.has(letter), "a stroke letter for %s" % letter)
+	assert_eq(LookParts.letters_width("AB", 2.0), 20.0, "4 + 2 + 4 grid steps")
+	var sketch: BuildingSketch = BuildingSketch.new()
+	var before: int = sketch.colors().size()
+	LookParts.letters(sketch, "PARTY", Vector2.ZERO, 2.0, PALETTE.sign_text, 2.0)
+	assert_eq(sketch.colors().size() - before, 9, "P 1 + A 2 + R 2 + T 2 + Y 2 strokes")
+	assert_true(_looks(&"party_shop")[2].parts.has(&"sign"), "the sign hangs at Lv 2")
 
 
 func test_a_greyed_colour_is_greyer_and_darker() -> void:

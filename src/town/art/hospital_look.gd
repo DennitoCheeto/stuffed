@@ -1,20 +1,29 @@
 class_name HospitalLook
 extends RefCounted
-## The Plush Hospital in the art kit's style (spec 05 §3.2): a tissue box with a plaster cross.
-## Ruin: the box is squashed flat with a torn flap, crumpled tissues and a loose plaster around it.
-## Lv 1: the box with a plaster cross. Lv 2: windows and a tissue puffing out of the top.
-## Lv 3: a bigger box and a little bed outside with a napping plushie.
+## The Plush Hospital in the art kit's style (spec 05 §3.2, PO pick H2): a dollhouse hospital
+## with a mint roof. Ruin: the walls collapsed to a jagged stump with an empty doorway, the roof
+## fallen off onto the floor. Lv 1: a one-storey house with a mint roof, a round attic window, a
+## door and a front step. Lv 2: an upstairs ward, plushies asleep in bed seen through its windows.
+## Lv 3: windows downstairs, a cross on the roof and flower bushes by the walls.
 
-## Front width, front height and depth of the box per level (design units).
-const FRONT_WIDTHS: Array[float] = [104.0, 116.0, 122.0]
-const FRONT_HEIGHTS: Array[float] = [62.0, 72.0, 78.0]
-const DEPTH: float = 30.0
-## How far the side and top lean up for every unit of depth (3/4 view).
-const RISE: float = 0.6
-## Lv 3 moves the box left to make room for the bed.
-const SHIFTS: Array[float] = [0.0, 0.0, -46.0]
-const BED_GAP: float = 14.0
-const BED_WIDTH: float = 80.0
+## The front wall's width, one storey's height and how far the side goes back (3/4 view).
+const WALL_WIDTH: float = 176.0
+const STOREY: float = 76.0
+const DEPTH: Vector2 = Vector2(22.0, -12.0)
+## How far the roof reaches past the walls, and how high its gable rises.
+const ROOF_OVERHANG: float = 14.0
+const ROOF_HEIGHT: float = 74.0
+## The door (width, height) and the step it stands on.
+const DOOR: Vector2 = Vector2(36.0, 52.0)
+const STEP: Vector2 = Vector2(52.0, 6.0)
+## Upstairs ward windows and downstairs windows: size, and where they sit (share of the width).
+const WARD_WINDOW: Vector2 = Vector2(58.0, 44.0)
+const LOW_WINDOW: Vector2 = Vector2(40.0, 34.0)
+const WINDOW_SHARES: Array[float] = [0.24, 0.76]
+## The flower bushes (Lv 3): one clump of three felt balls each side (offset, radius).
+const BUSH_BALLS: Array[Vector3] = [
+	Vector3(-12.0, -10.0, 11.0), Vector3(0.0, -16.0, 13.0), Vector3(12.0, -9.0, 11.0)
+]
 
 
 static func build(level: int, unit: float) -> BuildingSketch:
@@ -28,184 +37,201 @@ static func build(level: int, unit: float) -> BuildingSketch:
 
 static func _standing(sketch: BuildingSketch, level: int) -> void:
 	var palette: WorldPalette = WorldPalette.current()
-	var box: Rect2 = _front(level)
-	var depth: Vector2 = Vector2(DEPTH, -DEPTH * RISE)
-	LookParts.box_shadow(sketch, box.position.x, box.size.x, depth)
-	var slot: Vector2 = _top_face(sketch, palette, box, depth)
+	var storeys: int = 2 if level >= 2 else 1
+	var height: float = STOREY * storeys
+	var front: Rect2 = Rect2(-(WALL_WIDTH + DEPTH.x) / 2.0, -height, WALL_WIDTH, height)
+	LookParts.box_shadow(sketch, front.position.x, front.size.x, DEPTH)
+	_walls(sketch, palette, front)
+	var gable: Vector2 = _roof(sketch, palette, front)
+	_door(sketch, palette, front)
 	if level >= 2:
-		_tissue_puff(sketch, palette, slot)
-	_front_face(sketch, palette, box, level)
-	_side_face(sketch, palette, box, depth)
+		_upstairs(sketch, palette, front)
 	if level >= 3:
-		_bed(sketch, palette, box.end.x + DEPTH + BED_GAP)
+		_low_windows(sketch, palette, front)
+		_roof_cross(sketch, palette, gable)
+		sketch.mark(&"flower_bushes")
+		_bush(sketch, palette, Vector2(front.position.x - 4.0, 0.0), 0)
+		_bush(sketch, palette, Vector2(front.end.x + 12.0, 0.0), 1)
+	else:
+		_attic_window(sketch, palette, gable)
 
 
-static func _front(level: int) -> Rect2:
-	var width: float = FRONT_WIDTHS[level - 1]
-	var height: float = FRONT_HEIGHTS[level - 1]
-	return Rect2(-(width + DEPTH) / 2.0 + SHIFTS[level - 1], -height, width, height)
+## The white walls with their shaded side, stitched along the sides and the top.
+static func _walls(sketch: BuildingSketch, palette: WorldPalette, front: Rect2) -> void:
+	var top_right: Vector2 = Vector2(front.end.x, front.position.y)
+	var side: PackedVector2Array = [front.end, front.end + DEPTH, top_right + DEPTH, top_right]
+	sketch.piece(&"house", side, palette.hospital_wall_side)
+	sketch.block(&"house", front, palette.hospital_wall)
+	var inner: Rect2 = front.grow(-palette.seam_inset)
+	var path: PackedVector2Array = [
+		Vector2(inner.position.x, front.end.y - palette.seam_inset * 2.0),
+		inner.position,
+		Vector2(inner.end.x, inner.position.y),
+		Vector2(inner.end.x, front.end.y - palette.seam_inset * 2.0),
+	]
+	sketch.seam(path)
 
 
-## The light top face with the oval tissue slot; returns the slot's middle.
-static func _top_face(
-	sketch: BuildingSketch, palette: WorldPalette, box: Rect2, depth: Vector2
-) -> Vector2:
-	var top_left: Vector2 = box.position
-	var top_right: Vector2 = Vector2(box.end.x, box.position.y)
-	var top: PackedVector2Array = [top_left, top_right, top_right + depth, top_left + depth]
-	sketch.piece(&"box", top, palette.tissue)
-	var slot: Vector2 = Vector2(box.get_center().x, box.position.y) + depth / 2.0
-	sketch.shade(LookParts.oval(slot, box.size.x * 0.28, 4.0), palette.box_inside)
-	return slot
+## The mint roof: a sewn gable over the front and its slope going back. Returns the gable's
+## middle (for the attic window or the cross).
+static func _roof(sketch: BuildingSketch, palette: WorldPalette, front: Rect2) -> Vector2:
+	var base: float = front.position.y + 2.0
+	var left: Vector2 = Vector2(front.position.x - ROOF_OVERHANG, base)
+	var right: Vector2 = Vector2(front.end.x + ROOF_OVERHANG, base)
+	var apex: Vector2 = Vector2(front.get_center().x, base - ROOF_HEIGHT)
+	var slope: PackedVector2Array = [right, right + DEPTH, apex + DEPTH, apex]
+	sketch.piece(&"roof", slope, palette.hospital_roof_dark)
+	sketch.piece(&"roof", [left, right, apex], palette.hospital_roof, true)
+	return Vector2(apex.x, base - ROOF_HEIGHT * 0.38)
 
 
-## The front: a teal band, the plaster cross and (Lv 2+) two little windows.
-static func _front_face(
-	sketch: BuildingSketch, palette: WorldPalette, box: Rect2, level: int
-) -> void:
-	sketch.block(&"box", box, palette.tissue_box, true)
-	var band: Rect2 = Rect2(box.position.x, box.position.y + 7.0, box.size.x, 7.0)
-	sketch.shade(BuildingSketch.corners(band), palette.paint_trim)
-	var middle: Vector2 = Vector2(box.get_center().x, box.position.y + box.size.y * 0.58)
-	_plaster_cross(sketch, palette, middle)
-	if level < 2:
-		return
-	for share: float in [0.17, 0.83]:
-		var at: Vector2 = Vector2(box.position.x + box.size.x * share, middle.y - 2.0)
-		var pane: Rect2 = Rect2(at - Vector2(10.0, 10.0), Vector2(20.0, 20.0))
-		sketch.block(&"windows", pane.grow(3.0), palette.paint_trim)
+## Lv 1 and 2: a little round window in the gable.
+static func _attic_window(sketch: BuildingSketch, palette: WorldPalette, at: Vector2) -> void:
+	sketch.disc(&"attic_window", at, 11.0, palette.hospital_wall)
+	sketch.dot(at, 7.0, palette.glass)
+	sketch.line([at - Vector2(7.0, 0.0), at + Vector2(7.0, 0.0)], palette.hospital_wall, 2.0)
+	sketch.dot(at + Vector2(-3.0, -3.0), 1.8, palette.glass_shine)
+
+
+## The mint door with a round window and a knob, on a wooden front step.
+static func _door(sketch: BuildingSketch, palette: WorldPalette, front: Rect2) -> void:
+	var middle: float = front.get_center().x
+	var step: Rect2 = Rect2(middle - STEP.x / 2.0, -STEP.y, STEP.x, STEP.y)
+	var door: Rect2 = Rect2(middle - DOOR.x / 2.0, -STEP.y - DOOR.y, DOOR.x, DOOR.y)
+	sketch.block(&"door", door, palette.hospital_roof, true)
+	sketch.dot(door.get_center() + Vector2(0.0, -11.0), 6.5, palette.glass)
+	sketch.dot(Vector2(door.end.x - 8.0, door.get_center().y + 6.0), 3.0, palette.brass)
+	sketch.block(&"front_step", step, palette.wood_top)
+
+
+## Lv 2: the upstairs ward: a floor band between the storeys and two windows, each with a
+## plushie asleep in bed.
+static func _upstairs(sketch: BuildingSketch, palette: WorldPalette, front: Rect2) -> void:
+	sketch.mark(&"upstairs")
+	var floor_band: Rect2 = Rect2(front.position.x, -STOREY - 4.0, front.size.x, 8.0)
+	sketch.shade(BuildingSketch.corners(floor_band), palette.hospital_wall_side)
+	var side: Vector2 = Vector2(front.end.x, -STOREY - 4.0)
+	var down: Vector2 = Vector2(0.0, 8.0)
+	var band: PackedVector2Array = [side, side + DEPTH, side + DEPTH + down, side + down]
+	sketch.shade(band, palette.hospital_wall_side.darkened(0.1))
+	for i: int in WINDOW_SHARES.size():
+		var middle: float = front.position.x + front.size.x * WINDOW_SHARES[i]
+		var top_left: Vector2 = Vector2(middle - WARD_WINDOW.x / 2.0, front.position.y + 16.0)
+		var pane: Rect2 = Rect2(top_left, WARD_WINDOW)
+		sketch.block(&"ward_windows", pane.grow(4.0), palette.hospital_wall_side)
 		sketch.shade(BuildingSketch.corners(pane), palette.glass)
-		sketch.line([at - Vector2(0.0, 10.0), at + Vector2(0.0, 10.0)], palette.paint_trim, 2.0)
-		sketch.line([at - Vector2(10.0, 0.0), at + Vector2(10.0, 0.0)], palette.paint_trim, 2.0)
-		var shine: Rect2 = Rect2(pane.position + Vector2(3.0, 3.0), Vector2(4.0, 6.0))
+		_ward_bed(sketch, palette, pane, i)
+		for corner: float in [pane.position.x, pane.end.x]:
+			var reach: float = 12.0 if corner == pane.position.x else -12.0
+			var curtain: PackedVector2Array = [
+				Vector2(corner, pane.position.y),
+				Vector2(corner + reach, pane.position.y),
+				Vector2(corner, pane.position.y + 20.0),
+			]
+			sketch.shade(curtain, palette.bed_blanket)
+
+
+## A bed inside a ward window with a plushie asleep under the blanket (a teddy, then a seal).
+static func _ward_bed(
+	sketch: BuildingSketch, palette: WorldPalette, pane: Rect2, index: int
+) -> void:
+	sketch.mark(&"ward_beds")
+	var bed: Rect2 = Rect2(pane.position.x + 5.0, pane.end.y - 14.0, pane.size.x - 10.0, 8.0)
+	var head: Vector2 = Vector2(bed.position.x + 11.0, bed.position.y - 5.0)
+	var pillow: Rect2 = Rect2(bed.position.x + 1.0, bed.position.y - 9.0, 20.0, 9.0)
+	LookParts.outlined(sketch, BuildingSketch.corners(pillow), palette.bed_pillow)
+	sketch.mark(&"plushies_in_bed")
+	sketch.dot(head, 9.5, palette.ink)
+	if index % 2 == 0:
+		for x: float in [-6.0, 6.0]:
+			sketch.dot(head + Vector2(x, -6.5), 4.5, palette.ink)
+		LookParts.teddy_head(sketch, &"", head, 8.0, true)
+	else:
+		sketch.dot(head, 8.0, palette.metal)
+		for x: float in [-3.0, 3.0]:
+			var eye: Vector2 = head + Vector2(x, -1.0)
+			sketch.line([eye - Vector2(1.5, 0.0), eye + Vector2(1.5, 0.0)], palette.ink, 1.2)
+		sketch.dot(head + Vector2(0.0, 2.5), 1.4, palette.ink)
+	var blanket: Rect2 = Rect2(bed.position + Vector2(16.0, -6.0), Vector2(bed.size.x - 16.0, 8.0))
+	var cover: Color = palette.bed_blanket
+	if index % 2 == 1:
+		cover = WorldPalette.pick(palette.gift_box_tops, 2)
+	LookParts.outlined(sketch, BuildingSketch.corners(blanket), cover)
+	LookParts.outlined(sketch, BuildingSketch.corners(bed), palette.wood)
+
+
+## Lv 3: a window each side of the door, with a cross of window bars.
+static func _low_windows(sketch: BuildingSketch, palette: WorldPalette, front: Rect2) -> void:
+	for share: float in WINDOW_SHARES:
+		var middle: Vector2 = Vector2(front.position.x + front.size.x * share, -43.0)
+		var pane: Rect2 = Rect2(middle - LOW_WINDOW / 2.0, LOW_WINDOW)
+		sketch.block(&"downstairs_windows", pane.grow(4.0), palette.hospital_wall_side)
+		sketch.shade(BuildingSketch.corners(pane), palette.glass)
+		var bar: Color = palette.hospital_wall_side
+		sketch.line([Vector2(middle.x, pane.position.y), Vector2(middle.x, pane.end.y)], bar, 3.0)
+		sketch.line([Vector2(pane.position.x, middle.y), Vector2(pane.end.x, middle.y)], bar, 3.0)
+		var shine: Rect2 = Rect2(pane.position + Vector2(3.0, 3.0), Vector2(4.0, 10.0))
 		sketch.shade(BuildingSketch.corners(shine), palette.glass_shine)
 
 
-## Two plasters crossed, each with its soft pad and little holes.
-static func _plaster_cross(sketch: BuildingSketch, palette: WorldPalette, at: Vector2) -> void:
-	var arm: float = 22.0
-	var thick: float = 9.0
-	var upright: Rect2 = Rect2(at.x - thick, at.y - arm, thick * 2.0, arm * 2.0)
-	sketch.block(&"plaster_cross", upright, palette.plaster)
-	var across_bar: Rect2 = Rect2(at.x - arm, at.y - thick, arm * 2.0, thick * 2.0)
-	sketch.block(&"plaster_cross", across_bar, palette.plaster)
-	var pad: Rect2 = Rect2(at - Vector2(7.0, 7.0), Vector2(14.0, 14.0))
-	sketch.shade(BuildingSketch.corners(pad), palette.tissue)
-	var hole: Color = palette.plaster.darkened(0.2)
-	for end: Vector2 in [Vector2(0, -1), Vector2(0, 1), Vector2(-1, 0), Vector2(1, 0)]:
-		var tip: Vector2 = at + end * (arm - 6.0)
-		var across: Vector2 = end.orthogonal() * 3.5
-		sketch.dot(tip + across, 1.3, hole)
-		sketch.dot(tip - across, 1.3, hole)
+## Lv 3: a white felt disc with a teal cross in the gable.
+static func _roof_cross(sketch: BuildingSketch, palette: WorldPalette, at: Vector2) -> void:
+	sketch.disc(&"roof_cross", at, 16.0, palette.hospital_wall)
+	var teal: Color = WorldPalette.pick(palette.toys, 2)
+	sketch.shade(BuildingSketch.corners(Rect2(at.x - 4.5, at.y - 11.0, 9.0, 22.0)), teal)
+	sketch.shade(BuildingSketch.corners(Rect2(at.x - 11.0, at.y - 4.5, 22.0, 9.0)), teal)
 
 
-static func _side_face(
-	sketch: BuildingSketch, palette: WorldPalette, box: Rect2, depth: Vector2
-) -> void:
-	var top: Vector2 = Vector2(box.end.x, box.position.y)
-	var side: PackedVector2Array = [box.end, box.end + depth, top + depth, top]
-	sketch.piece(&"box", side, palette.tissue_box_side)
-	var band_top: Vector2 = top + Vector2(0.0, 7.0)
-	var down: Vector2 = Vector2(0.0, 7.0)
-	var band: PackedVector2Array = [
-		band_top, band_top + depth, band_top + depth + down, band_top + down
-	]
-	sketch.shade(band, Color(palette.paint_trim, 0.7))
+## Lv 3: a round felt bush with little flowers, standing on `foot`.
+static func _bush(sketch: BuildingSketch, palette: WorldPalette, foot: Vector2, index: int) -> void:
+	for ball: Vector3 in BUSH_BALLS:
+		sketch.disc(&"flower_bushes", foot + Vector2(ball.x, ball.y), ball.z, palette.bush)
+	for i: int in BUSH_BALLS.size():
+		var ball: Vector3 = BUSH_BALLS[i]
+		var flower: Vector2 = foot + Vector2(ball.x + 3.0, ball.y - ball.z * 0.4)
+		sketch.dot(flower, 3.2, WorldPalette.pick(palette.flower_petals, i + index))
+		sketch.dot(flower, 1.3, palette.flower_middle)
 
 
-## Lv 2+: a soft tissue puffing up out of the slot.
-static func _tissue_puff(sketch: BuildingSketch, palette: WorldPalette, slot: Vector2) -> void:
-	var puff: PackedVector2Array = [
-		slot + Vector2(-14.0, 1.0),
-		slot + Vector2(-20.0, -14.0),
-		slot + Vector2(-9.0, -30.0),
-		slot + Vector2(1.0, -22.0),
-		slot + Vector2(10.0, -38.0),
-		slot + Vector2(20.0, -18.0),
-		slot + Vector2(14.0, 1.0),
-	]
-	sketch.piece(&"tissue_puff", puff, palette.tissue)
-	var fold: PackedVector2Array = [slot + Vector2(-2.0, -2.0), slot + Vector2(6.0, -26.0)]
-	sketch.line(fold, palette.tissue_box_side, 1.5)
-
-
-## Lv 3: a little bed outside with a teddy napping under a striped blanket.
-static func _bed(sketch: BuildingSketch, palette: WorldPalette, left: float) -> void:
-	LookParts.footprint_shadow(sketch, Rect2(left, -8.0, BED_WIDTH, 8.0))
-	for x: float in [left + 5.0, left + BED_WIDTH - 5.0]:
-		sketch.rod(&"bed", [Vector2(x, 0.0), Vector2(x, -12.0)], palette.wood_side, 4.0)
-	sketch.block(&"bed", Rect2(left, -42.0, 10.0, 42.0), palette.wood_top)
-	sketch.block(&"bed", Rect2(left + BED_WIDTH - 9.0, -28.0, 9.0, 28.0), palette.wood_top)
-	sketch.block(&"bed", Rect2(left, -16.0, BED_WIDTH, 8.0), palette.wood)
-	sketch.block(&"bed", Rect2(left + 6.0, -25.0, BED_WIDTH - 12.0, 10.0), palette.tissue)
-	sketch.block(&"bed", Rect2(left + 10.0, -36.0, 22.0, 12.0), palette.bed_pillow)
-	var head: Vector2 = Vector2(left + 22.0, -38.0)
-	LookParts.teddy_head(sketch, &"napping_plushie", head, 10.0, true)
-	var blanket: PackedVector2Array = [
-		Vector2(left + 28.0, -14.0),
-		Vector2(left + BED_WIDTH - 6.0, -14.0),
-		Vector2(left + BED_WIDTH - 6.0, -28.0),
-		Vector2(left + 56.0, -33.0),
-		Vector2(left + 34.0, -31.0),
-		Vector2(left + 28.0, -26.0),
-	]
-	sketch.piece(&"blanket", blanket, palette.bed_blanket, true)
-	sketch.stripes(blanket, Color(palette.bed_fold, 0.8), 12.0, 5.0, true)
-	sketch.parts.append(&"zzz")
-	for i: int in 3:
-		var at: Vector2 = head + Vector2(12.0 + i * 10.0, -18.0 - i * 13.0)
-		var size: float = 5.0 + i * 1.5
-		var z: PackedVector2Array = [
-			at + Vector2(-size, -size), at + Vector2(size, -size), at + Vector2(-size, size)
-		]
-		z.append(at + Vector2(size, size))
-		sketch.line(z, palette.sign_effect, 1.8)
-
-
-## Ruin: the box is squashed flat and tilted with a torn flap, crumpled tissues and a loose
-## plaster lie on the floor.
+## Ruin: the walls collapsed to a jagged stump with an empty doorway and cracks, rubble on the
+## floor, and the roof fallen off, lying tipped against the wall.
 static func _ruin(sketch: BuildingSketch) -> void:
 	var palette: WorldPalette = WorldPalette.current()
-	var box: Rect2 = Rect2(-70.0, -36.0, 114.0, 36.0)
-	var depth: Vector2 = Vector2(DEPTH, -DEPTH * RISE * 0.6)
-	LookParts.box_shadow(sketch, box.position.x, box.size.x, depth)
-	sketch.turn(0.06, Vector2(box.end.x, 0.0))
-	var top_left: Vector2 = box.position
-	var top_right: Vector2 = Vector2(box.end.x, box.position.y)
-	var flap: PackedVector2Array = [
-		top_left + Vector2(8.0, 0.0), top_left + Vector2(40.0, 0.0), top_left + Vector2(14.0, -26.0)
+	var left: float = -(WALL_WIDTH + DEPTH.x) / 2.0
+	var right: float = left + WALL_WIDTH
+	LookParts.box_shadow(sketch, left, WALL_WIDTH, DEPTH)
+	var side: PackedVector2Array = [
+		Vector2(right, 0.0),
+		Vector2(right, 0.0) + DEPTH,
+		Vector2(right, -50.0) + DEPTH,
+		Vector2(right, -50.0),
 	]
-	sketch.piece(&"squashed_box", flap, palette.tissue_box)
-	var top: PackedVector2Array = [top_left, top_right, top_right + depth, top_left + depth]
-	sketch.piece(&"squashed_box", top, palette.tissue_box_side)
-	var fold: PackedVector2Array = [
-		top_left + Vector2(30.0, -4.0), top_right + Vector2(-20.0, -6.0)
+	sketch.piece(&"collapsed_walls", side, palette.hospital_wall_side)
+	var stump: PackedVector2Array = [
+		Vector2(left, 0.0),
+		Vector2(right, 0.0),
+		Vector2(right, -50.0),
+		Vector2(52.0, -60.0),
+		Vector2(26.0, -42.0),
+		Vector2(-6.0, -64.0),
+		Vector2(-44.0, -46.0),
+		Vector2(-72.0, -58.0),
+		Vector2(left, -50.0),
 	]
-	sketch.line(fold, palette.ink, 1.6)
-	sketch.block(&"squashed_box", box, palette.tissue_box)
-	var corner: Vector2 = box.position
-	var crease: PackedVector2Array = [
-		corner + Vector2(20.0, 8.0), corner + Vector2(52.0, 20.0), corner + Vector2(90.0, 10.0)
+	sketch.piece(&"collapsed_walls", stump, palette.hospital_wall)
+	var middle: float = left + WALL_WIDTH / 2.0
+	var doorway: Rect2 = Rect2(middle - DOOR.x / 2.0, -DOOR.y + 6.0, DOOR.x, DOOR.y - 6.0)
+	sketch.block(&"door_hole", doorway, palette.box_inside)
+	var crack: PackedVector2Array = [
+		Vector2(36.0, -40.0), Vector2(44.0, -28.0), Vector2(38.0, -16.0)
 	]
-	sketch.line(crease, Color(palette.ink, 0.6), 1.6)
-	var band: Rect2 = Rect2(box.position.x, box.position.y + 6.0, box.size.x, 6.0)
-	sketch.shade(BuildingSketch.corners(band), palette.paint_trim)
-	var side: PackedVector2Array = [box.end, box.end + depth, top_right + depth, top_right]
-	sketch.piece(&"squashed_box", side, palette.tissue_box_side)
-	sketch.straighten()
-	for at: Vector2 in [Vector2(-96.0, 2.0), Vector2(box.end.x + DEPTH + 26.0, 4.0)]:
-		var lump: PackedVector2Array = [
-			at + Vector2(-14.0, 0.0),
-			at + Vector2(-16.0, -10.0),
-			at + Vector2(-6.0, -18.0),
-			at + Vector2(4.0, -12.0),
-			at + Vector2(14.0, -16.0),
-			at + Vector2(16.0, -2.0),
-		]
-		sketch.piece(&"crumpled_tissues", lump, palette.tissue)
-		var wrinkle: PackedVector2Array = [at + Vector2(-8.0, -6.0), at + Vector2(6.0, -10.0)]
-		sketch.line(wrinkle, palette.tissue_box_side, 1.4)
-	sketch.turn(-0.3, Vector2.ZERO, Vector2(-36.0, 2.0))
-	sketch.block(&"loose_plaster", Rect2(-20.0, -6.0, 40.0, 12.0), palette.plaster)
-	sketch.shade(BuildingSketch.corners(Rect2(-6.0, -4.0, 12.0, 8.0)), palette.tissue)
+	sketch.line(crack, palette.ink, 1.5)
+	sketch.line([Vector2(-56.0, -44.0), Vector2(-62.0, -30.0)], palette.ink, 1.5)
+	for bit: Rect2 in [Rect2(right + 14.0, -8.0, 14.0, 9.0), Rect2(30.0, -6.0, 12.0, 8.0)]:
+		sketch.block(&"rubble", bit, palette.hospital_wall_side)
+	sketch.turn(-0.1, Vector2(left - 34.0, 0.0))
+	var roof: PackedVector2Array = [
+		Vector2(left - 34.0, 0.0), Vector2(left + 74.0, 0.0), Vector2(left + 20.0, -50.0)
+	]
+	sketch.piece(&"fallen_roof", roof, palette.hospital_roof, true)
 	sketch.straighten()

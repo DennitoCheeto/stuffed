@@ -1,11 +1,23 @@
 class_name LookParts
 extends RefCounted
 ## Small pieces the building looks share (spec 05 §2.2): cotton reels, pin flags, fairy lights,
-## bunting, teddy heads, ovals and the contact shadow. All of them draw into a `BuildingSketch`
-## in design units, with colours from the world palette.
+## bunting, teddy heads, ovals, sewn sign letters and the contact shadow. All of them draw into
+## a `BuildingSketch` in design units, with colours from the world palette.
 
 ## How far a floor shadow sits right and down of the object's footprint (light from the top-left).
 const SHADOW_NUDGE: Vector2 = Vector2(9.0, 5.0)
+## Stroke letters for `letters` (only the ones signs need so far): strokes split by "|", each a
+## list of grid points "xy" (x 0-4, y 0-6 down).
+const GLYPHS: Dictionary[String, String] = {
+	"A": "06 02 20 42 46|04 44",
+	"H": "00 06|40 46|03 43",
+	"O": "10 30 41 45 36|36 16 05 01 10",
+	"P": "06 00 30 41 42 33 03",
+	"R": "06 00 30 41 42 33 03|23 46",
+	"S": "41 30 10 01 02 13 33 44 45 36 16 05",
+	"T": "00 40|20 26",
+	"Y": "00 23 40|23 26",
+}
 
 
 ## The floor shadow under a footprint `rect` (its floor area in 3/4 view), nudged right and down.
@@ -186,3 +198,32 @@ static func clip_shade(
 	var box: PackedVector2Array = BuildingSketch.corners(rect)
 	for cut: PackedVector2Array in Geometry2D.intersect_polygons(shape, box):
 		sketch.shade(cut, color)
+
+
+## Felt letters sewn onto a sign: each letter is a few strokes on a 4 x 6 grid (open paths: a
+## closed path would bake as a filled shape). `at` is the top left of the first letter, `size`
+## one grid step; letters are 4 steps wide with 2 steps between them. Unknown letters are skipped.
+static func letters(
+	sketch: BuildingSketch, text: String, at: Vector2, size: float, color: Color, width: float
+) -> void:
+	for i: int in text.length():
+		var corner: Vector2 = at + Vector2(i * 6.0 * size, 0.0)
+		for stroke: String in GLYPHS.get(text[i], "").split("|", false):
+			var path: PackedVector2Array = []
+			for point: String in stroke.split(" ", false):
+				var grid: Vector2 = Vector2(point.unicode_at(0) - 48, point.unicode_at(1) - 48)
+				path.append(corner + grid * size)
+			sketch.line(path, color, width)
+
+
+## How wide `text` is with `letters` at `size` (no gap after the last letter).
+static func letters_width(text: String, size: float) -> float:
+	return maxf(text.length() * 6.0 - 2.0, 0.0) * size
+
+
+## A small shape with its own thin ink outline, for details inside a window (the kit's outline
+## would be hidden under the glass).
+static func outlined(sketch: BuildingSketch, shape: PackedVector2Array, color: Color) -> void:
+	for outer: PackedVector2Array in Geometry2D.offset_polygon(shape, 1.5):
+		sketch.shade(outer, WorldPalette.current().ink)
+	sketch.shade(shape, color)

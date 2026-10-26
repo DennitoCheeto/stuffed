@@ -120,14 +120,26 @@ static var _current: WorldPalette
 @export var tin_side: Color = Color.WHITE
 @export var tin_lid: Color = Color.WHITE
 @export var cookie: Color = Color.WHITE
-## The Party Shop's strawberry pincushion (pink, never red) and its shaded side.
+## A pink pincushion (the fort's second tower, the Snack Bar stools) and its shaded side.
 @export var pincushion: Color = Color.WHITE
 @export var pincushion_dark: Color = Color.WHITE
-## The Plush Hospital's tissue box, its tissues and the plaster cross.
-@export var tissue_box: Color = Color.WHITE
+## White paper and china (photos, cups) and its shaded side.
 @export var tissue_box_side: Color = Color.WHITE
 @export var tissue: Color = Color.WHITE
-@export var plaster: Color = Color.WHITE
+## The Party Shop's gift boxes, bottom to top: fronts, shaded sides, light tops.
+@export var gift_boxes: Array[Color] = []
+@export var gift_box_sides: Array[Color] = []
+@export var gift_box_tops: Array[Color] = []
+## The Party Shop's scalloped felt awning (light scallops, darker band).
+@export var awning: Color = Color.WHITE
+@export var awning_dark: Color = Color.WHITE
+## The Plush Hospital dollhouse: walls, their shaded side, the mint roof and its shaded side.
+@export var hospital_wall: Color = Color.WHITE
+@export var hospital_wall_side: Color = Color.WHITE
+@export var hospital_roof: Color = Color.WHITE
+@export var hospital_roof_dark: Color = Color.WHITE
+## Flower bushes in front of buildings.
+@export var bush: Color = Color.WHITE
 ## Little teddy plushies drawn into the buildings (on watch, napping).
 @export var teddy: Color = Color.WHITE
 @export var teddy_dark: Color = Color.WHITE
