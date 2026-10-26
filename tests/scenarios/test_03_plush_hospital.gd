@@ -8,7 +8,7 @@ const PLUSHIE_RULES: PlushieTownRules = preload("res://data/town/plushie_town_ru
 const MATERIAL_RULES: MaterialRules = preload("res://data/town/material_rules.tres")
 const RESCUE: RescueRules = preload("res://data/town/rescue_rules.tres")
 ## A free spot on the blanket, far from the door where Banane appears.
-const QUIET_SPOT: Vector2 = Vector2(600, 1560)
+const QUIET_SPOT: Vector2 = Vector2(450, 1420)
 
 
 ## Waits until the rebuild moment, the fort growing and plushies moving in have played.

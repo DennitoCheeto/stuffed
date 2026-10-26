@@ -76,8 +76,8 @@ func test_walkable_spots_keep_clear_of_buildings() -> void:
 	var hospital: Rect2 = LAYOUT.spot(&"plush_hospital").rect
 	assert_false(TownPlushie.is_walkable(LAYOUT, hospital.get_center(), 0.0), "not inside")
 	assert_false(TownPlushie.is_walkable(LAYOUT, Vector2(-10, 300), 0.0), "not off the blanket")
-	assert_true(TownPlushie.is_walkable(LAYOUT, Vector2(600, 1560), 40.0))
+	assert_true(TownPlushie.is_walkable(LAYOUT, Vector2(450, 1420), 40.0))
 	var through: bool = TownPlushie.is_path_clear(
-		LAYOUT, Vector2(1700, 1400), Vector2(2100, 1400), 0.0
+		LAYOUT, Vector2(1400, 1240), Vector2(1800, 1240), 0.0
 	)
 	assert_false(through, "a walk never crosses a building")
