@@ -385,8 +385,8 @@ static func _loose_button(sketch: BuildingSketch, at: Vector2, index: int) -> vo
 	var color: Color = WorldPalette.pick(palette.buttons, index)
 	sketch.shadow(LookParts.oval(at + Vector2(5, 6), 15.0, 13.0))
 	sketch.disc(&"button", at, 15.0, color)
-	var rim: PackedVector2Array = FeltDraw.circle(at, 10.5, 16)
-	rim.append(rim[0])
+	# An open arc: a closed line would be filled solid by the kit.
+	var rim: PackedVector2Array = FeltDraw.circle(at, 10.5, 16).slice(0, 13)
 	sketch.line(rim, color.darkened(0.15), 2.0)
 	for corner: Vector2 in [Vector2(-1, -1), Vector2(1, -1), Vector2(-1, 1), Vector2(1, 1)]:
 		sketch.dot(at + corner * 3.6, 2.0, palette.button_hole)

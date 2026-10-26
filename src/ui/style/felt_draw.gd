@@ -88,12 +88,15 @@ static func tape(center: Vector2, length: float, width: float, angle: float) -> 
 ## Fills `points` on the canvas item `item` with soft edges: the plain fill plus a thin ring that
 ## fades from `color` to see-through outside the edge (like Godot's anti-aliased style boxes), so
 ## felt shapes don't look jagged.
-static func fill_smooth(item: RID, points: PackedVector2Array, color: Color) -> void:
+## `feather` is the ring width in the item's own units (wider when the item is drawn scaled down).
+static func fill_smooth(
+	item: RID, points: PackedVector2Array, color: Color, feather: float = FEATHER
+) -> void:
 	if points.size() < 3:
 		return
 	var colors: PackedColorArray = [color]
 	RenderingServer.canvas_item_add_polygon(item, points, colors)
-	var outer: PackedVector2Array = feathered(points, FEATHER)
+	var outer: PackedVector2Array = feathered(points, feather)
 	var ring: PackedVector2Array = []
 	var ring_colors: PackedColorArray = []
 	var clear: Color = Color(color, 0.0)

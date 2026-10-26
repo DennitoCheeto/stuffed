@@ -95,7 +95,8 @@ func dot(center: Vector2, radius: float, color: Color) -> void:
 	shade(FeltDraw.circle(center, radius, 12), color)
 
 
-## A drawn-in material line (plank gaps, wood grain, cracks), no outline.
+## A drawn-in material line (plank gaps, wood grain, cracks), no outline. Keep it open: a closed
+## line (last point = first) is baked as a filled shape.
 func line(points: PackedVector2Array, color: Color, width: float = 2.0) -> void:
 	_mark_points.append(_place(points))
 	_mark_colors.append(_tint(color))

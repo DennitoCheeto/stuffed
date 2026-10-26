@@ -101,7 +101,7 @@ func _draw_outline(shape: PackedVector2Array) -> void:
 	if shape.size() < 3:
 		return
 	for grown: PackedVector2Array in Geometry2D.offset_polygon(shape, outline_width):
-		draw_colored_polygon(grown, outline_color)
+		FeltDraw.fill_smooth(get_canvas_item(), grown, outline_color, _feather())
 
 
 func _draw_shape(shape: PackedVector2Array, fill: Color) -> void:
@@ -109,12 +109,19 @@ func _draw_shape(shape: PackedVector2Array, fill: Color) -> void:
 		return
 	if soft:
 		draw_colored_polygon(FeltShapes.shifted(shape, Vector2(1.5, 3.0)), fill.darkened(0.4))
-	draw_colored_polygon(shape, fill)
+	FeltDraw.fill_smooth(get_canvas_item(), shape, fill, _feather())
 	if soft:
 		var light: Color = fill.lightened(0.3)
 		light.a = 0.35
 		var highlight: PackedVector2Array = FeltShapes.shrunk(shape, 0.72)
 		draw_colored_polygon(FeltShapes.shifted(highlight, Vector2(-3.0, -4.0)), light)
+
+
+## A soft edge about 1.2 screen px wide, however small the piece is drawn (Banane is drawn at a
+## third of his size, so a plain polygon edge looked jagged, #183).
+func _feather() -> float:
+	var shown: float = absf(get_global_transform().get_scale().y)
+	return FeltDraw.FEATHER / maxf(shown, 0.05)
 
 
 func _draw_seam() -> void:

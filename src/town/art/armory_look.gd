@@ -259,32 +259,67 @@ static func _side_face(
 		sketch.shade(trim, palette.brass_dark)
 
 
-## Lv 3: a wooden rack beside the box with a toy sword and a felt bow leaning on it.
+## Lv 3: a sturdy wooden rack beside the box (base plank, two square posts, a crossbar) with a
+## toy sword and a felt bow hanging between the posts. Nothing crosses a post, so every piece
+## keeps a clean outline.
 static func _weapon_rack(sketch: BuildingSketch, palette: WorldPalette, box: Rect2) -> void:
-	var left: float = box.position.x - 48.0
 	var right: float = box.position.x - 6.0
-	var top: float = box.position.y - 34.0
-	for x: float in [left, right]:
-		var post: PackedVector2Array = [Vector2(x, 0.0), Vector2(x, top)]
-		sketch.rod(&"weapon_rack", post, palette.wood_side, 6.0)
-	var bar: PackedVector2Array = [Vector2(left - 4.0, top + 8.0), Vector2(right + 4.0, top + 8.0)]
-	sketch.rod(&"weapon_rack", bar, palette.wood, 6.0)
-	var hilt: Vector2 = Vector2(left + 16.0, top + 2.0)
-	var blade: PackedVector2Array = [hilt + Vector2(0.0, 12.0), Vector2(left + 22.0, -6.0)]
-	sketch.rod(&"rack_sword", blade, palette.metal, 7.0)
-	var guard: PackedVector2Array = [hilt + Vector2(-9.0, 12.0), hilt + Vector2(9.0, 12.0)]
-	sketch.rod(&"rack_sword", guard, palette.brass, 4.0)
-	var grip: PackedVector2Array = [hilt, hilt + Vector2(0.0, 10.0)]
-	sketch.rod(&"rack_sword", grip, WorldPalette.pick(palette.toys, 1), 5.0)
-	var bow_top: Vector2 = Vector2(right - 14.0, top - 4.0)
-	var bow: PackedVector2Array = [
-		bow_top,
-		bow_top + Vector2(-12.0, 24.0),
-		bow_top + Vector2(-12.0, 52.0),
-		bow_top + Vector2(0.0, 76.0),
+	var left: float = right - 50.0
+	var top: float = box.position.y - 30.0
+	var base: Rect2 = Rect2(left - 3.0, -9.0, right - left + 6.0, 9.0)
+	LookParts.footprint_shadow(sketch, base)
+	sketch.block(&"weapon_rack", base, palette.wood_side)
+	for x: float in [left, right - 8.0]:
+		var post: Rect2 = Rect2(x, top, 8.0, base.position.y - top)
+		sketch.block(&"weapon_rack", post, palette.wood)
+		var side: Rect2 = Rect2(x + 5.0, top, 3.0, post.size.y)
+		sketch.shade(BuildingSketch.corners(side), palette.wood_side)
+	var bar: Rect2 = Rect2(left - 3.0, top, right - left + 6.0, 10.0)
+	sketch.block(&"weapon_rack", bar, palette.wood_top)
+	var grain_y: float = bar.position.y + 6.0
+	var grain: PackedVector2Array = [Vector2(left, grain_y), Vector2(right, grain_y)]
+	sketch.line(grain, palette.wood_grain, 1.2)
+	_rack_sword(sketch, palette, left + 17.0, top)
+	_rack_bow(sketch, palette, right - 14.0, top)
+
+
+## A toy sword hanging point-down from the rack's bar: pommel above, grip through the bar.
+static func _rack_sword(
+	sketch: BuildingSketch, palette: WorldPalette, x: float, top: float
+) -> void:
+	var blade: PackedVector2Array = [
+		Vector2(x - 5.0, top + 18.0),
+		Vector2(x + 5.0, top + 18.0),
+		Vector2(x + 5.0, -26.0),
+		Vector2(x, -17.0),
+		Vector2(x - 5.0, -26.0),
 	]
-	sketch.rod(&"rack_bow", bow, WorldPalette.pick(palette.toys, 2), 5.0)
-	sketch.line([bow_top, bow[3]], palette.tag, 1.5)
+	sketch.piece(&"rack_sword", blade, palette.metal)
+	sketch.line([Vector2(x - 1.5, top + 22.0), Vector2(x - 1.5, -26.0)], palette.glass_shine, 1.5)
+	_inked(sketch, Rect2(x - 3.5, top - 4.0, 7.0, 18.0), WorldPalette.pick(palette.toys, 1))
+	_inked(sketch, Rect2(x - 10.0, top + 13.0, 20.0, 6.0), palette.brass)
+	sketch.disc(&"rack_sword", Vector2(x, top - 7.0), 5.0, palette.brass)
+
+
+## A felt bow hanging from a peg on the bar, its string straight.
+static func _rack_bow(sketch: BuildingSketch, palette: WorldPalette, x: float, top: float) -> void:
+	var arc: PackedVector2Array = []
+	var length: float = -30.0 - top
+	for i: int in 9:
+		var t: float = float(i) / 8.0
+		arc.append(Vector2(x - sin(t * PI) * 10.0, top + 12.0 + t * length))
+	sketch.line([arc[0], arc[arc.size() - 1]], palette.tag, 1.5)
+	sketch.rod(&"rack_bow", arc, WorldPalette.pick(palette.toys, 2), 5.0)
+	sketch.disc(&"weapon_rack", Vector2(x, top + 5.0), 3.5, palette.brass_dark)
+
+
+## A small block with its own thin ink line, for pieces drawn in front of the bar.
+static func _inked(sketch: BuildingSketch, rect: Rect2, color: Color) -> void:
+	sketch.block(&"rack_sword", rect, color)
+	# One line per side: a closed line would be filled solid by the kit.
+	var edge: PackedVector2Array = BuildingSketch.corners(rect)
+	for i: int in edge.size():
+		sketch.line([edge[i], edge[(i + 1) % edge.size()]], WorldPalette.current().ink, 1.5)
 
 
 ## Ruin: the box is knocked over onto a loose plank, a plank of its front is broken, the lid lies
