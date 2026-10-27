@@ -29,6 +29,7 @@ func _ready() -> void:
 	_build_walls()
 	for rect: Rect2 in _blocking_rects():
 		_add_wall(rect)
+	_add_looks()
 
 
 ## The walkable floor, in arena coordinates.
@@ -61,11 +62,11 @@ func rug_rects() -> Array[Rect2]:
 	return rects
 
 
-## The baked furniture layers (floor decorations, then the pieces that block), back to front.
-func furniture_layers() -> Array[BuildingSketch]:
+## The baked furniture looks on `layer` (floor decorations or the pieces that block), one per piece.
+func furniture_sketches(layer: FurnitureLook.Layer) -> Array[BuildingSketch]:
 	if furniture == null:
 		return []
-	return FurnitureLook.layers(furniture, room)
+	return FurnitureLook.sketches(furniture, room, layer)
 
 
 ## The baked floor, rug, walls and window layers (back to front).
@@ -77,6 +78,15 @@ func _blocking_rects() -> Array[Rect2]:
 	if furniture == null:
 		return []
 	return furniture.blocking_rects()
+
+
+## The furniture (floor decorations first, then the pieces) and the sunbeams on top, each mesh on
+## its own node so the ones off the screen are skipped. They draw over the room's own layers.
+func _add_looks() -> void:
+	for layer: FurnitureLook.Layer in [FurnitureLook.Layer.FLOOR, FurnitureLook.Layer.PIECES]:
+		for sketch: BuildingSketch in furniture_sketches(layer):
+			add_child(BakedMeshNode.new(sketch.baked()))
+	add_child(BakedMeshNode.new(BedroomLook.sunbeams(size, room)))
 
 
 func _build_walls() -> void:
@@ -105,8 +115,5 @@ func _draw() -> void:
 	var layers: Array[BuildingSketch] = look_layers()
 	layers[BedroomLook.Layer.BOARDS].draw(self)
 	layers[BedroomLook.Layer.RUG].draw(self)
-	for layer: BuildingSketch in furniture_layers():
-		layer.draw(self)
 	layers[BedroomLook.Layer.WALLS].draw(self)
 	layers[BedroomLook.Layer.DETAILS].draw(self)
-	draw_mesh(BedroomLook.sunbeams(size, room), null)

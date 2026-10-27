@@ -4,9 +4,11 @@ extends RefCounted
 ## patchwork look: the bed with its shadow over the top-left corner, the alphabet block towers of
 ## block city, giant crayons, a sharpener with shavings and scribbles in the crayon corner, the
 ## sewing box, pincushion, scissors and a big spool with its thread trail in the sewing corner,
-## and the wooden train loop round the toy box. Built once with the building art kit and baked into
-## two meshes (one draw call each): FLOOR (what you walk over) and PIECES (what blocks). Two layers
-## keep the kit's "all ink first" rule from hiding a piece's outline under a floor decoration.
+## and the wooden train loop round the toy box. Built once with the building art kit: each piece is
+## baked into two meshes, its FLOOR part (what you walk over) and its PIECES part (what blocks).
+## The arena draws each mesh on its own node, so pieces off the screen cost nothing (one big mesh
+## for the whole room was drawn every frame). Two layers keep the kit's "all ink first" rule from
+## hiding a piece's outline under a floor decoration.
 ## Look numbers in data/arena/bedroom_room.tres, colours from the world palette.
 
 ## Layers, back to front.
@@ -25,21 +27,30 @@ const CAR_LENGTH: float = 150.0
 const CAR_GAP: float = 26.0
 const WHEEL_RADIUS: float = 9.0
 
-## Built layers per layout and room: key -> [floor, pieces].
+## Built sketches per layout and room: key -> [floor sketches, piece sketches].
 static var _cache: Dictionary[String, Array] = {}
 
 
-## The two baked layers of `layout`'s furniture, back to front (built the first time).
-static func layers(layout: FurnitureLayout, room: BedroomRoom) -> Array[BuildingSketch]:
+## The baked sketches of `layout`'s furniture on `layer`, one per piece that shows something there
+## (built the first time).
+static func sketches(
+	layout: FurnitureLayout, room: BedroomRoom, layer: Layer
+) -> Array[BuildingSketch]:
 	var key: String = "%d|%d" % [layout.get_instance_id(), room.get_instance_id()]
 	if not _cache.has(key):
-		var floor_layer: BuildingSketch = BuildingSketch.new()
-		var pieces: BuildingSketch = BuildingSketch.new()
+		var floors: Array[BuildingSketch] = []
+		var pieces: Array[BuildingSketch] = []
 		for i: int in layout.pieces.size():
-			_add(floor_layer, pieces, layout.pieces[i], room, i)
-		_cache[key] = [floor_layer, pieces]
+			var floor_part: BuildingSketch = BuildingSketch.new()
+			var piece_part: BuildingSketch = BuildingSketch.new()
+			_add(floor_part, piece_part, layout.pieces[i], room, i)
+			if not floor_part.parts.is_empty():
+				floors.append(floor_part)
+			if not piece_part.parts.is_empty():
+				pieces.append(piece_part)
+		_cache[key] = [floors, pieces]
 	var result: Array[BuildingSketch] = []
-	result.assign(_cache[key])
+	result.assign(_cache[key][layer])
 	return result
 
 

@@ -10,12 +10,29 @@ const TOUCH_MARGIN: float = 2.0
 const RELEASE_MARGIN: float = 32.0
 ## A walk this much along the side (0..1) keeps its direction; less is "head-on".
 const SLIDE_ALONG: float = 0.7
+## Lookup grid: each cell lists the furniture within CELL_MARGIN of it, so a walker only checks the
+## pieces near it (21 pieces x 500 zombies x every frame added up). Bigger circles check them all.
+const CELL_SIZE: float = 400.0
+const CELL_MARGIN: float = 200.0
 
 var rects: Array[Rect2] = []
+
+var _cells: Dictionary[Vector2i, Array] = {}
+var _none: Array[Rect2] = []
 
 
 func _init(blocking: Array[Rect2] = []) -> void:
 	rects = blocking
+	for rect: Rect2 in rects:
+		var area: Rect2 = rect.grow(CELL_MARGIN)
+		var first: Vector2i = _cell(area.position)
+		var last: Vector2i = _cell(area.end)
+		for x: int in range(first.x, last.x + 1):
+			for y: int in range(first.y, last.y + 1):
+				var key: Vector2i = Vector2i(x, y)
+				if not _cells.has(key):
+					_cells[key] = [] as Array[Rect2]
+				_cells[key].append(rect)
 
 
 func is_empty() -> bool:
@@ -24,7 +41,7 @@ func is_empty() -> bool:
 
 ## True if a circle of `radius` at `point` overlaps any furniture.
 func blocks(point: Vector2, radius: float = 0.0) -> bool:
-	for rect: Rect2 in rects:
+	for rect: Rect2 in _near(point, radius):
 		if _overlaps(rect, point, radius):
 			return true
 	return false
@@ -33,7 +50,7 @@ func blocks(point: Vector2, radius: float = 0.0) -> bool:
 ## `point` moved the shortest way out of every piece of furniture a circle of `radius` overlaps.
 func push_out(point: Vector2, radius: float) -> Vector2:
 	var result: Vector2 = point
-	for rect: Rect2 in rects:
+	for rect: Rect2 in _near(point, radius):
 		if _overlaps(rect, result, radius):
 			result = _surface_point(rect, result) + _normal(rect, result) * radius
 	return result
@@ -45,7 +62,7 @@ func push_out(point: Vector2, radius: float) -> Vector2:
 ## around a piece always goes the same way round, so it never turns back and gets stuck.
 func steer(point: Vector2, radius: float, walk: Vector2, detour: int) -> Array:
 	var near: bool = false
-	for rect: Rect2 in rects:
+	for rect: Rect2 in _near(point, radius + RELEASE_MARGIN):
 		if not _overlaps(rect, point, radius + RELEASE_MARGIN):
 			continue
 		near = true
@@ -68,6 +85,18 @@ func _pick_way_round(rect: Rect2, point: Vector2, walk: Vector2, side: Vector2) 
 	if absf(along) < SLIDE_ALONG:
 		along = (point - rect.get_center()).dot(side)
 	return -1 if along < 0.0 else 1
+
+
+## The furniture that may touch a circle of `reach` at `point`.
+func _near(point: Vector2, reach: float) -> Array[Rect2]:
+	if reach > CELL_MARGIN:
+		return rects
+	var found: Array = _cells.get(_cell(point), _none)
+	return found as Array[Rect2]
+
+
+static func _cell(point: Vector2) -> Vector2i:
+	return Vector2i(floori(point.x / CELL_SIZE), floori(point.y / CELL_SIZE))
 
 
 func _overlaps(rect: Rect2, point: Vector2, radius: float) -> bool:

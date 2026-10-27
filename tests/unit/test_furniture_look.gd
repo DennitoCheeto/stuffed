@@ -1,6 +1,7 @@
 extends GutTest
-## The Bedroom's furniture and its six places (spec 05 §4.2, §5, §6, M3.6-08): every piece has its
-## look, all of it is baked once into two layers, no danger colour and no broken shape.
+## The Bedroom's furniture and its six places (spec 05 §4.2, §5, §6, M3.6-08): every piece
+## has its look, each piece is baked once and drawn on its own node (off-screen pieces are skipped), no
+## danger colour and no broken shape.
 
 const ARENA_SCENE: PackedScene = preload("res://src/arena/arena.tscn")
 ## Pieces each layer must show, in `FurnitureLook.Layer` order.
@@ -44,27 +45,39 @@ func before_each() -> void:
 
 
 func test_every_layer_shows_its_pieces() -> void:
-	var layers: Array[BuildingSketch] = arena.furniture_layers()
-	assert_eq(layers.size(), FurnitureLook.Layer.size())
 	for i: int in LAYER_PARTS.size():
+		var shown: Array[StringName] = []
+		for sketch: BuildingSketch in arena.furniture_sketches(i as FurnitureLook.Layer):
+			shown.append_array(sketch.parts)
 		for part: StringName in LAYER_PARTS[i]:
-			assert_has(layers[i].parts, part, "layer %d shows %s" % [i, part])
+			assert_has(shown, part, "layer %d shows %s" % [i, part])
 
 
-func test_the_furniture_is_baked_once() -> void:
-	var first: Array[BuildingSketch] = arena.furniture_layers()
-	var again: Array[BuildingSketch] = arena.furniture_layers()
-	for i: int in first.size():
-		assert_same(first[i], again[i], "layer %d is built once" % i)
-		assert_same(first[i].baked(), again[i].baked(), "and baked once")
-		assert_gt(first[i].baked().get_surface_count(), 0, "layer %d is drawn" % i)
+func test_each_piece_is_baked_once_and_drawn_on_its_own_node() -> void:
+	var meshes: Array[ArrayMesh] = []
+	for layer: FurnitureLook.Layer in FurnitureLook.Layer.values():
+		var first: Array[BuildingSketch] = arena.furniture_sketches(layer)
+		var again: Array[BuildingSketch] = arena.furniture_sketches(layer)
+		assert_gt(first.size(), 1, "layer %d has a look per piece" % layer)
+		for i: int in first.size():
+			assert_same(first[i], again[i], "built once")
+			assert_same(first[i].baked(), again[i].baked(), "and baked once")
+			meshes.append(first[i].baked())
+	var drawn: Array[ArrayMesh] = []
+	for child: Node in arena.get_children():
+		if child is BakedMeshNode:
+			drawn.append((child as BakedMeshNode).mesh)
+	for mesh: ArrayMesh in meshes:
+		assert_has(drawn, mesh, "every piece is drawn on its own node")
+	assert_has(drawn, BedroomLook.sunbeams(arena.size, arena.room), "the sunbeams too")
 
 
 func test_no_danger_colours_and_no_broken_shapes() -> void:
-	for layer: BuildingSketch in arena.furniture_layers():
-		assert_eq(layer.broken_shapes(), PackedStringArray(), "every shape can be filled")
-		for color: Color in layer.colors():
-			assert_false(UiColors.is_danger(color), "%s is enemy red/orange" % color.to_html())
+	for layer: FurnitureLook.Layer in FurnitureLook.Layer.values():
+		for sketch: BuildingSketch in arena.furniture_sketches(layer):
+			assert_eq(sketch.broken_shapes(), PackedStringArray(), "every shape can be filled")
+			for color: Color in sketch.colors():
+				assert_false(UiColors.is_danger(color), "%s is enemy red/orange" % color.to_html())
 
 
 func test_every_block_letter_has_a_glyph() -> void:

@@ -108,6 +108,24 @@ func test_a_walker_gets_around_a_box() -> void:
 	assert_lt(walker.distance_to(target), 5.0, "reached the target (at %s)" % walker)
 
 
+## The lookup grid only skips pieces that are far away: same answers as checking every piece.
+func test_the_lookup_grid_gives_the_same_answers_as_checking_everything() -> void:
+	var furniture: Obstacles = LAYOUT.obstacles()
+	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
+	rng.seed = 11
+	for i: int in 3000:
+		# Right around a piece: the edges are where a cell could miss it.
+		var near: Rect2 = furniture.rects[i % furniture.rects.size()].grow(BIGGEST_RADIUS)
+		var point: Vector2 = near.position + near.size * Vector2(rng.randf(), rng.randf())
+		var radius: float = rng.randf_range(1.0, BIGGEST_RADIUS)
+		var any: bool = false
+		for rect: Rect2 in furniture.rects:
+			any = any or point.clamp(rect.position, rect.end).distance_to(point) < radius
+		assert_eq(furniture.blocks(point, radius), any, "at %s, radius %.0f" % [point, radius])
+		if any != furniture.blocks(point, radius):
+			return
+
+
 func test_floor_decorations_are_walked_over_and_the_rest_blocks() -> void:
 	var kinds: Dictionary[FurniturePiece.Kind, bool] = {}
 	for piece: FurniturePiece in LAYOUT.pieces:
