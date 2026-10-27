@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="TrickDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/town/trick_def.gd" id="1_trick"]
+
+[resource]
+script = ExtResource("1_trick")
+id = &"head_start"
+display_name = "Head Start"
+text = "Your starting weapon starts at Lv 2."
+needs_level = 1
+coins = 250
+stuffing = 5
+thread = 0

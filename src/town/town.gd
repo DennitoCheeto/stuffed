@@ -249,6 +249,17 @@ func try_build(building: TownBuilding) -> bool:
 	return true
 
 
+## Buys trick `index` of `building`'s branch (spec 06, AC-66): pays once, remembers it and saves
+## at once. Returns false (a "nope") if it can't be bought yet.
+func try_buy_trick(building: TownBuilding, index: int) -> bool:
+	if building.is_busy() or not TrickBook.buy(save, building.building, index):
+		Sfx.play(&"nope")
+		return false
+	refresh()
+	changed.emit()
+	return true
+
+
 ## Developer menu: the next level of `building` for free, even if it's still tangled in yarn.
 func dev_build(building: TownBuilding) -> bool:
 	var next: BuildingLevel = building.building.next(building.level)

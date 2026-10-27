@@ -1,8 +1,8 @@
 class_name TownDevMenu
 extends CanvasLayer
 ## Developer menu in town (F1, spec 03 §10): give materials, rebuild or upgrade any building for
-## free, add a plushie, fill or clear the Scrapbook, reset the whole town. Everything it changes
-## is saved right away (through the town's `changed`).
+## free, add a plushie, fill or clear the Scrapbook, give or clear all tricks, reset the whole
+## town. Everything it changes is saved right away (through the town's `changed`).
 
 const PANEL_COLOR: Color = Color(0.1, 0.09, 0.13, 0.92)
 ## What "Give materials" puts in the jars (developer shortcut, not balance).
@@ -13,6 +13,8 @@ const BUILD_ALL: String = "Build everything"
 const ADD_PLUSHIE: String = "Add plushie"
 const FILL_BOOK: String = "Fill Scrapbook"
 const CLEAR_BOOK: String = "Clear Scrapbook"
+const GIVE_TRICKS: String = "Give all tricks"
+const CLEAR_TRICKS: String = "Clear tricks"
 const RESET: String = "Reset town"
 const RESET_SURE: String = "Really reset?"
 ## The Scrapbook's pages and entries (to fill it).
@@ -75,6 +77,7 @@ func _build() -> void:
 		_row(column, [build_label(building)], [_build_one.bind(building)])
 	_row(column, [BUILD_ALL, ADD_PLUSHIE], [build_everything, add_plushie])
 	_row(column, [FILL_BOOK, CLEAR_BOOK], [fill_scrapbook, clear_scrapbook])
+	_row(column, [GIVE_TRICKS, CLEAR_TRICKS], [give_all_tricks, clear_tricks])
 	_row(column, [RESET], [_ask_reset])
 
 
@@ -146,6 +149,19 @@ func fill_scrapbook() -> void:
 func clear_scrapbook() -> void:
 	town.save.seen.clear()
 	RecipeBook.load_from(town.save)
+	_saved()
+
+
+## Every trick of every building counts as bought (spec 06 §6), whatever the building levels.
+func give_all_tricks() -> void:
+	for trick: TrickDef in TrickBook.all_tricks(town.layout):
+		if not town.save.has_trick(String(trick.id)):
+			town.save.tricks.append(String(trick.id))
+	_saved()
+
+
+func clear_tricks() -> void:
+	town.save.tricks.clear()
 	_saved()
 
 

@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="TrickDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/town/trick_def.gd" id="1_trick"]
+
+[resource]
+script = ExtResource("1_trick")
+id = &"second_helping"
+display_name = "Second Helping"
+text = "Healing past full health becomes a shield."
+needs_level = 2
+coins = 600
+stuffing = 15
+thread = 0

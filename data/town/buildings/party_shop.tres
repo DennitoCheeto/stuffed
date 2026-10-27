@@ -1,7 +1,11 @@
-[gd_resource type="Resource" script_class="BuildingDef" load_steps=6 format=3]
+[gd_resource type="Resource" script_class="BuildingDef" load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://src/town/building_def.gd" id="1_def"]
 [ext_resource type="Script" path="res://src/town/building_level.gd" id="2_level"]
+[ext_resource type="Script" path="res://src/town/trick_def.gd" id="3_trick"]
+[ext_resource type="Resource" path="res://data/town/tricks/confetti_rush.tres" id="t1"]
+[ext_resource type="Resource" path="res://data/town/tricks/double_fun.tres" id="t2"]
+[ext_resource type="Resource" path="res://data/town/tricks/pocket_pickup.tres" id="t3"]
 
 [sub_resource type="Resource" id="Resource_level_1"]
 script = ExtResource("2_level")
@@ -34,3 +38,4 @@ id = &"party_shop"
 display_name = "Party Shop"
 summary = "Floor pickups drop more often"
 levels = Array[ExtResource("2_level")]([SubResource("Resource_level_1"), SubResource("Resource_level_2"), SubResource("Resource_level_3")])
+tricks = Array[ExtResource("3_trick")]([ExtResource("t1"), ExtResource("t2"), ExtResource("t3")])

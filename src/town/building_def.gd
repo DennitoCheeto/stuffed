@@ -12,6 +12,8 @@ extends Resource
 @export var levels: Array[BuildingLevel] = []
 ## World pixels per design unit of its art-kit look (spec 05 §2.2): tunes how big it stands.
 @export var art_scale: float = 1.0
+## Its branch of 3 tricks (spec 06), bought in this order; trick N needs the building at Lv N.
+@export var tricks: Array[TrickDef] = []
 
 
 func max_level() -> int:

@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="TrickDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/town/trick_def.gd" id="1_trick"]
+
+[resource]
+script = ExtResource("1_trick")
+id = &"four_of_a_kind"
+display_name = "Four of a Kind"
+text = "Level-ups show 4 cards."
+needs_level = 3
+coins = 1000
+stuffing = 25
+thread = 6
