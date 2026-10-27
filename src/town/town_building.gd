@@ -75,7 +75,7 @@ func _init(town_spot: TownSpot, start_level: int, is_unlocked: bool) -> void:
 
 
 func _ready() -> void:
-	material = WorldPalette.current().grain_material()
+	material = WorldPalette.current().building_material()
 	var box: StyleBoxFelt = StyleBoxFelt.new(UiColors.TAG, UiColors.TAG.darkened(0.28))
 	box.radius = 8.0
 	box.stitch_inset = 3.0

@@ -103,3 +103,5 @@ door_glow = Color(1, 0.86, 0.56, 1)
 door_glow_dark = Color(0.9, 0.74, 0.42, 1)
 floor_brightness_min = 0.65
 grain_strength = 0.045
+flutter_pixels = 2.5
+flutter_speed = 5.0

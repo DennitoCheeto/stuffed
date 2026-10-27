@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="TownLifeRules" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/town/town_life_rules.gd" id="1_rules"]
+
+[resource]
+script = ExtResource("1_rules")
+sunbeam_starts = PackedFloat32Array(450, 1450)
+sunbeam_width = 240.0
+sunbeam_slant = 0.35
+sunbeam_strength = 0.9
+sparkles_per_beam = 12
+sparkle_size = 6.0
+sparkle_drift = 12.0
+sparkle_twinkle = 0.5
+plane_first_at = 8.0
+plane_min_gap = 20.0
+plane_max_gap = 40.0
+plane_speed = 280.0
+plane_size = 46.0
+plane_height = 80.0
+plane_bob = 22.0

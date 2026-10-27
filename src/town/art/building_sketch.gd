@@ -26,12 +26,21 @@ var _mark_colors: Array[Color] = []
 var _mark_widths: PackedFloat32Array = []
 ## Stitch dashes: pairs of points (start, end).
 var _seams: PackedVector2Array = []
+## How each ink shape, mark and seam dash may flutter: the anchor (fixed point) and the direction
+## to the loose end (zero = never moves). One entry per shape / per dash.
+var _ink_sway: Array[PackedVector2Array] = []
+var _mark_sway: Array[PackedVector2Array] = []
+var _seam_sway: Array[PackedVector2Array] = []
+## The flutter for pieces added now (sway / still).
+var _sway: PackedVector2Array = [Vector2.ZERO, Vector2.ZERO]
 ## Shapes that could not be filled (crossing edges): tests keep this at zero.
 var _broken: PackedStringArray = []
 var _mesh: ArrayMesh
 ## The mesh being baked: triangle corners and their colours.
 var _bake_points: PackedVector2Array = []
 var _bake_colors: PackedColorArray = []
+## How far each baked corner may flutter (UV.x, 0..1; the building shader moves it).
+var _bake_uvs: PackedVector2Array = []
 
 
 ## `unit` = world pixels per design unit; `is_ruin` greys every colour a little.
@@ -49,6 +58,25 @@ func turn(angle: float, pivot: Vector2 = Vector2.ZERO, shift: Vector2 = Vector2.
 
 func straighten() -> void:
 	_turn = Transform2D.IDENTITY
+
+
+## Pieces added from now on flutter (flags, bunting): fixed at nchor, the further a corner lies
+## towards nchor + toward, the more it moves (spec 05 §3.4). still ends it.
+func sway(anchor: Vector2, toward: Vector2) -> void:
+	_sway = [_turn * (anchor * _unit), _turn.basis_xform(toward * _unit)]
+
+
+func still() -> void:
+	_sway = [Vector2.ZERO, Vector2.ZERO]
+
+
+## How far each baked corner may flutter (0 = fixed, 1 = a loose cloth end).
+func sway_weights() -> PackedFloat32Array:
+	baked()
+	var weights: PackedFloat32Array = []
+	for uv: Vector2 in _bake_uvs:
+		weights.append(uv.x)
+	return weights
 
 
 ## A felt piece with the ink outline; `sewn` adds a stitched line just inside its edge.
@@ -101,6 +129,7 @@ func line(points: PackedVector2Array, color: Color, width: float = 2.0) -> void:
 	_mark_points.append(_place(points))
 	_mark_colors.append(_tint(color))
 	_mark_widths.append(width * _unit)
+	_mark_sway.append(_sway)
 
 
 ## Stripes of `color` across `points` (gingham, painted bands): every `spacing` units, `width` wide.
@@ -214,6 +243,7 @@ func _add_ink(shapes: Array[PackedVector2Array]) -> void:
 	for shape: PackedVector2Array in shapes:
 		if shape.size() >= 3 and not Geometry2D.triangulate_polygon(shape).is_empty():
 			_ink.append(shape)
+			_ink_sway.append(_sway)
 
 
 func _add_fill(shape: PackedVector2Array, color: Color) -> void:
@@ -223,6 +253,7 @@ func _add_fill(shape: PackedVector2Array, color: Color) -> void:
 	_mark_points.append(shape)
 	_mark_colors.append(_tint(color))
 	_mark_widths.append(0.0)
+	_mark_sway.append(_sway)
 
 
 func _add_dashes(path: PackedVector2Array, closed: bool) -> void:
@@ -244,6 +275,7 @@ func _add_dashes(path: PackedVector2Array, closed: bool) -> void:
 			if phase < dash:
 				_seams.append(from.lerp(to, along / length))
 				_seams.append(from.lerp(to, (along + step) / length))
+				_seam_sway.append(_sway)
 			along += step
 			walked += step
 
@@ -260,19 +292,21 @@ func _tint(color: Color) -> Color:
 func _bake() -> ArrayMesh:
 	_bake_points = PackedVector2Array()
 	_bake_colors = PackedColorArray()
+	_bake_uvs = PackedVector2Array()
+	var fixed: PackedVector2Array = [Vector2.ZERO, Vector2.ZERO]
 	for shape: PackedVector2Array in _shadows:
-		_bake_fill(shape, _palette.shadow)
-	for shape: PackedVector2Array in _ink:
-		_bake_fill(shape, _palette.ink)
+		_bake_fill(shape, _palette.shadow, fixed)
+	for i: int in _ink.size():
+		_bake_fill(_ink[i], _palette.ink, _ink_sway[i])
 	for i: int in _mark_points.size():
 		if _mark_widths[i] > 0.0:
-			_bake_stroke(_mark_points[i], _mark_colors[i], _mark_widths[i])
+			_bake_stroke(_mark_points[i], _mark_colors[i], _mark_widths[i], _mark_sway[i])
 		else:
-			_bake_fill(_mark_points[i], _mark_colors[i])
+			_bake_fill(_mark_points[i], _mark_colors[i], _mark_sway[i])
 	var thread: Color = _tint(_palette.seam_light)
 	for i: int in range(0, _seams.size(), 2):
 		var dash: PackedVector2Array = [_seams[i], _seams[i + 1]]
-		_bake_stroke(dash, thread, _palette.seam_width)
+		_bake_stroke(dash, thread, _palette.seam_width, _seam_sway[i >> 1])
 	var mesh: ArrayMesh = ArrayMesh.new()
 	if _bake_points.is_empty():
 		return mesh
@@ -280,24 +314,28 @@ func _bake() -> ArrayMesh:
 	arrays.resize(Mesh.ARRAY_MAX)
 	arrays[Mesh.ARRAY_VERTEX] = _bake_points
 	arrays[Mesh.ARRAY_COLOR] = _bake_colors
+	arrays[Mesh.ARRAY_TEX_UV] = _bake_uvs
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 	return mesh
 
 
 ## A line as filled shapes with round ends.
-func _bake_stroke(path: PackedVector2Array, color: Color, width: float) -> void:
+func _bake_stroke(
+	path: PackedVector2Array, color: Color, width: float, sway: PackedVector2Array
+) -> void:
 	var join: Geometry2D.PolyJoinType = Geometry2D.JOIN_ROUND
 	var ends: Geometry2D.PolyEndType = Geometry2D.END_ROUND
 	for shape: PackedVector2Array in Geometry2D.offset_polyline(path, width / 2.0, join, ends):
-		_bake_fill(shape, color)
+		_bake_fill(shape, color, sway)
 
 
 ## A filled shape plus a thin ring fading out around it (soft felt edges, like `FeltDraw.fill`).
-func _bake_fill(shape: PackedVector2Array, color: Color) -> void:
+func _bake_fill(shape: PackedVector2Array, color: Color, sway: PackedVector2Array) -> void:
 	var indices: PackedInt32Array = Geometry2D.triangulate_polygon(shape)
 	for index: int in indices:
 		_bake_points.append(shape[index])
 		_bake_colors.append(color)
+		_bake_uvs.append(Vector2(_weight(shape[index], sway), 0.0))
 	if indices.is_empty():
 		return
 	var outer: PackedVector2Array = FeltDraw.feathered(shape, FeltDraw.FEATHER)
@@ -309,3 +347,13 @@ func _bake_fill(shape: PackedVector2Array, color: Color) -> void:
 		ring.append(outer[next])
 		_bake_points.append_array(ring)
 		_bake_colors.append_array([color, clear, color, color, clear, clear])
+		for point: Vector2 in ring:
+			_bake_uvs.append(Vector2(_weight(point, sway), 0.0))
+
+
+## How far point may flutter for sway ([anchor, toward]): 0 at the anchor, 1 at its end.
+static func _weight(point: Vector2, sway: PackedVector2Array) -> float:
+	var toward: Vector2 = sway[1]
+	if toward == Vector2.ZERO:
+		return 0.0
+	return clampf((point - sway[0]).dot(toward) / toward.length_squared(), 0.0, 1.0)

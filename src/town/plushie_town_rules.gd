@@ -30,6 +30,13 @@ extends Resource
 @export var keep_clear: float = 40.0
 ## How many pixels it bobs up and down while walking.
 @export var bob_pixels: float = 4.0
+## How likely the next walk goes to a free hangout spot (reading, table, nap, lookout).
+@export var spot_chance: float = 0.35
+## Hanging out at a spot lasts this long (seconds, picked at random in between).
+@export var spot_min_seconds: float = 6.0
+@export var spot_max_seconds: float = 14.0
+## Climbing up to (or down from) a spot like the Watchtower lookout (pixels per second).
+@export var climb_speed: float = 160.0
 ## The stitch-up moment when a plushie moves in (seconds).
 @export var stitch_seconds: float = 1.3
 ## Banner when plushies move in ("%s" = the names) and its subtitle ("%d" = coin bonus in %).
