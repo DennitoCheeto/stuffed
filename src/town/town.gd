@@ -71,6 +71,8 @@ var unlock_toast: WeaponUnlockToast = WeaponUnlockToast.new()
 var book: ScrapbookBook = ScrapbookBook.new()
 ## Developer shortcuts (F1, spec 03 §10).
 var dev_menu: TownDevMenu = TownDevMenu.new()
+## Buying building tricks (spec 06).
+var tricks: TownTricks = TownTricks.new(self)
 
 ## Set once the Bedroom door was used (one press = one run).
 var _leaving: bool = false
@@ -246,17 +248,6 @@ func try_build(building: TownBuilding) -> bool:
 		Sfx.play(&"nope")
 		return false
 	_raise(building, next)
-	return true
-
-
-## Buys trick `index` of `building`'s branch (spec 06, AC-66): pays once, remembers it and saves
-## at once. Returns false (a "nope") if it can't be bought yet.
-func try_buy_trick(building: TownBuilding, index: int) -> bool:
-	if building.is_busy() or not TrickBook.buy(save, building.building, index):
-		Sfx.play(&"nope")
-		return false
-	refresh()
-	changed.emit()
 	return true
 
 

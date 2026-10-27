@@ -452,5 +452,5 @@ _Last updated: 2026-10-27 (M3.7 issues created, M3.7-01 in progress)_
   (`Layer` = RUG, WALLS, DETAILS), furniture, sunbeams. Big meshes: cut them so off-screen parts get skipped.
 - Tricks (M3.7-01, spec 06): `TrickDef` (`data/town/tricks/<id>.tres`: id, name, text, `needs_level`, price),
   listed in order on `BuildingDef.tricks`. Rules in `TrickBook` (`state_of` → `State`, `buy`, `buyable`,
-  `all_tricks(layout)`); bought ids in `TownSave.tricks` (save v4, `has_trick(id)`). Town: `town.try_buy_trick(building,
+  `all_tricks(layout)`); bought ids in `TownSave.tricks` (save v4, `has_trick(id)`). Town: `town.tricks.try_buy(building,
   index)` pays + saves. Dev menu `GIVE_TRICKS` / `CLEAR_TRICKS`. Tests: `test_tricks.gd`, `test_06_trick_buying.gd`.
