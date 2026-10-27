@@ -29,15 +29,11 @@ const TOP_PARTS: Dictionary[StringName, Array] = {
 	&"plush_hospital": [&"downstairs_windows", &"roof_cross", &"flower_bushes"],
 }
 ## What Lv 1 and Lv 2 of the redrawn Party Shop and Hospital show (spec 05 §3.2, #187).
-const LEVEL_PARTS: Dictionary[StringName, Array] = {
-	&"party_shop": [
-		[&"shop_box", &"ribbon_band", &"shop_window", &"shelves", &"door"],
-		[&"goods", &"awning", &"sign", &"door_bell", &"second_box"],
-	],
-	&"plush_hospital": [
-		[&"house", &"roof", &"door", &"front_step"],
-		[&"upstairs", &"ward_windows", &"ward_beds", &"plushies_in_bed"],
-	],
+const LEVEL_PARTS: Dictionary[String, Array] = {
+	"party_shop 1": [&"shop_box", &"ribbon_band", &"shop_window", &"shelves", &"door"],
+	"party_shop 2": [&"goods", &"awning", &"sign", &"door_bell", &"second_box"],
+	"plush_hospital 1": [&"house", &"roof", &"door", &"front_step"],
+	"plush_hospital 2": [&"upstairs", &"ward_windows", &"ward_beds", &"plushies_in_bed"],
 }
 ## How far a look may stick out of its spot sideways (share of the spot's width).
 const SIDE_ROOM: float = 0.05
@@ -113,13 +109,14 @@ func test_level_3_shows_the_full_object() -> void:
 
 
 func test_party_shop_and_hospital_grow_like_the_picked_mockup() -> void:
-	for id: StringName in LEVEL_PARTS:
+	for key: String in LEVEL_PARTS:
+		var id: StringName = StringName(key.get_slice(" ", 0))
+		var level: int = key.get_slice(" ", 1).to_int()
 		var looks: Array[BuildingSketch] = _looks(id)
-		for level: int in [1, 2]:
-			for part: StringName in LEVEL_PARTS[id][level - 1]:
-				assert_has(looks[level].parts, part, "%s Lv %d shows %s" % [id, level, part])
-				if level == 2:
-					assert_does_not_have(looks[1].parts, part, "%s: %s is new" % [id, part])
+		for part: StringName in LEVEL_PARTS[key]:
+			assert_has(looks[level].parts, part, "%s shows %s" % [key, part])
+			if level == 2:
+				assert_does_not_have(looks[1].parts, part, "%s: %s is new" % [key, part])
 	var hospital: Array[BuildingSketch] = _looks(&"plush_hospital")
 	var one_storey: float = hospital[1].bounds().size.y
 	assert_gt(hospital[2].bounds().size.y, one_storey * 1.3, "Lv 2 grows an upstairs")
