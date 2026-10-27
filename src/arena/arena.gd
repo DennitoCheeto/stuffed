@@ -1,24 +1,27 @@
 class_name Arena
 extends Node2D
-## The bedroom floor the run happens on: warm floorboards with a simple pattern (so movement is
-## readable) bounded by toy-block walls, with hand-placed furniture (spec 02 §10). Walls and
-## furniture bodies are built in code. Furniture blocks players (physics), zombies and enemy
-## bullets (through `obstacles`); the players' shots fly over it. All colours come from the
-## world palette (spec 05 §2.1); the whole room has the felt grain.
+## The Bedroom the run happens on (spec 05 §4.1): honey floorboards, the patchwork rug in the
+## middle where every run starts, toy-block walls and the top wall with two windows, sunbeams
+## falling across the middle, plus hand-placed furniture (spec 02 §10). Floor, rug, walls and
+## sunbeams are baked once (`BedroomLook`, a few meshes). Walls and furniture bodies are built in
+## code. Furniture blocks players (physics), zombies and enemy bullets (through `obstacles`); the
+## players' shots fly over it. All colours come from the world palette (spec 05 §2.1); the whole
+## room has the felt grain.
 
 const WALL_LAYER: int = 1
 const SHADOW_OFFSET: Vector2 = Vector2(10.0, 16.0)
 ## How see-through the light marks on toy blocks are.
 const BLOCK_INNER_ALPHA: float = 0.35
+const ROOM: BedroomRoom = preload("res://data/arena/bedroom_room.tres")
 
 ## Size of the walkable floor in pixels (about 4 x 4 screens).
 @export var size: Vector2 = Vector2(7680.0, 4320.0)
 ## Thickness of the toy-block walls around the floor.
 @export var wall_thickness: float = 96.0
-## Side length of one carpet pattern tile.
-@export var tile_size: float = 192.0
 ## The furniture of this room (none = an open floor).
 @export var furniture: FurnitureLayout
+## How the floor and the room look (boards, rug, top wall, sunbeams, vignette).
+@export var room: BedroomRoom = ROOM
 
 var palette: WorldPalette = WorldPalette.current()
 
@@ -35,9 +38,10 @@ func play_rect() -> Rect2:
 	return Rect2(Vector2.ZERO, size)
 
 
-## The floor plus the walls: the camera never shows anything outside this.
+## The floor plus the walls (the top wall is taller): the camera never shows anything outside.
 func outer_rect() -> Rect2:
-	return play_rect().grow(wall_thickness)
+	var outer: Rect2 = play_rect().grow(wall_thickness)
+	return outer.grow_side(SIDE_TOP, room.top_wall_height - wall_thickness)
 
 
 func center() -> Vector2:
@@ -49,6 +53,21 @@ func obstacles() -> Obstacles:
 	return Obstacles.new(_blocking_rects())
 
 
+## Where the patchwork rugs lie (the middle one is where every run starts).
+func rug_rects() -> Array[Rect2]:
+	var rects: Array[Rect2] = []
+	if furniture != null:
+		for piece: FurniturePiece in furniture.pieces:
+			if piece.kind == FurniturePiece.Kind.RUG:
+				rects.append(piece.rect)
+	return rects
+
+
+## The baked floor, rug, walls and window layers (back to front).
+func look_layers() -> Array[BuildingSketch]:
+	return BedroomLook.layers(size, wall_thickness, room, rug_rects())
+
+
 func _blocking_rects() -> Array[Rect2]:
 	if furniture == null:
 		return []
@@ -58,7 +77,7 @@ func _blocking_rects() -> Array[Rect2]:
 func _build_walls() -> void:
 	var t: float = wall_thickness
 	var outer: Rect2 = outer_rect()
-	_add_wall(Rect2(outer.position, Vector2(outer.size.x, t)))
+	_add_wall(Rect2(outer.position, Vector2(outer.size.x, -outer.position.y)))
 	_add_wall(Rect2(Vector2(outer.position.x, size.y), Vector2(outer.size.x, t)))
 	_add_wall(Rect2(Vector2(-t, 0.0), Vector2(t, size.y)))
 	_add_wall(Rect2(Vector2(size.x, 0.0), Vector2(t, size.y)))
@@ -78,58 +97,19 @@ func _add_wall(rect: Rect2) -> void:
 
 
 func _draw() -> void:
-	draw_rect(play_rect(), palette.board_colors[0])
-	_draw_carpet_pattern()
-	_draw_blocks()
+	var layers: Array[BuildingSketch] = look_layers()
+	layers[BedroomLook.Layer.BOARDS].draw(self)
+	layers[BedroomLook.Layer.RUG].draw(self)
 	if furniture != null:
 		for piece: FurniturePiece in furniture.pieces:
 			_draw_piece(piece)
-
-
-func _draw_carpet_pattern() -> void:
-	var columns: int = ceili(size.x / tile_size)
-	var rows: int = ceili(size.y / tile_size)
-	for row: int in rows:
-		for column: int in columns:
-			if (row + column) % 2 == 0:
-				continue
-			var tile: Rect2 = Rect2(Vector2(column, row) * tile_size, Vector2.ONE * tile_size)
-			draw_rect(tile.intersection(play_rect()), WorldPalette.pick(palette.board_colors, 1))
-	var seam: Color = palette.board_seam
-	for column: int in range(1, columns):
-		var x: float = column * tile_size
-		draw_dashed_line(Vector2(x, 0.0), Vector2(x, size.y), seam, 2.0, 10.0)
-	for row: int in range(1, rows):
-		var y: float = row * tile_size
-		draw_dashed_line(Vector2(0.0, y), Vector2(size.x, y), seam, 2.0, 10.0)
-
-
-func _draw_blocks() -> void:
-	var outer: Rect2 = outer_rect()
-	var t: float = wall_thickness
-	var count_x: int = ceili(outer.size.x / t)
-	var count_y: int = ceili(size.y / t)
-	for i: int in count_x:
-		var x: float = outer.position.x + i * t
-		_draw_block(Vector2(x, outer.position.y), i)
-		_draw_block(Vector2(x, size.y), i + 1)
-	for i: int in count_y:
-		var y: float = i * t
-		_draw_block(Vector2(-t, y), i + 2)
-		_draw_block(Vector2(size.x, y), i + 3)
-
-
-func _draw_block(top_left: Vector2, index: int) -> void:
-	var t: float = wall_thickness
-	var block: Rect2 = Rect2(top_left, Vector2(t, t))
-	draw_rect(block.grow(-2.0), WorldPalette.pick(palette.wall_blocks, index))
-	draw_rect(block.grow(-t * 0.25), Color(palette.seam_light, BLOCK_INNER_ALPHA), false, 3.0)
+	layers[BedroomLook.Layer.WALLS].draw(self)
+	layers[BedroomLook.Layer.DETAILS].draw(self)
+	draw_mesh(BedroomLook.sunbeams(size, room), null)
 
 
 func _draw_piece(piece: FurniturePiece) -> void:
 	match piece.kind:
-		FurniturePiece.Kind.RUG:
-			_draw_rug(piece.rect)
 		FurniturePiece.Kind.BED:
 			_draw_bed(piece.rect)
 		FurniturePiece.Kind.TOY_BOX:
@@ -163,13 +143,6 @@ func _draw_stitches(rect: Rect2) -> void:
 
 func _draw_shadow(rect: Rect2, corner: float) -> void:
 	_draw_felt(Rect2(rect.position + SHADOW_OFFSET, rect.size), palette.shadow, corner, false)
-
-
-func _draw_rug(rect: Rect2) -> void:
-	var corner: float = minf(rect.size.x, rect.size.y) * 0.5
-	_draw_felt(rect, palette.rug_border, corner, false)
-	_draw_felt(rect.grow(-48.0), WorldPalette.pick(palette.rug_patches, 0), corner - 48.0, false)
-	_draw_felt(rect.grow(-110.0), WorldPalette.pick(palette.rug_patches, 2), corner - 110.0, false)
 
 
 func _draw_bed(rect: Rect2) -> void:

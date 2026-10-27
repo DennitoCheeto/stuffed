@@ -85,6 +85,8 @@ var pickup_rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var floor_pickup_drops: FloorPickupDrops
 ## Edge arrows to floor pickups out of sight (on the HUD).
 var pickup_arrows: PickupArrows = PickupArrows.new()
+## The soft warm vignette at the screen edges (under the HUD).
+var vignette: RoomVignette
 ## Materials and a freed plushie collected for the town in this run (spec 03 §3).
 var haul: RunHaul = RunHaul.new()
 ## Separate randomness for materials, so they don't change the zombies or the cards.
@@ -194,6 +196,10 @@ func _ready() -> void:
 	pause_menu.upgrade_pool = upgrade_pool
 	pickup_arrows.floor_items = floor_items
 	hud.add_child(pickup_arrows)
+	vignette = RoomVignette.new(arena.room)
+	vignette.layer = hud.layer
+	add_child(vignette)
+	move_child(vignette, hud.get_index())
 	dev_menu.setup(self)
 	dev_menu.restart_requested.connect(restart_requested.emit)
 	var first: Player = spawn_player(0, arena.center())

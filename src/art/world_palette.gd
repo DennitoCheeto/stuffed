@@ -26,6 +26,12 @@ static var _current: WorldPalette
 @export var rug_seams: Array[Color] = []
 ## Toy-block walls around the room.
 @export var wall_blocks: Array[Color] = []
+## The top wall above the floor (spec 05 §4.1): wallpaper, its soft stripes (drawn at
+## `pattern_alpha`), the window frames and the sky behind the glass.
+@export var wallpaper: Color = Color.WHITE
+@export var wallpaper_stripe: Color = Color.WHITE
+@export var window_frame: Color = Color.WHITE
+@export var window_sky: Color = Color.WHITE
 
 @export_group("Bedroom furniture")
 @export var bed_frame: Color = Color.WHITE

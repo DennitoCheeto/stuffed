@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-27 (M3.6-06 town life)_
+_Last updated: 2026-10-27 (M3.6-07 Bedroom floor and room)_
 
 ## Where we are
 
@@ -16,7 +16,7 @@ _Last updated: 2026-10-27 (M3.6-06 town life)_
 | M1 Core run | ✅ accepted 2026-10-21 (PRs #17–#29; playtest P-1 … P-6 passed, 144 fps on the PO's PC) |
 | M2 Build variety | ✅ accepted 2026-10-24 (played with M3): all 19 tickets merged (PRs #47–#49, #51–#55, #57, #58, #60, #61, #63, #67, #69, #77, #78, #80, #81); + spec 02b floor pickups approved (#83): M2-20 (PR #88), M2-21 (PR #89) and M2-22 (PR #90) merged |
 | M3.5 UI and juice | ✅ accepted 2026-10-25: spec 04 (PR #123), M3.5-01 … 08 (PRs #133, #137, #138, #140, #141, #143, #149, #150) + PO fixes #136, #146, #152, #154, #156 (late-game hitches), #158 |
-| M3.6 Sunny patchwork | 🚧 spec 05 approved 2026-10-25 (PR #160; AC-58 … AC-65, P-22 … P-25); milestone M3.6, issues #162–#170 (M3.6-01 … 09); M3.6-01 world palette (#162): merged (PR #171); hero clarity #172 (part 1): merged (PR #173, floors calmer #174); M3.6-02 art kit + Lucky Jar + Armory (#163): merged (PR #175); M3.6-03 other four buildings + fort + Scrapbook stand (#164): merged (PR #179); M3.6-04 town ground + compact layout (#165): merged (PR #181); M3.6-05 town text (#166): merged (PR #188); spec update #186 merged by the PO; M3.6-10 Party Shop + Hospital redraw (#187): merged (PR #190); M3.6-06 town life (#167): PR #192 |
+| M3.6 Sunny patchwork | 🚧 spec 05 approved 2026-10-25 (PR #160; AC-58 … AC-65, P-22 … P-25); milestone M3.6, issues #162–#170 (M3.6-01 … 09); M3.6-01 world palette (#162): merged (PR #171); hero clarity #172 (part 1): merged (PR #173, floors calmer #174); M3.6-02 art kit + Lucky Jar + Armory (#163): merged (PR #175); M3.6-03 other four buildings + fort + Scrapbook stand (#164): merged (PR #179); M3.6-04 town ground + compact layout (#165): merged (PR #181); M3.6-05 town text (#166): merged (PR #188); spec update #186 merged by the PO; M3.6-10 Party Shop + Hospital redraw (#187): merged (PR #190); M3.6-06 town life (#167): merged (PR #192); M3.6-07 Bedroom floor and room (#168): PR open |
 | M3 Town | ✅ accepted 2026-10-24: spec 03 approved (PR #91); issues #92–#103; M3-01 save system (PR #105), M3-02 town + flow (PR #106), M3-03 materials (PR #107), M3-04 Way Home portal (PR #109), M3-05 rebuilding (PR #110), M3-06 Toy Box Armory (PR #114), M3-07 Lucky Jar + Watchtower + Snack Bar (PR #115), M3-08 Party Shop (PR #116), M3-09 rescue in the run (PR #117), M3-10 Plush Hospital + plushies in town (PR #118), M3-11 Scrapbook (PR #119), M3-12 co-op in town + dev menu + sounds (PR #120) |
 
 ## Next step
@@ -51,8 +51,9 @@ _Last updated: 2026-10-27 (M3.6-06 town life)_
   M3.6-04 town ground: quilt, tape measure, thread paths, compact layout, props (#165): merged (PR #181).
   M3.6-05 town text (#166): merged (PR #188).
   M3.6-10 redraw: Party Shop = gift-box shop, Plush Hospital = dollhouse (#187): merged (PR #190).
-  M3.6-06 town life: plushie spots, flutter, sparkles, paper plane (#167): PR #192.
-  **Next: M3.6-07 Bedroom floor and room (#168), then #169 zones, #170 perf check.**
+  M3.6-06 town life: plushie spots, flutter, sparkles, paper plane (#167): merged (PR #192).
+  M3.6-07 Bedroom floor and room: floorboards, patchwork rug, top wall + 2 windows, sunbeams, vignette (#168): PR open.
+  **Next: M3.6-08 Bedroom zones (#169), then #170 perf check.**
   **PO direction (2026-10-27): features first, polish later.** Fewer look rounds / option boards; ship
   "good enough" art and batch nitpicks for a later iteration pass. After M3.6: skill / progress tree spec, M4 siege.
   Speedy Stitcher = "King beaten before 9:00": PO OK (2026-10-25).
@@ -412,14 +413,20 @@ _Last updated: 2026-10-27 (M3.6-06 town life)_
   `hospital_*`, `bush` in `world_palette.tres`. Sign text is sewn into the mesh with `LookParts.letters` (stroke
   glyphs in `LookParts.GLYPHS`, add letters there). Details inside a window lose the kit outline (the glass is
   filled after all ink): use `LookParts.outlined`. `sketch.mark(part)` names a part drawn with shades/lines.
-- Town life (M3.6-06, spec 05 §3.4): plushie hangout spots are PlushieSpots in pillow_fort.tres
-  (layout.plushie_spots: pose READ/SIT/NAP/WAVE, t, pproach = climb foot, uilding + 
-eeds_level).
-  	own.hangouts (PlushieHangouts: ree_spots(), claim, elease, one plushie per spot). Plushie: isit(spot),
-  is_hanging_out(), pose(); states CLIMBING / HANGING_OUT; numbers spot_*, climb_speed in
-  plushie_town_rules.tres. Flutter: BuildingSketch.sway(anchor, toward) / still() stores a 0..1 weight in the
-  mesh UV.x; elt.gdshader moves it only when lutter_pixels > 0 (palette.building_material(), used by
-  buildings + fort; floors/puppets keep grain_material()). 	own.life (TownLife, numbers in
-  data/town/town_life_rules.tres): eam(i), sparkle_positions(), plane_flying, 
-ext_plane_at, planes_flown.
-  Sunbeams are very soft on the bright quilt: raise sunbeam_strength if the PO wants them stronger.
+- Town life (M3.6-06, spec 05 §3.4): plushie hangout spots are `PlushieSpot`s in `pillow_fort.tres`
+  (`layout.plushie_spots`: pose READ/SIT/NAP/WAVE, `at`, `approach` = climb foot, `building` + `needs_level`).
+  `town.hangouts` (`PlushieHangouts`: `free_spots()`, `claim`, `release`, one plushie per spot). Plushie:
+  `visit(spot)`, `is_hanging_out()`, `pose()`; states CLIMBING / HANGING_OUT; numbers `spot_*`, `climb_speed` in
+  `plushie_town_rules.tres`. Flutter: `BuildingSketch.sway(anchor, toward)` / `still()` stores a 0..1 weight in
+  the mesh UV.x; `felt.gdshader` moves it only when `flutter_pixels` > 0 (`palette.building_material()`, used
+  by buildings + fort; floors/puppets keep `grain_material()`). `town.life` (`TownLife`, numbers in
+  `data/town/town_life_rules.tres`): `beam(i)`, `sparkle_positions()`, `plane_flying`, `next_plane_at`,
+  `planes_flown`. Sunbeams are very soft on the bright quilt: raise `sunbeam_strength` if the PO wants them stronger.
+- Bedroom room (M3.6-07, spec 05 §4.1): `BedroomLook.layers(size, wall, room, rugs)` = 4 baked `BuildingSketch`
+  meshes (boards, rug, walls, details = rug buttons + windows; cached) drawn by `Arena._draw` (furniture between
+  rug and walls), plus `BedroomLook.sunbeams()` (own gradient mesh; meshes need UVs or the felt shader draws
+  nothing). Numbers in `data/arena/bedroom_room.tres` (`BedroomRoom`, `arena.room`). The top wall is taller
+  than the side walls: `arena.outer_rect()` reaches up `top_wall_height` (camera limit), `play_rect()` is
+  unchanged. `run.vignette` (`RoomVignette`, a CanvasLayer on the HUD's layer, moved just before the HUD).
+  Window positions: `BedroomLook.window_rect(room, i)`, beams `beam(room, i)`. Old furniture (bed, toy boxes,
+  towers) is still drawn with `_draw_felt` until #169. Tests: `test_bedroom_look.gd`, `test_05_bedroom_room.gd`.

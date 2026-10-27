@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="BedroomRoom" format=3]
+
+[ext_resource type="Script" path="res://src/arena/bedroom_room.gd" id="1_room"]
+
+[resource]
+script = ExtResource("1_room")
+plank_width = 96.0
+plank_lengths = PackedFloat32Array(640, 880, 760, 1040, 700, 960)
+grain_lines = 2
+knot_every = 7
+rug_patch = 150.0
+rug_border = 44.0
+rug_button_every = 2
+rug_button_radius = 14.0
+top_wall_height = 380.0
+baseboard_height = 40.0
+window_centers = PackedFloat32Array(2600, 3700)
+window_size = Vector2(560, 230)
+window_bottom = 90.0
+sunbeam_length = 3000.0
+sunbeam_slant = 0.35
+sunbeam_strength = 1.0
+sunbeam_soft_edge = 0.3
+vignette_clear = 0.6

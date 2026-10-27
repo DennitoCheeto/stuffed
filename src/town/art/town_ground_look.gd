@@ -81,9 +81,9 @@ static func quilt(layout: TownLayout) -> BuildingSketch:
 			var pattern: Color = Color(palette.quilt_patterns[kind], palette.pattern_alpha)
 			match kind:
 				Patch.GINGHAM:
-					_gingham(sketch, rect, pattern)
+					gingham(sketch, rect, pattern)
 				Patch.POLKA:
-					_polka(sketch, rect, pattern)
+					polka(sketch, rect, pattern)
 				Patch.CORDUROY:
 					sketch.stripes(BuildingSketch.corners(rect), pattern, CORDUROY_STEP, 5.0, true)
 				Patch.PLAIN:
@@ -94,11 +94,11 @@ static func quilt(layout: TownLayout) -> BuildingSketch:
 	var seam: Color = palette.quilt_seam
 	var x: float = side
 	while x < play.size.x:
-		_dashed(sketch, [Vector2(x, 0.0), Vector2(x, play.size.y)], seam, SEAM_WIDTH, SEAM_DASH)
+		dashed(sketch, [Vector2(x, 0.0), Vector2(x, play.size.y)], seam, SEAM_WIDTH, SEAM_DASH)
 		x += side
 	var y: float = side
 	while y < play.size.y:
-		_dashed(sketch, [Vector2(0.0, y), Vector2(play.size.x, y)], seam, SEAM_WIDTH, SEAM_DASH)
+		dashed(sketch, [Vector2(0.0, y), Vector2(play.size.x, y)], seam, SEAM_WIDTH, SEAM_DASH)
 		y += side
 	return sketch
 
@@ -112,7 +112,7 @@ static func paths(layout: TownLayout) -> BuildingSketch:
 		if line.size() < 2:
 			continue
 		var color: Color = WorldPalette.pick(palette.thread_paths, i)
-		_dashed(sketch, line, color, THREAD_WIDTH, THREAD_DASH, THREAD_GAP)
+		dashed(sketch, line, color, THREAD_WIDTH, THREAD_DASH, THREAD_GAP)
 		sketch.dot(line[line.size() - 1], THREAD_WIDTH * 1.4, color)
 	_tape(sketch, layout)
 	return sketch
@@ -175,7 +175,7 @@ static func walls(layout: TownLayout) -> BuildingSketch:
 
 
 ## Dashes of `color` along `line` (seams, thread paths), `width` thick.
-static func _dashed(
+static func dashed(
 	sketch: BuildingSketch,
 	line: PackedVector2Array,
 	color: Color,
@@ -227,13 +227,13 @@ static func _walk(line: PackedVector2Array, step: float) -> Array[Transform2D]:
 	return result
 
 
-static func _gingham(sketch: BuildingSketch, rect: Rect2, color: Color) -> void:
+static func gingham(sketch: BuildingSketch, rect: Rect2, color: Color) -> void:
 	var area: PackedVector2Array = BuildingSketch.corners(rect)
 	sketch.stripes(area, color, GINGHAM_STEP, GINGHAM_STEP / 2.0, true)
 	sketch.stripes(area, color, GINGHAM_STEP, GINGHAM_STEP / 2.0, false)
 
 
-static func _polka(sketch: BuildingSketch, rect: Rect2, color: Color) -> void:
+static func polka(sketch: BuildingSketch, rect: Rect2, color: Color) -> void:
 	var row: int = 0
 	var y: float = rect.position.y + POLKA_STEP / 2.0
 	while y < rect.end.y:
