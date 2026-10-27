@@ -71,6 +71,8 @@ var unlock_toast: WeaponUnlockToast = WeaponUnlockToast.new()
 var book: ScrapbookBook = ScrapbookBook.new()
 ## Developer shortcuts (F1, spec 03 §10).
 var dev_menu: TownDevMenu = TownDevMenu.new()
+## Buying building tricks (spec 06).
+var tricks: TownTricks = TownTricks.new(self)
 
 ## Set once the Bedroom door was used (one press = one run).
 var _leaving: bool = false

@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="TrickDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/town/trick_def.gd" id="1_trick"]
+
+[resource]
+script = ExtResource("1_trick")
+id = &"pocket_pickup"
+display_name = "Pocket Pickup"
+text = "Carry one floor pickup and use it with Q."
+needs_level = 3
+coins = 1000
+stuffing = 25
+thread = 6

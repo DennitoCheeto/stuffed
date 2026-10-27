@@ -5,8 +5,9 @@ extends RefCounted
 ## Written to disk by SaveStore. Unlocks (weapons, rerolls, ...) follow from the building levels.
 
 ## Bump when the meaning of a field changes; from_dict upgrades older saves. Version 3: the
-## Scrapbook also lists plushies rescued before it existed.
-const VERSION: int = 3
+## Scrapbook also lists plushies rescued before it existed. Version 4: bought building tricks
+## (older saves have none).
+const VERSION: int = 4
 ## Plushie ids of the placeholder plushies (version 1) -> the real plushies that replaced them.
 const OLD_PLUSHIE_IDS: Dictionary[String, String] = {
 	"kitty": "pip",
@@ -29,6 +30,8 @@ var revealed: PackedStringArray = []
 var runs_started: int = 0
 ## Run titles earned before (RunTitle.id); a first-time title gets a "New!" sticker.
 var titles_seen: PackedStringArray = []
+## Building tricks bought (TrickDef.id, spec 06), in the order they were bought.
+var tricks: PackedStringArray = []
 ## Banane's chosen starting weapon ("" = his own).
 var start_weapon: String = ""
 ## The haul of a run that was still going when last saved (RunHaul.to_dict(); empty = none).
@@ -41,6 +44,10 @@ func material(id: String) -> int:
 
 func building_level(id: String) -> int:
 	return building_levels.get(id, 0)
+
+
+func has_trick(id: String) -> bool:
+	return tricks.has(id)
 
 
 ## How many buildings are rebuilt (level 1 or more).
@@ -197,6 +204,7 @@ func to_dict() -> Dictionary:
 		"runs_started": runs_started,
 		"start_weapon": start_weapon,
 		"titles_seen": Array(titles_seen),
+		"tricks": Array(tricks),
 		"unfinished_run": unfinished_run.duplicate(true),
 	}
 
@@ -226,6 +234,9 @@ static func from_dict(data: Dictionary) -> TownSave:
 	var titles: Variant = data.get("titles_seen", [])
 	if titles is Array:
 		save.titles_seen = PackedStringArray(titles as Array)
+	var bought: Variant = data.get("tricks", [])
+	if bought is Array:
+		save.tricks = PackedStringArray(bought as Array)
 	var unfinished: Variant = data.get("unfinished_run", {})
 	if unfinished is Dictionary:
 		var saved: Dictionary = unfinished as Dictionary

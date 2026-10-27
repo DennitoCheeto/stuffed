@@ -1,6 +1,6 @@
 # 06 — Building tricks (the skill tree)
 
-Status: **DRAFT** (spec PR, the product owner approves by merging).
+Status: **APPROVED** (PO merged PR #199, 2026-10-27).
 Milestone: **M3.7 — Building tricks** (after M3.6 Sunny patchwork, before M4 Night siege).
 Based on: the product owner's idea (2026-10-26: "use the buildings differently, as a skill tree for upgrades ... we
 can add cooler stuff that also makes the player more powerful") and their picks (2026-10-27): **each building is a
