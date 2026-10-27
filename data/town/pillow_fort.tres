@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="TownLayout" load_steps=15 format=3]
+[gd_resource type="Resource" script_class="TownLayout" load_steps=20 format=3]
 
 [ext_resource type="Script" path="res://src/town/town_layout.gd" id="1_layout"]
 [ext_resource type="Script" path="res://src/town/town_spot.gd" id="2_spot"]
@@ -8,6 +8,7 @@
 [ext_resource type="Resource" path="res://data/town/buildings/snack_bar.tres" id="6_snack_bar"]
 [ext_resource type="Resource" path="res://data/town/buildings/party_shop.tres" id="7_party_shop"]
 [ext_resource type="Resource" path="res://data/town/buildings/plush_hospital.tres" id="8_hospital"]
+[ext_resource type="Script" path="res://src/town/plushie_spot.gd" id="9_plushie_spot"]
 
 [sub_resource type="Resource" id="Resource_armory"]
 script = ExtResource("2_spot")
@@ -63,6 +64,42 @@ needs_rebuilds = 0
 needs_rescue = true
 thread_path = PackedVector2Array(1230, 1300, 1350, 1370, 1470, 1375, 1570, 1360, 1600, 1345)
 
+[sub_resource type="Resource" id="Resource_reading_spot"]
+script = ExtResource("9_plushie_spot")
+id = &"reading_by_the_fort"
+pose = 0
+at = Vector2(1100, 955)
+approach = Vector2(0, 0)
+building = &""
+needs_level = 0
+
+[sub_resource type="Resource" id="Resource_table_spot"]
+script = ExtResource("9_plushie_spot")
+id = &"snack_bar_table"
+pose = 1
+at = Vector2(1680, 520)
+approach = Vector2(1680, 538)
+building = &"snack_bar"
+needs_level = 2
+
+[sub_resource type="Resource" id="Resource_nap_spot"]
+script = ExtResource("9_plushie_spot")
+id = &"hospital_nap"
+pose = 2
+at = Vector2(1690, 1352)
+approach = Vector2(1690, 1378)
+building = &"plush_hospital"
+needs_level = 1
+
+[sub_resource type="Resource" id="Resource_lookout_spot"]
+script = ExtResource("9_plushie_spot")
+id = &"watchtower_lookout"
+pose = 3
+at = Vector2(922, 232)
+approach = Vector2(975, 538)
+building = &"watchtower"
+needs_level = 3
+
 [resource]
 script = ExtResource("1_layout")
 size = Vector2(2500, 1500)
@@ -87,3 +124,4 @@ safety_pins = PackedVector2Array(2040, 400, 500, 1250)
 marbles = PackedVector2Array(2290, 900, 380, 960)
 spools = PackedVector2Array(2280, 560, 500, 350)
 tent_position = Vector2(1910, 1320)
+plushie_spots = Array[ExtResource("9_plushie_spot")]([SubResource("Resource_reading_spot"), SubResource("Resource_table_spot"), SubResource("Resource_nap_spot"), SubResource("Resource_lookout_spot")])

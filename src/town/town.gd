@@ -45,7 +45,11 @@ var buildings: Dictionary[StringName, TownBuilding] = {}
 var plushies: Dictionary[String, TownPlushie] = {}
 ## Where rescued plushies wait for a Hospital bed.
 var tent: PlushieTent
+## Which hangout spots are open and who uses them (spec 05 §3.4).
+var hangouts: PlushieHangouts
 var actors: Node2D
+## Sunbeams, dust sparkles and the paper plane over everything (spec 05 §3.4).
+var life: TownLife
 var camera: PlayersCamera
 var hud: CanvasLayer
 ## Material id -> counter in the top-left corner.
@@ -96,6 +100,7 @@ func _ready() -> void:
 		buildings[spot.id] = building
 	tent = PlushieTent.new(PLUSHIE_RULES, layout.tent_position)
 	holder.add_child(tent)
+	hangouts = PlushieHangouts.new(layout.plushie_spots, save)
 	actors = Node2D.new()
 	actors.name = "Actors"
 	add_child(actors)
@@ -106,6 +111,8 @@ func _ready() -> void:
 	refresh_tent()
 	for index: int in maxi(player_count, 1):
 		spawn_player(index)
+	life = TownLife.new(layout)
+	add_child(life)
 	add_child(card)
 	camera = PlayersCamera.new()
 	camera.name = "Camera"
@@ -485,6 +492,7 @@ func move_in_waiting() -> Array[TownPlushie]:
 ## Adds the rescued plushie `who` to the town at `at` (`stitched` = it already lived here).
 func spawn_plushie(who: PlushieDef, at: Vector2, stitched: bool) -> TownPlushie:
 	var plushie: TownPlushie = TownPlushie.new(who, PLUSHIE_RULES, layout, at, stitched)
+	plushie.hangouts = hangouts
 	actors.add_child(plushie)
 	plushies[who.id] = plushie
 	return plushie

@@ -26,7 +26,7 @@ func _init(town_layout: TownLayout) -> void:
 
 
 func _ready() -> void:
-	material = WorldPalette.current().grain_material()
+	material = WorldPalette.current().building_material()
 
 
 func _draw() -> void:

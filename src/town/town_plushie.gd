@@ -3,9 +3,11 @@ extends Node2D
 ## A rescued plushie living in the Pillow Fort (spec 03 §7, AC-45): it walks around, sits on
 ## cushions, stops to wave when a player comes close, and has a name tag. A plushie that just
 ## moved in plays the stitch-up moment first (it pops up at the Plush Hospital with stitches
-## flying). It never blocks anyone. Numbers in PlushieTownRules.
+## flying). Now and then it goes to a hangout spot (spec 05 §3.4, `PlushieSpot`): reads a book by
+## the fort, sits at the Snack Bar table, naps at the Hospital or climbs up the Watchtower to wave
+## from the lookout. It never blocks anyone. Numbers in PlushieTownRules.
 
-enum State { STITCHING, IDLE, WALKING, SITTING, WAVING }
+enum State { STITCHING, IDLE, WALKING, SITTING, WAVING, CLIMBING, HANGING_OUT }
 
 ## How many random spots a plushie tries before it just waits a bit longer.
 const TRIES: int = 12
@@ -14,6 +16,10 @@ const PATH_STEP: float = 20.0
 const STITCH_COLOR: Color = Color("#f4ecff")
 const NAME_SIZE: int = 20
 const NAME_WIDTH: float = 200.0
+## The little "z"s rising while it naps: how many, how big (pixels), how long one rises (seconds).
+const NAP_ZS: int = 3
+const NAP_Z_SIZE: float = 9.0
+const NAP_Z_SECONDS: float = 2.4
 
 var plushie: PlushieDef
 var rules: PlushieTownRules
@@ -24,6 +30,10 @@ var target: Vector2 = Vector2.ZERO
 ## How many times it waved at a player (tests read it).
 var waves: int = 0
 var name_tag: Label
+## The town's hangout spots (null = this plushie never visits any).
+var hangouts: PlushieHangouts
+## The spot it is walking to or hanging out at (null = none).
+var spot: PlushieSpot
 
 ## Seconds left in the current state (idle, sitting, waving, stitching).
 var _left: float = 0.0
@@ -38,6 +48,9 @@ var _after_wave_left: float = 0.0
 var _facing: float = 1.0
 var _time: float = 0.0
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
+## Where the current climb ends, and whether it goes back down (leaving the spot).
+var _climb_to: Vector2 = Vector2.ZERO
+var _climb_down: bool = false
 
 
 ## `stitched` = it already lives here (no stitch-up moment).
@@ -69,6 +82,11 @@ func _ready() -> void:
 	TownArt.center_label(name_tag, 0.0, -top - 34.0, NAME_WIDTH)
 
 
+func _exit_tree() -> void:
+	if hangouts != null:
+		hangouts.release(self)
+
+
 func _physics_process(delta: float) -> void:
 	_time += delta
 	_wave_wait = maxf(_wave_wait - delta, 0.0)
@@ -78,13 +96,19 @@ func _physics_process(delta: float) -> void:
 		if _left <= 0.0:
 			_rest()
 		return
-	if state != State.WAVING and _wave_wait <= 0.0:
+	if _may_wave() and _wave_wait <= 0.0:
 		var near: Player = player_near()
 		if near != null:
 			_start_wave(near)
 	match state:
 		State.WALKING:
 			_walk(delta)
+		State.CLIMBING:
+			_climb(delta)
+		State.HANGING_OUT:
+			_left -= delta
+			if _left <= 0.0:
+				_end_hang_out()
 		State.WAVING:
 			var near: Player = player_near()
 			if near != null:
@@ -115,11 +139,39 @@ func player_near() -> Player:
 	return best
 
 
-## 0..1: how high the waving arm is right now.
+## 0..1: how high the waving arm is right now (a slow wave all the time on the lookout).
 func wave_amount() -> float:
-	if state != State.WAVING:
-		return 0.0
-	return 0.55 + 0.45 * sin(_time * TAU * 2.5)
+	if state == State.WAVING:
+		return 0.55 + 0.45 * sin(_time * TAU * 2.5)
+	if pose() == PlushieSpot.Pose.WAVE:
+		return 0.5 + 0.4 * sin(_time * TAU * 1.2)
+	return 0.0
+
+
+## True while it hangs out at its spot (also while it stops there to wave at a player).
+func is_hanging_out() -> bool:
+	if state == State.WAVING:
+		return _after_wave == State.HANGING_OUT
+	return state == State.HANGING_OUT
+
+
+## What it does at its spot right now (-1 = it isn't at one).
+func pose() -> int:
+	return spot.pose if is_hanging_out() else -1
+
+
+## Walks to place (and climbs up if needed) to hang out there. False if the spot is taken or
+## closed, or the way there is blocked.
+func visit(place: PlushieSpot) -> bool:
+	if hangouts == null or not _can_walk_to(place.walk_target()):
+		return false
+	if not hangouts.claim(place, self):
+		return false
+	spot = place
+	target = place.walk_target()
+	_to_cushion = false
+	state = State.WALKING
+	return true
 
 
 ## True when a plushie may stand at `point`: on the blanket and clear of every building.
@@ -161,6 +213,10 @@ func _start_wave(player: Player) -> void:
 
 ## Picks the next walk: sometimes to a cushion, else somewhere nearby. Waits if nothing fits.
 func _pick_walk() -> void:
+	if hangouts != null and _rng.randf() < rules.spot_chance:
+		var place: PlushieSpot = hangouts.pick(_rng)
+		if place != null and visit(place):
+			return
 	for i: int in TRIES:
 		var cushion: bool = not layout.cushions.is_empty() and _rng.randf() < rules.sit_chance
 		var spot: Vector2 = _cushion_spot() if cushion else _nearby_spot()
@@ -196,11 +252,57 @@ func _walk(delta: float) -> void:
 	position = position.move_toward(target, rules.walk_speed * delta)
 	if position.distance_to(target) > 0.5:
 		return
-	if _to_cushion:
+	if spot != null:
+		if spot.needs_climb():
+			_start_climb(spot.at, false)
+		else:
+			_hang_out()
+	elif _to_cushion:
 		state = State.SITTING
 		_left = _rng.randf_range(rules.sit_min_seconds, rules.sit_max_seconds)
 	else:
 		_rest()
+
+
+func _may_wave() -> bool:
+	if state == State.WAVING or state == State.CLIMBING or state == State.STITCHING:
+		return false
+	return pose() != PlushieSpot.Pose.NAP
+
+
+func _start_climb(to: Vector2, down: bool) -> void:
+	state = State.CLIMBING
+	_climb_to = to
+	_climb_down = down
+
+
+func _climb(delta: float) -> void:
+	position = position.move_toward(_climb_to, rules.climb_speed * delta)
+	if position.distance_to(_climb_to) > 0.5:
+		return
+	if _climb_down:
+		_leave_spot()
+	else:
+		_hang_out()
+
+
+func _hang_out() -> void:
+	state = State.HANGING_OUT
+	_left = _rng.randf_range(rules.spot_min_seconds, rules.spot_max_seconds)
+
+
+func _end_hang_out() -> void:
+	if spot != null and spot.needs_climb():
+		_start_climb(spot.approach, true)
+	else:
+		_leave_spot()
+
+
+func _leave_spot() -> void:
+	if hangouts != null:
+		hangouts.release(self)
+	spot = null
+	_rest()
 
 
 func _look_at(point: Vector2) -> void:
@@ -209,11 +311,15 @@ func _look_at(point: Vector2) -> void:
 
 
 func _draw() -> void:
+	if pose() == PlushieSpot.Pose.NAP:
+		_draw_nap()
+		return
 	var bob: float = 0.0
-	if state == State.WALKING:
+	if state == State.WALKING or state == State.CLIMBING:
 		bob = -absf(sin(_time * TAU * 1.8)) * rules.bob_pixels
 	var squash: Vector2 = Vector2(_facing, 1.0)
-	if state == State.SITTING:
+	var seated: bool = pose() == PlushieSpot.Pose.SIT or pose() == PlushieSpot.Pose.READ
+	if state == State.SITTING or seated:
 		squash = Vector2(_facing * 1.06, 0.9)
 	var stitch: float = 1.0
 	if state == State.STITCHING:
@@ -224,6 +330,56 @@ func _draw() -> void:
 	draw_set_transform(Vector2.ZERO)
 	if state == State.STITCHING:
 		_draw_stitches(stitch)
+	if pose() == PlushieSpot.Pose.READ:
+		_draw_book()
+
+
+## Napping: lying on its side, little "z"s rising from its head.
+func _draw_nap() -> void:
+	var palette: WorldPalette = WorldPalette.current()
+	var lift: float = rules.size * 0.9
+	var breathe: float = 1.0 + 0.03 * sin(_time * TAU * 0.4)
+	draw_set_transform(Vector2(0.0, -lift), PI / 2.0 * _facing, Vector2(1.0, breathe))
+	PlushieLook.draw(self, plushie, Vector2.ZERO, rules.size, 0.0)
+	draw_set_transform(Vector2.ZERO)
+	var head: Vector2 = Vector2(PlushieLook.top(plushie, rules.size) * 0.8 * _facing, -lift * 1.6)
+	for i: int in NAP_ZS:
+		var t: float = fmod(_time / NAP_Z_SECONDS + float(i) / NAP_ZS, 1.0)
+		var at: Vector2 = head + Vector2(t * 16.0 * _facing, -t * 46.0)
+		var s: float = NAP_Z_SIZE * (0.6 + 0.6 * t)
+		var color: Color = Color(palette.ink, 0.8 * sin(t * PI))
+		var z: PackedVector2Array = [
+			at + Vector2(-s, -s) / 2.0,
+			at + Vector2(s, -s) / 2.0,
+			at + Vector2(-s, s) / 2.0,
+			at + Vector2(s, s) / 2.0,
+		]
+		draw_polyline(z, color, 2.0, true)
+
+
+## Reading: an open picture book held in front.
+func _draw_book() -> void:
+	var palette: WorldPalette = WorldPalette.current()
+	var middle: Vector2 = Vector2(rules.size * 0.55 * _facing, -rules.size * 1.05)
+	var w: float = rules.size * 0.55
+	var h: float = rules.size * 0.6
+	var cover: PackedVector2Array = [
+		middle + Vector2(-w - 2.0, -h / 2.0 - 2.0),
+		middle + Vector2(w + 2.0, -h / 2.0 - 2.0),
+		middle + Vector2(w + 2.0, h / 2.0 + 3.0),
+		middle + Vector2(-w - 2.0, h / 2.0 + 3.0),
+	]
+	FeltDraw.fill(self, cover, palette.ribbon)
+	for side: float in [-1.0, 1.0]:
+		var page: PackedVector2Array = [
+			middle + Vector2(0.0, -h / 2.0 + 2.0),
+			middle + Vector2(side * w, -h / 2.0),
+			middle + Vector2(side * w, h / 2.0),
+			middle + Vector2(0.0, h / 2.0 + 2.0),
+		]
+		FeltDraw.fill(self, page, palette.tag)
+	var spine: Vector2 = middle + Vector2(0.0, 2.0)
+	draw_line(spine - Vector2(0.0, h / 2.0), spine + Vector2(0.0, h / 2.0), palette.ink)
 
 
 ## The stitch-up moment: little cross stitches fly out around it and fade.

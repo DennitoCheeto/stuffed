@@ -50,6 +50,10 @@ const SMOOTH_STEPS: int = 10
 ## It doesn't block walking.
 @export var tent_position: Vector2 = Vector2(1910, 1320)
 
+@export_group("Life")
+## Where plushies like to hang out (spec 05 §3.4): by the fort, at buildings once built.
+@export var plushie_spots: Array[PlushieSpot] = []
+
 
 func play_rect() -> Rect2:
 	return Rect2(Vector2.ZERO, size)

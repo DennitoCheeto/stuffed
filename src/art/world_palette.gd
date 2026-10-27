@@ -192,6 +192,9 @@ static var _current: WorldPalette
 ## A ruin's colours: share of the way to grey, and how much darker.
 @export_range(0.0, 1.0) var ruin_grey: float = 0.5
 @export_range(0.0, 1.0) var ruin_dim: float = 0.06
+## Flags and bunting flutter (spec 05 §3.4): how far a loose cloth end moves (px) and how fast.
+@export_range(0.0, 10.0) var flutter_pixels: float = 2.5
+@export var flutter_speed: float = 5.0
 
 
 ## The game's palette (loaded once).
@@ -233,6 +236,14 @@ func grain_material() -> ShaderMaterial:
 	material.shader = FELT_SHADER
 	material.set_shader_parameter(&"grain_strength", grain_strength)
 	material.set_shader_parameter(&"grain_scale", grain_scale)
+	return material
+
+
+## The grain material for buildings and the fort: their flags and bunting also flutter.
+func building_material() -> ShaderMaterial:
+	var material: ShaderMaterial = grain_material()
+	material.set_shader_parameter(&"flutter_pixels", flutter_pixels)
+	material.set_shader_parameter(&"flutter_speed", flutter_speed)
 	return material
 
 

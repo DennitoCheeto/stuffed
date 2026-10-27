@@ -108,8 +108,10 @@ static func pin_flag(
 	var cloth: PackedVector2Array = [
 		top + Vector2(1.0, 4.0), top + Vector2(34.0, 13.0), top + Vector2(1.0, 24.0)
 	]
+	sketch.sway(top, Vector2(34.0, 0.0))
 	sketch.piece(part, cloth, color)
 	sketch.seam([cloth[0] + Vector2(4.0, 5.0), cloth[2] + Vector2(4.0, -5.0)])
+	sketch.still()
 	sketch.disc(part, top, 5.0, palette.brass)
 
 
@@ -137,7 +139,9 @@ static func bunting(
 		var flag: PackedVector2Array = [
 			at + Vector2(-7.0, 0.0), at + Vector2(7.0, 0.0), at + Vector2(0.0, 15.0)
 		]
+		sketch.sway(at, Vector2(0.0, 15.0))
 		sketch.piece(part, flag, WorldPalette.pick(palette.toys, i))
+		sketch.still()
 
 
 ## `count` points from `from` to `to`, hanging down `sag` in the middle.
