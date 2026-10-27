@@ -130,7 +130,7 @@ func test_the_shop_sign_is_sewn_in_felt_letters() -> void:
 	var sketch: BuildingSketch = BuildingSketch.new()
 	var before: int = sketch.colors().size()
 	LookParts.letters(sketch, "PARTY", Vector2.ZERO, 2.0, PALETTE.sign_text, 2.0)
-	assert_eq(sketch.colors().size() - before, 9, "P 1 + A 2 + R 2 + T 2 + Y 2 strokes")
+	assert_eq(sketch.colors().size() - before, 11, "P 2 + A 2 + R 3 + T 2 + Y 2 strokes")
 	assert_true(_looks(&"party_shop")[2].parts.has(&"sign"), "the sign hangs at Lv 2")
 
 
