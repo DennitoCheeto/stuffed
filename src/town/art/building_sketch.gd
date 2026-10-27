@@ -200,6 +200,11 @@ func _place(points: PackedVector2Array) -> PackedVector2Array:
 	return placed
 
 
+## Names a visible part that is drawn without its own outline (shades, lines).
+func mark(part: StringName) -> void:
+	_name(part)
+
+
 func _name(part: StringName) -> void:
 	if part != &"" and not parts.has(part):
 		parts.append(part)

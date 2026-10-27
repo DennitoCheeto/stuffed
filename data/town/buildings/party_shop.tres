@@ -34,4 +34,3 @@ id = &"party_shop"
 display_name = "Party Shop"
 summary = "Floor pickups drop more often"
 levels = Array[ExtResource("2_level")]([SubResource("Resource_level_1"), SubResource("Resource_level_2"), SubResource("Resource_level_3")])
-art_scale = 1.1
