@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-27 (M3.6-09 perf check)_
+_Last updated: 2026-10-27 (spec 06 building tricks drafted)_
 
 ## Where we are
 
@@ -56,7 +56,10 @@ _Last updated: 2026-10-27 (M3.6-09 perf check)_
   M3.6-08 Bedroom zones: bed's shadow, block city, crayon corner, sewing corner, train loop (#169): merged (PR #195).
   M3.6-09 perf check (#170): merged (PR #197). Benchmark: before M3.6 ~8.4 fps / 833 draw calls, after ~12.9 fps /
   319 (AC-65 ✅). Floorboards are now tiles.
-  **Next: M3.6 acceptance playtest (P-22 … P-25) by the PO, then the skill / progress tree spec.**
+  **Next: M3.6 acceptance playtest (P-22 … P-25) by the PO (2026-10-27: "didn't test yet, let's continue").**
+  **Spec 06 Building tricks (skill tree) drafted** (`docs/specs/06-building-tricks.md`, AC-66 … AC-73,
+  P-26 … P-28, milestone M3.7). PO picks 2026-10-27: each building = a branch of 3 tricks, mostly new mechanics,
+  small first version (18). Spec PR open: the PO approves by merging, then create milestone M3.7 + 10 issues.
   **PO direction (2026-10-27): features first, polish later.** Fewer look rounds / option boards; ship
   "good enough" art and batch nitpicks for a later iteration pass. After M3.6: skill / progress tree spec, M4 siege.
   Speedy Stitcher = "King beaten before 9:00": PO OK (2026-10-25).
