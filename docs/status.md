@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-10-27 (M3.6-07 Bedroom floor and room)_
+_Last updated: 2026-10-27 (M3.6-08 Bedroom zones)_
 
 ## Where we are
 
@@ -16,7 +16,7 @@ _Last updated: 2026-10-27 (M3.6-07 Bedroom floor and room)_
 | M1 Core run | ✅ accepted 2026-10-21 (PRs #17–#29; playtest P-1 … P-6 passed, 144 fps on the PO's PC) |
 | M2 Build variety | ✅ accepted 2026-10-24 (played with M3): all 19 tickets merged (PRs #47–#49, #51–#55, #57, #58, #60, #61, #63, #67, #69, #77, #78, #80, #81); + spec 02b floor pickups approved (#83): M2-20 (PR #88), M2-21 (PR #89) and M2-22 (PR #90) merged |
 | M3.5 UI and juice | ✅ accepted 2026-10-25: spec 04 (PR #123), M3.5-01 … 08 (PRs #133, #137, #138, #140, #141, #143, #149, #150) + PO fixes #136, #146, #152, #154, #156 (late-game hitches), #158 |
-| M3.6 Sunny patchwork | 🚧 spec 05 approved 2026-10-25 (PR #160; AC-58 … AC-65, P-22 … P-25); milestone M3.6, issues #162–#170 (M3.6-01 … 09); M3.6-01 world palette (#162): merged (PR #171); hero clarity #172 (part 1): merged (PR #173, floors calmer #174); M3.6-02 art kit + Lucky Jar + Armory (#163): merged (PR #175); M3.6-03 other four buildings + fort + Scrapbook stand (#164): merged (PR #179); M3.6-04 town ground + compact layout (#165): merged (PR #181); M3.6-05 town text (#166): merged (PR #188); spec update #186 merged by the PO; M3.6-10 Party Shop + Hospital redraw (#187): merged (PR #190); M3.6-06 town life (#167): merged (PR #192); M3.6-07 Bedroom floor and room (#168): merged (PR #193) |
+| M3.6 Sunny patchwork | 🚧 spec 05 approved 2026-10-25 (PR #160; AC-58 … AC-65, P-22 … P-25); milestone M3.6, issues #162–#170 (M3.6-01 … 09); M3.6-01 world palette (#162): merged (PR #171); hero clarity #172 (part 1): merged (PR #173, floors calmer #174); M3.6-02 art kit + Lucky Jar + Armory (#163): merged (PR #175); M3.6-03 other four buildings + fort + Scrapbook stand (#164): merged (PR #179); M3.6-04 town ground + compact layout (#165): merged (PR #181); M3.6-05 town text (#166): merged (PR #188); spec update #186 merged by the PO; M3.6-10 Party Shop + Hospital redraw (#187): merged (PR #190); M3.6-06 town life (#167): merged (PR #192); M3.6-07 Bedroom floor and room (#168): merged (PR #193); M3.6-08 Bedroom zones (#169): merged (PR #195) |
 | M3 Town | ✅ accepted 2026-10-24: spec 03 approved (PR #91); issues #92–#103; M3-01 save system (PR #105), M3-02 town + flow (PR #106), M3-03 materials (PR #107), M3-04 Way Home portal (PR #109), M3-05 rebuilding (PR #110), M3-06 Toy Box Armory (PR #114), M3-07 Lucky Jar + Watchtower + Snack Bar (PR #115), M3-08 Party Shop (PR #116), M3-09 rescue in the run (PR #117), M3-10 Plush Hospital + plushies in town (PR #118), M3-11 Scrapbook (PR #119), M3-12 co-op in town + dev menu + sounds (PR #120) |
 
 ## Next step
@@ -53,7 +53,9 @@ _Last updated: 2026-10-27 (M3.6-07 Bedroom floor and room)_
   M3.6-10 redraw: Party Shop = gift-box shop, Plush Hospital = dollhouse (#187): merged (PR #190).
   M3.6-06 town life: plushie spots, flutter, sparkles, paper plane (#167): merged (PR #192).
   M3.6-07 Bedroom floor and room: floorboards, patchwork rug, top wall + 2 windows, sunbeams, vignette (#168): merged (PR #193).
-  **Next: M3.6-08 Bedroom zones (#169), then #170 perf check.**
+  M3.6-08 Bedroom zones: bed's shadow, block city, crayon corner, sewing corner, train loop (#169): merged (PR #195).
+  **Next: #170 perf check (the boards mesh is ~424k vertices drawn every frame: split it into tiles), then the
+  M3.6 acceptance playtest (P-22 … P-25).**
   **PO direction (2026-10-27): features first, polish later.** Fewer look rounds / option boards; ship
   "good enough" art and batch nitpicks for a later iteration pass. After M3.6: skill / progress tree spec, M4 siege.
   Speedy Stitcher = "King beaten before 9:00": PO OK (2026-10-25).
@@ -428,5 +430,14 @@ _Last updated: 2026-10-27 (M3.6-07 Bedroom floor and room)_
   nothing). Numbers in `data/arena/bedroom_room.tres` (`BedroomRoom`, `arena.room`). The top wall is taller
   than the side walls: `arena.outer_rect()` reaches up `top_wall_height` (camera limit), `play_rect()` is
   unchanged. `run.vignette` (`RoomVignette`, a CanvasLayer on the HUD's layer, moved just before the HUD).
-  Window positions: `BedroomLook.window_rect(room, i)`, beams `beam(room, i)`. Old furniture (bed, toy boxes,
-  towers) is still drawn with `_draw_felt` until #169. Tests: `test_bedroom_look.gd`, `test_05_bedroom_room.gd`.
+  Window positions: `BedroomLook.window_rect(room, i)`, beams `beam(room, i)`. Furniture: see "Bedroom zones". Tests: `test_bedroom_look.gd`, `test_05_bedroom_room.gd`.
+- Bedroom zones (M3.6-08, spec 05 §4.2): `FurniturePiece.zone` (`Zone` enum) + new kinds (crayon, sharpener,
+  scribbles, sewing box, pincushion, scissors, spool = spool + thread trail across its rect, train track); new kinds
+  go at the end of `Kind` (the .tres stores numbers). `layout.in_zone(zone)`. Looks: `FurnitureLook.sketches(layout,
+  room, layer)` (FLOOR = walk-over parts, PIECES = blocking parts), one baked sketch per piece, each drawn on its own
+  `BakedMeshNode` child of the Arena (off-screen ones are skipped; one big mesh cost ~25% fps). Sunbeams are a
+  `BakedMeshNode` too. Look numbers in `bedroom_room.tres` ("Zones"), `palette.crayons`. `Obstacles` has a lookup
+  grid (`CELL_SIZE`, `CELL_MARGIN`; circles bigger than the margin check all rects). Stroke letters: a stroke must
+  never touch itself (closed loops bake as blobs), stems are their own stroke. Tests: `test_furniture.gd`,
+  `test_furniture_look.gd`, `test_05_bedroom_zones.gd`. Scenario tests pick the *first* piece of a kind: keep free
+  space around the first tower/toy box in the list.
