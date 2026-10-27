@@ -9,6 +9,8 @@ const TOWN_LAYOUT: TownLayout = preload("res://data/town/pillow_fort.tres")
 ## as they redraw them (buildings: M3.6-02/03, town ground: M3.6-04, Bedroom: M3.6-07/08).
 const WORLD_ART_SCRIPTS: Array[String] = [
 	"res://src/arena/arena.gd",
+	"res://src/arena/bedroom_look.gd",
+	"res://src/arena/room_vignette.gd",
 	"res://src/town/town_floor.gd",
 	"res://src/town/town_art.gd",
 	"res://src/town/art/building_sketch.gd",
