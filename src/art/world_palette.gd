@@ -43,6 +43,10 @@ static var _current: WorldPalette
 @export var toy_box_band: Color = Color.WHITE
 ## Alphabet block towers.
 @export var tower_blocks: Array[Color] = []
+## Giant crayons (and the scribbles they leave on the floor).
+@export var crayons: Array[Color] = []
+## The paper wrapped round a crayon.
+@export var crayon_paper: Color = Color.WHITE
 
 @export_group("Town ground")
 ## Quilt patches under the Pillow Fort.

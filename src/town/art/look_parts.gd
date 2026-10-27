@@ -7,13 +7,16 @@ extends RefCounted
 ## How far a floor shadow sits right and down of the object's footprint (light from the top-left).
 const SHADOW_NUDGE: Vector2 = Vector2(9.0, 5.0)
 ## Stroke letters for `letters` (only the ones signs need so far): strokes split by "|", each a
-## list of grid points "xy" (x 0-4, y 0-6 down).
+## list of grid points "xy" (x 0-4, y 0-6 down). A stroke must never touch itself (a closed
+## loop bakes as a filled blob): give a letter's stem its own stroke.
 const GLYPHS: Dictionary[String, String] = {
 	"A": "06 02 20 42 46|04 44",
+	"B": "00 06|00 30 41 42 33 03|33 44 45 36 06",
+	"C": "41 30 10 01 05 16 36 45",
 	"H": "00 06|40 46|03 43",
 	"O": "10 30 41 45 36|36 16 05 01 10",
-	"P": "06 00 30 41 42 33 03",
-	"R": "06 00 30 41 42 33 03|23 46",
+	"P": "00 06|00 30 41 42 33 03",
+	"R": "00 06|00 30 41 42 33 03|23 46",
 	"S": "41 30 10 01 02 13 33 44 45 36 16 05",
 	"T": "00 40|20 26",
 	"Y": "00 23 40|23 26",

@@ -14,5 +14,14 @@ func blocking_rects() -> Array[Rect2]:
 	return result
 
 
+## The pieces of one place of the Bedroom.
+func in_zone(zone: FurniturePiece.Zone) -> Array[FurniturePiece]:
+	var result: Array[FurniturePiece] = []
+	for piece: FurniturePiece in pieces:
+		if piece.zone == zone:
+			result.append(piece)
+	return result
+
+
 func obstacles() -> Obstacles:
 	return Obstacles.new(blocking_rects())
