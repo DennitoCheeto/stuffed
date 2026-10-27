@@ -69,7 +69,12 @@ func furniture_sketches(layer: FurnitureLook.Layer) -> Array[BuildingSketch]:
 	return FurnitureLook.sketches(furniture, room, layer)
 
 
-## The baked floor, rug, walls and window layers (back to front).
+## The baked floorboard tiles (spec 05 §6: the camera only draws the tiles it sees).
+func board_tiles() -> Array[BuildingSketch]:
+	return BedroomLook.board_tiles(size, room)
+
+
+## The baked rug, walls and window layers on top of the boards (back to front).
 func look_layers() -> Array[BuildingSketch]:
 	return BedroomLook.layers(size, wall_thickness, room, rug_rects())
 
@@ -80,9 +85,14 @@ func _blocking_rects() -> Array[Rect2]:
 	return furniture.blocking_rects()
 
 
-## The furniture (floor decorations first, then the pieces) and the sunbeams on top, each mesh on
-## its own node so the ones off the screen are skipped. They draw over the room's own layers.
+## The room back to front: board tiles, rug, walls and windows, the furniture (floor decorations
+## first, then the pieces) and the sunbeams on top, each mesh on its own node so the ones off the
+## screen are skipped.
 func _add_looks() -> void:
+	var room_layers: Array[BuildingSketch] = board_tiles()
+	room_layers.append_array(look_layers())
+	for sketch: BuildingSketch in room_layers:
+		add_child(BakedMeshNode.new(sketch.baked()))
 	for layer: FurnitureLook.Layer in [FurnitureLook.Layer.FLOOR, FurnitureLook.Layer.PIECES]:
 		for sketch: BuildingSketch in furniture_sketches(layer):
 			add_child(BakedMeshNode.new(sketch.baked()))
@@ -109,11 +119,3 @@ func _add_wall(rect: Rect2) -> void:
 	collision.shape = shape
 	body.add_child(collision)
 	add_child(body)
-
-
-func _draw() -> void:
-	var layers: Array[BuildingSketch] = look_layers()
-	layers[BedroomLook.Layer.BOARDS].draw(self)
-	layers[BedroomLook.Layer.RUG].draw(self)
-	layers[BedroomLook.Layer.WALLS].draw(self)
-	layers[BedroomLook.Layer.DETAILS].draw(self)

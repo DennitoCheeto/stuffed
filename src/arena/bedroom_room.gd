@@ -13,6 +13,9 @@ extends Resource
 @export_range(0, 4) var grain_lines: int = 2
 ## Every this many boards gets a knot.
 @export_range(1, 50) var knot_every: int = 7
+## The boards are baked in tiles of about this size, so the camera only draws the ones it sees
+## (one mesh for the whole floor was ~424k vertices every frame).
+@export var board_tile: Vector2 = Vector2(960.0, 1080.0)
 
 @export_group("Rug")
 ## Side of one rug patch (rounded so whole patches fit).

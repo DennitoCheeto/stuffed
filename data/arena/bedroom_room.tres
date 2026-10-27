@@ -8,6 +8,7 @@ plank_width = 96.0
 plank_lengths = PackedFloat32Array(640, 880, 760, 1040, 700, 960)
 grain_lines = 2
 knot_every = 7
+board_tile = Vector2(960, 1080)
 rug_patch = 150.0
 rug_border = 44.0
 rug_button_every = 2

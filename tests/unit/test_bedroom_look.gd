@@ -5,9 +5,10 @@ extends GutTest
 
 const ARENA_SCENE: PackedScene = preload("res://src/arena/arena.tscn")
 const ROOM: BedroomRoom = preload("res://data/arena/bedroom_room.tres")
+## Pieces every floorboard tile shows.
+const BOARD_PARTS: Array[StringName] = [&"floorboards", &"wood_grain", &"knots", &"nails"]
 ## Pieces each layer must show, in `BedroomLook.Layer` order.
 const LAYER_PARTS: Array[Array] = [
-	[&"floorboards", &"wood_grain", &"knots", &"nails"],
 	[&"rug", &"rug_patches", &"rug_seams"],
 	[&"toy_blocks", &"top_wall", &"baseboard"],
 	[&"rug_buttons", &"window", &"window_glass", &"window_sill", &"curtains", &"curtain_rod"],
@@ -27,6 +28,9 @@ func test_every_layer_shows_its_pieces() -> void:
 	for i: int in LAYER_PARTS.size():
 		for part: StringName in LAYER_PARTS[i]:
 			assert_has(layers[i].parts, part, "layer %d shows %s" % [i, part])
+	for tile: BuildingSketch in arena.board_tiles():
+		for part: StringName in BOARD_PARTS:
+			assert_has(tile.parts, part, "every board tile shows %s" % part)
 
 
 func test_the_room_is_baked_once() -> void:
@@ -35,13 +39,41 @@ func test_the_room_is_baked_once() -> void:
 	for i: int in first.size():
 		assert_same(first[i], again[i], "layer %d is built once" % i)
 		assert_same(first[i].baked(), again[i].baked(), "and baked once")
+	var tiles: Array[BuildingSketch] = arena.board_tiles()
+	for i: int in tiles.size():
+		assert_same(tiles[i], arena.board_tiles()[i], "board tile %d is built once" % i)
 	var beams: ArrayMesh = BedroomLook.sunbeams(arena.size, arena.room)
 	assert_same(beams, BedroomLook.sunbeams(arena.size, arena.room), "sunbeams are baked once")
 	assert_gt(beams.get_surface_count(), 0, "the sunbeams are drawn")
 
 
+func test_the_boards_are_cut_into_tiles_the_camera_can_skip() -> void:
+	var tiles: Array[BuildingSketch] = arena.board_tiles()
+	assert_gt(tiles.size(), 8, "the floor is cut into many tiles")
+	var longest: float = 0.0
+	for length: float in ROOM.plank_lengths:
+		longest = maxf(longest, length)
+	var biggest: Vector2 = ROOM.board_tile + Vector2(ROOM.plank_width, longest)
+	var covered: Rect2 = Rect2()
+	for i: int in tiles.size():
+		var box: AABB = tiles[i].baked().get_aabb()
+		var rect: Rect2 = Rect2(box.position.x, box.position.y, box.size.x, box.size.y)
+		assert_lte(rect.size.x, biggest.x, "tile %d is about one tile wide" % i)
+		assert_lte(rect.size.y, biggest.y, "tile %d is about one tile tall" % i)
+		covered = rect if i == 0 else covered.merge(rect)
+	assert_true(covered.grow(1.0).encloses(arena.play_rect()), "the tiles cover the whole floor")
+	var drawn: Array[ArrayMesh] = []
+	for child: Node in arena.get_children():
+		if child is BakedMeshNode:
+			drawn.append((child as BakedMeshNode).mesh)
+	for tile: BuildingSketch in tiles:
+		assert_has(drawn, tile.baked(), "each tile is drawn on its own node")
+
+
 func test_no_danger_colours_and_no_broken_shapes() -> void:
-	for layer: BuildingSketch in arena.look_layers():
+	var all: Array[BuildingSketch] = arena.board_tiles()
+	all.append_array(arena.look_layers())
+	for layer: BuildingSketch in all:
 		assert_eq(layer.broken_shapes(), PackedStringArray(), "every shape can be filled")
 		for color: Color in layer.colors():
 			assert_false(UiColors.is_danger(color), "%s is enemy red/orange" % color.to_html())
