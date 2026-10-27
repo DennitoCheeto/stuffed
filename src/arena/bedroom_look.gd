@@ -3,14 +3,15 @@ extends RefCounted
 ## The Bedroom's floor and room in the Sunny patchwork look (spec 05 §4.1): honey floorboards with
 ## grain, knots and nails, the patchwork rug in the middle (where every run starts) with stitched
 ## seams and sewn-on buttons, the toy-block walls, and the top wall with wallpaper, a baseboard and
-## two windows with curtains. Built once with the building art kit and baked into four meshes
-## (one draw call each): boards, rug, walls, details. Layers keep the kit's "all ink first" rule
-## from hiding a window's or button's outline under the wallpaper or the rug. The sunbeams that
-## fall from the windows are one more mesh whose light fades out softly (`sunbeams`).
+## two windows with curtains. Built once with the building art kit and baked: the boards in tiles
+## (`board_tiles`, so the camera skips the tiles it does not see), then rug, walls and details.
+## Layers keep the kit's "all ink first" rule from hiding a window's or button's outline under
+## the wallpaper or the rug. The sunbeams that fall from the windows are one more mesh whose light
+## fades out softly (`sunbeams`).
 ## Numbers in data/arena/bedroom_room.tres, colours from the world palette.
 
 ## Layers, back to front.
-enum Layer { BOARDS, RUG, WALLS, DETAILS }
+enum Layer { RUG, WALLS, DETAILS }
 
 const BOARD_GAP: float = 3.0
 const NAIL_RADIUS: float = 3.0
@@ -33,12 +34,13 @@ const SILL_HEIGHT: float = 18.0
 const CURTAIN_WIDTH: float = 90.0
 const CURTAIN_STEP: float = 18.0
 
-## Built layers per room: key -> [boards, rug, walls, details].
+## Built layers per room: key -> [rug, walls, details].
 static var _cache: Dictionary[String, Array] = {}
+static var _boards: Dictionary[String, Array] = {}
 static var _beams: Dictionary[String, ArrayMesh] = {}
 
 
-## The four baked layers of the room, back to front (built the first time).
+## The baked layers on top of the boards, back to front (built the first time).
 static func layers(
 	size: Vector2, wall: float, room: BedroomRoom, rugs: Array[Rect2]
 ) -> Array[BuildingSketch]:
@@ -49,7 +51,7 @@ static func layers(
 		for rect: Rect2 in rugs:
 			patchwork(rug, details, rect, room)
 		windows(details, room)
-		_cache[key] = [boards(size, room), rug, walls(size, wall, room), details]
+		_cache[key] = [rug, walls(size, wall, room), details]
 	var result: Array[BuildingSketch] = []
 	result.assign(_cache[key])
 	return result
@@ -84,16 +86,30 @@ static func window_rect(room: BedroomRoom, index: int) -> Rect2:
 	return Rect2(room.window_centers[index] - size.x / 2.0, top, size.x, size.y)
 
 
-## Honey floorboards running from the top wall towards you, joints shifted column by column.
-static func boards(size: Vector2, room: BedroomRoom) -> BuildingSketch:
+## Honey floorboards running from the top wall towards you, joints shifted column by column, cut
+## into tiles of `room.board_tile` (each board goes into the tile its top left corner is in), so a
+## camera only draws the tiles it sees. Built the first time.
+static func board_tiles(size: Vector2, room: BedroomRoom) -> Array[BuildingSketch]:
+	var key: String = _key(size, 0.0, room, [])
+	if not _boards.has(key):
+		_boards[key] = _build_boards(size, room)
+	var result: Array[BuildingSketch] = []
+	result.assign(_boards[key])
+	return result
+
+
+static func _build_boards(size: Vector2, room: BedroomRoom) -> Array[BuildingSketch]:
 	var palette: WorldPalette = WorldPalette.current()
-	var sketch: BuildingSketch = BuildingSketch.new()
 	var floor_rect: Rect2 = Rect2(Vector2.ZERO, size)
 	var lengths: PackedFloat32Array = room.plank_lengths
 	var width: float = room.plank_width
 	var columns: int = ceili(size.x / width)
+	var tile_columns: int = maxi(ceili(size.x / room.board_tile.x), 1)
+	var tile_rows: int = maxi(ceili(size.y / room.board_tile.y), 1)
+	var tiles: Array[BuildingSketch] = []
+	for i: int in tile_columns * tile_rows:
+		tiles.append(BuildingSketch.new())
 	var count: int = 0
-	var joints: Array[PackedVector2Array] = []
 	for col: int in columns:
 		var k: int = col * 2
 		var y: float = -lengths[k % lengths.size()] * fposmod(col * 0.37, 1.0)
@@ -104,23 +120,26 @@ static func boards(size: Vector2, room: BedroomRoom) -> BuildingSketch:
 			y += length
 			if rect.size.y <= 1.0:
 				continue
+			var tx: int = mini(floori(rect.position.x / room.board_tile.x), tile_columns - 1)
+			var ty: int = mini(floori(rect.position.y / room.board_tile.y), tile_rows - 1)
+			var sketch: BuildingSketch = tiles[ty * tile_columns + tx]
 			sketch.shade(BuildingSketch.corners(rect), WorldPalette.pick(palette.board_colors, k))
 			_grain(sketch, rect, room.grain_lines, count, palette.board_grain)
 			if count % room.knot_every == 0:
 				_knot(sketch, rect, count, palette.board_grain)
 			_nails(sketch, rect, size, palette.board_seam)
+			if col > 0:
+				var left: PackedVector2Array = [rect.position, Vector2(rect.position.x, rect.end.y)]
+				sketch.line(left, palette.board_seam, BOARD_GAP)
 			if rect.end.y < size.y:
 				var from: Vector2 = rect.position + Vector2(BOARD_GAP, rect.size.y)
-				joints.append([from, rect.end - Vector2(BOARD_GAP, 0.0)])
+				var to: Vector2 = rect.end - Vector2(BOARD_GAP, 0.0)
+				sketch.line([from, to], palette.board_seam, BOARD_GAP)
 			count += 1
-	for col: int in range(1, columns):
-		var x: float = col * width
-		sketch.line([Vector2(x, 0.0), Vector2(x, size.y)], palette.board_seam, BOARD_GAP)
-	for joint: PackedVector2Array in joints:
-		sketch.line(joint, palette.board_seam, BOARD_GAP)
-	for part: StringName in [&"floorboards", &"wood_grain", &"knots", &"nails"]:
-		sketch.mark(part)
-	return sketch
+	for sketch: BuildingSketch in tiles:
+		for part: StringName in [&"floorboards", &"wood_grain", &"knots", &"nails"]:
+			sketch.mark(part)
+	return tiles
 
 
 ## A patchwork rug on `rect`: an outlined edge band with a stitched line, patches with tone-on-tone
