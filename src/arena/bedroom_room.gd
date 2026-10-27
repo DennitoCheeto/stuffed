@@ -46,3 +46,18 @@ extends Resource
 @export_group("Vignette")
 ## Share of the way from the screen middle to a corner that stays clear.
 @export_range(0.0, 1.0) var vignette_clear: float = 0.6
+
+@export_group("Zones")
+## How dark the bed's shadow makes the top-left corner (share of the palette's shadow).
+@export_range(0.0, 1.0) var bed_shade_strength: float = 0.75
+## How far the bed's shadow reaches right of and below the bed (px).
+@export var bed_shade_reach: float = 520.0
+## Crayon scribbles on the floor: how see-through and how thick.
+@export_range(0.0, 1.0) var scribble_alpha: float = 0.4
+@export var scribble_width: float = 9.0
+## Scribbles in the crayon corner.
+@export_range(0, 30) var scribble_count: int = 16
+## Width of the wooden train track.
+@export var track_width: float = 84.0
+## Width of the thread trail from the big spool.
+@export var thread_width: float = 6.0

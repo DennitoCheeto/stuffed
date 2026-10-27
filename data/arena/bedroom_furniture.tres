@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="FurnitureLayout" load_steps=11 format=3]
+[gd_resource type="Resource" script_class="FurnitureLayout" load_steps=29 format=3]
 
 [ext_resource type="Script" path="res://src/arena/furniture_layout.gd" id="1_layout"]
 [ext_resource type="Script" path="res://src/arena/furniture_piece.gd" id="2_piece"]
@@ -6,51 +6,185 @@
 [sub_resource type="Resource" id="Resource_rug"]
 script = ExtResource("2_piece")
 kind = 3
+zone = 0
 rect = Rect2(3140, 1710, 1400, 900)
 blocks = false
 
 [sub_resource type="Resource" id="Resource_bed"]
 script = ExtResource("2_piece")
 kind = 0
+zone = 1
 rect = Rect2(700, 520, 820, 1180)
 blocks = true
+
+[sub_resource type="Resource" id="Resource_tower_l"]
+script = ExtResource("2_piece")
+kind = 2
+zone = 2
+rect = Rect2(6900, 1360, 200, 200)
+blocks = true
+
+[sub_resource type="Resource" id="Resource_tower_a"]
+script = ExtResource("2_piece")
+kind = 2
+zone = 2
+rect = Rect2(5200, 300, 240, 240)
+blocks = true
+
+[sub_resource type="Resource" id="Resource_tower_b"]
+script = ExtResource("2_piece")
+kind = 2
+zone = 2
+rect = Rect2(5640, 260, 200, 200)
+blocks = true
+
+[sub_resource type="Resource" id="Resource_tower_c"]
+script = ExtResource("2_piece")
+kind = 2
+zone = 2
+rect = Rect2(6060, 340, 260, 260)
+blocks = true
+
+[sub_resource type="Resource" id="Resource_tower_d"]
+script = ExtResource("2_piece")
+kind = 2
+zone = 2
+rect = Rect2(6540, 260, 220, 220)
+blocks = true
+
+[sub_resource type="Resource" id="Resource_tower_e"]
+script = ExtResource("2_piece")
+kind = 2
+zone = 2
+rect = Rect2(6980, 380, 240, 240)
+blocks = true
+
+[sub_resource type="Resource" id="Resource_tower_f"]
+script = ExtResource("2_piece")
+kind = 2
+zone = 2
+rect = Rect2(5420, 840, 220, 220)
+blocks = true
+
+[sub_resource type="Resource" id="Resource_tower_g"]
+script = ExtResource("2_piece")
+kind = 2
+zone = 2
+rect = Rect2(5880, 900, 260, 260)
+blocks = true
+
+[sub_resource type="Resource" id="Resource_tower_h"]
+script = ExtResource("2_piece")
+kind = 2
+zone = 2
+rect = Rect2(6400, 820, 200, 200)
+blocks = true
+
+[sub_resource type="Resource" id="Resource_tower_i"]
+script = ExtResource("2_piece")
+kind = 2
+zone = 2
+rect = Rect2(6820, 920, 240, 240)
+blocks = true
+
+[sub_resource type="Resource" id="Resource_tower_j"]
+script = ExtResource("2_piece")
+kind = 2
+zone = 2
+rect = Rect2(5200, 1380, 220, 220)
+blocks = true
+
+[sub_resource type="Resource" id="Resource_tower_k"]
+script = ExtResource("2_piece")
+kind = 2
+zone = 2
+rect = Rect2(6120, 1400, 240, 240)
+blocks = true
+
+[sub_resource type="Resource" id="Resource_scribbles"]
+script = ExtResource("2_piece")
+kind = 6
+zone = 3
+rect = Rect2(5300, 2860, 2100, 1240)
+blocks = false
+
+[sub_resource type="Resource" id="Resource_crayon_1"]
+script = ExtResource("2_piece")
+kind = 4
+zone = 3
+rect = Rect2(5500, 3080, 600, 120)
+blocks = true
+
+[sub_resource type="Resource" id="Resource_crayon_2"]
+script = ExtResource("2_piece")
+kind = 4
+zone = 3
+rect = Rect2(6360, 2900, 120, 600)
+blocks = true
+
+[sub_resource type="Resource" id="Resource_crayon_3"]
+script = ExtResource("2_piece")
+kind = 4
+zone = 3
+rect = Rect2(5600, 3700, 640, 120)
+blocks = true
+
+[sub_resource type="Resource" id="Resource_crayon_4"]
+script = ExtResource("2_piece")
+kind = 4
+zone = 3
+rect = Rect2(6760, 3760, 600, 120)
+blocks = true
+
+[sub_resource type="Resource" id="Resource_sharpener"]
+script = ExtResource("2_piece")
+kind = 5
+zone = 3
+rect = Rect2(6800, 3160, 220, 200)
+blocks = true
+
+[sub_resource type="Resource" id="Resource_spool"]
+script = ExtResource("2_piece")
+kind = 10
+zone = 4
+rect = Rect2(1700, 2700, 1100, 700)
+blocks = false
+
+[sub_resource type="Resource" id="Resource_scissors"]
+script = ExtResource("2_piece")
+kind = 9
+zone = 4
+rect = Rect2(1260, 3560, 460, 260)
+blocks = false
+
+[sub_resource type="Resource" id="Resource_sewing_box"]
+script = ExtResource("2_piece")
+kind = 7
+zone = 4
+rect = Rect2(420, 3300, 600, 420)
+blocks = true
+
+[sub_resource type="Resource" id="Resource_pincushion"]
+script = ExtResource("2_piece")
+kind = 8
+zone = 4
+rect = Rect2(1300, 2980, 240, 240)
+blocks = true
+
+[sub_resource type="Resource" id="Resource_train_track"]
+script = ExtResource("2_piece")
+kind = 11
+zone = 5
+rect = Rect2(2860, 3020, 1960, 1120)
+blocks = false
 
 [sub_resource type="Resource" id="Resource_toy_box"]
 script = ExtResource("2_piece")
 kind = 1
-rect = Rect2(5860, 760, 660, 420)
-blocks = true
-
-[sub_resource type="Resource" id="Resource_toy_box_2"]
-script = ExtResource("2_piece")
-kind = 1
-rect = Rect2(3400, 3560, 640, 380)
-blocks = true
-
-[sub_resource type="Resource" id="Resource_tower_1"]
-script = ExtResource("2_piece")
-kind = 2
-rect = Rect2(1500, 3020, 200, 200)
-blocks = true
-
-[sub_resource type="Resource" id="Resource_tower_2"]
-script = ExtResource("2_piece")
-kind = 2
-rect = Rect2(1960, 3360, 160, 160)
-blocks = true
-
-[sub_resource type="Resource" id="Resource_tower_3"]
-script = ExtResource("2_piece")
-kind = 2
-rect = Rect2(5880, 3080, 220, 220)
-blocks = true
-
-[sub_resource type="Resource" id="Resource_tower_4"]
-script = ExtResource("2_piece")
-kind = 2
-rect = Rect2(6400, 2700, 180, 180)
+zone = 5
+rect = Rect2(3520, 3400, 640, 360)
 blocks = true
 
 [resource]
 script = ExtResource("1_layout")
-pieces = Array[ExtResource("2_piece")]([SubResource("Resource_rug"), SubResource("Resource_bed"), SubResource("Resource_toy_box"), SubResource("Resource_toy_box_2"), SubResource("Resource_tower_1"), SubResource("Resource_tower_2"), SubResource("Resource_tower_3"), SubResource("Resource_tower_4")])
+pieces = Array[ExtResource("2_piece")]([SubResource("Resource_rug"), SubResource("Resource_bed"), SubResource("Resource_tower_l"), SubResource("Resource_tower_a"), SubResource("Resource_tower_b"), SubResource("Resource_tower_c"), SubResource("Resource_tower_d"), SubResource("Resource_tower_e"), SubResource("Resource_tower_f"), SubResource("Resource_tower_g"), SubResource("Resource_tower_h"), SubResource("Resource_tower_i"), SubResource("Resource_tower_j"), SubResource("Resource_tower_k"), SubResource("Resource_scribbles"), SubResource("Resource_crayon_1"), SubResource("Resource_crayon_2"), SubResource("Resource_crayon_3"), SubResource("Resource_crayon_4"), SubResource("Resource_sharpener"), SubResource("Resource_spool"), SubResource("Resource_scissors"), SubResource("Resource_sewing_box"), SubResource("Resource_pincushion"), SubResource("Resource_train_track"), SubResource("Resource_toy_box")])
