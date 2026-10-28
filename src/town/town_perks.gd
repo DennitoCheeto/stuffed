@@ -20,6 +20,8 @@ var max_health_bonus: float = 0.0
 var pickup_gap_cut: float = 0.0
 ## Run time the first floor pickup is due (0 = the normal first drop time, Party Shop Lv 3).
 var first_pickup_at: float = 0.0
+## The bought building tricks (spec 06), branch by branch. Town-wide: every hero gets them.
+var tricks: Array[TrickDef] = []
 
 
 ## The perks of the town in `save`, with the buildings standing on the spots of `layout`.
@@ -38,6 +40,9 @@ static func from_save(save: TownSave, layout: TownLayout) -> TownPerks:
 			perks.pickup_gap_cut += reached.pickup_gap_cut
 			if reached.first_pickup_at > 0.0:
 				perks.first_pickup_at = _earliest(perks.first_pickup_at, reached.first_pickup_at)
+	for trick: TrickDef in TrickBook.all_tricks(layout):
+		if save.has_trick(String(trick.id)):
+			perks.tricks.append(trick)
 	var chosen: StringName = StringName(save.start_weapon)
 	if perks.can_choose_start_weapon and not perks.locked_weapons.has(chosen):
 		perks.start_weapon = chosen
@@ -47,6 +52,26 @@ static func from_save(save: TownSave, layout: TownLayout) -> TownPerks:
 ## The earlier of two first-drop times, where 0 means "not set".
 static func _earliest(current: float, other: float) -> float:
 	return other if current <= 0.0 else minf(current, other)
+
+
+## The bought trick `id` (null = not bought).
+func trick(id: StringName) -> TrickDef:
+	for bought: TrickDef in tricks:
+		if bought.id == id:
+			return bought
+	return null
+
+
+func has_trick(id: StringName) -> bool:
+	return trick(id) != null
+
+
+## The ids of the bought tricks (run log, dev menu).
+func trick_ids() -> PackedStringArray:
+	var ids: PackedStringArray = []
+	for bought: TrickDef in tricks:
+		ids.append(String(bought.id))
+	return ids
 
 
 ## The weapons of `pool` that can come up on cards (in pool order).
