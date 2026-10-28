@@ -36,6 +36,8 @@ static func to_entry(result: RunResult) -> Dictionary:
 		"rescue": _rescue_or_null(result.rescue),
 		"weapons": result.weapons.duplicate(true),
 		"titles": Array(result.titles),
+		"tricks": Array(result.tricks),
+		"trick_moments": _timed(result.trick_moments),
 	}
 
 

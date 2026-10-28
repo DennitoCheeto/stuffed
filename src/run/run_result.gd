@@ -60,6 +60,10 @@ var new_scrapbook_entries: int = 0
 var weapon_titles: Dictionary[String, String] = {}
 ## The run titles it earned (RunTitle.id), rarest first (set by Main).
 var titles: PackedStringArray = []
+## The building tricks that were on in this run (TrickDef ids, spec 06 §6).
+var tricks: PackedStringArray = []
+## The first time each trick fired: {"id", "time": run seconds, "player": 0-based index}.
+var trick_moments: Array[Dictionary] = []
 
 
 ## How the run ended for the town (spec 03 §10): "king", "way_home", "died" or "gave_up".

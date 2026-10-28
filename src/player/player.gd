@@ -62,6 +62,8 @@ var starting_weapon: WeaponStats
 ## own); set before adding the hero.
 var bonus_max_health: float = 0.0
 var bonus_pickup_share: float = 0.0
+## Ids of the town's building tricks this hero has (spec 06; every hero gets all of them).
+var tricks: PackedStringArray = []
 ## Every card picked this run, in order, e.g. "Quick Feet 2" (for the end screen and run log).
 var picked_upgrades: PackedStringArray = []
 ## Rerolls, skips and banishes left this run (the run sets it up when it spawns the player).
@@ -258,6 +260,11 @@ func hurt_invulnerable_left() -> float:
 
 func is_dead() -> bool:
 	return health <= 0.0
+
+
+## True if this hero has the building trick `id` (spec 06).
+func has_trick(id: StringName) -> bool:
+	return tricks.has(String(id))
 
 
 ## Damage from a zombie or a bullet (Thick Felt makes it smaller). Ignored while dashing or right

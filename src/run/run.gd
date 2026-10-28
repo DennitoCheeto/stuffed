@@ -108,6 +108,8 @@ var rescue_plan: RescuePlan
 var rescue: TangledPlushie
 ## For the run log: {"plushie", "time", "freed", "freed_at"} (empty = no rescue appeared).
 var rescue_log: Dictionary = {}
+## The first time each building trick fired, for the run log: {"id", "time", "player"}.
+var trick_moments: Array[Dictionary] = []
 ## How long the heroes went without damage, and how many gift boxes were opened (run titles).
 var unhurt: UnhurtClock = UnhurtClock.new()
 var gift_boxes_opened: int = 0
@@ -260,6 +262,7 @@ func spawn_player(index: int, at: Vector2) -> Player:
 	player.starting_weapon = perks.starting_weapon(upgrade_pool, player.stats.starting_weapon)
 	player.bonus_max_health = perks.max_health_bonus
 	player.bonus_pickup_share = perks.pickup_range_bonus
+	player.tricks = perks.trick_ids()
 	player.died.connect(_on_player_died)
 	player.hurt.connect(_on_player_hurt.bind(player))
 	unhurt.start(index, elapsed)
@@ -474,6 +477,8 @@ func make_result(ending: String) -> RunResult:
 	result.gift_boxes_opened = gift_boxes_opened
 	result.longest_unhurt_seconds = unhurt.longest_at(elapsed, _standing())
 	result.lowest_health_at_goal = lowest_health_at_goal
+	result.tricks = perks.trick_ids()
+	result.trick_moments = trick_moments.duplicate(true)
 	for player: Player in Players.all(get_tree()):
 		for weapon: Weapon in player.weapons():
 			result.weapon_titles[String(weapon.stats.id)] = weapon.stats.run_title
@@ -864,6 +869,32 @@ func drop_floor_pickup(id: StringName, at: Vector2) -> FloorPickup:
 	pickup.touched.connect(_on_floor_pickup_touched)
 	floor_items.add_child(pickup)
 	return pickup
+
+
+## True if the town bought the building trick `id` (spec 06; town-wide, every hero has it).
+func has_trick(id: StringName) -> bool:
+	return perks.has_trick(id)
+
+
+## Trick code calls this each time trick `id` does its thing for `player` (null = for everyone).
+## The first time in a run it shows a small banner naming the trick, in the player's colour
+## (spec 06 §2.5, AC-70), and notes it for the run log. Returns true on that first time.
+func note_trick(id: StringName, player: Player = null) -> bool:
+	var trick: TrickDef = perks.trick(id)
+	if trick == null or trick_fired(id):
+		return false
+	var index: int = player.player_index if player != null else 0
+	trick_moments.append({"id": String(id), "time": elapsed, "player": index})
+	hud.trick_banner.show_trick(trick.display_name, index, rules.trick_banner_seconds)
+	return true
+
+
+## True once trick `id` has fired in this run.
+func trick_fired(id: StringName) -> bool:
+	for moment: Dictionary in trick_moments:
+		if moment["id"] == String(id):
+			return true
+	return false
 
 
 ## A floor pickup works at once (spec 02b §2): banner, sound, log line, then its effect.

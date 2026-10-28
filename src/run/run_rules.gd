@@ -13,6 +13,8 @@ extends Resource
 ## ... at most once in this many seconds: in a big late-game horde it fired so often that the
 ## run felt laggy although the frame rate stayed high.
 @export var hit_stop_cooldown: float = 2.0
+## The small banner naming a building trick the first time it fires stays this long.
+@export var trick_banner_seconds: float = 2.5
 
 @export_group("Endless (after the goal)")
 ## Every endless minute: new zombies get this much more health (0.15 = +15%) ...

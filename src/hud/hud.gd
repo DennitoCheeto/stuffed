@@ -36,6 +36,8 @@ var banner_title: Label
 var banner_subtitle: Label
 ## The run's haul (coins, stuffing, thread).
 var jars: RunJars
+## The small banner naming a building trick the first time it fires (spec 06).
+var trick_banner: TrickBanner
 
 var _player: Player
 var _boss: Zombie
@@ -54,6 +56,8 @@ func _ready() -> void:
 	_restyle()
 	_build_boss_bar()
 	_build_banner()
+	trick_banner = TrickBanner.new()
+	add_child(trick_banner)
 	jars = RunJars.new()
 	jars.position = JARS_POSITION
 	add_child(jars)

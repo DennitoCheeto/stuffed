@@ -17,12 +17,16 @@ const TANK: EnemyStats = preload("res://data/enemies/tank.tres")
 const ENEMY_TYPES: Array[EnemyStats] = [SHAMBLER, RUNNER, SPITTER, BLOATER, TANK]
 const MAX_EVERYTHING: String = "Max everything"
 const REFILL: String = "Refill rerolls/skips/banishes"
+## Width of the line listing the town's tricks (it wraps instead of widening the panel).
+const TRICKS_WIDTH: float = 520.0
 
 var run: Run
 ## Everything the menu can do, by button text (tests press them by name).
 var buttons: Dictionary[String, BaseButton] = {}
 ## Which weapon or item the "Give Lv N" buttons give.
 var upgrade_picker: OptionButton
+## Which building tricks are on in this run (spec 06 §6).
+var tricks_label: Label
 
 var _info_label: Label
 var _hitboxes: HitboxOverlay
@@ -55,6 +59,14 @@ func press(text: String) -> void:
 		button.button_pressed = not button.button_pressed
 	else:
 		button.pressed.emit()
+
+
+## "Tricks on: Head Start, Picnic" (or "Tricks on: none") for the town's tricks in `perks`.
+static func tricks_text(perks: TownPerks) -> String:
+	var names: PackedStringArray = []
+	for trick: TrickDef in perks.tricks:
+		names.append(trick.display_name)
+	return "Tricks on: %s" % (", ".join(names) if not names.is_empty() else "none")
 
 
 ## Selects the weapon or item `id` in the picker (for the "Give Lv N" buttons).
@@ -145,6 +157,11 @@ func _build() -> void:
 	column.add_theme_constant_override("separation", 4)
 	scroll.add_child(column)
 	_title(column, "Developer menu (F1)")
+	tricks_label = Label.new()
+	tricks_label.text = tricks_text(run.perks)
+	tricks_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	tricks_label.custom_minimum_size = Vector2(TRICKS_WIDTH, 0.0)
+	column.add_child(tricks_label)
 	_row(column, ["Give 10 XP", "Level up now"], [_give_xp, _level_up])
 	_build_give(column)
 	_row(column, [MAX_EVERYTHING, REFILL], [max_everything, _refill_card_controls])
