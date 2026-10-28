@@ -48,9 +48,11 @@ func _process(delta: float) -> void:
 	visible = _left > 0.0
 
 
-## Shows "<trick_name>!" in player `player_index`'s colour for `seconds`.
+## Shows "<trick_name>!" in player `player_index`'s colour for `seconds`. A trick that fires
+## while the banner still shows joins it on a new line (Head Start + Second Toy at the start).
 func show_trick(trick_name: String, player_index: int, seconds: float) -> void:
-	title.text = "%s!" % trick_name
+	var line: String = "%s!" % trick_name
+	title.text = "%s\n%s" % [title.text, line] if visible else line
 	title.add_theme_color_override("font_color", color_for(player_index))
 	_left = seconds
 	modulate.a = 1.0

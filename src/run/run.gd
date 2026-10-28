@@ -103,6 +103,8 @@ var run_number: int = 0
 var rescued_before: PackedStringArray = []
 ## Separate randomness for the rescue, so it doesn't change the zombies or the cards.
 var rescue_rng: RandomNumberGenerator = RandomNumberGenerator.new()
+## Separate randomness for building tricks (Second Toy), so they don't change the cards.
+var trick_rng: RandomNumberGenerator = RandomNumberGenerator.new()
 ## This run's rescue (null = none), and the tangled plushie once it has appeared.
 var rescue_plan: RescuePlan
 var rescue: TangledPlushie
@@ -159,6 +161,7 @@ func _ready() -> void:
 	pickup_rng.seed = seed_value * 17 + 3
 	material_rng.seed = seed_value * 13 + 5
 	rescue_rng.seed = seed_value * 7 + 11
+	trick_rng.seed = seed_value * 23 + 13
 	rescue_plan = rescue_rules.plan(run_number, rescued_before, rescue_rng)
 	floor_pickup_drops = FloorPickupDrops.new(
 		floor_pickup_rules, pickup_rng, perks.pickup_gap_cut, perks.first_pickup_at
@@ -263,6 +266,7 @@ func spawn_player(index: int, at: Vector2) -> Player:
 	player.bonus_max_health = perks.max_health_bonus
 	player.bonus_pickup_share = perks.pickup_range_bonus
 	player.tricks = perks.trick_ids()
+	_prepare_armory_tricks(player)
 	player.died.connect(_on_player_died)
 	player.hurt.connect(_on_player_hurt.bind(player))
 	unhurt.start(index, elapsed)
@@ -271,6 +275,7 @@ func spawn_player(index: int, at: Vector2) -> Player:
 	player.evolved.connect(_on_player_evolved.bind(player))
 	player.loadout_changed.connect(_note_loadout.bind(player))
 	actors.add_child(player)
+	_note_armory_tricks(player)
 	player.progress.leveled_up.connect(_on_leveled_up.bind(player))
 	return player
 
@@ -347,14 +352,17 @@ func _show_next_level_up(with_moment: bool) -> void:
 	var controls: CardControls = player.card_controls
 	level_up_screen.show_controls(controls)
 	var offers: Array[UpgradeOffer] = upgrade_pool.roll(
-		player.upgrade_levels(), upgrade_rng, _excluded(controls)
+		player.upgrade_levels(), upgrade_rng, _card_excluded(player)
 	)
+	if not new_weapons_only(player).is_empty():
+		note_trick(&"show_and_tell", player)
 	level_up_screen.open(offers, with_moment)
 
 
 func _on_upgrade_picked(offer: UpgradeOffer) -> void:
 	var player: Player = _level_up_queue.pop_front()
 	player.apply_upgrade(offer)
+	player.first_level_up_done = true
 	_show_next_level_up(false)
 
 
@@ -365,7 +373,7 @@ func _on_reroll_requested() -> void:
 	if not controls.use_reroll():
 		return
 	var offers: Array[UpgradeOffer] = upgrade_pool.roll(
-		player.upgrade_levels(), upgrade_rng, _excluded(controls), _ids_on_screen()
+		player.upgrade_levels(), upgrade_rng, _card_excluded(player), _ids_on_screen()
 	)
 	level_up_screen.show_controls(controls)
 	level_up_screen.show_offers(offers)
@@ -377,6 +385,7 @@ func _on_skip_requested() -> void:
 	if not player.card_controls.use_skip():
 		return
 	_level_up_queue.pop_front()
+	player.first_level_up_done = true
 	player.heal(player.max_health * upgrade_pool.skip_heal)
 	_show_next_level_up(false)
 
@@ -390,7 +399,7 @@ func _on_banish_requested(index: int) -> void:
 	var banished_card: UpgradeDef = offers[index].upgrade
 	if banished_card.kind == UpgradeDef.Kind.SNACK or not controls.banish(banished_card.id):
 		return
-	var excluded: Array[StringName] = _excluded(controls)
+	var excluded: Array[StringName] = _card_excluded(player)
 	excluded.append_array(_ids_on_screen())
 	offers[index] = upgrade_pool.roll(player.upgrade_levels(), upgrade_rng, excluded, [], 1)[0]
 	level_up_screen.show_controls(controls)
@@ -402,6 +411,70 @@ func _excluded(controls: CardControls) -> Array[StringName]:
 	var excluded: Array[StringName] = controls.banished.duplicate()
 	excluded.append_array(perks.locked_weapons)
 	return excluded
+
+
+## The cards `player` must not get now: `_excluded`, plus everything but new weapons on their
+## first level-up with the Show-and-Tell trick.
+func _card_excluded(player: Player) -> Array[StringName]:
+	var excluded: Array[StringName] = _excluded(player.card_controls)
+	var new_weapons: Array[StringName] = new_weapons_only(player)
+	if new_weapons.is_empty():
+		return excluded
+	for upgrade: UpgradeDef in upgrade_pool.upgrades:
+		if not new_weapons.has(upgrade.id) and not excluded.has(upgrade.id):
+			excluded.append(upgrade.id)
+	return excluded
+
+
+## Show-and-Tell (spec 06 §3): on `player`'s first level-up, the weapons they could get that
+## they don't have yet. Empty when the trick doesn't apply, or when there aren't enough of them
+## to fill the cards (then the cards are normal).
+func new_weapons_only(player: Player) -> Array[StringName]:
+	var ids: Array[StringName] = []
+	if player.first_level_up_done or not player.has_trick(&"show_and_tell"):
+		return ids
+	var levels: Dictionary[StringName, int] = player.upgrade_levels()
+	if upgrade_pool.owned_count(levels, UpgradeDef.Kind.WEAPON) >= upgrade_pool.max_weapons:
+		return ids
+	var excluded: Array[StringName] = _excluded(player.card_controls)
+	for upgrade: UpgradeDef in upgrade_pool.upgrades:
+		var open: bool = upgrade.weight > 0.0 and not excluded.has(upgrade.id)
+		if upgrade.kind == UpgradeDef.Kind.WEAPON and open and levels.get(upgrade.id, 0) == 0:
+			ids.append(upgrade.id)
+	if ids.size() < upgrade_pool.cards_per_level_up:
+		ids.clear()
+	return ids
+
+
+## Head Start and Second Toy (spec 06 §3): set before the hero is added.
+func _prepare_armory_tricks(player: Player) -> void:
+	var head_start: TrickDef = perks.trick(&"head_start")
+	if head_start != null:
+		player.starting_weapon_level = int(head_start.amount)
+	var second_toy: TrickDef = perks.trick(&"second_toy")
+	if second_toy != null:
+		player.extra_weapons = _random_weapons(int(second_toy.amount), player.starting_weapon)
+
+
+## `count` different unlocked weapons, never `besides` (the starting weapon), within the slots.
+func _random_weapons(count: int, besides: WeaponStats) -> Array[WeaponStats]:
+	var choices: Array[WeaponStats] = []
+	for upgrade: UpgradeDef in perks.open_weapons(upgrade_pool):
+		if besides == null or upgrade.weapon.id != besides.id:
+			choices.append(upgrade.weapon)
+	var picked: Array[WeaponStats] = []
+	var room: int = upgrade_pool.max_weapons - (1 if besides != null else 0)
+	while picked.size() < mini(count, room) and not choices.is_empty():
+		picked.append(choices.pop_at(trick_rng.randi_range(0, choices.size() - 1)))
+	return picked
+
+
+## The Armory tricks the hero started with show their banner once.
+func _note_armory_tricks(player: Player) -> void:
+	if player.starting_weapon_level > 1:
+		note_trick(&"head_start", player)
+	if not player.extra_weapons.is_empty():
+		note_trick(&"second_toy", player)
 
 
 func _ids_on_screen() -> Array[StringName]:

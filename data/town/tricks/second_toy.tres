@@ -8,6 +8,7 @@ id = &"second_toy"
 display_name = "Second Toy"
 text = "Start every run with a second weapon."
 needs_level = 3
+amount = 1.0
 coins = 1000
 stuffing = 25
 thread = 6
