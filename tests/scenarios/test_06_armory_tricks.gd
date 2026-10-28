@@ -58,11 +58,12 @@ func test_ac69_show_and_tell_first_level_up_offers_only_new_weapons() -> void:
 		assert_eq(offer.upgrade.kind, UpgradeDef.Kind.WEAPON, "%s is a weapon" % offer.upgrade.id)
 		assert_false(owned.has(offer.upgrade.id), "%s is new" % offer.upgrade.id)
 		assert_false(run.perks.locked_weapons.has(offer.upgrade.id), "and unlocked")
-	assert_true(run.trick_fired(&"show_and_tell"), "noted for the banner and log")
+	assert_true(run.tricks.fired(&"show_and_tell"), "noted for the banner and log")
 	screen.picked.emit(screen.offers[0])
 	await wait_physics_frames(2)
 	assert_true(banane.first_level_up_done, "only the first level-up")
-	assert_eq(run.new_weapons_only(banane), [] as Array[StringName], "later cards are normal")
+	var later: Array[StringName] = run.tricks.new_weapons_only(banane, [])
+	assert_true(later.is_empty(), "later cards are normal")
 
 
 func test_ac69_show_and_tell_falls_back_to_normal_cards_with_full_slots() -> void:
@@ -79,7 +80,7 @@ func test_ac69_show_and_tell_falls_back_to_normal_cards_with_full_slots() -> voi
 		var kind: UpgradeDef.Kind = offer.upgrade.kind
 		var fine: bool = kind != UpgradeDef.Kind.WEAPON or owned.has(offer.upgrade.id)
 		assert_true(fine, "%s: no new weapon fits" % offer.upgrade.id)
-	assert_false(run.trick_fired(&"show_and_tell"), "the trick didn't fire")
+	assert_false(run.tricks.fired(&"show_and_tell"), "the trick didn't fire")
 
 
 func test_ac69_second_toy_starts_with_a_second_unlocked_weapon() -> void:
@@ -92,4 +93,4 @@ func test_ac69_second_toy_starts_with_a_second_unlocked_weapon() -> void:
 	assert_ne(weapons[1].stats.id, weapons[0].stats.id, "a different one")
 	assert_false(run.perks.locked_weapons.has(weapons[1].stats.id), "an unlocked one")
 	assert_eq(weapons[1].level, 1)
-	assert_true(run.trick_fired(&"second_toy"))
+	assert_true(run.tricks.fired(&"second_toy"))
