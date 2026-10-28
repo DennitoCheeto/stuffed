@@ -68,8 +68,9 @@ func test_ac69_show_and_tell_first_level_up_offers_only_new_weapons() -> void:
 func test_ac69_show_and_tell_falls_back_to_normal_cards_with_full_slots() -> void:
 	await _quiet_run(["show_and_tell"])
 	var banane: Player = first_player()
+	var slots: int = run.upgrade_pool.max_weapons
 	for upgrade: UpgradeDef in run.upgrade_pool.upgrades:
-		if upgrade.kind == UpgradeDef.Kind.WEAPON and banane.weapons().size() < run.upgrade_pool.max_weapons:
+		if upgrade.kind == UpgradeDef.Kind.WEAPON and banane.weapons().size() < slots:
 			run.dev_menu.give(upgrade.id, 1)
 	var screen: LevelUpScreen = await _open_level_up(banane)
 	assert_eq(screen.offers.size(), 3, "three normal cards")
