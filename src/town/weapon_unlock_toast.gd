@@ -74,6 +74,11 @@ func is_showing() -> bool:
 	return visible
 
 
+## Seconds until the toast is gone (0 = not showing).
+func time_left() -> float:
+	return maxf(_left, 0.0) if visible else 0.0
+
+
 func _process(delta: float) -> void:
 	if _left <= 0.0:
 		return

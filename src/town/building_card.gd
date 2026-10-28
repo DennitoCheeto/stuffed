@@ -33,6 +33,8 @@ var cost_row: HBoxContainer
 var cost_counters: Dictionary[String, JarCounter] = {}
 ## "E  Rebuild", "Needs 40 more coins", "Fully upgraded!" or what unlocks it.
 var action_label: Label
+## "T   Tricks (1 of 3)" on a built building (spec 06 §2); hidden on ruins.
+var tricks_label: Label
 var box: StyleBoxFelt = StyleBoxFelt.new()
 
 var _pop: Tween
@@ -71,6 +73,8 @@ func _init() -> void:
 	column.add_child(cost_row)
 	action_label = _line(column, 24, ACTION_COLOR, UiFonts.heading())
 	action_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	tricks_label = _line(column, 24, ACTION_COLOR, UiFonts.heading())
+	tricks_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
 
 ## Shows the card for `target` with the town's jars in `save`, above the building or (when the
@@ -95,6 +99,8 @@ func show_for(target: TownBuilding, save: TownSave, above: bool, note: String = 
 	action_label.text = action_text(target, save)
 	var missing: bool = target.unlocked and not save.missing(_cost(target)).is_empty()
 	action_label.add_theme_color_override(&"font_color", MISSING_COLOR if missing else ACTION_COLOR)
+	tricks_label.text = tricks_text(target, save)
+	tricks_label.visible = not tricks_label.text.is_empty()
 	visible = true
 	reset_size()
 	var rect: Rect2 = target.spot.rect
@@ -135,6 +141,17 @@ static func action_text(target: TownBuilding, save: TownSave) -> String:
 	if not missing.is_empty():
 		return missing_text(missing)
 	return "E   Rebuild" if target.level == 0 else "E   Upgrade to level %d" % (target.level + 1)
+
+
+## "T   Tricks (1 of 3)" at a built building with a branch of tricks, else "".
+static func tricks_text(target: TownBuilding, save: TownSave) -> String:
+	if not TownTricks.has_tricks(target):
+		return ""
+	var bought: int = 0
+	for trick: TrickDef in target.building.tricks:
+		if save.has_trick(String(trick.id)):
+			bought += 1
+	return "T   Tricks (%d of %d)" % [bought, target.building.tricks.size()]
 
 
 ## "Needs 40 more stuffing", or "Needs 40 more coins and 5 more thread".
