@@ -58,12 +58,18 @@ var items: Array[UpgradeDef] = []
 var item_levels: Dictionary[StringName, int] = {}
 ## The weapon this hero starts the run with (null = the hero's own; set before adding the hero).
 var starting_weapon: WeaponStats
+## The starting weapon's level (Head Start trick: 2) and more weapons to start with (Second Toy
+## trick); set before adding the hero.
+var starting_weapon_level: int = 1
+var extra_weapons: Array[WeaponStats] = []
 ## Town bonuses for this run (Snack Bar health, Watchtower range as a share of the hero's
 ## own); set before adding the hero.
 var bonus_max_health: float = 0.0
 var bonus_pickup_share: float = 0.0
 ## Ids of the town's building tricks this hero has (spec 06; every hero gets all of them).
 var tricks: PackedStringArray = []
+## True once this hero's first level-up of the run is done (Show-and-Tell trick).
+var first_level_up_done: bool = false
 ## Every card picked this run, in order, e.g. "Quick Feet 2" (for the end screen and run log).
 var picked_upgrades: PackedStringArray = []
 ## Rerolls, skips and banishes left this run (the run sets it up when it spawns the player).
@@ -97,7 +103,11 @@ func _ready() -> void:
 	if starting_weapon == null:
 		starting_weapon = stats.starting_weapon
 	if armed and starting_weapon != null:
-		add_weapon(starting_weapon)
+		var first: Weapon = add_weapon(starting_weapon)
+		first.level = clampi(starting_weapon_level, 1, starting_weapon.max_level())
+	if armed:
+		for extra: WeaponStats in extra_weapons:
+			add_weapon(extra)
 
 
 func _physics_process(delta: float) -> void:

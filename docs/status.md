@@ -464,8 +464,8 @@ _Last updated: 2026-10-28 (M3.7-03 merged)_
   ("Can build!" wins). Fit check step "tricks panel". Tests: `test_06_tricks_panel.gd`.
 - Trick runtime (M3.7-03, AC-70/71): `run.perks.tricks` (`TrickDef`s in branch order; `has_trick`, `trick`,
   `trick_ids`), every hero gets `player.tricks` / `player.has_trick(id)`. Trick code calls
-  `run.note_trick(id, player)` each time it fires: the first time per run it shows `hud.trick_banner`
+  `run.tricks.note(id, player)` (`RunTricks`, `src/run/run_tricks.gd`) each time it fires: the first time per run it shows `hud.trick_banner`
   (`TrickBanner`, hero ring colour lightened, `trick_banner_seconds` in `run_rules.tres`) and adds to
-  `run.trick_moments` (log fields `tricks`, `trick_moments`). Run dev menu: `dev_menu.tricks_label`.
+  `run.tricks.moments` (log fields `tricks`, `trick_moments`). Run dev menu: `dev_menu.tricks_label`.
   Scenario tests buy tricks with `main.town.tricks.append(id)` before `start_run()`. Run one test file with
   `tools/test.sh -gselect=<name>` (`-gtest` is ignored with the config and runs everything).

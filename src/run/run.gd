@@ -103,13 +103,13 @@ var run_number: int = 0
 var rescued_before: PackedStringArray = []
 ## Separate randomness for the rescue, so it doesn't change the zombies or the cards.
 var rescue_rng: RandomNumberGenerator = RandomNumberGenerator.new()
+## The building tricks in this run (spec 06).
+var tricks: RunTricks
 ## This run's rescue (null = none), and the tangled plushie once it has appeared.
 var rescue_plan: RescuePlan
 var rescue: TangledPlushie
 ## For the run log: {"plushie", "time", "freed", "freed_at"} (empty = no rescue appeared).
 var rescue_log: Dictionary = {}
-## The first time each building trick fired, for the run log: {"id", "time", "player"}.
-var trick_moments: Array[Dictionary] = []
 ## How long the heroes went without damage, and how many gift boxes were opened (run titles).
 var unhurt: UnhurtClock = UnhurtClock.new()
 var gift_boxes_opened: int = 0
@@ -159,6 +159,8 @@ func _ready() -> void:
 	pickup_rng.seed = seed_value * 17 + 3
 	material_rng.seed = seed_value * 13 + 5
 	rescue_rng.seed = seed_value * 7 + 11
+	tricks = RunTricks.new(self)
+	tricks.rng.seed = seed_value * 23 + 13
 	rescue_plan = rescue_rules.plan(run_number, rescued_before, rescue_rng)
 	floor_pickup_drops = FloorPickupDrops.new(
 		floor_pickup_rules, pickup_rng, perks.pickup_gap_cut, perks.first_pickup_at
@@ -262,7 +264,7 @@ func spawn_player(index: int, at: Vector2) -> Player:
 	player.starting_weapon = perks.starting_weapon(upgrade_pool, player.stats.starting_weapon)
 	player.bonus_max_health = perks.max_health_bonus
 	player.bonus_pickup_share = perks.pickup_range_bonus
-	player.tricks = perks.trick_ids()
+	tricks.prepare_hero(player)
 	player.died.connect(_on_player_died)
 	player.hurt.connect(_on_player_hurt.bind(player))
 	unhurt.start(index, elapsed)
@@ -271,6 +273,7 @@ func spawn_player(index: int, at: Vector2) -> Player:
 	player.evolved.connect(_on_player_evolved.bind(player))
 	player.loadout_changed.connect(_note_loadout.bind(player))
 	actors.add_child(player)
+	tricks.hero_added(player)
 	player.progress.leveled_up.connect(_on_leveled_up.bind(player))
 	return player
 
@@ -347,7 +350,7 @@ func _show_next_level_up(with_moment: bool) -> void:
 	var controls: CardControls = player.card_controls
 	level_up_screen.show_controls(controls)
 	var offers: Array[UpgradeOffer] = upgrade_pool.roll(
-		player.upgrade_levels(), upgrade_rng, _excluded(controls)
+		player.upgrade_levels(), upgrade_rng, _card_excluded(player)
 	)
 	level_up_screen.open(offers, with_moment)
 
@@ -355,6 +358,7 @@ func _show_next_level_up(with_moment: bool) -> void:
 func _on_upgrade_picked(offer: UpgradeOffer) -> void:
 	var player: Player = _level_up_queue.pop_front()
 	player.apply_upgrade(offer)
+	player.first_level_up_done = true
 	_show_next_level_up(false)
 
 
@@ -365,7 +369,7 @@ func _on_reroll_requested() -> void:
 	if not controls.use_reroll():
 		return
 	var offers: Array[UpgradeOffer] = upgrade_pool.roll(
-		player.upgrade_levels(), upgrade_rng, _excluded(controls), _ids_on_screen()
+		player.upgrade_levels(), upgrade_rng, _card_excluded(player), _ids_on_screen()
 	)
 	level_up_screen.show_controls(controls)
 	level_up_screen.show_offers(offers)
@@ -377,6 +381,7 @@ func _on_skip_requested() -> void:
 	if not player.card_controls.use_skip():
 		return
 	_level_up_queue.pop_front()
+	player.first_level_up_done = true
 	player.heal(player.max_health * upgrade_pool.skip_heal)
 	_show_next_level_up(false)
 
@@ -390,7 +395,7 @@ func _on_banish_requested(index: int) -> void:
 	var banished_card: UpgradeDef = offers[index].upgrade
 	if banished_card.kind == UpgradeDef.Kind.SNACK or not controls.banish(banished_card.id):
 		return
-	var excluded: Array[StringName] = _excluded(controls)
+	var excluded: Array[StringName] = _card_excluded(player)
 	excluded.append_array(_ids_on_screen())
 	offers[index] = upgrade_pool.roll(player.upgrade_levels(), upgrade_rng, excluded, [], 1)[0]
 	level_up_screen.show_controls(controls)
@@ -402,6 +407,12 @@ func _excluded(controls: CardControls) -> Array[StringName]:
 	var excluded: Array[StringName] = controls.banished.duplicate()
 	excluded.append_array(perks.locked_weapons)
 	return excluded
+
+
+## The cards `player` must not get now: `_excluded`, plus everything but new weapons on their
+## first level-up with the Show-and-Tell trick (RunTricks).
+func _card_excluded(player: Player) -> Array[StringName]:
+	return tricks.card_excluded(player, _excluded(player.card_controls))
 
 
 func _ids_on_screen() -> Array[StringName]:
@@ -478,7 +489,7 @@ func make_result(ending: String) -> RunResult:
 	result.longest_unhurt_seconds = unhurt.longest_at(elapsed, _standing())
 	result.lowest_health_at_goal = lowest_health_at_goal
 	result.tricks = perks.trick_ids()
-	result.trick_moments = trick_moments.duplicate(true)
+	result.trick_moments = tricks.moments.duplicate(true)
 	for player: Player in Players.all(get_tree()):
 		for weapon: Weapon in player.weapons():
 			result.weapon_titles[String(weapon.stats.id)] = weapon.stats.run_title
@@ -869,32 +880,6 @@ func drop_floor_pickup(id: StringName, at: Vector2) -> FloorPickup:
 	pickup.touched.connect(_on_floor_pickup_touched)
 	floor_items.add_child(pickup)
 	return pickup
-
-
-## True if the town bought the building trick `id` (spec 06; town-wide, every hero has it).
-func has_trick(id: StringName) -> bool:
-	return perks.has_trick(id)
-
-
-## Trick code calls this each time trick `id` does its thing for `player` (null = for everyone).
-## The first time in a run it shows a small banner naming the trick, in the player's colour
-## (spec 06 §2.5, AC-70), and notes it for the run log. Returns true on that first time.
-func note_trick(id: StringName, player: Player = null) -> bool:
-	var trick: TrickDef = perks.trick(id)
-	if trick == null or trick_fired(id):
-		return false
-	var index: int = player.player_index if player != null else 0
-	trick_moments.append({"id": String(id), "time": elapsed, "player": index})
-	hud.trick_banner.show_trick(trick.display_name, index, rules.trick_banner_seconds)
-	return true
-
-
-## True once trick `id` has fired in this run.
-func trick_fired(id: StringName) -> bool:
-	for moment: Dictionary in trick_moments:
-		if moment["id"] == String(id):
-			return true
-	return false
 
 
 ## A floor pickup works at once (spec 02b §2): banner, sound, log line, then its effect.

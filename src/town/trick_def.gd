@@ -10,6 +10,9 @@ extends Resource
 @export var text: String = ""
 ## The building level it needs (1, 2 or 3; the 3rd trick of a branch is the star trick).
 @export var needs_level: int = 1
+## The trick's number, if it has one (its meaning is per trick: Head Start = the starting
+## weapon's level, Second Toy = how many extra weapons). Tune it here, not in code.
+@export var amount: float = 0.0
 @export var coins: int = 0
 @export var stuffing: int = 0
 @export var thread: int = 0
