@@ -105,6 +105,9 @@ func _visit_all(window: Vector2i) -> void:
 	town.open_weapon_picker()
 	await _check("start weapon picker")
 	town.picker.close()
+	town.tricks.open(town.buildings[&"plush_hospital"])
+	await _check("tricks panel")
+	town.tricks.panel.close()
 	town.open_menu()
 	town.menu.title_button.pressed.emit()
 	await _frames()
@@ -123,7 +126,7 @@ func _visit_all(window: Vector2i) -> void:
 	town.enter_bedroom()
 	await _frames()
 	await _visit_run(main.current_screen as Run)
-	assert_eq(checked.size(), 19, "every screen checked: %s" % [checked])
+	assert_eq(checked.size(), 20, "every screen checked: %s" % [checked])
 
 
 func _visit_run(run: Run) -> void:
@@ -232,6 +235,7 @@ func _town_moments(town: Town) -> void:
 	town.unlock_toast.show_weapons(weapons)
 	var names: String = "Toy Box Armory and Plush Hospital and Party Shop"
 	town.show_banner("New buildings!", "%s can be rebuilt now" % names)
+	town.tricks.toast.show_for("Plush Hospital")
 
 
 ## 6 weapons (long names), every item slot, all at their top level; player 2 gets the same build

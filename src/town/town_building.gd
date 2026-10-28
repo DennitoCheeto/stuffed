@@ -21,6 +21,8 @@ const CAN_BUILD_BOB_PIXELS: float = 5.0
 const CAN_BUILD_BOB_SPEED: float = 3.2
 const CAN_BUILD_TEXT: String = "Can build!"
 const CAN_BUILD_FONT_SIZE: int = 22
+## Floats there instead when a trick of the building can be bought ("Can build!" wins).
+const NEW_TRICK_TEXT: String = "New trick!"
 ## How many yarn strands wrap a locked ruin.
 const TANGLE_STRANDS: int = 8
 ## The rebuild moment: the ruin shakes (matches the "rebuild" sound's rustle), then pops up.
@@ -48,8 +50,14 @@ var cost_counters: Dictionary[String, JarCounter] = {}
 var can_build_tag: FabricTag = FabricTag.new(
 	CAN_BUILD_TEXT, UiColors.GOLD, UiColors.GOLD_INK, CAN_BUILD_FONT_SIZE
 )
+## Floats over a built building while one of its tricks can be bought (spec 06 §4).
+var new_trick_tag: FabricTag = FabricTag.new(
+	NEW_TRICK_TEXT, UiColors.STICKER_TEAL, UiColors.STICKER_TEAL_INK, CAN_BUILD_FONT_SIZE
+)
 ## True when the jars could pay for the next level at the last refresh.
 var affordable: bool = false
+## True when one of its tricks could be bought at the last refresh.
+var trick_ready: bool = false
 ## True while the info card shows this building (the card says it all, the tag steps aside).
 var card_shown: bool = false
 
@@ -92,6 +100,8 @@ func _ready() -> void:
 	price_tag.add_child(cost_row)
 	can_build_tag.visible = false
 	add_child(can_build_tag)
+	new_trick_tag.visible = false
+	add_child(new_trick_tag)
 
 
 ## Updates the price tag and the "Can build!" tag for the town's jars right now.
@@ -102,6 +112,7 @@ func refresh(save: TownSave) -> void:
 	cost_counters.clear()
 	var next: BuildingLevel = building.next(level)
 	affordable = unlocked and next != null and save.can_afford(next.cost())
+	trick_ready = level > 0 and TrickBook.buyable(save, building) >= 0
 	price_tag.visible = unlocked and level == 0 and next != null
 	_update_can_build()
 	if not price_tag.visible:
@@ -123,6 +134,11 @@ func refresh(save: TownSave) -> void:
 ## True while the golden "Can build!" tag floats over the building.
 func shows_can_build() -> bool:
 	return can_build_tag.visible
+
+
+## True while the "New trick!" tag floats over the building.
+func shows_new_trick() -> bool:
+	return new_trick_tag.visible
 
 
 ## Every piece of text the building shows on its own (without a player next to it).
@@ -175,9 +191,10 @@ func is_yarn_falling() -> bool:
 
 func _process(delta: float) -> void:
 	_update_can_build()
-	if can_build_tag.visible:
+	if can_build_tag.visible or new_trick_tag.visible:
 		_bob_time += delta
-		_place_can_build()
+		_place_tag(can_build_tag)
+		_place_tag(new_trick_tag)
 	if _shake_left > 0.0:
 		_shake_left -= delta
 		if _shake_left <= 0.0:
@@ -192,25 +209,31 @@ func _process(delta: float) -> void:
 		queue_redraw()
 
 
-## The tag shows while the jars can pay, but not during the build moment or under the card.
+## The tags show while the jars can pay, but not during the build moment or under the card.
+## One tag at a time: "Can build!" wins over "New trick!".
 func _update_can_build() -> void:
-	var wanted: bool = affordable and not is_busy() and not card_shown
-	if wanted and not can_build_tag.visible:
-		can_build_tag.reset_size()
-		_place_can_build()
-	can_build_tag.visible = wanted
+	var calm: bool = not is_busy() and not card_shown
+	_show_tag(can_build_tag, affordable and calm)
+	_show_tag(new_trick_tag, trick_ready and not affordable and calm)
+
+
+func _show_tag(tag: FabricTag, wanted: bool) -> void:
+	if wanted and not tag.visible:
+		tag.reset_size()
+		_place_tag(tag)
+	tag.visible = wanted
 
 
 ## Over the top of the drawing, bobbing gently.
-func _place_can_build() -> void:
+func _place_tag(tag: FabricTag) -> void:
 	if _top_level != shown_level:
 		_top_level = shown_level
 		_look_top = shown_look().bounds().position.y
 	var bottom: Vector2 = Vector2(spot.rect.get_center().x, spot.rect.end.y)
 	var top: float = bottom.y + _look_top - CAN_BUILD_GAP
 	var bob: float = sin(_bob_time * CAN_BUILD_BOB_SPEED) * CAN_BUILD_BOB_PIXELS
-	var tag_size: Vector2 = can_build_tag.size
-	can_build_tag.position = Vector2(bottom.x - tag_size.x / 2.0, top - tag_size.y + bob)
+	var tag_size: Vector2 = tag.size
+	tag.position = Vector2(bottom.x - tag_size.x / 2.0, top - tag_size.y + bob)
 
 
 ## Shows the new level, growing from `from` times its size, with a puff of `puff_size`.

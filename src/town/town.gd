@@ -123,6 +123,7 @@ func _ready() -> void:
 	camera.make_current()
 	camera.snap_to_players()
 	_build_hud()
+	tricks.attach(hud)
 	refresh()
 	if not pending_reveals().is_empty() or can_move_in():
 		_settle_left = ARRIVAL_REVEAL_SECONDS
@@ -158,6 +159,8 @@ func _physics_process(delta: float) -> void:
 				continue
 			if pressed:
 				interact(building)
+			elif player.just_pressed("tricks"):
+				tricks.open(building, player.player_index)
 			if shown == null:
 				shown = building
 				prompt = BuildingCard.action_text(building, save)
@@ -267,6 +270,7 @@ func _raise(building: TownBuilding, next: BuildingLevel) -> void:
 	building.play_build(new_level)
 	if not next.unlocks_weapons.is_empty():
 		unlock_toast.show_weapons(_weapons(next.unlocks_weapons))
+	tricks.on_built(building, new_level)
 	refresh()
 	_settle_left = AFTER_BUILD_SECONDS
 	changed.emit()

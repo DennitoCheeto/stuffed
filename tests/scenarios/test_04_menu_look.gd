@@ -7,7 +7,8 @@ extends "res://tests/scenarios/run_scenario.gd"
 ## are felt patches that lift but never tilt, Reroll / Skip / Banish are sewn buttons with
 ## fabric-tag keys, and the gift box moment and the goal screen are felt too. In town (M3.5-08)
 ## the building card, the start weapon picker, the unlock toast, the "New building!" banner and
-## the prompt are felt, and the Scrapbook has fabric-tag tabs and photo entries.
+## the prompt are felt, and the Scrapbook has fabric-tag tabs and photo entries. The Tricks panel
+## and its toast (M3.7-02) are felt too.
 
 const FONT_FILES: Array[FontFile] = [UiFonts.FREDOKA, UiFonts.PATRICK_HAND, UiFonts.NUNITO]
 ## A spring is done after its length plus a little margin.
@@ -424,6 +425,26 @@ func test_ac49_the_start_weapon_picker_is_felt_with_sewn_tiles() -> void:
 	await _settle()
 	assert_almost_eq(now.lift_amount(), UiFeel.STYLE.hover_lift, 0.5, "the focused tile lifts")
 	picker.close()
+
+
+func test_ac49_the_tricks_panel_toast_and_tag_are_felt() -> void:
+	main.town.building_levels["snack_bar"] = 2
+	var town: Town = await go_to_town()
+	assert_true(town.tricks.open(town.buildings[&"snack_bar"]))
+	await wait_seconds(UiFeel.STYLE.open_seconds + SETTLE)
+	var panel: TricksPanel = town.tricks.panel
+	_assert_themed(panel, "tricks panel")
+	assert_true(panel.cloth.is_visible_in_tree(), "the felt cloth is behind it")
+	assert_eq(panel.title.label.get_theme_font(&"font"), UiFonts.hand(), "hand-written title")
+	assert_true(panel.strip.get_theme_stylebox(&"panel") is StyleBoxFelt, "a strip of cloth")
+	for patch: TrickPatch in panel.patches:
+		assert_true(patch is SewnButton, "%s is a sewn patch" % patch.trick.display_name)
+	panel.close()
+	town.tricks.toast.show_for("Snack Bar")
+	await wait_process_frames(2)
+	var found: PackedStringArray = unthemed(town.tricks.toast)
+	assert_eq(found.size(), 0, "the toast is all felt: %s" % [found])
+	assert_eq(town.tricks.toast.title_label.get_theme_font(&"font"), UiFonts.hand())
 
 
 func test_ac49_the_unlock_toast_and_the_new_building_banner_are_felt() -> void:

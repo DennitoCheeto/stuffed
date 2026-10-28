@@ -70,7 +70,9 @@ func unlock_all_weapons() -> void:
 ## Gives player `index` (1 = player 2) controls for this test: "p2_move_left", "p2_interact", ...
 ## There are no keys for them yet (co-op joining comes later), tests press them directly.
 func add_controls(index: int) -> void:
-	for control: String in ["move_left", "move_right", "move_up", "move_down", "dash", "interact"]:
+	for control: String in [
+		"move_left", "move_right", "move_up", "move_down", "dash", "interact", "tricks"
+	]:
 		var action: StringName = StringName("p%d_%s" % [index + 1, control])
 		if not InputMap.has_action(action):
 			InputMap.add_action(action, 0.2)
