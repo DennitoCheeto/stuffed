@@ -8,6 +8,7 @@ id = &"four_of_a_kind"
 display_name = "Four of a Kind"
 text = "Level-ups show 4 cards."
 needs_level = 3
+amount = 4.0
 coins = 1000
 stuffing = 25
 thread = 6

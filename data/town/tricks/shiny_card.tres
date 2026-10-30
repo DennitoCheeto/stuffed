@@ -8,6 +8,7 @@ id = &"shiny_card"
 display_name = "Shiny Card"
 text = "Sometimes a card is shiny: it gives 2 levels."
 needs_level = 1
+amount = 0.1
 coins = 250
 stuffing = 5
 thread = 0

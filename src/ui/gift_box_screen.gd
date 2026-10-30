@@ -25,6 +25,10 @@ const CONTINUE_TEXT: String = "Continue  [Enter / Space / E]"
 const HIGHLIGHT_COLOR: Color = UiColors.GOLD
 ## The cards sit a little crooked, each its own way (degrees).
 const CARD_TILTS: Array[float] = [-2.0, 1.5, -1.0, 2.0, -1.5]
+## The card row: how wide it may get and the gap between cards. With more cards than fit (a big box
+## with the Lucky Gift trick holds up to 6), the cards get narrower.
+const ROW_WIDTH: float = 1800.0
+const CARD_GAP: int = 24
 const CONFETTI_COLORS: PackedColorArray = [
 	Color("#f2b52e"), Color("#4fc3f7"), Color("#f08a3c"), Color("#b388ff"), Color("#7bd88f")
 ]
@@ -101,6 +105,12 @@ func open(gift: GiftContents, rules: GiftBoxRules) -> void:
 	art.lid_open = 0.0
 	art.wobble = 0.0
 	visible = true
+
+
+## How wide each of `count` plain cards is: the normal width, or narrower so they fit the row.
+static func card_width(count: int) -> float:
+	var room: float = (ROW_WIDTH - CARD_GAP * (count - 1)) / maxf(count, 1.0)
+	return minf(GiftCardView.CARD_SIZE.x, floorf(room))
 
 
 ## True once the contents are shown long enough that a confirm closes them.
@@ -196,9 +206,11 @@ func _show_contents() -> void:
 	art.visible = false
 	hint_label.visible = false
 	var parts: Array[Wobbly] = []
-	for card: GiftCard in _gift.cards():
+	var shown: Array[GiftCard] = _gift.cards()
+	var width: float = card_width(shown.size())
+	for card: GiftCard in shown:
 		var tilt: float = CARD_TILTS[cards.size() % CARD_TILTS.size()]
-		var view: GiftCardView = GiftCardView.new(card, tilt)
+		var view: GiftCardView = GiftCardView.new(card, tilt, width)
 		card_row.add_child(view)
 		cards.append(view)
 		parts.append(view)
@@ -231,12 +243,12 @@ func _build() -> void:
 	add_child(hint_label)
 	card_row = HBoxContainer.new()
 	card_row.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-	card_row.offset_left = -900.0
-	card_row.offset_right = 900.0
+	card_row.offset_left = -ROW_WIDTH / 2.0
+	card_row.offset_right = ROW_WIDTH / 2.0
 	card_row.offset_top = -230.0
 	card_row.offset_bottom = 170.0
 	card_row.alignment = BoxContainer.ALIGNMENT_CENTER
-	card_row.add_theme_constant_override("separation", 24)
+	card_row.add_theme_constant_override("separation", CARD_GAP)
 	card_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(card_row)
 	_build_continue()

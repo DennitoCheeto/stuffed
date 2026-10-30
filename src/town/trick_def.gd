@@ -11,7 +11,9 @@ extends Resource
 ## The building level it needs (1, 2 or 3; the 3rd trick of a branch is the star trick).
 @export var needs_level: int = 1
 ## The trick's number, if it has one (its meaning is per trick: Head Start = the starting
-## weapon's level, Second Toy = how many extra weapons). Tune it here, not in code.
+## weapon's level, Second Toy = how many extra weapons, Shiny Card = the chance a level-up has a
+## shiny card, Lucky Gift = extra gift box level-ups, Four of a Kind = cards per level-up).
+## Tune it here, not in code.
 @export var amount: float = 0.0
 @export var coins: int = 0
 @export var stuffing: int = 0

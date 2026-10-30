@@ -123,7 +123,7 @@ func test_ac12_banished_card_is_replaced_and_never_offered_again() -> void:
 	var victim: StringName = before[1]
 	await _press("banish_card")
 	assert_true(screen.banishing, "B asks which card")
-	assert_eq(screen.title_label.text, LevelUpScreen.BANISH_TITLE)
+	assert_eq(screen.title_label.text, LevelUpScreen.BANISH_TITLE % "1, 2 or 3")
 	await _press("pick_card_2")
 	assert_false(screen.banishing)
 	var after: Array[StringName] = _card_ids()

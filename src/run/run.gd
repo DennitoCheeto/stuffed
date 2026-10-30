@@ -349,9 +349,8 @@ func _show_next_level_up(with_moment: bool) -> void:
 		player.celebrate()
 	var controls: CardControls = player.card_controls
 	level_up_screen.show_controls(controls)
-	var offers: Array[UpgradeOffer] = upgrade_pool.roll(
-		player.upgrade_levels(), upgrade_rng, _card_excluded(player)
-	)
+	tricks.start_level_up(player)
+	var offers: Array[UpgradeOffer] = _deal(player, _card_excluded(player), [])
 	level_up_screen.open(offers, with_moment)
 
 
@@ -362,15 +361,13 @@ func _on_upgrade_picked(offer: UpgradeOffer) -> void:
 	_show_next_level_up(false)
 
 
-## Reroll: 3 new cards, avoiding the ones on screen while others are left.
+## Reroll: new cards, avoiding the ones on screen while others are left.
 func _on_reroll_requested() -> void:
 	var player: Player = _level_up_queue[0]
 	var controls: CardControls = player.card_controls
 	if not controls.use_reroll():
 		return
-	var offers: Array[UpgradeOffer] = upgrade_pool.roll(
-		player.upgrade_levels(), upgrade_rng, _card_excluded(player), _ids_on_screen()
-	)
+	var offers: Array[UpgradeOffer] = _deal(player, _card_excluded(player), _ids_on_screen())
 	level_up_screen.show_controls(controls)
 	level_up_screen.show_offers(offers)
 
@@ -398,8 +395,21 @@ func _on_banish_requested(index: int) -> void:
 	var excluded: Array[StringName] = _card_excluded(player)
 	excluded.append_array(_ids_on_screen())
 	offers[index] = upgrade_pool.roll(player.upgrade_levels(), upgrade_rng, excluded, [], 1)[0]
+	tricks.dealt(offers, player)
 	level_up_screen.show_controls(controls)
 	level_up_screen.show_offers(offers)
+
+
+## Rolls the cards of one level-up for `player`: as many as their tricks say (Four of a Kind),
+## and a lucky level-up makes one shiny (Shiny Card, RunTricks).
+func _deal(
+	player: Player, excluded: Array[StringName], avoid: Array[StringName]
+) -> Array[UpgradeOffer]:
+	var count: int = tricks.card_count(player)
+	var levels: Dictionary[StringName, int] = player.upgrade_levels()
+	var offers: Array[UpgradeOffer] = upgrade_pool.roll(levels, upgrade_rng, excluded, avoid, count)
+	tricks.dealt(offers, player)
+	return offers
 
 
 ## Cards that must not come up: banished ones and weapons the town hasn't unlocked yet.
@@ -831,12 +841,15 @@ func drop_gift_box(at: Vector2, big: bool = false) -> GiftBox:
 ## The box opens for `player`: its contents are given right away, then the moment plays.
 func _on_gift_box_touched(box: GiftBox, player: Player) -> void:
 	gift_boxes_opened += 1
-	var extra: int = gift_box_rules.big_box_extra_level_ups if box.big else 0
+	var lucky: int = tricks.gift_extra(player)
+	var extra: int = (gift_box_rules.big_box_extra_level_ups if box.big else 0) + lucky
 	var gift: GiftContents = gift_box_rules.contents(
 		player.upgrade_levels(), upgrade_pool, upgrade_rng, extra
 	)
 	gift.player = player
 	gift.apply_to(player)
+	if lucky > 0 and not gift.level_ups.is_empty():
+		tricks.note(&"lucky_gift", player)
 	collect(material_rules.for_gift_box(box.big, material_rng), box.position, true)
 	box.queue_free()
 	_gift_queue.append(gift)

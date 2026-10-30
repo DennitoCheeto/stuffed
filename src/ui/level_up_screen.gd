@@ -1,12 +1,12 @@
 class_name LevelUpScreen
 extends CanvasLayer
-## The level-up moment and its 3 cards (spec 04 §6.3): "Level up!" hand-written on the felt cloth,
-## the cards are felt patches that drop in straight (they never tilt while you choose). Pick with
-## keys 1/2/3, a mouse click, or arrows + Enter. Right under the cards: Reroll (R), Skip (S) and
-## Banish (B, then 1/2/3) as sewn buttons with their uses left (spec 02 §20). They pulse on the
-## first level-up of a run. While choosing a card to banish the cards wiggle with a scissors mark;
-## B again or Esc cancels. Keeps running while the run is frozen. Built in code (the .tscn is only
-## the root).
+## The level-up moment and its 3 cards (4 with the Four of a Kind trick; spec 04 §6.3):
+## "Level up!" hand-written on the felt cloth, the cards are felt patches that drop in straight
+## (they never tilt while you choose). Pick with keys 1-4, a mouse click, or arrows + Enter. Right
+## under the cards: Reroll (R), Skip (S) and Banish (B, then a card number) as sewn buttons with
+## their uses left (spec 02 §20). They pulse on the first level-up of a run. While choosing a card
+## to banish the cards wiggle with a scissors mark; B again or Esc cancels. Keeps running while the
+## run is frozen. Built in code (the .tscn is only the root).
 
 signal picked(offer: UpgradeOffer)
 ## The cards can be picked from now on.
@@ -15,16 +15,19 @@ signal cards_shown
 signal reroll_requested
 ## The player takes no card.
 signal skip_requested
-## The player banishes card `index` (0-2).
+## The player banishes card `index` (0 = the first).
 signal banish_requested(index: int)
 
 ## How long the big moment (quack, confetti) plays before the cards appear.
 const MOMENT_TIME: float = 0.7
 ## Picks are ignored this long after the cards appear, so a key held from playing doesn't pick.
 const INPUT_DELAY: float = 0.2
-const PICK_ACTIONS: Array[StringName] = [&"pick_card_1", &"pick_card_2", &"pick_card_3"]
+const PICK_ACTIONS: Array[StringName] = [
+	&"pick_card_1", &"pick_card_2", &"pick_card_3", &"pick_card_4"
+]
 const TITLE: String = "Level up!"
-const BANISH_TITLE: String = "Banish which card? (1, 2 or 3)  Esc: cancel"
+## %s = the card numbers ("1, 2 or 3").
+const BANISH_TITLE: String = "Banish which card? (%s)  Esc: cancel"
 const TITLE_SIZE: int = 84
 const BANISH_TITLE_SIZE: int = 56
 ## The long banish question tilts less, so it stays clear of the cards.
@@ -135,7 +138,7 @@ func close() -> void:
 	_set_banishing(false)
 
 
-## Picks card `index` (0-2), as if the player chose it; while banishing, banishes it instead.
+## Picks card `index` (0 = the first) as if the player chose it; while banishing, banishes it.
 func choose(index: int) -> void:
 	if not _accepting or index < 0 or index >= offers.size():
 		return
@@ -147,7 +150,7 @@ func choose(index: int) -> void:
 	picked.emit(offers[index])
 
 
-## Asks for 3 new cards (if a reroll is left).
+## Asks for new cards (if a reroll is left).
 func reroll() -> void:
 	if not _accepting:
 		return
@@ -205,12 +208,23 @@ func _unhandled_input(event: InputEvent) -> void:
 func _set_banishing(on: bool) -> void:
 	banishing = on
 	title.tilt = BANISH_TILT if on else TITLE_TILT
-	title_label.text = BANISH_TITLE if on else TITLE
+	title_label.text = BANISH_TITLE % _card_numbers() if on else TITLE
 	title_label.add_theme_font_size_override("font_size", BANISH_TITLE_SIZE if on else TITLE_SIZE)
 	title_label.add_theme_color_override("font_color", BANISH_COLOR if on else HIGHLIGHT_COLOR)
 	banish_button.set_active(on)
 	for card: UpgradeCard in cards:
 		card.set_marked(on)
+
+
+## "1, 2 or 3" (or "1, 2, 3 or 4") for the cards on screen.
+func _card_numbers() -> String:
+	var count: int = maxi(offers.size(), 1)
+	var numbers: PackedStringArray = []
+	for number: int in range(1, count):
+		numbers.append(str(number))
+	if numbers.is_empty():
+		return "1"
+	return "%s or %d" % [", ".join(numbers), count]
 
 
 func _build_cards() -> void:

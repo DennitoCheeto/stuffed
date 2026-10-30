@@ -173,9 +173,15 @@ func upgrade_levels() -> Dictionary[StringName, int]:
 	return levels
 
 
-## Applies a picked level-up card.
+## Applies a picked level-up card (a shiny one gives all its levels).
 func apply_upgrade(offer: UpgradeOffer) -> void:
-	var upgrade: UpgradeDef = offer.upgrade
+	for step: int in offer.levels():
+		_apply_level(offer.upgrade, offer.next_level + step)
+	loadout_changed.emit()
+
+
+## One level of `upgrade`, reaching `level`.
+func _apply_level(upgrade: UpgradeDef, level: int) -> void:
 	match upgrade.kind:
 		UpgradeDef.Kind.WEAPON:
 			var owned: Weapon = weapon(upgrade.weapon.id)
@@ -190,8 +196,7 @@ func apply_upgrade(offer: UpgradeOffer) -> void:
 			_apply_item(upgrade)
 		UpgradeDef.Kind.SNACK:
 			heal(max_health * upgrade.amount)
-	picked_upgrades.append("%s %d" % [upgrade.display_name, offer.next_level])
-	loadout_changed.emit()
+	picked_upgrades.append("%s %d" % [upgrade.display_name, level])
 
 
 ## Gives this hero a weapon (level 1). It attacks on its own from now on.
