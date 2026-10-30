@@ -9,6 +9,9 @@ var moments: Array[Dictionary] = []
 ## Separate randomness for tricks (Second Toy), so they don't change the cards or zombies.
 var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 
+## Shiny Card: the level-up on screen is a lucky one (one of its cards shines).
+var shiny_level_up: bool = false
+
 var _run: Run
 
 
@@ -91,9 +94,53 @@ func new_weapons_only(player: Player, excluded: Array[StringName]) -> Array[Stri
 		var open: bool = upgrade.weight > 0.0 and not excluded.has(upgrade.id)
 		if upgrade.kind == UpgradeDef.Kind.WEAPON and open and levels.get(upgrade.id, 0) == 0:
 			ids.append(upgrade.id)
-	if ids.size() < pool.cards_per_level_up:
+	if ids.size() < card_count(player):
 		ids.clear()
 	return ids
+
+
+## How many cards `player`'s level-ups show: Four of a Kind's number, else the pool's.
+func card_count(player: Player) -> int:
+	var four: TrickDef = _run.perks.trick(&"four_of_a_kind")
+	if four != null and player.has_trick(&"four_of_a_kind"):
+		return int(four.amount)
+	return _run.upgrade_pool.cards_per_level_up
+
+
+## A new level-up for `player` starts: Shiny Card rolls (its chance in data) whether one of its
+## cards shines. The shine stays with this level-up through rerolls and banishes.
+func start_level_up(player: Player) -> void:
+	var shiny_card: TrickDef = _run.perks.trick(&"shiny_card")
+	var has_it: bool = shiny_card != null and player.has_trick(&"shiny_card")
+	shiny_level_up = has_it and rng.randf() < shiny_card.amount
+
+
+## `offers` were just dealt to `player` (a new level-up, a reroll or a banish): Four of a Kind
+## fires on more cards than normal, and on a lucky level-up one random card that can shine
+## becomes shiny (unless one already is).
+func dealt(offers: Array[UpgradeOffer], player: Player) -> void:
+	if offers.size() > _run.upgrade_pool.cards_per_level_up:
+		note(&"four_of_a_kind", player)
+	if not shiny_level_up:
+		return
+	var choices: Array[UpgradeOffer] = []
+	for offer: UpgradeOffer in offers:
+		if offer.shiny:
+			return
+		if offer.can_shine():
+			choices.append(offer)
+	if choices.is_empty():
+		return
+	choices[rng.randi_range(0, choices.size() - 1)].shiny = true
+	note(&"shiny_card", player)
+
+
+## Lucky Gift: how many more level-ups a gift box opened by `player` tries to give.
+func gift_extra(player: Player) -> int:
+	var lucky_gift: TrickDef = _run.perks.trick(&"lucky_gift")
+	if lucky_gift == null or not player.has_trick(&"lucky_gift"):
+		return 0
+	return int(lucky_gift.amount)
 
 
 ## `count` different unlocked weapons, never `besides` (the starting weapon), within the slots.

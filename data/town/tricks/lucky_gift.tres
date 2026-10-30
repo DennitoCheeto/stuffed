@@ -8,6 +8,7 @@ id = &"lucky_gift"
 display_name = "Lucky Gift"
 text = "Gift boxes give one more level-up."
 needs_level = 2
+amount = 1.0
 coins = 600
 stuffing = 15
 thread = 0

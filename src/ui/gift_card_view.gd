@@ -21,12 +21,13 @@ var level_label: Label
 var text_label: Label = UiFonts.label("", 21, UiColors.INK_SOFT)
 
 
-func _init(shown: GiftCard, degrees: float = 0.0) -> void:
+## `width` = how wide a plain card is (narrower when many share the row; evolutions keep theirs).
+func _init(shown: GiftCard, degrees: float = 0.0, width: float = CARD_SIZE.x) -> void:
 	card = shown
 	var evolution: bool = card.is_evolution()
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	patch.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	patch.custom_minimum_size = EVOLUTION_SIZE if evolution else CARD_SIZE
+	patch.custom_minimum_size = EVOLUTION_SIZE if evolution else Vector2(width, CARD_SIZE.y)
 	box.shadow = UiColors.SHADOW
 	box.pad(24, 26)
 	if evolution:

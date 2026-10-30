@@ -1,5 +1,5 @@
 extends GutTest
-## Scenario (spec 04 §5, AC-55): every screen fits on 1920x1080, 1920x1200, 1280x720 and
+## Scenario (spec 04 §5, AC-55, AC-72): every screen fits on 1920x1080, 1920x1200, 1280x720 and
 ## 2560x1440 with worst-case content (6 weapons and full items, 2 players, a maxed town, a rescue,
 ## long upgrade lists): all buttons, panels and labels stay inside the window with a 24 px margin,
 ## inside their felt box, and no label is cut off. The game runs in a SubViewport the size of the
@@ -123,10 +123,12 @@ func _visit_all(window: Vector2i) -> void:
 	title.start_button.pressed.emit()
 	await _frames()
 	town = main.current_screen as Town
+	# Four of a Kind: the level-up shows 4 cards (AC-72).
+	main.town.tricks.append("four_of_a_kind")
 	town.enter_bedroom()
 	await _frames()
 	await _visit_run(main.current_screen as Run)
-	assert_eq(checked.size(), 20, "every screen checked: %s" % [checked])
+	assert_eq(checked.size(), 22, "every screen checked: %s" % [checked])
 
 
 func _visit_run(run: Run) -> void:
@@ -152,12 +154,19 @@ func _visit_run(run: Run) -> void:
 	await _wait_until(run.level_up_screen.is_open)
 	await wait_seconds(LevelUpScreen.MOMENT_TIME + 0.1)
 	await _check("level-up")
+	run.level_up_screen.show_offers(_longest_offers(4, true))
+	await _check("level-up (4 cards, shiny)")
 	run.level_up_screen.picked.emit(run.level_up_screen.offers[0])
 	await _frames()
 	run.pickups.buttons.clear()
 	run.drop_gift_box(hero.position)
 	await _wait_until(_gift_shown.bind(run))
 	await _check("gift box")
+	run.gift_screen.close()
+	await _frames()
+	run.gift_screen.open(_six_level_ups(), run.gift_box_rules)
+	await _wait_until(_gift_shown.bind(run))
+	await _check("gift box (6 cards)")
 	run.gift_screen.close()
 	await _frames()
 	run.freeze(&"goal")
@@ -210,6 +219,28 @@ func _wait_until(done: Callable) -> void:
 
 func _gift_shown(run: Run) -> bool:
 	return run.gift_screen.showing_contents
+
+
+## The `count` upgrades with the longest names as level-up cards (the first one shiny).
+func _longest_offers(count: int, shiny: bool) -> Array[UpgradeOffer]:
+	var upgrades: Array[UpgradeDef] = Town.UPGRADE_POOL.upgrades.duplicate()
+	upgrades.sort_custom(_longer_name)
+	var offers: Array[UpgradeOffer] = []
+	for upgrade: UpgradeDef in upgrades.slice(0, count):
+		offers.append(UpgradeOffer.new(upgrade, 2))
+	offers[0].shiny = shiny
+	return offers
+
+
+func _longer_name(a: UpgradeDef, b: UpgradeDef) -> bool:
+	return a.display_name.length() > b.display_name.length()
+
+
+## The most a gift box can hold: a big box with the Lucky Gift trick (3 + 2 + 1 level-ups).
+func _six_level_ups() -> GiftContents:
+	var gift: GiftContents = GiftContents.new()
+	gift.level_ups = _longest_offers(6, false)
+	return gift
 
 
 ## Every building at its top level and full jars: the longest cards and the Armory picker.

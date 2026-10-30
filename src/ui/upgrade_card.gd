@@ -2,7 +2,8 @@ class_name UpgradeCard
 extends SewnButton
 ## One level-up card as a felt patch (spec 02 §5, §11; spec 04 §6.3): the key number and
 ## "New!" / "Lv 2 → 3" on fabric tags, the icon, the name, one line of what it does and, for
-## weapons that can evolve, the icon of their partner item. The chosen card lifts and gets a gold
+## weapons that can evolve, the icon of their partner item. A shiny card (Shiny Card trick) has gold
+## stitches, twinkling gold stars and a gold "+2 levels" tag. The chosen card lifts and gets a gold
 ## outline ring, but never grows or tilts: cards must read at a glance and keep one size.
 
 const CARD_SIZE: Vector2 = Vector2(340, 400)
@@ -11,6 +12,8 @@ const WIGGLE_ANGLE: float = 0.035
 const WIGGLE_SPEED: float = 9.0
 ## New upgrades get a teal tag, level-ups a plain one.
 const NEW_TAG: Color = UiColors.STICKER_TEAL
+## A shiny card's stitches and tag.
+const SHINY_COLOR: Color = UiColors.GOLD
 
 var offer: UpgradeOffer
 ## "Evolves with": the partner item's name and icon (weapons that can evolve only).
@@ -25,9 +28,13 @@ var key_tag: FabricTag = FabricTag.new("1", UiColors.TAG, UiColors.INK, 20)
 var level_tag: FabricTag = FabricTag.new("", UiColors.TAG, UiColors.INK, 20)
 var name_label: Label = UiFonts.label("", 32, UiColors.INK, UiFonts.heading(600))
 var text_label: Label = UiFonts.label("", 21, UiColors.INK_SOFT)
+## Shiny cards only: the "+2 levels" tag and the twinkling stars.
+var shiny_tag: FabricTag = FabricTag.new("", SHINY_COLOR, UiColors.GOLD_INK, 20)
+var sparkle: ShinySparkle = ShinySparkle.new()
 
 var _icon: UpgradeIcon = UpgradeIcon.new()
 var _wiggle_time: float = 0.0
+var _plain_stitch: Color
 
 
 func _init() -> void:
@@ -58,6 +65,9 @@ func _init() -> void:
 	_icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	column.add_child(_icon)
+	shiny_tag.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	shiny_tag.visible = false
+	column.add_child(shiny_tag)
 	for label: Label in [name_label, text_label, partner_label]:
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -83,11 +93,14 @@ func _init() -> void:
 	# Top middle, half over the edge: it never hides the key or the level.
 	banish_mark.position = Vector2(CARD_SIZE.x / 2.0 - 32.0, -34.0)
 	banish_mark.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	sparkle.visible = false
+	add_child(sparkle)
 	banish_mark.visible = false
 	add_child(banish_mark)
+	_plain_stitch = box.stitch
 
 
-## Shows `card_offer` as card number `number` (1-3).
+## Shows `card_offer` as card number `number` (1 = the first).
 func show_offer(card_offer: UpgradeOffer, number: int) -> void:
 	offer = card_offer
 	key_tag.label.text = str(number)
@@ -106,6 +119,10 @@ func show_offer(card_offer: UpgradeOffer, number: int) -> void:
 	if offer.partner != null:
 		partner_label.text = "Evolves with %s" % offer.partner.display_name
 		partner_icon.icon = offer.partner.icon
+	shiny_tag.label.text = "+%d levels" % offer.levels()
+	shiny_tag.visible = offer.shiny
+	sparkle.visible = offer.shiny
+	set_stitch(SHINY_COLOR if offer.shiny else _plain_stitch)
 
 
 ## Marks the card while the player picks one to banish: scissors mark + a small wiggle.
