@@ -11,11 +11,17 @@ const TOP: float = 330.0
 const FADE: float = 0.4
 ## How much lighter than the hero's floor ring the name is, so it reads on the dark backing.
 const LIGHTEN: float = 0.45
+## Tricks that fire together share a line, at most this many names per line and this many lines
+## (the oldest names drop off), so the banner never grows down over the hero in the middle.
+const NAMES_PER_LINE: int = 3
+const MAX_LINES: int = 2
+const NAME_GAP: String = "  ·  "
 
 var title: Label
 var subtitle: Label
 
 var _left: float = 0.0
+var _names: PackedStringArray = []
 
 
 func _init() -> void:
@@ -49,10 +55,18 @@ func _process(delta: float) -> void:
 
 
 ## Shows "<trick_name>!" in player `player_index`'s colour for `seconds`. A trick that fires
-## while the banner still shows joins it on a new line (Head Start + Second Toy at the start).
+## while the banner still shows joins it (Head Start + Second Toy at the start): up to
+## NAMES_PER_LINE names side by side, at most MAX_LINES lines.
 func show_trick(trick_name: String, player_index: int, seconds: float) -> void:
-	var line: String = "%s!" % trick_name
-	title.text = "%s\n%s" % [title.text, line] if visible else line
+	if not visible:
+		_names.clear()
+	_names.append("%s!" % trick_name)
+	while _names.size() > NAMES_PER_LINE * MAX_LINES:
+		_names.remove_at(0)
+	var lines: PackedStringArray = []
+	for start: int in range(0, _names.size(), NAMES_PER_LINE):
+		lines.append(NAME_GAP.join(_names.slice(start, start + NAMES_PER_LINE)))
+	title.text = "\n".join(lines)
 	title.add_theme_color_override("font_color", color_for(player_index))
 	_left = seconds
 	modulate.a = 1.0

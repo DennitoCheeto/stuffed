@@ -2,8 +2,9 @@ class_name PlushieBuddy
 extends Node2D
 ## Plushie Buddy (spec 06 §3, §3.1): the plushie rescued last comes along in the run. It trots
 ## after its hero and sends the XP buttons near it to that hero. Drawn small with its town look
-## (PlushieLook) on a soft light halo, so it never looks like a zombie or an enemy shot. It
-## can't be hurt (no body, no hitbox) and doesn't attack. Numbers in rescue_rules.tres.
+## (PlushieLook, danger colours calmed) on a soft light halo, so it never looks like a zombie or
+## an enemy shot. It can't be hurt (no body, no hitbox) and doesn't attack. Numbers in
+## rescue_rules.tres.
 
 ## It sent `count` buttons to `player` (only when count > 0).
 signal fetched(count: int, player: Player)
@@ -13,6 +14,9 @@ const HOP_SPEED: float = 3.2
 const HOP_HEIGHT: float = 0.35
 ## It walks at least this much faster than its hero, so it never falls behind for good.
 const CATCH_UP: float = 1.2
+## The look is drawn once into a small picture at this scale (sharp when the camera zooms in)
+## and shown as one sprite: drawn shape by shape every frame it cost ~50 draw calls (#209).
+const BAKE_SCALE: float = 3.0
 
 var plushie: PlushieDef
 var rules: RescueRules
@@ -21,14 +25,43 @@ var reach: float = 0.0
 var pickups: PickupManager
 ## True while it walks (it hops), false while it waits next to its hero.
 var walking: bool = false
+## The baked look (rendered once) and the sprite that shows it and hops.
+var picture: SubViewport
+var sprite: Sprite2D
 
 var _hop_time: float = 0.0
 
 
 func setup(who: PlushieDef, rescue_rules: RescueRules, fetch_reach: float) -> void:
-	plushie = who
+	plushie = who.calmed()
 	rules = rescue_rules
 	reach = fetch_reach
+
+
+func _ready() -> void:
+	var top: float = PlushieLook.top(plushie, rules.buddy_size)
+	var box: Vector2 = Vector2(top * 1.6, top * 1.5)
+	var origin: Vector2 = Vector2(box.x / 2.0, top * 1.2)
+	picture = SubViewport.new()
+	picture.transparent_bg = true
+	picture.size = Vector2i((box * BAKE_SCALE).ceil())
+	picture.render_target_update_mode = SubViewport.UPDATE_ONCE
+	var painter: Node2D = Node2D.new()
+	painter.scale = Vector2.ONE * BAKE_SCALE
+	painter.position = origin * BAKE_SCALE
+	painter.draw.connect(_paint.bind(painter))
+	picture.add_child(painter)
+	add_child(picture)
+	sprite = Sprite2D.new()
+	sprite.texture = picture.get_texture()
+	sprite.centered = false
+	sprite.offset = -origin * BAKE_SCALE
+	sprite.scale = Vector2.ONE / BAKE_SCALE
+	# The picture's see-through halo is stored premultiplied: blend it that way, or it darkens.
+	var blend: CanvasItemMaterial = CanvasItemMaterial.new()
+	blend.blend_mode = CanvasItemMaterial.BLEND_MODE_PREMULT_ALPHA
+	sprite.material = blend
+	add_child(sprite)
 
 
 ## The hero it follows: player 1, or the nearest hero still standing if player 1 is down.
@@ -47,6 +80,11 @@ func hero() -> Player:
 	return best
 
 
+## How high it is in its hop right now (pixels, 0 = on the floor).
+func lift() -> float:
+	return absf(sin(_hop_time * TAU * HOP_SPEED / 2.0)) * rules.buddy_size * HOP_HEIGHT
+
+
 func _physics_process(delta: float) -> void:
 	var leader: Player = hero()
 	if leader == null:
@@ -61,19 +99,19 @@ func _physics_process(delta: float) -> void:
 		_hop_time += delta
 	else:
 		_hop_time = 0.0
-	queue_redraw()
+	sprite.position.y = -lift()
 	if pickups != null:
 		var count: int = pickups.attract_near(global_position, reach, leader)
 		if count > 0:
 			fetched.emit(count, leader)
 
 
-func _draw() -> void:
+## Draws the halo and the plushie once into the picture (feet at the painter's origin).
+func _paint(canvas: Node2D) -> void:
 	var size: float = rules.buddy_size
-	var lift: float = absf(sin(_hop_time * TAU * HOP_SPEED / 2.0)) * size * HOP_HEIGHT
 	var top: float = PlushieLook.top(plushie, size)
 	var halo: PackedVector2Array = PlushieLook.ellipse(
-		Vector2(0.0, -top * 0.5 - lift), top * 0.62, top * 0.66
+		Vector2(0.0, -top * 0.5), top * 0.62, top * 0.66
 	)
-	FeltDraw.fill(self, halo, rules.buddy_halo)
-	PlushieLook.draw(self, plushie, Vector2(0.0, -lift), size)
+	FeltDraw.fill(canvas, halo, rules.buddy_halo)
+	PlushieLook.draw(canvas, plushie, Vector2.ZERO, size)

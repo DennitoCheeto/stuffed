@@ -99,3 +99,21 @@ func test_dev_menu_shows_which_tricks_are_on() -> void:
 func test_dev_menu_says_none_without_tricks() -> void:
 	await _quiet_run()
 	assert_eq(run.dev_menu.tricks_label.text, "Tricks on: none")
+
+
+func test_ac70_many_tricks_at_once_keep_the_banner_above_the_hero() -> void:
+	_buy(["picnic"])
+	await _quiet_run()
+	var banner: TrickBanner = run.hud.trick_banner
+	var names: Array[String] = ["Head Start", "Second Toy", "Treasure Map", "Picnic", "Spyglass"]
+	names.append_array(["Pocket Pickup", "Spare Stuffing"])
+	for trick_name: String in names:
+		banner.show_trick(trick_name, 0, 2.0)
+	await wait_process_frames(2)
+	var lines: PackedStringArray = banner.title.text.split("\n")
+	assert_eq(lines.size(), TrickBanner.MAX_LINES, "names share lines")
+	assert_string_contains(lines[0], "Second Toy!", "the oldest name dropped off")
+	assert_false(banner.title.text.contains("Head Start"))
+	assert_string_contains(lines[1], "Spare Stuffing!")
+	# The hero stands in the middle of a 1080 px high screen; the banner ends well above them.
+	assert_lt(banner.get_global_rect().end.y, 1080.0 / 2.0 - 60.0, "above the hero")
