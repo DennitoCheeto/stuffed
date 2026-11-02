@@ -12,6 +12,10 @@ signal celebrated
 signal loadout_changed
 ## A weapon evolved (the gift box moment shows it).
 signal evolved(weapon: Weapon)
+## Second Helping: the shield (health over full) went up or down.
+signal shield_changed(shield: float)
+## Spare Stuffing: the hero would have fallen and popped back up instead.
+signal popped_back_up
 
 const GROUP: StringName = &"players"
 ## Thick Felt never makes the hero take less than this share of a hit.
@@ -28,6 +32,13 @@ const EVOLVED_LEVEL: int = 99
 
 var health: float = 0.0
 var max_health: float = 0.0
+## Second Helping trick: healing past full health fills this shield (up to `max_shield`, 0 =
+## no shield), and hits take it first. Set `max_shield` before adding the hero.
+var shield: float = 0.0
+var max_shield: float = 0.0
+## Spare Stuffing trick: the share of max health the hero pops back up with when they would
+## fall, once per run (0 = none or already used). Set before adding the hero.
+var spare_stuffing: float = 0.0
 ## Last non-zero move direction; a dash while standing still goes this way.
 var facing: Vector2 = Vector2.RIGHT
 ## Name of whatever hit the hero last (shown on the end screen later).
@@ -156,11 +167,28 @@ func add_xp(amount: int) -> int:
 	return progress.add_xp(amount)
 
 
+## Heals up to full health; with Second Helping, what goes past full fills the shield.
 func heal(amount: float) -> void:
 	if is_dead():
 		return
+	var extra: float = health + amount - max_health
 	health = minf(health + amount, max_health)
+	if extra > 0.0:
+		add_shield(extra)
 	health_changed.emit(health, max_health)
+
+
+## Adds `amount` to the shield, up to `max_shield` (nothing without Second Helping).
+func add_shield(amount: float) -> void:
+	var before: float = shield
+	shield = clampf(shield + amount, 0.0, max_shield)
+	if shield != before:
+		shield_changed.emit(shield)
+
+
+## True while Spare Stuffing can still catch this hero's fall.
+func has_spare_stuffing() -> bool:
+	return spare_stuffing > 0.0
 
 
 ## Current level of every upgrade the hero has (weapons and items), for rolling cards.
@@ -282,16 +310,25 @@ func has_trick(id: StringName) -> bool:
 	return tricks.has(String(id))
 
 
-## Damage from a zombie or a bullet (Thick Felt makes it smaller). Ignored while dashing or right
-## after another hit. Returns true if it hurt.
+## Damage from a zombie or a bullet (Thick Felt makes it smaller, the shield takes it first).
+## Ignored while dashing or right after another hit. A hit that would make the hero fall is
+## caught once by Spare Stuffing. Returns true if it hurt.
 func take_hit(amount: float, source: String) -> bool:
 	if is_dead() or is_invulnerable() or invincible:
 		return false
 	amount *= damage_taken_multiplier
-	health = maxf(health - amount, 0.0)
+	var blocked: float = minf(shield, amount)
+	add_shield(-blocked)
+	health = maxf(health - (amount - blocked), 0.0)
 	last_hit_by = source
 	_hurt_invulnerable_left = stats.hurt_invulnerability
 	hurt.emit(amount)
+	if is_dead() and has_spare_stuffing():
+		health = maxf(max_health * spare_stuffing, 1.0)
+		spare_stuffing = 0.0
+		health_changed.emit(health, max_health)
+		popped_back_up.emit()
+		return true
 	health_changed.emit(health, max_health)
 	if is_dead():
 		died.emit(self)

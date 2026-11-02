@@ -671,6 +671,7 @@ func _note_boss_defeat(boss: Zombie) -> void:
 			boss_defeated_at = elapsed
 	elif mini_boss_defeated_at < 0.0:
 		mini_boss_defeated_at = elapsed
+		tricks.mini_boss_beaten()
 
 
 ## Adds `amounts` to the shared haul (any player's kill counts) and shows it on the HUD; with

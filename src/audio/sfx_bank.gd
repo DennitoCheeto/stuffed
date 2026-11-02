@@ -63,6 +63,9 @@ const LENGTHS: Dictionary[StringName, float] = {
 	&"ui_open": 0.3,
 	&"sticker": 0.22,
 	&"star": 0.9,
+	# Building tricks (spec 06 §7): soft, never close to enemy danger.
+	&"whistle": 0.3,
+	&"pop_up": 0.45,
 }
 
 
@@ -146,6 +149,8 @@ static func _weapon_or_moment(sound: StringName) -> Callable:
 		&"ui_open": _ui_open,
 		&"sticker": _sticker,
 		&"star": _star,
+		&"whistle": _whistle,
+		&"pop_up": _pop_up,
 	}
 	return voices[sound]
 
@@ -638,3 +643,19 @@ static func _star(t: float) -> float:
 		var decay: float = 9.0 if i < notes.size() - 1 else 4.0
 		music += Synth.triangle(Synth.midi_hz(notes[i]) * local) * Synth.pluck(local, 0.01, decay)
 	return 0.13 * music
+
+
+## Magnet Whistle trick: a light two-note whistle going up (softer than enemy danger).
+static func _whistle(t: float) -> float:
+	var local: float = t if t < 0.14 else t - 0.14
+	var note: float = 84.0 if t < 0.14 else 91.0
+	var vibrato: float = 0.004 * sin(TAU * 9.0 * t)
+	var tone: float = Synth.sine(Synth.midi_hz(note) * (1.0 + vibrato) * local)
+	return 0.11 * tone * sin(PI * clampf(local / 0.14, 0.0, 1.0))
+
+
+## Spare Stuffing trick: the hero pops back up, a soft springy "fwump-boing" going up.
+static func _pop_up(t: float) -> float:
+	var fluff: float = Synth.noise(t) * exp(-18.0 * t)
+	var spring: float = Synth.sine(Synth.sweep(t, 180.0, 520.0, 0.3)) * Synth.pluck(t, 0.02, 7.0)
+	return 0.05 * fluff + 0.14 * spring
