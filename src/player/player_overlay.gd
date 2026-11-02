@@ -17,8 +17,12 @@ const SHIELD_LIGHTEN: float = ShieldOutline.LIGHTEN
 const HEART_SIZE: float = 10.0
 const HEART_COLOR: Color = UiColors.HEALTH
 const INK: Color = UiColors.HUD_OUTLINE
+## Pocket Pickup's carried toy right of the small bar.
+const POCKET_SIZE: float = 14.0
 
 var _player: Player
+var _pocket_key: StringName = &""
+var _pocket_texture: AtlasTexture
 
 
 func _ready() -> void:
@@ -61,6 +65,21 @@ func _draw_health_bar() -> void:
 		var heart_at: Vector2 = Vector2(bar.position.x - HEART_SIZE, bar.get_center().y)
 		FeltDraw.fill(self, SpareHeartPatch.heart_points(heart_at, HEART_SIZE / 2.0 + 1.0), INK)
 		FeltDraw.fill(self, SpareHeartPatch.heart_points(heart_at, HEART_SIZE / 2.0), HEART_COLOR)
+	if _player.pocket != null:
+		_draw_pocket(bar)
+
+
+## Pocket Pickup: the carried toy, small, right of the small bar on a dark felt dot.
+func _draw_pocket(bar: Rect2) -> void:
+	var key: StringName = FloorPickupLook.key(_player.pocket.id)
+	if _pocket_key != key:
+		_pocket_key = key
+		_pocket_texture = FeltAtlas.part_texture(key)
+	var center: Vector2 = Vector2(bar.end.x + POCKET_SIZE / 2.0 + 2.0, bar.get_center().y)
+	draw_circle(center, POCKET_SIZE / 2.0 + 1.0, INK)
+	draw_circle(center, POCKET_SIZE / 2.0, UiColors.HUD_FELT)
+	var box: Vector2 = Vector2.ONE * (POCKET_SIZE - 2.0)
+	draw_texture_rect(_pocket_texture, Rect2(center - box / 2.0, box), false)
 
 
 ## Second Helping: a light outline in the hero's colour that closes as the shield fills.

@@ -14,9 +14,12 @@ extends Resource
 ## weapon's level, Second Toy = how many extra weapons, Shiny Card = the chance a level-up has a
 ## shiny card, Lucky Gift = extra gift box level-ups, Four of a Kind = cards per level-up,
 ## Treasure Map = how many pixels outside the start screen its box hides at least, Second
-## Helping = the biggest shield, Spare Stuffing = the share of max health a hero pops back up with).
-## Tune it here, not in code.
+## Helping = the biggest shield, Spare Stuffing = the share of max health a hero pops back up with,
+## Confetti Rush = extra move speed (0.25 = 25%), Double Fun = the chance a floor pickup is a
+## double). Tune it here, not in code.
 @export var amount: float = 0.0
+## How long the trick's effect lasts, if it lasts (Confetti Rush: seconds of running faster).
+@export var seconds: float = 0.0
 @export var coins: int = 0
 @export var stuffing: int = 0
 @export var thread: int = 0

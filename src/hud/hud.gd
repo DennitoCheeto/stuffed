@@ -20,7 +20,7 @@ const BANNER_TOP: float = 170.0
 const BANNER_FADE: float = 0.5
 ## Where the run's material jars sit (under the item row, top left).
 const JARS_POSITION: Vector2 = Vector2(24.0, 176.0)
-## Space between the health bar and the Spare Stuffing heart patch.
+## Space between the health bar and the trick pieces (heart patch, pocket), and between them.
 const HEART_GAP: float = 12.0
 
 ## Upgrade cards by id, for the icons of owned weapons and items.
@@ -44,6 +44,10 @@ var trick_banner: TrickBanner
 ## patch next to it (Spare Stuffing).
 var shield_outline: ShieldOutline
 var spare_heart: SpareHeartPatch
+## Party Shop: the pocket for a carried floor pickup (Pocket Pickup).
+var pocket: PocketPatch
+## The small trick pieces right of the health bar (heart patch, pocket), side by side.
+var trick_row: HBoxContainer
 
 var _player: Player
 var _boss: Zombie
@@ -66,9 +70,16 @@ func _ready() -> void:
 	add_child(trick_banner)
 	shield_outline = ShieldOutline.new()
 	health_bar.add_child(shield_outline)
+	trick_row = HBoxContainer.new()
+	trick_row.name = "TrickRow"
+	trick_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	trick_row.add_theme_constant_override("separation", int(HEART_GAP))
+	trick_row.position = Vector2(health_bar.offset_right + HEART_GAP, health_bar.offset_top)
+	add_child(trick_row)
 	spare_heart = SpareHeartPatch.new()
-	spare_heart.position = Vector2(health_bar.offset_right + HEART_GAP, health_bar.offset_top)
-	add_child(spare_heart)
+	trick_row.add_child(spare_heart)
+	pocket = PocketPatch.new()
+	trick_row.add_child(pocket)
 	jars = RunJars.new()
 	jars.position = JARS_POSITION
 	add_child(jars)
@@ -134,6 +145,7 @@ func follow_player(player: Player, upgrade_pool: UpgradePool) -> void:
 	player.shield_changed.connect(_on_shield_changed)
 	shield_outline.follow(player)
 	spare_heart.follow(player)
+	pocket.follow(player)
 	show_health(player.health, player.max_health)
 	player.progress.xp_changed.connect(show_xp)
 	show_xp(player.progress.xp, player.progress.xp_needed(), player.progress.level)

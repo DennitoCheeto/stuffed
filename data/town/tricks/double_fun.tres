@@ -7,6 +7,7 @@ script = ExtResource("1_trick")
 id = &"double_fun"
 display_name = "Double Fun"
 text = "Some floor pickups are doubles."
+amount = 0.15
 needs_level = 2
 coins = 600
 stuffing = 15

@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-11-02 (M3.7-07 merged)_
+_Last updated: 2026-11-02 (M3.7-08 in review)_
 
 ## Where we are
 
@@ -17,7 +17,7 @@ _Last updated: 2026-11-02 (M3.7-07 merged)_
 | M2 Build variety | ✅ accepted 2026-10-24 (played with M3): all 19 tickets merged (PRs #47–#49, #51–#55, #57, #58, #60, #61, #63, #67, #69, #77, #78, #80, #81); + spec 02b floor pickups approved (#83): M2-20 (PR #88), M2-21 (PR #89) and M2-22 (PR #90) merged |
 | M3.5 UI and juice | ✅ accepted 2026-10-25: spec 04 (PR #123), M3.5-01 … 08 (PRs #133, #137, #138, #140, #141, #143, #149, #150) + PO fixes #136, #146, #152, #154, #156 (late-game hitches), #158 |
 | M3.6 Sunny patchwork | 🚧 spec 05 approved 2026-10-25 (PR #160; AC-58 … AC-65, P-22 … P-25); milestone M3.6, issues #162–#170 (M3.6-01 … 09); M3.6-01 world palette (#162): merged (PR #171); hero clarity #172 (part 1): merged (PR #173, floors calmer #174); M3.6-02 art kit + Lucky Jar + Armory (#163): merged (PR #175); M3.6-03 other four buildings + fort + Scrapbook stand (#164): merged (PR #179); M3.6-04 town ground + compact layout (#165): merged (PR #181); M3.6-05 town text (#166): merged (PR #188); spec update #186 merged by the PO; M3.6-10 Party Shop + Hospital redraw (#187): merged (PR #190); M3.6-06 town life (#167): merged (PR #192); M3.6-07 Bedroom floor and room (#168): merged (PR #193); M3.6-08 Bedroom zones (#169): merged (PR #195); M3.6-09 perf check (#170): merged (PR #197), all 10 M3.6 tickets merged |
-| M3.7 Building tricks | 🚧 spec 06 approved 2026-10-27 (PR #199; AC-66 … AC-73, P-26 … P-28); issues #200–#209 (M3.7-01 … 10); M3.7-01 trick data + save v4 (#200): merged (PR #210); M3.7-02 Tricks panel (#201): merged (PR #212); M3.7-03 trick runtime (#202): merged (PR #214); M3.7-04 Armory tricks (#203): merged (PR #216); M3.7-05 Lucky Jar tricks (#204): merged (PR #218); M3.7-06 Watchtower tricks (#205): merged (PR #219); M3.7-07 Snack Bar tricks (#206): merged (PR #221) |
+| M3.7 Building tricks | 🚧 spec 06 approved 2026-10-27 (PR #199; AC-66 … AC-73, P-26 … P-28); issues #200–#209 (M3.7-01 … 10); M3.7-01 trick data + save v4 (#200): merged (PR #210); M3.7-02 Tricks panel (#201): merged (PR #212); M3.7-03 trick runtime (#202): merged (PR #214); M3.7-04 Armory tricks (#203): merged (PR #216); M3.7-05 Lucky Jar tricks (#204): merged (PR #218); M3.7-06 Watchtower tricks (#205): merged (PR #219); M3.7-07 Snack Bar tricks (#206): merged (PR #221); M3.7-08 Party Shop tricks (#207): PR open |
 | M3 Town | ✅ accepted 2026-10-24: spec 03 approved (PR #91); issues #92–#103; M3-01 save system (PR #105), M3-02 town + flow (PR #106), M3-03 materials (PR #107), M3-04 Way Home portal (PR #109), M3-05 rebuilding (PR #110), M3-06 Toy Box Armory (PR #114), M3-07 Lucky Jar + Watchtower + Snack Bar (PR #115), M3-08 Party Shop (PR #116), M3-09 rescue in the run (PR #117), M3-10 Plush Hospital + plushies in town (PR #118), M3-11 Scrapbook (PR #119), M3-12 co-op in town + dev menu + sounds (PR #120) |
 
 ## Next step
@@ -62,7 +62,7 @@ _Last updated: 2026-11-02 (M3.7-07 merged)_
   `docs/specs/06-building-tricks.md`, AC-66 … AC-73, P-26 … P-28). Each building = a branch of 3 tricks, mostly new
   mechanics, 18 in total. Milestone **M3.7 — Building tricks**, issues **#200–#209** (M3.7-01 … 10).
   M3.7-01 trick data + save v4 + buying rules + dev menu (#200): merged (PR #210). M3.7-02 Tricks panel (#201): merged (PR #212). The panel opens with **T** (not E as the spec says: E
-  still builds/upgrades); PO to confirm. M3.7-03 trick runtime (#202): merged (PR #214). M3.7-04 Armory tricks (#203): merged (PR #216). M3.7-05 Lucky Jar tricks (#204): merged (PR #218). M3.7-06 Watchtower tricks (#205): merged (PR #219). M3.7-07 Snack Bar tricks (#206): merged (PR #221). **Next: M3.7-08 Party Shop tricks (#207).**
+  still builds/upgrades); PO to confirm. M3.7-03 trick runtime (#202): merged (PR #214). M3.7-04 Armory tricks (#203): merged (PR #216). M3.7-05 Lucky Jar tricks (#204): merged (PR #218). M3.7-06 Watchtower tricks (#205): merged (PR #219). M3.7-07 Snack Bar tricks (#206): merged (PR #221). M3.7-08 Party Shop tricks (#207): PR open. **Next: M3.7-09 Plush Hospital tricks (#208).**
   **PO direction (2026-10-27): features first, polish later.** Fewer look rounds / option boards; ship
   "good enough" art and batch nitpicks for a later iteration pass. After M3.6: skill / progress tree spec, M4 siege.
   Speedy Stitcher = "King beaten before 9:00": PO OK (2026-10-25).
@@ -499,3 +499,12 @@ _Last updated: 2026-11-02 (M3.7-07 merged)_
   (`ShieldOutline`, closes as the shield fills; label "+N"), `hud.spare_heart` (`SpareHeartPatch`); every hero's
   small bar (`player_overlay.gd`) shows both too (co-op). Tests: `test_06_snack_bar_tricks.gd`. Shell heredocs
   piped through perl emptied a file once: edit with the Edit tool.
+- Party Shop tricks (M3.7-08): `TrickDef.seconds` (Confetti Rush = 4 s, `amount` 0.25 speed) →
+  `Player.boost_speed(share, seconds)` / `speed_boost_left()`. Double Fun: `tricks.rolls_double()` in
+  `run.drop_floor_pickup(id, at, double)`; `FloorPickup.double` / `twin` (second toy + outer ring); double numbers
+  `double_*` in `floor_pickup_rules.tres` (magnet = `LastingMagnet` keeps pulling, globe freezes longer, popper hits
+  elites/bosses harder). Effects now go through `run.use_floor_pickup(kind, player, double)` (log field `double`).
+  Pocket: `p1_use_pocket` (Q), `Player.pocket` / `pocket_double` / `put_in_pocket` / `use_pocket` (`pocket_used`
+  → run), `tricks.pocket(...)`; HUD `hud.pocket` (`PocketPatch`, `is_full()`) in `hud.trick_row` with the heart
+  patch; the small per-hero bar shows the toy. Key names for hints: `player.key_text("use_pocket")`.
+  `run_scenario.CONTROLS` lists the per-player actions `add_controls` makes. Tests: `test_06_party_shop_tricks.gd`.

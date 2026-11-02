@@ -31,6 +31,15 @@ extends Resource
 @export var popper_boss_share: float = 0.05
 ## Party Popper: how long the confetti flies (seconds; looks only).
 @export var popper_seconds: float = 1.4
+## Double Fun trick (spec 06 §3), what a double does per kind. Big Magnet: after pulling every
+## button, it keeps pulling new ones to the hero for this many seconds.
+@export var double_magnet_seconds: float = 6.0
+## Snow Globe: the horde stays frozen this many times as long.
+@export var double_freeze_scale: float = 1.8
+## Party Popper: elites and bosses lose this many times the normal share of their health.
+@export var double_popper_scale: float = 2.0
+## Put before a double's banner, e.g. "DOUBLE " + "SNOW GLOBE!".
+@export var double_banner_prefix: String = "DOUBLE "
 
 
 ## The kind with this id, or null.
