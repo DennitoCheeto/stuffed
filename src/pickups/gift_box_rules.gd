@@ -21,6 +21,10 @@ extends Resource
 ## The contents stay until the player confirms; confirming works only this long after they
 ## show, so a key that was already held doesn't close them by accident.
 @export var confirm_delay: float = 0.5
+## Treasure Map (spec 06 §3.1): the hidden big box stays this far from the walls ...
+@export var treasure_wall_margin: float = 220.0
+## ... and this far from any furniture.
+@export var treasure_stand_radius: float = 70.0
 
 
 ## What a box holds for a player whose upgrades are at `levels` (id → level): an evolution if a

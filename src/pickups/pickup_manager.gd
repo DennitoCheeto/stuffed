@@ -43,6 +43,18 @@ func attract_all(player: Player) -> void:
 		button.speed = maxf(button.speed, rules.attract_start_speed)
 
 
+## Magnet Whistle (spec 06 §3): every button inside `area` (world rect) flies to `player`.
+## Returns how many.
+func attract_in(area: Rect2, player: Player) -> int:
+	var count: int = 0
+	for button: XpButton in buttons:
+		if area.has_point(button.position):
+			button.target = player
+			button.speed = maxf(button.speed, rules.attract_start_speed)
+			count += 1
+	return count
+
+
 func _physics_process(delta: float) -> void:
 	_time += delta
 	var players: Array[Player] = []

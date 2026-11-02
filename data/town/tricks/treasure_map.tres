@@ -8,6 +8,7 @@ id = &"treasure_map"
 display_name = "Treasure Map"
 text = "A big gift box hides in every run. Follow the arrow!"
 needs_level = 3
+amount = 400.0
 coins = 1000
 stuffing = 25
 thread = 6
