@@ -8,6 +8,7 @@ id = &"spare_stuffing"
 display_name = "Spare Stuffing"
 text = "Once per run, you pop back up instead of falling."
 needs_level = 3
+amount = 0.5
 coins = 1000
 stuffing = 25
 thread = 6

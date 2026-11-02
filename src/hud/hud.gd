@@ -20,6 +20,8 @@ const BANNER_TOP: float = 170.0
 const BANNER_FADE: float = 0.5
 ## Where the run's material jars sit (under the item row, top left).
 const JARS_POSITION: Vector2 = Vector2(24.0, 176.0)
+## Space between the health bar and the Spare Stuffing heart patch.
+const HEART_GAP: float = 12.0
 
 ## Upgrade cards by id, for the icons of owned weapons and items.
 var pool: UpgradePool
@@ -38,6 +40,10 @@ var banner_subtitle: Label
 var jars: RunJars
 ## The small banner naming a building trick the first time it fires (spec 06).
 var trick_banner: TrickBanner
+## Snack Bar tricks: the shield outline around the health bar (Second Helping) and the heart
+## patch next to it (Spare Stuffing).
+var shield_outline: ShieldOutline
+var spare_heart: SpareHeartPatch
 
 var _player: Player
 var _boss: Zombie
@@ -58,6 +64,11 @@ func _ready() -> void:
 	_build_banner()
 	trick_banner = TrickBanner.new()
 	add_child(trick_banner)
+	shield_outline = ShieldOutline.new()
+	health_bar.add_child(shield_outline)
+	spare_heart = SpareHeartPatch.new()
+	spare_heart.position = Vector2(health_bar.offset_right + HEART_GAP, health_bar.offset_top)
+	add_child(spare_heart)
 	jars = RunJars.new()
 	jars.position = JARS_POSITION
 	add_child(jars)
@@ -120,6 +131,9 @@ func follow_player(player: Player, upgrade_pool: UpgradePool) -> void:
 	player.loadout_changed.connect(show_loadout)
 	show_loadout()
 	player.health_changed.connect(show_health)
+	player.shield_changed.connect(_on_shield_changed)
+	shield_outline.follow(player)
+	spare_heart.follow(player)
 	show_health(player.health, player.max_health)
 	player.progress.xp_changed.connect(show_xp)
 	show_xp(player.progress.xp, player.progress.xp_needed(), player.progress.level)
@@ -135,6 +149,12 @@ func show_health(current: float, maximum: float) -> void:
 	health_bar.max_value = maximum
 	health_bar.value = current
 	health_label.text = "%d / %d" % [ceili(current), roundi(maximum)]
+	if _player != null and _player.shield > 0.0:
+		health_label.text += "  +%d" % ceili(_player.shield)
+
+
+func _on_shield_changed(_shield: float) -> void:
+	show_health(_player.health, _player.max_health)
 
 
 ## Redraws the weapon and item icons of the followed player.

@@ -154,3 +154,12 @@ func test_menu_sounds_are_softer_than_enemy_danger() -> void:
 		assert_true(SfxBank.LENGTHS.has(sound), "%s exists" % sound)
 		assert_lt(_loudness(sound), quietest_danger, "%s is softer than danger" % sound)
 	assert_lt(_loudness(&"ui_hover"), _loudness(&"ui_press"), "hover is the softest touch")
+
+
+## Spec 06 §7: the trick sounds (Magnet Whistle, Spare Stuffing) stay softer than enemy danger.
+func test_trick_sounds_are_softer_than_enemy_danger() -> void:
+	var quietest_danger: float = INF
+	for sound: StringName in DANGER:
+		quietest_danger = minf(quietest_danger, _loudness(sound))
+	for sound: StringName in [RunTricks.WHISTLE_SOUND, RunTricks.SPARE_SOUND]:
+		assert_lt(_loudness(sound), quietest_danger, "%s is softer than danger" % sound)

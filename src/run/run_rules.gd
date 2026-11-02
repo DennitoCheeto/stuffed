@@ -15,6 +15,12 @@ extends Resource
 @export var hit_stop_cooldown: float = 2.0
 ## The small banner naming a building trick the first time it fires stays this long.
 @export var trick_banner_seconds: float = 2.5
+## Spare Stuffing's shockwave: zombies within this radius of the hero get pushed away ...
+@export var spare_shockwave_radius: float = 260.0
+## ... this hard (a push speed; about push / 8 pixels of travel) ...
+@export var spare_shockwave_push: float = 1400.0
+## ... and the soft ring grows to the radius over this many seconds.
+@export var spare_shockwave_seconds: float = 0.5
 
 @export_group("Endless (after the goal)")
 ## Every endless minute: new zombies get this much more health (0.15 = +15%) ...

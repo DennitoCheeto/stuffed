@@ -4,9 +4,11 @@ extends RefCounted
 ## when each first fired (banner + run log, AC-70), and the trick rules that hook into the run.
 ## The run owns one as `run.tricks`; trick code calls `note(id, player)` whenever a trick acts.
 
-## Magnet Whistle plays the floor magnet's sound, higher and lighter.
-const WHISTLE_SOUND: StringName = &"magnet"
-const WHISTLE_PITCH: float = 1.5
+## The trick sounds: a light whistle and a springy pop, both softer than enemy danger (§7).
+const WHISTLE_SOUND: StringName = &"whistle"
+const WHISTLE_PITCH: float = 1.0
+const SPARE_SOUND: StringName = &"pop_up"
+const SPARE_PITCH: float = 1.0
 ## Treasure Map tries this many random spots before it falls back to a far corner.
 const TREASURE_TRIES: int = 60
 
@@ -63,14 +65,59 @@ func prepare_hero(player: Player) -> void:
 	var second_toy: TrickDef = perks.trick(&"second_toy")
 	if second_toy != null:
 		player.extra_weapons = _random_weapons(int(second_toy.amount), player.starting_weapon)
+	var second_helping: TrickDef = perks.trick(&"second_helping")
+	if second_helping != null:
+		player.max_shield = second_helping.amount
+	var spare_stuffing: TrickDef = perks.trick(&"spare_stuffing")
+	if spare_stuffing != null:
+		player.spare_stuffing = spare_stuffing.amount
 
 
-## After the hero is added: the tricks they started with show their banner once.
+## After the hero is added: the tricks they started with show their banner once, and the
+## Snack Bar tricks listen to the hero.
 func hero_added(player: Player) -> void:
 	if player.starting_weapon_level > 1:
 		note(&"head_start", player)
 	if not player.extra_weapons.is_empty():
 		note(&"second_toy", player)
+	player.shield_changed.connect(_on_shield_changed.bind(player))
+	player.popped_back_up.connect(pop_back_up.bind(player))
+
+
+## Picnic: the mini-boss was beaten, so every hero still standing heals to full.
+func mini_boss_beaten() -> void:
+	if not has(&"picnic"):
+		return
+	for player: Player in Players.all(_run.get_tree()):
+		if not player.is_dead():
+			player.heal(player.max_health - player.health)
+	note(&"picnic")
+
+
+## Spare Stuffing: `player` just popped back up instead of falling. A soft shockwave pushes the
+## zombies around them away (numbers in run_rules.tres) and Banane quacks. Returns how many
+## zombies were pushed.
+func pop_back_up(player: Player) -> int:
+	var rules: RunRules = _run.rules
+	var center: Vector2 = player.global_position
+	var pushed: Array[Zombie] = _run.enemies.query_circle(center, rules.spare_shockwave_radius)
+	for zombie: Zombie in pushed:
+		var away: Vector2 = zombie.position - center
+		var direction: Vector2 = away.normalized() if away != Vector2.ZERO else Vector2.RIGHT
+		zombie.knockback += direction * rules.spare_shockwave_push * zombie.knockback_taken()
+	var wave: SpareShockwave = SpareShockwave.new(
+		center, player.player_index, rules.spare_shockwave_radius
+	)
+	wave.lifetime = rules.spare_shockwave_seconds
+	_run.effects.add_child(wave)
+	Sfx.play(SPARE_SOUND, SPARE_PITCH)
+	note(&"spare_stuffing", player)
+	return pushed.size()
+
+
+func _on_shield_changed(shield: float, player: Player) -> void:
+	if shield > 0.0:
+		note(&"second_helping", player)
 
 
 ## The cards `player` must not get: `excluded`, plus everything but new weapons on their first

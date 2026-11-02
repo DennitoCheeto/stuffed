@@ -13,7 +13,8 @@ extends Resource
 ## The trick's number, if it has one (its meaning is per trick: Head Start = the starting
 ## weapon's level, Second Toy = how many extra weapons, Shiny Card = the chance a level-up has a
 ## shiny card, Lucky Gift = extra gift box level-ups, Four of a Kind = cards per level-up,
-## Treasure Map = how many pixels outside the start screen its box hides at least).
+## Treasure Map = how many pixels outside the start screen its box hides at least, Second
+## Helping = the biggest shield, Spare Stuffing = the share of max health a hero pops back up with).
 ## Tune it here, not in code.
 @export var amount: float = 0.0
 @export var coins: int = 0
