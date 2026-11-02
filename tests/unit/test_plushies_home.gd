@@ -81,3 +81,22 @@ func test_walkable_spots_keep_clear_of_buildings() -> void:
 		LAYOUT, Vector2(1400, 1240), Vector2(1800, 1240), 0.0
 	)
 	assert_false(through, "a walk never crosses a building")
+
+
+func test_the_plushie_rescued_last_is_saved_and_reloaded() -> void:
+	var town: TownSave = TownSave.new()
+	var haul: RunHaul = RunHaul.new()
+	haul.rescued = "bobo"
+	town.bank(haul, 1.0)
+	haul.rescued = "pip"
+	town.bank(haul, 1.0)
+	assert_eq(town.last_rescued, "pip", "Plushie Buddy brings the newest one")
+	var again: TownSave = TownSave.from_dict(town.to_dict())
+	assert_eq(again.last_rescued, "pip")
+	assert_eq(TownPerks.from_save(again, LAYOUT).buddy, "pip")
+
+
+func test_an_older_save_brings_any_plushie_that_came_home() -> void:
+	var old: Dictionary = {"version": 4, "plushies": {"robbar": "in_town"}}
+	assert_eq(TownSave.from_dict(old).last_rescued, "robbar")
+	assert_eq(TownSave.from_dict({"version": 4}).last_rescued, "", "nobody yet")

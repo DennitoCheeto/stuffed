@@ -26,3 +26,7 @@ freed_subtitle = "In your backpack: it comes home even if you fall"
 banner_seconds = 2.5
 help_sound = &"help"
 freed_sound = &"rescued"
+buddy_size = 11.0
+buddy_follow_distance = 70.0
+buddy_speed = 420.0
+buddy_halo = Color(1, 0.98, 0.92, 0.55)

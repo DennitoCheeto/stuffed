@@ -7,6 +7,7 @@ script = ExtResource("1_trick")
 id = &"plushie_buddy"
 display_name = "Plushie Buddy"
 text = "Your last rescued plushie comes along and collects buttons."
+amount = 160.0
 needs_level = 3
 coins = 1000
 stuffing = 25

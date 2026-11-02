@@ -756,6 +756,7 @@ func start_rescue(who: PlushieDef = null) -> TangledPlushie:
 	rescue.position = _rescue_spot()
 	rescue.freed.connect(_on_plushie_freed)
 	floor_items.add_child(rescue)
+	tricks.rescue_started(rescue)
 	rescue_log = {"plushie": who.id, "time": elapsed, "freed": false, "freed_at": -1.0}
 	var data: RescueRules = rescue_rules
 	var lilac: Color = TangledPlushie.GLOW_COLOR
@@ -780,7 +781,7 @@ func _rescue_spot() -> Vector2:
 
 
 ## The ring is full: the plushie is in the backpack and comes home however the run ends.
-func _on_plushie_freed(_player: Player) -> void:
+func _on_plushie_freed(player: Player) -> void:
 	var who: PlushieDef = rescue.plushie
 	haul.rescued = who.id
 	rescue_log["freed"] = true
@@ -789,6 +790,7 @@ func _on_plushie_freed(_player: Player) -> void:
 	var title: String = data.freed_banner % who.display_name
 	hud.show_banner(title, data.freed_subtitle, data.banner_seconds, TangledPlushie.GLOW_COLOR)
 	Sfx.play(data.freed_sound)
+	tricks.plushie_freed(rescue, player)
 	# Saved right away: closing the game now still brings it home.
 	checkpoint_due.emit()
 

@@ -7,6 +7,8 @@ extends Node2D
 
 ## The ring is full: the plushie is free (tells only once).
 signal freed(player: Player)
+## Someone started freeing it (tells only once).
+signal helped(player: Player)
 
 ## Soft lilac glow, ring and edge arrow.
 const GLOW_COLOR: Color = Color("#d4b8ff")
@@ -32,6 +34,8 @@ var fill: float = 0.0
 var used: bool = false
 ## True while a living player stands next to it.
 var occupied: bool = false
+## Standing next to it this long (seconds) frees it (the rules' time; Quick Untangle cuts it).
+var fill_seconds: float = 3.0
 
 var _time: float = 0.0
 ## 0..1 through the hop into the backpack.
@@ -42,6 +46,7 @@ var _rescuer: Player
 func setup(rescue_rules: RescueRules, who: PlushieDef) -> void:
 	rules = rescue_rules
 	plushie = who
+	fill_seconds = rules.fill_seconds
 
 
 func _physics_process(delta: float) -> void:
@@ -54,7 +59,9 @@ func _physics_process(delta: float) -> void:
 	occupied = standing != null
 	if standing == null:
 		return
-	fill = minf(fill + delta / rules.fill_seconds, 1.0)
+	if fill <= 0.0:
+		helped.emit(standing)
+	fill = minf(fill + delta / fill_seconds, 1.0)
 	if fill >= 1.0:
 		used = true
 		_rescuer = standing

@@ -32,6 +32,8 @@ var runs_started: int = 0
 var titles_seen: PackedStringArray = []
 ## Building tricks bought (TrickDef.id, spec 06), in the order they were bought.
 var tricks: PackedStringArray = []
+## The plushie rescued most recently (its id; "" = none yet). Plushie Buddy brings it along.
+var last_rescued: String = ""
 ## Banane's chosen starting weapon ("" = his own).
 var start_weapon: String = ""
 ## The haul of a run that was still going when last saved (RunHaul.to_dict(); empty = none).
@@ -117,6 +119,7 @@ func bank(haul: RunHaul, share: float, coin_bonus: float = 0.0) -> void:
 		mark_seen(ScrapbookRules.PLUSHIES, haul.rescued)
 		if not plushies.has(haul.rescued):
 			plushies[haul.rescued] = "waiting"
+		last_rescued = haul.rescued
 	for page: String in haul.seen:
 		for id: String in haul.seen[page]:
 			mark_seen(page, id)
@@ -205,6 +208,7 @@ func to_dict() -> Dictionary:
 		"start_weapon": start_weapon,
 		"titles_seen": Array(titles_seen),
 		"tricks": Array(tricks),
+		"last_rescued": last_rescued,
 		"unfinished_run": unfinished_run.duplicate(true),
 	}
 
@@ -237,6 +241,11 @@ static func from_dict(data: Dictionary) -> TownSave:
 	var bought: Variant = data.get("tricks", [])
 	if bought is Array:
 		save.tricks = PackedStringArray(bought as Array)
+	# Saves from before Plushie Buddy: any plushie that came home.
+	var any_plushie: String = ""
+	for id: String in save.plushies:
+		any_plushie = id
+	save.last_rescued = str(data.get("last_rescued", any_plushie))
 	var unfinished: Variant = data.get("unfinished_run", {})
 	if unfinished is Dictionary:
 		var saved: Dictionary = unfinished as Dictionary
