@@ -138,3 +138,32 @@ func test_ac68_a_save_from_before_tricks_loads_with_none() -> void:
 	assert_eq(town.material("coins"), 40)
 	assert_eq(int(town.to_dict()["version"]), TownSave.VERSION)
 	assert_eq(TownSave.VERSION, 4)
+
+
+## Spec 06 §3 prices: a trick never costs more than the next building level (a star trick: the
+## level it waits for), so after a run there's often something affordable.
+func test_every_trick_is_cheaper_than_the_next_building_level() -> void:
+	for spot: TownSpot in LAYOUT.spots:
+		var def: BuildingDef = spot.building
+		for trick: TrickDef in def.tricks:
+			var next: int = mini(trick.needs_level, def.levels.size() - 1)
+			var level: BuildingLevel = def.levels[next]
+			var what: String = "%s vs %s Lv %d" % [trick.id, def.id, next + 1]
+			assert_lt(trick.coins, level.coins, what)
+			assert_lte(trick.stuffing, level.stuffing, what)
+			assert_lte(trick.thread, level.thread, what)
+
+
+func test_tricks_get_pricier_along_a_branch() -> void:
+	for spot: TownSpot in LAYOUT.spots:
+		var tricks: Array[TrickDef] = spot.building.tricks
+		for i: int in range(1, tricks.size()):
+			assert_gt(tricks[i].coins, tricks[i - 1].coins, "%s" % tricks[i].id)
+			assert_gte(tricks[i].stuffing, tricks[i - 1].stuffing, "%s" % tricks[i].id)
+
+
+func test_all_tricks_cost_about_11k_coins() -> void:
+	var coins: int = 0
+	for trick: TrickDef in TrickBook.all_tricks(LAYOUT):
+		coins += trick.coins
+	assert_between(coins, 10000, 12000, "spec 06 §3: all 18 ≈ 11k coins")

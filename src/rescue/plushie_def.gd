@@ -33,3 +33,14 @@ enum Shape {
 @export var patch_color: Color = Color("#2a2230")
 ## How big it is next to the others (1 = normal; a smol seal is smaller).
 @export var height: float = 1.0
+
+
+## A copy with every danger colour made dustier (UiColors.calmed), for a plushie in a run
+## (Plushie Buddy): Böbö's brown and Pip's red scarf would otherwise read as enemy danger.
+func calmed() -> PlushieDef:
+	var copy: PlushieDef = duplicate() as PlushieDef
+	copy.body_color = UiColors.calmed(body_color)
+	copy.accent_color = UiColors.calmed(accent_color)
+	copy.detail_color = UiColors.calmed(detail_color)
+	copy.patch_color = UiColors.calmed(patch_color)
+	return copy

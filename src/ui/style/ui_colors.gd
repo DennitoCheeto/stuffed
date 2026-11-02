@@ -62,6 +62,8 @@ const DANGER_HUE_LOW: float = 35.0 / 360.0
 const DANGER_HUE_HIGH: float = 335.0 / 360.0
 const DANGER_SATURATION: float = 0.45
 const DANGER_VALUE: float = 0.35
+## calmed() turns a danger colour down to this saturation: same hue, just dustier.
+const CALM_SATURATION: float = 0.4
 
 
 ## True for a colour that reads as enemy danger (red / orange, saturated and bright enough).
@@ -69,3 +71,11 @@ static func is_danger(color: Color) -> bool:
 	if color.a <= 0.0 or color.s < DANGER_SATURATION or color.v < DANGER_VALUE:
 		return false
 	return color.h < DANGER_HUE_LOW or color.h > DANGER_HUE_HIGH
+
+
+## The colour itself, or a dustier version of it if it reads as danger. For friendly things that
+## walk among the zombies with their own colours (Plushie Buddy).
+static func calmed(color: Color) -> Color:
+	if not is_danger(color):
+		return color
+	return Color.from_hsv(color.h, CALM_SATURATION, color.v, color.a)

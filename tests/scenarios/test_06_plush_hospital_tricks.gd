@@ -161,7 +161,11 @@ func test_ac69_ac73_the_buddy_is_harmless_and_never_looks_like_danger() -> void:
 	await _quiet_run(["plushie_buddy"])
 	var buddy: PlushieBuddy = run.tricks.buddy
 	assert_false(buddy.is_class("CollisionObject2D"), "no body: zombies can't hurt it")
-	assert_eq(buddy.get_child_count(), 0, "no weapons, no hitbox")
+	for child: Node in buddy.find_children("*", "", true, false):
+		assert_false(child is CollisionObject2D, "no hitbox: %s" % child.name)
+		assert_false(child is Weapon, "no weapon: %s" % child.name)
+	assert_eq(buddy.sprite.texture, buddy.picture.get_texture(), "one baked picture (#209)")
+	assert_ne(buddy.picture.render_target_update_mode, SubViewport.UPDATE_ALWAYS, "drawn once")
 	assert_lt(RULES.buddy_size, TangledPlushie.SIZE, "drawn small")
 	assert_false(UiColors.is_danger(RULES.buddy_halo), "a soft halo, never danger red")
 	assert_gt(RULES.buddy_halo.v, 0.85, "a light halo")
