@@ -888,45 +888,61 @@ func floor_pickups() -> Array[FloorPickup]:
 
 
 ## Puts the floor pickup `id` (e.g. &"magnet") on the floor at `at`; the first player who
-## touches it triggers it.
-func drop_floor_pickup(id: StringName, at: Vector2) -> FloorPickup:
+## touches it triggers it. With Double Fun it may be a double (or force one with `double`).
+func drop_floor_pickup(id: StringName, at: Vector2, double: bool = false) -> FloorPickup:
 	var pickup: FloorPickup = FloorPickup.new()
 	pickup.position = at
+	pickup.double = double or tricks.rolls_double()
 	pickup.setup(floor_pickup_rules.find(id), floor_pickup_rules)
 	pickup.touched.connect(_on_floor_pickup_touched)
 	floor_items.add_child(pickup)
 	return pickup
 
 
-## A floor pickup works at once (spec 02b §2): banner, sound, log line, then its effect.
+## A floor pickup was touched (spec 02b §2): Confetti Rush may speed the hero up, Pocket Pickup
+## may keep it for later, otherwise it works at once.
 func _on_floor_pickup_touched(pickup: FloorPickup, player: Player) -> void:
-	var kind: FloorPickupDef = pickup.kind
 	pickup.queue_free()
-	hud.show_banner(kind.banner, kind.banner_subtitle, floor_pickup_rules.banner_seconds)
+	haul.see(ScrapbookRules.FLOOR_PICKUPS, String(pickup.kind.id))
+	tricks.floor_pickup_touched(player, pickup.double)
+	if not tricks.pocket(pickup.kind, pickup.double, player):
+		use_floor_pickup(pickup.kind, player, pickup.double)
+
+
+## Floor pickup `kind` works for `player` (when touched or taken out of the pocket): banner,
+## sound, log line, then its effect. A double (Double Fun) is stronger or longer (data).
+func use_floor_pickup(kind: FloorPickupDef, player: Player, double: bool = false) -> void:
+	var data: FloorPickupRules = floor_pickup_rules
+	var title: String = data.double_banner_prefix + kind.banner if double else kind.banner
+	hud.show_banner(title, kind.banner_subtitle, data.banner_seconds)
 	Sfx.play(kind.sound)
 	var entry: Dictionary = {
 		"id": String(kind.id),
 		"name": kind.display_name,
 		"time": elapsed,
 		"player": player.player_index,
+		"double": double,
 	}
 	floor_pickup_log.append(entry)
-	haul.see(ScrapbookRules.FLOOR_PICKUPS, String(kind.id))
 	match kind.id:
 		&"magnet":
 			pickups.attract_all(player)
+			if double:
+				effects.add_child(LastingMagnet.new(pickups, player, data.double_magnet_seconds))
 		&"snow_globe":
-			freeze_the_horde()
+			freeze_the_horde(data.double_freeze_scale if double else 1.0)
 		&"party_popper":
-			party_pop(player)
+			party_pop(player, data.double_popper_scale if double else 1.0)
 
 
 ## Snow Globe (spec 02b §3): the horde freezes, bosses slow down, enemy bullets in the air pop
-## into fluff and no new zombies come, all for the freeze time from data.
-func freeze_the_horde() -> void:
+## into fluff and no new zombies come, all for the freeze time from data (times `scale` for a
+## double).
+func freeze_the_horde(scale: float = 1.0) -> void:
 	var data: FloorPickupRules = floor_pickup_rules
-	enemies.freeze(data.freeze_seconds, data.freeze_boss_speed, data.freeze_crack_seconds)
-	spawner.pause(data.freeze_seconds)
+	var seconds: float = data.freeze_seconds * scale
+	enemies.freeze(seconds, data.freeze_boss_speed, data.freeze_crack_seconds)
+	spawner.pause(seconds)
 	var popped: PackedVector2Array = projectiles.pop_enemy_bullets()
 	if not popped.is_empty():
 		effects.add_child(FluffPoofs.new(popped))
@@ -934,8 +950,8 @@ func freeze_the_horde() -> void:
 
 ## Party Popper (spec 02b §3): confetti over the whole screen. Normal zombies on screen pop (and
 ## drop their XP as usual), elites and bosses lose the share of their health set in data,
-## zombies off screen are untouched.
-func party_pop(player: Player) -> void:
+## zombies off screen are untouched. A double hits elites and bosses `scale` times as hard.
+func party_pop(player: Player, scale: float = 1.0) -> void:
 	var data: FloorPickupRules = floor_pickup_rules
 	var view: Rect2 = spawner.visible_rect()
 	for zombie: Zombie in enemies.zombies.duplicate():
@@ -943,9 +959,9 @@ func party_pop(player: Player) -> void:
 			continue
 		var hit: float = zombie.health
 		if zombie.is_boss():
-			hit = zombie.max_health * data.popper_boss_share
+			hit = zombie.max_health * minf(data.popper_boss_share * scale, 1.0)
 		elif zombie.is_elite():
-			hit = zombie.max_health * data.popper_elite_share
+			hit = zombie.max_health * minf(data.popper_elite_share * scale, 1.0)
 		enemies.damage_from(WeaponTally.PARTY_POPPER, zombie, hit)
 	var seconds: float = data.popper_seconds
 	var confetti: ConfettiBlast = ConfettiBlast.new(player.global_position, view, seconds, randi())

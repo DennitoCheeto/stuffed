@@ -16,6 +16,11 @@ signal evolved(weapon: Weapon)
 signal shield_changed(shield: float)
 ## Spare Stuffing: the hero would have fallen and popped back up instead.
 signal popped_back_up
+## Pocket Pickup: something went into or came out of the pocket.
+signal pocket_changed
+## Pocket Pickup: the player pressed their "use pocket" key with something in the pocket (it is
+## already empty again; the run uses `kind`).
+signal pocket_used(kind: FloorPickupDef, double: bool)
 
 const GROUP: StringName = &"players"
 ## Thick Felt never makes the hero take less than this share of a hit.
@@ -39,6 +44,12 @@ var max_shield: float = 0.0
 ## Spare Stuffing trick: the share of max health the hero pops back up with when they would
 ## fall, once per run (0 = none or already used). Set before adding the hero.
 var spare_stuffing: float = 0.0
+## Pocket Pickup trick: the floor pickup this hero carries (null = empty) and whether it is a
+## double (Double Fun).
+var pocket: FloorPickupDef
+var pocket_double: bool = false
+## Confetti Rush trick: extra move speed (0.25 = 25% faster) for `speed_boost_left()` seconds.
+var speed_boost: float = 0.0
 ## Last non-zero move direction; a dash while standing still goes this way.
 var facing: Vector2 = Vector2.RIGHT
 ## Name of whatever hit the hero last (shown on the end screen later).
@@ -91,6 +102,7 @@ var _dash_left: float = 0.0
 var _dash_direction: Vector2 = Vector2.ZERO
 var _dash_cooldown_left: float = 0.0
 var _hurt_invulnerable_left: float = 0.0
+var _speed_boost_left: float = 0.0
 
 @onready var _hitbox: CollisionShape2D = $Hitbox
 @onready var _weapons: Node2D = $Weapons
@@ -124,9 +136,12 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	_dash_cooldown_left = maxf(_dash_cooldown_left - delta, 0.0)
 	_hurt_invulnerable_left = maxf(_hurt_invulnerable_left - delta, 0.0)
+	_speed_boost_left = maxf(_speed_boost_left - delta, 0.0)
 	if is_dead():
 		velocity = Vector2.ZERO
 		return
+	if pocket != null and _controls.is_just_pressed("use_pocket"):
+		use_pocket()
 	var direction: Vector2 = _controls.move_vector()
 	if direction != Vector2.ZERO:
 		facing = direction.normalized()
@@ -153,8 +168,46 @@ func just_pressed(action_name: String) -> bool:
 	return _controls.is_just_pressed(action_name)
 
 
+## The key this player presses for `action_name` (e.g. "Q" for "use_pocket"), for hints.
+func key_text(action_name: String) -> String:
+	return _controls.key_text(action_name)
+
+
 func move_speed() -> float:
-	return stats.move_speed * move_speed_multiplier
+	var boost: float = speed_boost if _speed_boost_left > 0.0 else 0.0
+	return stats.move_speed * (move_speed_multiplier + boost)
+
+
+## Confetti Rush: run `share` faster (0.25 = 25%) for `seconds` (a new boost restarts the time).
+func boost_speed(share: float, seconds: float) -> void:
+	speed_boost = share
+	_speed_boost_left = seconds
+
+
+func speed_boost_left() -> float:
+	return _speed_boost_left
+
+
+## Pocket Pickup: puts `kind` into the empty pocket. Returns false if the pocket was full.
+func put_in_pocket(kind: FloorPickupDef, double: bool) -> bool:
+	if pocket != null:
+		return false
+	pocket = kind
+	pocket_double = double
+	pocket_changed.emit()
+	return true
+
+
+## Pocket Pickup: empties the pocket and tells the run to use what was in it.
+func use_pocket() -> void:
+	if pocket == null:
+		return
+	var kind: FloorPickupDef = pocket
+	var double: bool = pocket_double
+	pocket = null
+	pocket_double = false
+	pocket_changed.emit()
+	pocket_used.emit(kind, double)
 
 
 ## Plays the level-up moment on the puppet.

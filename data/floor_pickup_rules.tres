@@ -49,3 +49,7 @@ freeze_boss_speed = 0.5
 popper_elite_share = 0.4
 popper_boss_share = 0.05
 popper_seconds = 1.4
+double_magnet_seconds = 6.0
+double_freeze_scale = 1.8
+double_popper_scale = 2.0
+double_banner_prefix = "DOUBLE "

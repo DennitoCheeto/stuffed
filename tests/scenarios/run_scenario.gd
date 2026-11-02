@@ -8,6 +8,10 @@ const FPS: float = 60.0
 const TEST_LOG: String = "user://test_run_log.jsonl"
 const TEST_SAVE: String = "user://test_save.json"
 const TEST_SETTINGS: String = "user://test_settings.json"
+## The per-player actions `add_controls` makes for another player.
+const CONTROLS: Array[String] = [
+	"move_left", "move_right", "move_up", "move_down", "dash", "interact", "tricks", "use_pocket"
+]
 
 var main: Main
 var sender: GutInputSender
@@ -70,9 +74,7 @@ func unlock_all_weapons() -> void:
 ## Gives player `index` (1 = player 2) controls for this test: "p2_move_left", "p2_interact", ...
 ## There are no keys for them yet (co-op joining comes later), tests press them directly.
 func add_controls(index: int) -> void:
-	for control: String in [
-		"move_left", "move_right", "move_up", "move_down", "dash", "interact", "tricks"
-	]:
+	for control: String in CONTROLS:
 		var action: StringName = StringName("p%d_%s" % [index + 1, control])
 		if not InputMap.has_action(action):
 			InputMap.add_action(action, 0.2)

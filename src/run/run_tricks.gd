@@ -9,6 +9,11 @@ const WHISTLE_SOUND: StringName = &"whistle"
 const WHISTLE_PITCH: float = 1.0
 const SPARE_SOUND: StringName = &"pop_up"
 const SPARE_PITCH: float = 1.0
+## Pocket Pickup: the banner when a pickup goes into the pocket, and a soft pickup sound.
+const POCKET_TITLE: String = "IN YOUR POCKET!"
+const POCKET_HINT: String = "Press %s to use the %s"
+const POCKET_SOUND: StringName = &"pickup"
+const POCKET_PITCH: float = 0.8
 ## Treasure Map tries this many random spots before it falls back to a far corner.
 const TREASURE_TRIES: int = 60
 
@@ -82,6 +87,41 @@ func hero_added(player: Player) -> void:
 		note(&"second_toy", player)
 	player.shield_changed.connect(_on_shield_changed.bind(player))
 	player.popped_back_up.connect(pop_back_up.bind(player))
+	player.pocket_used.connect(_on_pocket_used.bind(player))
+
+
+## Double Fun: whether a new floor pickup is a double (its chance in data).
+func rolls_double() -> bool:
+	var double_fun: TrickDef = _run.perks.trick(&"double_fun")
+	return double_fun != null and rng.randf() < double_fun.amount
+
+
+## `player` touched a floor pickup (`double` = a Double Fun double): Confetti Rush makes them
+## run faster for a bit (numbers in data), and a double shows Double Fun's banner.
+func floor_pickup_touched(player: Player, double: bool) -> void:
+	if double:
+		note(&"double_fun", player)
+	var rush: TrickDef = _run.perks.trick(&"confetti_rush")
+	if rush != null and player.has_trick(&"confetti_rush"):
+		player.boost_speed(rush.amount, rush.seconds)
+		note(&"confetti_rush", player)
+
+
+## Pocket Pickup: `player` keeps `kind` in their empty pocket instead of using it now; a banner
+## names the key that uses it. Returns false if they can't (no trick, or the pocket is full:
+## then the new pickup works at once, as without the trick).
+func pocket(kind: FloorPickupDef, double: bool, player: Player) -> bool:
+	if not player.has_trick(&"pocket_pickup") or not player.put_in_pocket(kind, double):
+		return false
+	var hint: String = POCKET_HINT % [player.key_text("use_pocket"), kind.display_name]
+	_run.hud.show_banner(POCKET_TITLE, hint, _run.floor_pickup_rules.banner_seconds)
+	Sfx.play(POCKET_SOUND, POCKET_PITCH)
+	note(&"pocket_pickup", player)
+	return true
+
+
+func _on_pocket_used(kind: FloorPickupDef, double: bool, player: Player) -> void:
+	_run.use_floor_pickup(kind, player, double)
 
 
 ## Picnic: the mini-boss was beaten, so every hero still standing heals to full.

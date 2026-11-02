@@ -41,6 +41,21 @@ func is_just_pressed(action_name: String) -> bool:
 	return InputMap.has_action(full_name) and Input.is_action_just_pressed(full_name)
 
 
+## The key this player presses for `action_name`, e.g. "Q" for "use_pocket" ("?" if none).
+func key_text(action_name: String) -> String:
+	var full_name: StringName = action(action_name)
+	if not InputMap.has_action(full_name):
+		return "?"
+	for event: InputEvent in InputMap.action_get_events(full_name):
+		var key: InputEventKey = event as InputEventKey
+		if key == null:
+			continue
+		if key.physical_keycode != KEY_NONE:
+			return OS.get_keycode_string(key.physical_keycode)
+		return OS.get_keycode_string(key.keycode)
+	return "?"
+
+
 ## Remembers where this player's cursor is (fed every input event).
 func observe(event: InputEvent) -> void:
 	var motion: InputEventMouseMotion = event as InputEventMouseMotion
