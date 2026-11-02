@@ -55,6 +55,18 @@ func attract_in(area: Rect2, player: Player) -> int:
 	return count
 
 
+## Plushie Buddy (spec 06 §3): every button within `radius` of `point` that isn't flying to
+## anyone yet flies to `player`. Returns how many.
+func attract_near(point: Vector2, radius: float, player: Player) -> int:
+	var count: int = 0
+	for button: XpButton in buttons:
+		if button.target == null and button.position.distance_squared_to(point) <= radius * radius:
+			button.target = player
+			button.speed = rules.attract_start_speed
+			count += 1
+	return count
+
+
 func _physics_process(delta: float) -> void:
 	_time += delta
 	var players: Array[Player] = []

@@ -30,6 +30,13 @@ extends Resource
 ## The one "help!" squeak when it appears, and the happy sound when it is freed.
 @export var help_sound: StringName = &"help"
 @export var freed_sound: StringName = &"rescued"
+## Plushie Buddy (spec 06 §3.1): the buddy's head size (pixels, the run's plushie is 22), how
+## close it trots behind its hero (pixels), how fast it walks (pixels per second), and the soft
+## light halo it stands on, so it never looks like a zombie or an enemy shot.
+@export var buddy_size: float = 11.0
+@export var buddy_follow_distance: float = 70.0
+@export var buddy_speed: float = 420.0
+@export var buddy_halo: Color = Color(1.0, 0.98, 0.92, 0.55)
 
 
 ## The rescue for run number `run_number`, or null if this run has none. Plushies in

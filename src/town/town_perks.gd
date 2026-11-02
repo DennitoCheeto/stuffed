@@ -22,6 +22,8 @@ var pickup_gap_cut: float = 0.0
 var first_pickup_at: float = 0.0
 ## The bought building tricks (spec 06), branch by branch. Town-wide: every hero gets them.
 var tricks: Array[TrickDef] = []
+## Plushie Buddy: the id of the plushie rescued last ("" = none yet).
+var buddy: String = ""
 
 
 ## The perks of the town in `save`, with the buildings standing on the spots of `layout`.
@@ -43,6 +45,7 @@ static func from_save(save: TownSave, layout: TownLayout) -> TownPerks:
 	for trick: TrickDef in TrickBook.all_tricks(layout):
 		if save.has_trick(String(trick.id)):
 			perks.tricks.append(trick)
+	perks.buddy = save.last_rescued
 	var chosen: StringName = StringName(save.start_weapon)
 	if perks.can_choose_start_weapon and not perks.locked_weapons.has(chosen):
 		perks.start_weapon = chosen

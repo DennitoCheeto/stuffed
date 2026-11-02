@@ -16,7 +16,9 @@ extends Resource
 ## Treasure Map = how many pixels outside the start screen its box hides at least, Second
 ## Helping = the biggest shield, Spare Stuffing = the share of max health a hero pops back up with,
 ## Confetti Rush = extra move speed (0.25 = 25%), Double Fun = the chance a floor pickup is a
-## double). Tune it here, not in code.
+## double, Quick Untangle = the share of the normal time freeing a plushie takes (0.5 = half),
+## Plushie Buddy = how close (pixels) an XP button must be to the buddy for it to fetch it).
+## Tune it here, not in code.
 @export var amount: float = 0.0
 ## How long the trick's effect lasts, if it lasts (Confetti Rush: seconds of running faster).
 @export var seconds: float = 0.0

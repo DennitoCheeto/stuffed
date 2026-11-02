@@ -26,6 +26,8 @@ var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var shiny_level_up: bool = false
 ## Treasure Map: the hidden big gift box (null without the trick; freed once opened).
 var treasure: GiftBox
+## Plushie Buddy: the plushie that came along (null without the trick or a rescued plushie).
+var buddy: PlushieBuddy
 
 var _run: Run
 
@@ -246,6 +248,8 @@ func run_started() -> void:
 		_run.pickup_arrows.threat_pointed.connect(_on_threat_pointed, CONNECT_ONE_SHOT)
 	if has(&"treasure_map"):
 		hide_treasure()
+	if has(&"plushie_buddy"):
+		bring_buddy()
 
 
 ## Magnet Whistle: `player` levelled up, so every XP button on screen flies to them (a soft
@@ -300,6 +304,51 @@ func treasure_spot(away: float) -> Vector2:
 func start_rect(at: Vector2) -> Rect2:
 	var view: Vector2 = _run.get_viewport_rect().size / _run.camera.zoom
 	return Rect2(at - view / 2.0, view)
+
+
+## Plushie Buddy: the plushie rescued last comes along, next to player 1. Returns null if the
+## town has no rescued plushie yet.
+func bring_buddy() -> PlushieBuddy:
+	var who: PlushieDef = _run.rescue_rules.find(_run.perks.buddy)
+	if who == null:
+		return null
+	var trick: TrickDef = _run.perks.trick(&"plushie_buddy")
+	buddy = PlushieBuddy.new()
+	buddy.setup(who, _run.rescue_rules, trick.amount)
+	buddy.pickups = _run.pickups
+	var beside: Vector2 = Vector2(-_run.rescue_rules.buddy_follow_distance, 0.0)
+	buddy.position = Players.all(_run.get_tree())[0].global_position + beside
+	buddy.fetched.connect(_on_buddy_fetched)
+	_run.actors.add_child(buddy)
+	return buddy
+
+
+func _on_buddy_fetched(_count: int, player: Player) -> void:
+	note(&"plushie_buddy", player)
+
+
+## A tangled plushie appeared: Quick Untangle makes freeing it faster (its share in data) and
+## names itself once someone starts.
+func rescue_started(tangled: TangledPlushie) -> void:
+	var quick: TrickDef = _run.perks.trick(&"quick_untangle")
+	if quick == null:
+		return
+	tangled.fill_seconds = _run.rescue_rules.fill_seconds * quick.amount
+	tangled.helped.connect(_on_untangle_helped)
+
+
+func _on_untangle_helped(player: Player) -> void:
+	note(&"quick_untangle", player)
+
+
+## `tangled` was just freed by `player`: Thank-you Gift drops a gift box where it stood.
+## Returns the box (null without the trick).
+func plushie_freed(tangled: TangledPlushie, player: Player) -> GiftBox:
+	if not has(&"thank_you_gift"):
+		return null
+	var box: GiftBox = _run.drop_gift_box(tangled.position)
+	note(&"thank_you_gift", player)
+	return box
 
 
 func _on_threat_pointed() -> void:

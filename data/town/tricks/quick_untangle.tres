@@ -7,6 +7,7 @@ script = ExtResource("1_trick")
 id = &"quick_untangle"
 display_name = "Quick Untangle"
 text = "Freeing a plushie takes half the time."
+amount = 0.5
 needs_level = 1
 coins = 250
 stuffing = 5
