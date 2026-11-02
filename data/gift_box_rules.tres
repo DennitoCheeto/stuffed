@@ -12,3 +12,5 @@ skip_delay = 0.3
 confirm_delay = 0.5
 big_box_extra_level_ups = 2
 big_box_scale = 1.6
+treasure_wall_margin = 220.0
+treasure_stand_radius = 70.0

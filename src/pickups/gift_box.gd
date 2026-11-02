@@ -15,6 +15,8 @@ var rules: GiftBoxRules
 var opened: bool = false
 ## The boss's big box: more inside, drawn bigger.
 var big: bool = false
+## The Treasure Map box (spec 06 §3): hidden at the start, with an edge arrow.
+var treasure: bool = false
 var box: Sprite2D
 var lid: Sprite2D
 ## 0..1, how bright the glow is right now.

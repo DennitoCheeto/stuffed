@@ -4,6 +4,12 @@ extends RefCounted
 ## when each first fired (banner + run log, AC-70), and the trick rules that hook into the run.
 ## The run owns one as `run.tricks`; trick code calls `note(id, player)` whenever a trick acts.
 
+## Magnet Whistle plays the floor magnet's sound, higher and lighter.
+const WHISTLE_SOUND: StringName = &"magnet"
+const WHISTLE_PITCH: float = 1.5
+## Treasure Map tries this many random spots before it falls back to a far corner.
+const TREASURE_TRIES: int = 60
+
 ## The first time each trick fired, for the run log: {"id", "time", "player"}.
 var moments: Array[Dictionary] = []
 ## Separate randomness for tricks (Second Toy), so they don't change the cards or zombies.
@@ -11,6 +17,8 @@ var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 
 ## Shiny Card: the level-up on screen is a lucky one (one of its cards shines).
 var shiny_level_up: bool = false
+## Treasure Map: the hidden big gift box (null without the trick; freed once opened).
+var treasure: GiftBox
 
 var _run: Run
 
@@ -141,6 +149,74 @@ func gift_extra(player: Player) -> int:
 	if lucky_gift == null or not player.has_trick(&"lucky_gift"):
 		return 0
 	return int(lucky_gift.amount)
+
+
+## Every hero is in and the camera is in place: Spyglass hands the edge arrows the zombies, and
+## Treasure Map hides its big gift box.
+func run_started() -> void:
+	if has(&"spyglass"):
+		_run.pickup_arrows.threats = _run.enemies
+		_run.pickup_arrows.threat_pointed.connect(_on_threat_pointed, CONNECT_ONE_SHOT)
+	if has(&"treasure_map"):
+		hide_treasure()
+
+
+## Magnet Whistle: `player` levelled up, so every XP button on screen flies to them (a soft
+## magnet sound, quieter than enemy danger). Returns how many buttons came.
+func leveled_up(player: Player) -> int:
+	if not player.has_trick(&"magnet_whistle"):
+		return 0
+	var count: int = _run.pickups.attract_in(_run.spawner.visible_rect(), player)
+	if count > 0:
+		Sfx.play(WHISTLE_SOUND, WHISTLE_PITCH)
+		note(&"magnet_whistle", player)
+	return count
+
+
+## Treasure Map: puts the big gift box at a free spot away from the start screen (see
+## `treasure_spot`); the edge arrows show the way. Returns the box.
+func hide_treasure() -> GiftBox:
+	var trick: TrickDef = _run.perks.trick(&"treasure_map")
+	var box: GiftBox = _run.drop_gift_box(treasure_spot(trick.amount), true)
+	box.treasure = true
+	treasure = box
+	note(&"treasure_map")
+	return box
+
+
+## A random spot in the room at least `away` pixels outside the screen the heroes start on,
+## inside the wall margin and clear of furniture (numbers in gift_box_rules.tres).
+func treasure_spot(away: float) -> Vector2:
+	var rules: GiftBoxRules = _run.gift_box_rules
+	var start: Vector2 = Players.centroid(_run.get_tree())
+	var start_screen: Rect2 = start_rect(start).grow(away)
+	var area: Rect2 = _run.arena.play_rect().grow(-rules.treasure_wall_margin)
+	var furniture: Obstacles = _run.enemies.obstacles
+	var radius: float = rules.treasure_stand_radius
+	for attempt: int in TREASURE_TRIES:
+		var x: float = rng.randf_range(area.position.x, area.end.x)
+		var spot: Vector2 = Vector2(x, rng.randf_range(area.position.y, area.end.y))
+		if not start_screen.has_point(spot) and not furniture.blocks(spot, radius):
+			return spot
+	# Very unlikely: the room corner farthest from the start, pushed out of any furniture.
+	var corner: Vector2 = area.position
+	var others: Array[Vector2] = [
+		area.end, Vector2(area.end.x, area.position.y), Vector2(area.position.x, area.end.y)
+	]
+	for point: Vector2 in others:
+		if point.distance_squared_to(start) > corner.distance_squared_to(start):
+			corner = point
+	return furniture.push_out(corner, radius)
+
+
+## The world rect the screen shows when the camera is centred on `at`.
+func start_rect(at: Vector2) -> Rect2:
+	var view: Vector2 = _run.get_viewport_rect().size / _run.camera.zoom
+	return Rect2(at - view / 2.0, view)
+
+
+func _on_threat_pointed() -> void:
+	note(&"spyglass")
 
 
 ## `count` different unlocked weapons, never `besides` (the starting weapon), within the slots.

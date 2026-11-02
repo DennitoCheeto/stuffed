@@ -212,6 +212,7 @@ func _ready() -> void:
 	hud.follow_player(first, upgrade_pool)
 	camera.set_bounds(arena.outer_rect())
 	camera.snap_to_players()
+	tricks.run_started()
 	Crosshair.use()
 	_show_clock()
 
@@ -332,6 +333,7 @@ func is_frozen() -> bool:
 
 
 func _on_leveled_up(_new_level: int, player: Player) -> void:
+	tricks.leveled_up(player)
 	_level_up_queue.append(player)
 	if not level_up_screen.is_open() and not gift_screen.is_open():
 		_show_next_level_up(true)
