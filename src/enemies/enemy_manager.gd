@@ -448,10 +448,9 @@ func _may_burst() -> bool:
 ## Where a zombie wants to go: straight at its target, or (ranged zombies) to a spot at their
 ## keep distance. A ranged zombie stands still while it winds up.
 func _walk(zombie: Zombie, target: Player) -> Vector2:
-	if target == null and fort != null:
-		return fort.walk(zombie)
 	if target == null or zombie.stun_left > 0.0:
-		return Vector2.ZERO
+		# In the siege a zombie without a hero to chase walks to the fort.
+		return fort.walk(zombie) if target == null and fort != null else Vector2.ZERO
 	var toward: Vector2 = zombie.position.direction_to(target.global_position)
 	toward *= zombie.current_speed()
 	var attack: SpitAttack = zombie.attack
