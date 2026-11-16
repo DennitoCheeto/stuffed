@@ -14,7 +14,8 @@ extends Resource
 @export var nights_between: int = 3
 
 @export_group("Waves")
-@export var waves: int = 3
+## The waves, in order (spec 07 §5).
+@export var wave_list: Array[SiegeWave] = []
 ## Seconds each wave keeps spawning.
 @export var wave_seconds: float = 60.0
 ## A short rest between waves (seconds).
@@ -23,6 +24,24 @@ extends Resource
 @export var zombie_growth: float = 0.2
 ## Each siege after the first gives zombies this share more health.
 @export var health_growth: float = 0.15
+## Zombies appear this far outside the town room's edges (pixels), from all four sides.
+@export var spawn_margin: float = 150.0
+## What makes a zombie an elite.
+@export var elite_rules: EliteRules
+
+@export_group("Fort and heroes")
+## The pillow fort's health in a town with nothing built ...
+@export var fort_health: float = 600.0
+## ... and this much more for every building level built.
+@export var fort_health_per_level: float = 60.0
+## Share of a zombie's touch damage the fort takes per second while the zombie touches it.
+@export var fort_touch_rate: float = 0.6
+## Zombies on their way to the fort turn to a hero closer than this (pixels).
+@export var hero_reach: float = 260.0
+## A fallen hero stands back up at the fort after this many seconds.
+@export var stand_up_seconds: float = 4.0
+## A short moment to see the end (won or lost) before going home.
+@export var end_pause_seconds: float = 2.5
 
 @export_group("After the siege")
 ## The haul of the first won siege (material id -> amount).
@@ -46,6 +65,19 @@ extends Resource
 ## The banner when the first warning appears in town.
 @export var warning_banner: String = "A horde is on its way!"
 @export var warning_subtitle: String = "It arrives in %d nights. Get the fort ready!"
+## The banner when you come home and the siege is due (the town turns to dusk).
+@export var due_banner: String = "The horde is coming!"
+@export var due_subtitle: String = "Build and repair, then defend the fort at the door."
+## The door's prompt while the siege is due.
+@export var door_prompt: String = "E   Defend the fort"
+## The banner when wave N of M starts ("%d of %d").
+@export var wave_banner: String = "Wave %d of %d"
+@export var wave_subtitle: String = "Keep them away from the fort!"
+@export var last_wave_subtitle: String = "The last wave! Something big is coming..."
+@export var won_banner: String = "Night defended!"
+@export var won_subtitle: String = "The fort stands. The horde runs home."
+@export var lost_banner: String = "The horde got in"
+@export var lost_subtitle: String = "The fort fell. They leave at dawn."
 
 
 ## Shows the first warning once enough buildings stand. Returns true if it just appeared.
@@ -89,6 +121,17 @@ func zombie_scale(number: int) -> float:
 
 func health_scale(number: int) -> float:
 	return 1.0 + health_growth * maxi(number - 1, 0)
+
+
+## The pillow fort's health in a town with `built_levels` building levels in total.
+func fort_health_for(built_levels: int) -> float:
+	return fort_health + fort_health_per_level * maxi(built_levels, 0)
+
+
+## How long all waves with their breathers take (seconds).
+func total_seconds() -> float:
+	var count: int = wave_list.size()
+	return wave_seconds * count + breather_seconds * maxi(count - 1, 0)
 
 
 ## What winning siege `number` (1 = the first) brings home.

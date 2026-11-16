@@ -8,6 +8,8 @@ extends Node2D
 
 ## A player pressed E at the Bedroom door: Main starts a run.
 signal bedroom_requested
+## A player pressed E at the door while the horde is due: Main starts the night siege.
+signal siege_requested
 signal title_requested
 signal quit_requested
 ## The developer menu's "Reset town": Main starts a fresh town.
@@ -43,6 +45,10 @@ var fort: TownFort
 var scrapbook: ScrapbookStand
 ## Nights until the horde, next to the door (spec 07 §2).
 var calendar: MoonCalendar
+## Dusk (warm tint + fairy lights) while the night siege is due (null otherwise).
+var dusk: TownDusk
+## A banner to show on arrival (title, subtitle), e.g. how the siege ended. Set by Main.
+var welcome_banner: PackedStringArray = []
 ## Building spot id -> its building (a ruin at level 0).
 var buildings: Dictionary[StringName, TownBuilding] = {}
 ## Plushie id -> the rescued plushie living in town.
@@ -84,6 +90,8 @@ var _leaving: bool = false
 var _settle_left: float = 0.0
 var _banner_left: float = 0.0
 var _banner_drop: Tween
+## "The horde is coming!" still has to be shown (spec 07 §2).
+var _horde_news: bool = false
 
 
 func _ready() -> void:
@@ -131,6 +139,8 @@ func _ready() -> void:
 	_build_hud()
 	tricks.attach(hud)
 	refresh()
+	if welcome_banner.size() >= 2:
+		show_banner(welcome_banner[0], welcome_banner[1])
 	if not pending_reveals().is_empty() or can_move_in() or _warning_due():
 		_settle_left = ARRIVAL_REVEAL_SECONDS
 	add_child(menu)
@@ -152,7 +162,7 @@ func _physics_process(delta: float) -> void:
 	for player: Player in Players.all(get_tree()):
 		var pressed: bool = player.just_pressed("interact")
 		if is_at_door(player):
-			prompt = "E   Go to the Bedroom"
+			prompt = _door_prompt()
 			if pressed:
 				enter_bedroom()
 		elif is_at_scrapbook(player):
@@ -383,6 +393,7 @@ func _refresh_calendar() -> void:
 	var nights: int = save.siege_nights
 	var slots: int = maxi(SIEGE_RULES.nights_between, SIEGE_RULES.first_nights)
 	calendar.show_nights(nights, slots, SIEGE_RULES.calendar_line(nights))
+	_refresh_dusk()
 
 
 ## True when enough buildings stand for the first siege warning but it hasn't appeared yet.
@@ -402,11 +413,13 @@ func settle() -> void:
 		Sfx.play(&"upgrade", 0.8)
 	reveal_new_buildings()
 	move_in_waiting()
+	_refresh_dusk()
 	if _warning_due() and is_banner_showing():
 		# Let the other banner finish first; the next settle shows the warning.
 		_settle_left = maxf(_banner_left, 0.1)
 	else:
 		_warn_of_the_horde()
+	_tell_the_horde_is_coming()
 
 
 ## Once enough buildings stand, the moon calendar appears with a banner (spec 07 §3). Returns
@@ -573,13 +586,56 @@ func refresh_tent() -> void:
 	tent.show_waiting(waiting)
 
 
-## What pressing E at the door does: off to the Bedroom (once).
+## What pressing E at the door does: off to the Bedroom (once), or the night siege when the
+## horde is due (spec 07 §2: no expedition until it is played).
 func enter_bedroom() -> void:
 	if _leaving:
 		return
 	_leaving = true
 	Sfx.play(&"pop")
-	bedroom_requested.emit()
+	if SIEGE_RULES.is_due(save):
+		siege_requested.emit()
+	else:
+		bedroom_requested.emit()
+
+
+func _door_prompt() -> String:
+	return SIEGE_RULES.door_prompt if SIEGE_RULES.is_due(save) else "E   Go to the Bedroom"
+
+
+## Dusk comes (with a banner, see `_tell_the_horde_is_coming`) when the siege is due and goes
+## when it was played; the fairy lights follow the buildings that stand.
+func _refresh_dusk() -> void:
+	if not SIEGE_RULES.is_due(save):
+		if dusk != null:
+			dusk.queue_free()
+			dusk = null
+		return
+	var standing: Array[TownBuilding] = []
+	standing.assign(buildings.values())
+	var lit: Array[Rect2] = TownDusk.lit_rects(fort, standing)
+	var first: bool = dusk == null
+	if not first and dusk.lit == lit:
+		return
+	if not first:
+		dusk.queue_free()
+	dusk = TownDusk.new(lit)
+	fort.get_parent().add_child(dusk)
+	if first:
+		# The banner waits for the next settle, after any other news of the arrival.
+		_horde_news = true
+		_settle_left = maxf(_settle_left, 0.1)
+
+
+## "The horde is coming!" once dusk has come, after any other banner has finished.
+func _tell_the_horde_is_coming() -> void:
+	if not _horde_news:
+		return
+	if is_banner_showing():
+		_settle_left = maxf(_settle_left, maxf(_banner_left, 0.1))
+		return
+	_horde_news = false
+	show_banner(SIEGE_RULES.due_banner, SIEGE_RULES.due_subtitle)
 
 
 ## True when `spot` can be rebuilt and its yarn already fell away (or it never had any).

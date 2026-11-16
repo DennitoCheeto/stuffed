@@ -34,7 +34,7 @@ func test_the_numbers_come_from_data() -> void:
 	assert_eq(RULES.first_trigger_buildings, 2)
 	assert_eq(RULES.first_nights, 2)
 	assert_eq(RULES.nights_between, 3)
-	assert_eq(RULES.waves, 3)
+	assert_eq(RULES.wave_list.size(), 3)
 	assert_eq(_amounts(RULES.reward), [400, 20, 4])
 	assert_almost_eq(RULES.repair_share, 0.25, 0.001)
 

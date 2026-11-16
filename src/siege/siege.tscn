@@ -1,0 +1,19 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="PackedScene" path="res://src/run/run.tscn" id="1_run"]
+[ext_resource type="Script" path="res://src/siege/siege.gd" id="2_siege"]
+[ext_resource type="Script" path="res://src/siege/siege_arena.gd" id="3_arena"]
+[ext_resource type="Resource" path="res://data/siege/siege_xp_rules.tres" id="4_xp"]
+[ext_resource type="Resource" path="res://data/siege/siege_rules.tres" id="5_rules"]
+[ext_resource type="Resource" path="res://data/town/pillow_fort.tres" id="6_layout"]
+
+[node name="Siege" instance=ExtResource("1_run")]
+script = ExtResource("2_siege")
+siege_rules = ExtResource("5_rules")
+layout = ExtResource("6_layout")
+
+[node name="Arena" parent="." index="0"]
+script = ExtResource("3_arena")
+
+[node name="Pickups" parent="." index="1"]
+rules = ExtResource("4_xp")

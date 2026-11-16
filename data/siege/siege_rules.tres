@@ -1,17 +1,56 @@
-[gd_resource type="Resource" script_class="SiegeRules" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="SiegeRules" load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://src/siege/siege_rules.gd" id="1_rules"]
+[ext_resource type="Script" path="res://src/siege/siege_wave.gd" id="2_wave"]
+[ext_resource type="Resource" path="res://data/enemies/shambler.tres" id="3_shambler"]
+[ext_resource type="Resource" path="res://data/enemies/runner.tres" id="4_runner"]
+[ext_resource type="Resource" path="res://data/enemies/spitter.tres" id="5_spitter"]
+[ext_resource type="Resource" path="res://data/enemies/bloater.tres" id="6_bloater"]
+[ext_resource type="Resource" path="res://data/enemies/tank.tres" id="7_tank"]
+[ext_resource type="Resource" path="res://data/bosses/big_ted.tres" id="8_big_ted"]
+[ext_resource type="Resource" path="res://data/elite_rules.tres" id="9_elite_rules"]
+[ext_resource type="Script" path="res://src/enemies/enemy_stats.gd" id="10_stats"]
+
+[sub_resource type="Resource" id="Resource_wave_1"]
+script = ExtResource("2_wave")
+rate = 1.2
+enemies = Array[ExtResource("10_stats")]([ExtResource("3_shambler"), ExtResource("4_runner")])
+weights = PackedFloat32Array(3, 1)
+
+[sub_resource type="Resource" id="Resource_wave_2"]
+script = ExtResource("2_wave")
+rate = 1.6
+enemies = Array[ExtResource("10_stats")]([ExtResource("3_shambler"), ExtResource("4_runner"), ExtResource("5_spitter"), ExtResource("6_bloater")])
+weights = PackedFloat32Array(3, 1.2, 0.8, 0.6)
+elites = 1
+
+[sub_resource type="Resource" id="Resource_wave_3"]
+script = ExtResource("2_wave")
+rate = 2.0
+enemies = Array[ExtResource("10_stats")]([ExtResource("3_shambler"), ExtResource("4_runner"), ExtResource("5_spitter"), ExtResource("6_bloater"), ExtResource("7_tank")])
+weights = PackedFloat32Array(3, 1.2, 0.8, 0.6, 0.5)
+elites = 1
+boss = ExtResource("8_big_ted")
+boss_at = 15.0
 
 [resource]
 script = ExtResource("1_rules")
 first_trigger_buildings = 2
 first_nights = 2
 nights_between = 3
-waves = 3
+wave_list = Array[ExtResource("2_wave")]([SubResource("Resource_wave_1"), SubResource("Resource_wave_2"), SubResource("Resource_wave_3")])
 wave_seconds = 60.0
 breather_seconds = 8.0
 zombie_growth = 0.2
 health_growth = 0.15
+spawn_margin = 150.0
+elite_rules = ExtResource("9_elite_rules")
+fort_health = 600.0
+fort_health_per_level = 60.0
+fort_touch_rate = 0.6
+hero_reach = 260.0
+stand_up_seconds = 4.0
+end_pause_seconds = 2.5
 reward = Dictionary[String, int]({
 "coins": 400,
 "stuffing": 20,
@@ -28,3 +67,13 @@ end_text_one = "1 night until the horde!"
 end_text_due = "The horde is coming tonight!"
 warning_banner = "A horde is on its way!"
 warning_subtitle = "It arrives in %d nights. Get the fort ready!"
+due_banner = "The horde is coming!"
+due_subtitle = "Build and repair, then defend the fort at the door."
+door_prompt = "E   Defend the fort"
+wave_banner = "Wave %d of %d"
+wave_subtitle = "Keep them away from the fort!"
+last_wave_subtitle = "The last wave! Something big is coming..."
+won_banner = "Night defended!"
+won_subtitle = "The fort stands. The horde runs home."
+lost_banner = "The horde got in"
+lost_subtitle = "The fort fell. They leave at dawn."
