@@ -160,6 +160,12 @@ static var _current: WorldPalette
 @export var fort_roof: Array[Color] = []
 @export var door_glow: Color = Color.WHITE
 @export var door_glow_dark: Color = Color.WHITE
+## The moon calendar by the door (spec 07 §2): night-sky felt board (and its darker frame), a
+## bright moon for every night to go and a pale one for every night that passed.
+@export var calendar_sky: Color = Color.WHITE
+@export var calendar_sky_dark: Color = Color.WHITE
+@export var moon: Color = Color.WHITE
+@export var moon_spent: Color = Color.WHITE
 
 @export_group("Shared")
 ## The one even outline around world pieces (like the zombies').

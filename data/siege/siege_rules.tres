@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="SiegeRules" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/siege/siege_rules.gd" id="1_rules"]
+
+[resource]
+script = ExtResource("1_rules")
+first_trigger_buildings = 2
+first_nights = 2
+nights_between = 3
+waves = 3
+wave_seconds = 60.0
+breather_seconds = 8.0
+zombie_growth = 0.2
+health_growth = 0.15
+reward = Dictionary[String, int]({
+"coins": 400,
+"stuffing": 20,
+"thread": 4
+})
+reward_growth = 0.25
+consolation_share = 0.3
+repair_share = 0.25
+calendar_text = "The horde arrives in %d nights."
+calendar_text_one = "The horde arrives in 1 night."
+calendar_text_due = "The horde arrives tonight!"
+end_text = "%d nights until the horde!"
+end_text_one = "1 night until the horde!"
+end_text_due = "The horde is coming tonight!"
+warning_banner = "A horde is on its way!"
+warning_subtitle = "It arrives in %d nights. Get the fort ready!"

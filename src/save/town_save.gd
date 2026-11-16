@@ -6,8 +6,9 @@ extends RefCounted
 
 ## Bump when the meaning of a field changes; from_dict upgrades older saves. Version 3: the
 ## Scrapbook also lists plushies rescued before it existed. Version 4: bought building tricks
-## (older saves have none).
-const VERSION: int = 4
+## (older saves have none). Version 5: the night siege countdown, sieges and damaged buildings
+## (older saves get no warning until the countdown starts as usual).
+const VERSION: int = 5
 ## Plushie ids of the placeholder plushies (version 1) -> the real plushies that replaced them.
 const OLD_PLUSHIE_IDS: Dictionary[String, String] = {
 	"kitty": "pip",
@@ -34,6 +35,13 @@ var titles_seen: PackedStringArray = []
 var tricks: PackedStringArray = []
 ## The plushie rescued most recently (its id; "" = none yet). Plushie Buddy brings it along.
 var last_rescued: String = ""
+## Nights until the horde comes (spec 07 §3): -1 = no warning yet, 0 = the siege is due.
+var siege_nights: int = -1
+## Night sieges played and won.
+var sieges_played: int = 0
+var sieges_won: int = 0
+## Buildings a lost siege damaged (their ids): bonuses and tricks off until repaired.
+var damaged: PackedStringArray = []
 ## Banane's chosen starting weapon ("" = his own).
 var start_weapon: String = ""
 ## The haul of a run that was still going when last saved (RunHaul.to_dict(); empty = none).
@@ -50,6 +58,11 @@ func building_level(id: String) -> int:
 
 func has_trick(id: String) -> bool:
 	return tricks.has(id)
+
+
+## True when a lost siege damaged building `id` and it wasn't repaired yet.
+func is_damaged(id: String) -> bool:
+	return damaged.has(id)
 
 
 ## How many buildings are rebuilt (level 1 or more).
@@ -209,6 +222,10 @@ func to_dict() -> Dictionary:
 		"titles_seen": Array(titles_seen),
 		"tricks": Array(tricks),
 		"last_rescued": last_rescued,
+		"siege_nights": siege_nights,
+		"sieges_played": sieges_played,
+		"sieges_won": sieges_won,
+		"damaged": Array(damaged),
 		"unfinished_run": unfinished_run.duplicate(true),
 	}
 
@@ -246,6 +263,12 @@ static func from_dict(data: Dictionary) -> TownSave:
 	for id: String in save.plushies:
 		any_plushie = id
 	save.last_rescued = str(data.get("last_rescued", any_plushie))
+	save.siege_nights = int(data.get("siege_nights", -1))
+	save.sieges_played = int(data.get("sieges_played", 0))
+	save.sieges_won = int(data.get("sieges_won", 0))
+	var broken: Variant = data.get("damaged", [])
+	if broken is Array:
+		save.damaged = PackedStringArray(broken as Array)
 	var unfinished: Variant = data.get("unfinished_run", {})
 	if unfinished is Dictionary:
 		var saved: Dictionary = unfinished as Dictionary

@@ -13,6 +13,8 @@ const WIDTH: float = 380.0
 const NOTE_COLOR: Color = UiColors.INK_SOFT
 ## The rescued plushie line and the plushie bonus.
 const RESCUE_COLOR: Color = UiColors.PURPLE
+## The night siege countdown line (calm teal, never a danger colour).
+const HORDE_COLOR: Color = UiColors.TEAL
 const PHOTO_PICTURE: Vector2 = Vector2(120, 104)
 
 ## Material id -> amount brought home this run.
@@ -27,6 +29,8 @@ var bonus_label: Label
 var rescue_label: Label
 ## The rescued plushie's photo (null until one is shown).
 var rescue_photo: PhotoFrame
+## "2 nights until the horde!" (spec 07 §2; hidden before the first warning).
+var horde_label: Label
 ## Material id -> "+12" counter (this run).
 var gained: Dictionary[String, JarCounter] = {}
 ## Material id -> total in the jars.
@@ -65,6 +69,10 @@ func _init() -> void:
 		totals[material] = JarCounter.new(material, 22, 28.0).on_felt(UiColors.INK_SOFT)
 		totals[material].size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		jars.add_child(totals[material])
+	horde_label = _text(24, HORDE_COLOR)
+	horde_label.add_theme_font_override(&"font", UiFonts.hand())
+	horde_label.visible = false
+	add_child(horde_label)
 	_rescue_box = VBoxContainer.new()
 	_rescue_box.alignment = BoxContainer.ALIGNMENT_CENTER
 	_rescue_box.add_theme_constant_override(&"separation", 6)
@@ -93,6 +101,12 @@ func show_haul(
 	_plips = 0
 	_counting = true
 	_show_at(0.0)
+
+
+## Shows the night siege countdown `line` (empty = hide it).
+func show_horde(line: String) -> void:
+	horde_label.text = line
+	horde_label.visible = not line.is_empty()
 
 
 ## Shows that the plushie `plushie_name` was rescued in this run and moves into town, with a

@@ -18,6 +18,8 @@ const RESCUE_RULES: RescueRules = preload("res://data/town/rescue_rules.tres")
 const PLUSHIE_RULES: PlushieTownRules = preload("res://data/town/plushie_town_rules.tres")
 ## Which run titles a finished run earns (spec 04 §4.2).
 const RUN_TITLES: RunTitleRules = preload("res://data/ui/run_titles.tres")
+## When the night siege comes (spec 07 §3).
+const SIEGE_RULES: SiegeRules = preload("res://data/siege/siege_rules.tres")
 
 ## Tests turn this off so "Quit" doesn't close the test runner.
 var quit_enabled: bool = true
@@ -106,6 +108,8 @@ func show_end(result: RunResult) -> void:
 	var share: float = MATERIAL_RULES.keep_share(result)
 	var bonus: float = coin_bonus()
 	var titles: Array[RunTitle] = _earn_titles(result)
+	# One more night went by (spec 07 §3); saved with the haul.
+	SIEGE_RULES.night_passed(town)
 	var kept: Dictionary[String, int] = _bank_run(share, bonus)
 	result.materials_kept = kept
 	RunLog.append(result)
@@ -115,6 +119,7 @@ func show_end(result: RunResult) -> void:
 	end.show_result(result)
 	end.show_titles(titles, RUN_TITLES.slap_gap)
 	end.brought_home.show_haul(kept, before, share, bonus)
+	end.brought_home.show_horde(SIEGE_RULES.end_line(town.siege_nights))
 	var rescued: PlushieDef = RESCUE_RULES.find(result.rescued_plushie())
 	if rescued != null:
 		end.brought_home.show_rescue(rescued.display_name, rescued)
@@ -146,6 +151,7 @@ func _play_music(track: StringName) -> void:
 func load_town() -> void:
 	town = SaveStore.read()
 	if town.settle_unfinished_run(MATERIAL_RULES.keep_share_lost, coin_bonus()):
+		SIEGE_RULES.night_passed(town)
 		SaveStore.write(town)
 	RecipeBook.load_from(town)
 

@@ -137,7 +137,7 @@ func test_ac68_a_save_from_before_tricks_loads_with_none() -> void:
 	assert_eq(town.tricks.size(), 0)
 	assert_eq(town.material("coins"), 40)
 	assert_eq(int(town.to_dict()["version"]), TownSave.VERSION)
-	assert_eq(TownSave.VERSION, 4)
+	assert_gte(TownSave.VERSION, 4, "tricks came with version 4")
 
 
 ## Spec 06 §3 prices: a trick never costs more than the next building level (a star trick: the

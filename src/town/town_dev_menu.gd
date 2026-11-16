@@ -1,8 +1,9 @@
 class_name TownDevMenu
 extends CanvasLayer
 ## Developer menu in town (F1, spec 03 §10): give materials, rebuild or upgrade any building for
-## free, add a plushie, fill or clear the Scrapbook, give or clear all tricks, reset the whole
-## town. Everything it changes is saved right away (through the town's `changed`).
+## free, add a plushie, fill or clear the Scrapbook, give or clear all tricks, call the night
+## siege, damage or repair buildings, reset the whole town. Everything it changes is saved
+## right away (through the town's `changed`).
 
 const PANEL_COLOR: Color = Color(0.1, 0.09, 0.13, 0.92)
 ## What "Give materials" puts in the jars (developer shortcut, not balance).
@@ -15,6 +16,9 @@ const FILL_BOOK: String = "Fill Scrapbook"
 const CLEAR_BOOK: String = "Clear Scrapbook"
 const GIVE_TRICKS: String = "Give all tricks"
 const CLEAR_TRICKS: String = "Clear tricks"
+const SIEGE_NOW: String = "Siege now"
+const DAMAGE_ONE: String = "Damage a building"
+const REPAIR_ALL: String = "Repair all"
 const RESET: String = "Reset town"
 const RESET_SURE: String = "Really reset?"
 ## The Scrapbook's pages and entries (to fill it).
@@ -78,6 +82,7 @@ func _build() -> void:
 	_row(column, [BUILD_ALL, ADD_PLUSHIE], [build_everything, add_plushie])
 	_row(column, [FILL_BOOK, CLEAR_BOOK], [fill_scrapbook, clear_scrapbook])
 	_row(column, [GIVE_TRICKS, CLEAR_TRICKS], [give_all_tricks, clear_tricks])
+	_row(column, [SIEGE_NOW, DAMAGE_ONE, REPAIR_ALL], [siege_now, damage_one, repair_all])
 	_row(column, [RESET], [_ask_reset])
 
 
@@ -162,6 +167,29 @@ func give_all_tricks() -> void:
 
 func clear_tricks() -> void:
 	town.save.tricks.clear()
+	_saved()
+
+
+## The horde comes before the next expedition (spec 07 §10): the countdown jumps to 0.
+func siege_now() -> void:
+	town.save.siege_nights = 0
+	_saved()
+
+
+## The first built building that isn't damaged yet gets damaged (as after a lost siege).
+## Returns its id, or "" when none is left.
+func damage_one() -> String:
+	for spot: TownSpot in town.layout.spots:
+		var id: String = String(spot.id)
+		if town.save.building_level(id) > 0 and not town.save.is_damaged(id):
+			town.save.damaged.append(id)
+			_saved()
+			return id
+	return ""
+
+
+func repair_all() -> void:
+	town.save.damaged.clear()
 	_saved()
 
 
