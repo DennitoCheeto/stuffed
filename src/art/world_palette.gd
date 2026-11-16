@@ -166,6 +166,10 @@ static var _current: WorldPalette
 @export var calendar_sky_dark: Color = Color.WHITE
 @export var moon: Color = Color.WHITE
 @export var moon_spent: Color = Color.WHITE
+## Dusk before and during the night siege (spec 07 §7): a warm evening tint over the whole
+## town (never dark), and the soft glow around each fairy light.
+@export var dusk_tint: Color = Color.WHITE
+@export var dusk_glow: Color = Color.WHITE
 
 @export_group("Shared")
 ## The one even outline around world pieces (like the zombies').

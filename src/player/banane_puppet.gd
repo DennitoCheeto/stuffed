@@ -113,7 +113,9 @@ func _enter(new_state: State) -> void:
 func _update_state() -> void:
 	match state:
 		State.DOWN:
-			pass
+			# Stood back up (night siege).
+			if not _player.is_dead():
+				_enter(_moving_state())
 		State.QUACK:
 			if _state_time >= QUACK_TIME:
 				process_mode = Node.PROCESS_MODE_INHERIT

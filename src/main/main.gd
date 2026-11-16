@@ -8,6 +8,7 @@ signal quit_requested
 const TITLE_SCENE: PackedScene = preload("res://src/title/title_screen.tscn")
 const TOWN_SCENE: PackedScene = preload("res://src/town/town.tscn")
 const RUN_SCENE: PackedScene = preload("res://src/run/run.tscn")
+const SIEGE_SCENE: PackedScene = preload("res://src/siege/siege.tscn")
 const END_SCENE: PackedScene = preload("res://src/ui/end_screen.tscn")
 const MATERIAL_RULES: MaterialRules = preload("res://data/town/material_rules.tres")
 ## Where the town's buildings stand (their levels decide what changes in a run).
@@ -31,6 +32,8 @@ var music: MusicPlayer
 var town: TownSave
 ## How many players play together (everybody who came home from the last run walks in town).
 var player_count: int = 1
+## What the town shows on arrival after a siege (title, subtitle; empty = nothing).
+var _siege_news: PackedStringArray = []
 
 
 func _ready() -> void:
@@ -72,6 +75,9 @@ func show_town() -> void:
 	pillow_fort.save = town
 	pillow_fort.player_count = player_count
 	pillow_fort.bedroom_requested.connect(start_run)
+	pillow_fort.siege_requested.connect(start_siege)
+	pillow_fort.welcome_banner = _siege_news
+	_siege_news = PackedStringArray()
 	pillow_fort.title_requested.connect(show_title)
 	pillow_fort.quit_requested.connect(quit)
 	pillow_fort.changed.connect(save_now)
@@ -79,8 +85,12 @@ func show_town() -> void:
 	_switch_to(pillow_fort)
 
 
-## Starts a fresh run; `seed_value` 0 = a random seed (the developer menu replays seeds).
+## Starts a fresh run; `seed_value` 0 = a random seed (the developer menu replays seeds). While
+## the horde is due no expedition starts (spec 07 §2): "Try again" goes back to the town.
 func start_run(seed_value: int = 0) -> void:
+	if SIEGE_RULES.is_due(town):
+		show_town()
+		return
 	var run: Run = RUN_SCENE.instantiate()
 	run.finished.connect(show_end)
 	run.gave_up.connect(show_end)
@@ -97,6 +107,42 @@ func start_run(seed_value: int = 0) -> void:
 	SaveStore.write(town)
 	_play_music(&"run")
 	_switch_to(run)
+
+
+## The night siege in the town (spec 07 §2). Saved on start; closing the game during it leaves
+## it due, so it starts over next time (nothing is lost).
+func start_siege() -> void:
+	var siege: Siege = SIEGE_SCENE.instantiate()
+	siege.town_save = town
+	siege.number = town.sieges_played + 1
+	siege.player_count = player_count
+	var perks: TownPerks = TownPerks.from_save(town, TOWN_LAYOUT)
+	# Tricks in the siege come with M4-08 (spec 07 §4).
+	perks.tricks.clear()
+	perks.buddy = ""
+	siege.perks = perks
+	siege.finished.connect(_end_siege)
+	siege.gave_up.connect(_end_siege)
+	siege.restart_requested.connect(func(_seed_value: int) -> void: start_siege())
+	siege.music_requested.connect(_play_music)
+	town.unfinished_run = {}
+	SaveStore.write(town)
+	_play_music(&"run")
+	_switch_to(siege)
+
+
+## A siege ended (won, lost, or given up = lost): the countdown starts again, saved at once,
+## and the town tells how it went.
+func _end_siege(result: RunResult) -> void:
+	player_count = maxi(Players.all(get_tree()).size(), 1)
+	var won: bool = result.ending == Siege.WON
+	SIEGE_RULES.siege_ended(town, won)
+	SaveStore.write(town)
+	if won:
+		_siege_news = PackedStringArray([SIEGE_RULES.won_banner, SIEGE_RULES.won_subtitle])
+	else:
+		_siege_news = PackedStringArray([SIEGE_RULES.lost_banner, SIEGE_RULES.lost_subtitle])
+	show_town()
 
 
 ## The end screen for a finished or given-up run (also written to the run log): its stats and
@@ -160,7 +206,8 @@ func load_town() -> void:
 ## game doesn't lose it (it counts as given up on the next start).
 func save_now() -> void:
 	var run: Run = current_screen as Run
-	if run != null and not run.over:
+	# A siege isn't an expedition: closing during it just leaves it due (spec 07 §8).
+	if run != null and not run.over and not run is Siege:
 		town.unfinished_run = run.haul.to_dict()
 	SaveStore.write(town)
 

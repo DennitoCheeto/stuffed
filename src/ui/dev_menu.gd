@@ -17,6 +17,12 @@ const TANK: EnemyStats = preload("res://data/enemies/tank.tres")
 const ENEMY_TYPES: Array[EnemyStats] = [SHAMBLER, RUNNER, SPITTER, BLOATER, TANK]
 const MAX_EVERYTHING: String = "Max everything"
 const REFILL: String = "Refill rerolls/skips/banishes"
+## Night siege shortcuts (spec 07 §10), only in a siege.
+const NEXT_WAVE: String = "Next wave"
+const WIN_SIEGE: String = "Win siege"
+const HURT_FORT: String = "Hurt the fort"
+## "Hurt the fort" takes this share of its full health.
+const FORT_HURT_SHARE: float = 0.25
 ## Width of the line listing the town's tricks (it wraps instead of widening the panel).
 const TRICKS_WIDTH: float = 520.0
 
@@ -157,6 +163,9 @@ func _build() -> void:
 	column.add_theme_constant_override("separation", 4)
 	scroll.add_child(column)
 	_title(column, "Developer menu (F1)")
+	var siege: Siege = run as Siege
+	if siege != null:
+		_row(column, [NEXT_WAVE, WIN_SIEGE, HURT_FORT], [siege.next_wave, siege.win, _hurt_fort])
 	tricks_label = Label.new()
 	tricks_label.text = tricks_text(run.perks)
 	tricks_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -363,6 +372,11 @@ func _ready_to_evolve(evolution: EvolutionDef) -> void:
 		player.apply_upgrade(UpgradeOffer.new(pool.find(evolution.partner), 1))
 	player.loadout_changed.emit()
 	_drop_gift_box()
+
+
+func _hurt_fort() -> void:
+	var siege: Siege = run as Siege
+	siege.fort.hurt(siege.fort.max_health * FORT_HURT_SHARE)
 
 
 func _kill_all() -> void:

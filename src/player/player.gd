@@ -358,6 +358,16 @@ func is_dead() -> bool:
 	return health <= 0.0
 
 
+## A fallen hero stands back up at `at` with full health (night siege, spec 07 §2), safe from
+## hits for a moment.
+func stand_up(at: Vector2) -> void:
+	health = max_health
+	global_position = at
+	velocity = Vector2.ZERO
+	_hurt_invulnerable_left = stats.hurt_invulnerability * 2.0
+	health_changed.emit(health, max_health)
+
+
 ## True if this hero has the building trick `id` (spec 06).
 func has_trick(id: StringName) -> bool:
 	return tricks.has(String(id))
