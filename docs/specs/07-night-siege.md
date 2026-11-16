@@ -1,6 +1,6 @@
 # 07 — Night siege
 
-Status: **DRAFT** (waiting for the product owner).
+Status: **APPROVED** (PO merged PR #226, 2026-11-16).
 Milestone: **M4 — Night siege** (after M3.7 Building tricks, before M4.5 Equipment).
 Based on: vision §5 ("Night siege", "Rhythm"), §6.5 ("the siege is where the town really counts"), the siege roles
 in spec 03 §6, and the PO direction of 2026-10-27: **features first, polish later** (good-enough looks, no option

@@ -107,6 +107,7 @@ wall_thickness = 96.0
 fort_rect = Rect2(1050, 600, 400, 300)
 door_rect = Rect2(1205, 800, 90, 100)
 scrapbook_rect = Rect2(1560, 955, 140, 90)
+calendar_position = Vector2(880, 995)
 reach = 90.0
 spawn_position = Vector2(1250, 975)
 spawn_spacing = 90.0

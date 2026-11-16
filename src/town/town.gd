@@ -22,6 +22,8 @@ const UPGRADE_POOL: UpgradePool = preload("res://data/upgrade_pool.tres")
 const RESCUE_RULES: RescueRules = preload("res://data/town/rescue_rules.tres")
 ## How plushies walk, sit and wave at home.
 const PLUSHIE_RULES: PlushieTownRules = preload("res://data/town/plushie_town_rules.tres")
+## When the night siege comes (spec 07 §3).
+const SIEGE_RULES: SiegeRules = preload("res://data/siege/siege_rules.tres")
 const PROMPT_COLOR: Color = UiColors.INK
 ## Seconds after a rebuild before new buildings are revealed and the fort grows (after the pop).
 const AFTER_BUILD_SECONDS: float = 1.0
@@ -39,6 +41,8 @@ var player_count: int = 1
 var floor_art: TownFloor
 var fort: TownFort
 var scrapbook: ScrapbookStand
+## Nights until the horde, next to the door (spec 07 §2).
+var calendar: MoonCalendar
 ## Building spot id -> its building (a ruin at level 0).
 var buildings: Dictionary[StringName, TownBuilding] = {}
 ## Plushie id -> the rescued plushie living in town.
@@ -95,6 +99,8 @@ func _ready() -> void:
 	holder.add_child(fort)
 	scrapbook = ScrapbookStand.new(layout.scrapbook_rect)
 	holder.add_child(scrapbook)
+	calendar = MoonCalendar.new(layout.calendar_position)
+	holder.add_child(calendar)
 	for spot: TownSpot in layout.spots:
 		var level: int = save.building_level(String(spot.id))
 		var building: TownBuilding = TownBuilding.new(spot, level, _is_open(spot))
@@ -125,7 +131,7 @@ func _ready() -> void:
 	_build_hud()
 	tricks.attach(hud)
 	refresh()
-	if not pending_reveals().is_empty() or can_move_in():
+	if not pending_reveals().is_empty() or can_move_in() or _warning_due():
 		_settle_left = ARRIVAL_REVEAL_SECONDS
 	add_child(menu)
 	menu.resumed.connect(func() -> void: process_mode = Node.PROCESS_MODE_INHERIT)
@@ -369,10 +375,25 @@ func refresh() -> void:
 		jars[material].show_amount(save.material(material))
 	for id: StringName in buildings:
 		buildings[id].refresh(save)
+	refresh_calendar()
+
+
+## The moon calendar shows the nights until the horde (hidden before the first warning).
+func refresh_calendar() -> void:
+	var nights: int = save.siege_nights
+	var slots: int = maxi(SIEGE_RULES.nights_between, SIEGE_RULES.first_nights)
+	calendar.show_nights(nights, slots, SIEGE_RULES.calendar_line(nights))
+
+
+## True when enough buildings stand for the first siege warning but it hasn't appeared yet.
+func _warning_due() -> bool:
+	if SIEGE_RULES.is_warned(save):
+		return false
+	return save.rebuilt_count() >= SIEGE_RULES.first_trigger_buildings
 
 
 ## After a rebuild settles (and on arrival): the fort grows, newly unlocked ruins lose their
-## yarn and waiting plushies move into free Hospital beds.
+## yarn, waiting plushies move into free Hospital beds and the first siege warning appears.
 func settle() -> void:
 	var pieces: int = TownFort.pieces_for(save.total_levels(), layout.fort_piece_every)
 	if pieces > fort.pieces:
@@ -381,6 +402,25 @@ func settle() -> void:
 		Sfx.play(&"upgrade", 0.8)
 	reveal_new_buildings()
 	move_in_waiting()
+	if _warning_due() and is_banner_showing():
+		# Let the other banner finish first; the next settle shows the warning.
+		_settle_left = maxf(_banner_left, 0.1)
+	else:
+		warn_of_the_horde()
+
+
+## Once enough buildings stand, the moon calendar appears with a banner (spec 07 §3). Returns
+## true if it just appeared.
+func warn_of_the_horde() -> bool:
+	if not SIEGE_RULES.warn_if_ready(save):
+		return false
+	refresh_calendar()
+	var board: Rect2 = Rect2(layout.calendar_position - Vector2(70.0, 130.0), Vector2(140.0, 130.0))
+	add_child(TownPuff.new(board))
+	show_banner(SIEGE_RULES.warning_banner, SIEGE_RULES.warning_subtitle % save.siege_nights)
+	Sfx.play(&"new_building", 0.8)
+	changed.emit()
+	return true
 
 
 ## True while a rebuild or arrival is still waiting for `settle` (or a building is animating).

@@ -31,6 +31,10 @@ func _full_town() -> TownSave:
 	town.note_title("weapon_star:thimble_mortar")
 	town.revealed = PackedStringArray(["watchtower", "snack_bar"])
 	town.tricks = PackedStringArray(["head_start", "picnic"])
+	town.siege_nights = 1
+	town.sieges_played = 3
+	town.sieges_won = 2
+	town.damaged = PackedStringArray(["snack_bar"])
 	var haul: RunHaul = RunHaul.new()
 	haul.add("coins", 40)
 	haul.rescued = "piglet"
@@ -61,6 +65,11 @@ func test_ac47_save_reload_gives_the_same_town() -> void:
 	assert_eq(loaded.titles_seen, PackedStringArray(["collector", "weapon_star:thimble_mortar"]))
 	assert_eq(loaded.revealed, PackedStringArray(["watchtower", "snack_bar"]))
 	assert_eq(loaded.tricks, PackedStringArray(["head_start", "picnic"]))
+	assert_eq(loaded.siege_nights, 1)
+	assert_eq(loaded.sieges_played, 3)
+	assert_eq(loaded.sieges_won, 2)
+	assert_true(loaded.is_damaged("snack_bar"))
+	assert_false(loaded.is_damaged("toy_box_armory"))
 	assert_eq(RunHaul.from_dict(loaded.unfinished_run).amount("coins"), 40)
 
 
