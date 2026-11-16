@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-11-02 (M3.7-10 merged, all M3.7 tickets done)_
+_Last updated: 2026-11-16 (spec 07 Night siege drafted, PR #226)_
 
 ## Where we are
 
@@ -62,7 +62,7 @@ _Last updated: 2026-11-02 (M3.7-10 merged, all M3.7 tickets done)_
   `docs/specs/06-building-tricks.md`, AC-66 … AC-73, P-26 … P-28). Each building = a branch of 3 tricks, mostly new
   mechanics, 18 in total. Milestone **M3.7 — Building tricks**, issues **#200–#209** (M3.7-01 … 10).
   M3.7-01 trick data + save v4 + buying rules + dev menu (#200): merged (PR #210). M3.7-02 Tricks panel (#201): merged (PR #212). The panel opens with **T** (not E as the spec says: E
-  still builds/upgrades); PO to confirm. M3.7-03 trick runtime (#202): merged (PR #214). M3.7-04 Armory tricks (#203): merged (PR #216). M3.7-05 Lucky Jar tricks (#204): merged (PR #218). M3.7-06 Watchtower tricks (#205): merged (PR #219). M3.7-07 Snack Bar tricks (#206): merged (PR #221). M3.7-08 Party Shop tricks (#207): merged (PR #222). M3.7-09 Plush Hospital tricks (#208): merged. M3.7-10 readability + prices (#209): merged (prices kept at the first guess, ~11.1k coins; tune after the playtest). **Next: M3.7 acceptance playtest (P-26 … P-28)** (and the still-open M3.6 playtest P-22 … P-25).
+  still builds/upgrades); PO to confirm. M3.7-03 trick runtime (#202): merged (PR #214). M3.7-04 Armory tricks (#203): merged (PR #216). M3.7-05 Lucky Jar tricks (#204): merged (PR #218). M3.7-06 Watchtower tricks (#205): merged (PR #219). M3.7-07 Snack Bar tricks (#206): merged (PR #221). M3.7-08 Party Shop tricks (#207): merged (PR #222). M3.7-09 Plush Hospital tricks (#208): merged. M3.7-10 readability + prices (#209): merged (prices kept at the first guess, ~11.1k coins; tune after the playtest). M3.6 + M3.7 playtests **postponed by the PO** (2026-11-16: "didnt play anything, lets just do more implementation ... i will do it then when we have more"): batch them with M4. **Spec 07 Night siege drafted** (`docs/specs/07-night-siege.md`, AC-74 … AC-84, P-29 … P-31, 9 tickets) in spec PR #226. **Next: PO approves #226 → milestone M4 + issues → implement.** While waiting, approved open issues: #172 part 2 (clarity ladder), #147 (plushie looks + walk).
   **PO direction (2026-10-27): features first, polish later.** Fewer look rounds / option boards; ship
   "good enough" art and batch nitpicks for a later iteration pass. After M3.6: skill / progress tree spec, M4 siege.
   Speedy Stitcher = "King beaten before 9:00": PO OK (2026-10-25).
