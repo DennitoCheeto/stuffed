@@ -375,11 +375,11 @@ func refresh() -> void:
 		jars[material].show_amount(save.material(material))
 	for id: StringName in buildings:
 		buildings[id].refresh(save)
-	refresh_calendar()
+	_refresh_calendar()
 
 
 ## The moon calendar shows the nights until the horde (hidden before the first warning).
-func refresh_calendar() -> void:
+func _refresh_calendar() -> void:
 	var nights: int = save.siege_nights
 	var slots: int = maxi(SIEGE_RULES.nights_between, SIEGE_RULES.first_nights)
 	calendar.show_nights(nights, slots, SIEGE_RULES.calendar_line(nights))
@@ -406,15 +406,15 @@ func settle() -> void:
 		# Let the other banner finish first; the next settle shows the warning.
 		_settle_left = maxf(_banner_left, 0.1)
 	else:
-		warn_of_the_horde()
+		_warn_of_the_horde()
 
 
 ## Once enough buildings stand, the moon calendar appears with a banner (spec 07 §3). Returns
 ## true if it just appeared.
-func warn_of_the_horde() -> bool:
+func _warn_of_the_horde() -> bool:
 	if not SIEGE_RULES.warn_if_ready(save):
 		return false
-	refresh_calendar()
+	_refresh_calendar()
 	var board: Rect2 = Rect2(layout.calendar_position - Vector2(70.0, 130.0), Vector2(140.0, 130.0))
 	add_child(TownPuff.new(board))
 	show_banner(SIEGE_RULES.warning_banner, SIEGE_RULES.warning_subtitle % save.siege_nights)

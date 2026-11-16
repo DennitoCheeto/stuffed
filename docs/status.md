@@ -526,7 +526,9 @@ _Last updated: 2026-11-16 (spec 07 approved, M4 issues #228-#236, M4-01 in PR)_
 - Siege data (M4-01, spec 07): `SiegeRules` (`data/siege/siege_rules.tres`: trigger, nights, waves, growth, reward,
   consolation, repair share, texts). Countdown = `TownSave.siege_nights` (-1 = no warning, 0 = due; save v5 also
   `sieges_played` / `sieges_won` / `damaged`, `is_damaged(id)`). `night_passed(save)` in `Main.show_end` and when
-  an unfinished run is settled; `warn_if_ready` in `town.settle()` (`warn_of_the_horde()`, waits for another
+  an unfinished run is settled; `warn_if_ready` in `town.settle()` (`_warn_of_the_horde()`, waits for another
   banner) and on arrival; `siege_ended(save, won)` restarts it. Town: `town.calendar` (`MoonCalendar`,
   `MoonCalendarLook`, `layout.calendar_position`, `shown_text()`), end screen `brought_home.horde_label`. Dev
   menu `SIEGE_NOW`, `damage_one()`, `REPAIR_ALL`. Tests: `test_siege_rules.gd`, `test_07_siege_calendar.gd`.
+  `Town` is at gdlint's limit of 30 public methods: new town helpers must be private (`_name`) or live in
+  their own class.
