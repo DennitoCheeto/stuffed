@@ -10,9 +10,9 @@ func attack() -> bool:
 	var shots: ProjectileManager = projectiles()
 	if manager == null or shots == null:
 		return false
-	var aim: Vector2 = player.global_position.direction_to(player.aim_point())
+	var aim: Vector2 = origin().direction_to(aim_point())
 	if aim == Vector2.ZERO:
-		aim = player.facing
+		aim = facing()
 	for i: int in current().count:
 		var lash: WhipProjectile = shots.spawn(WhipProjectile) as WhipProjectile
 		lash.launch(self, aim.rotated(PI * i))

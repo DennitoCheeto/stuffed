@@ -22,12 +22,23 @@ func attack() -> bool:
 	return true
 
 
-## Living zombies inside the visible part of the world.
+## Living zombies inside the visible part of the world (a turret: within its range).
 func _on_screen(manager: EnemyManager) -> Array[Zombie]:
+	if is_turret():
+		return _in_range(manager)
 	var viewport: Viewport = get_viewport()
 	var view: Rect2 = viewport.get_canvas_transform().affine_inverse() * viewport.get_visible_rect()
 	var result: Array[Zombie] = []
 	for zombie: Zombie in manager.zombies:
 		if not zombie.dead and view.has_point(zombie.position):
+			result.append(zombie)
+	return result
+
+
+func _in_range(manager: EnemyManager) -> Array[Zombie]:
+	var result: Array[Zombie] = []
+	var reach: float = mount_range * mount_range
+	for zombie: Zombie in manager.zombies:
+		if not zombie.dead and zombie.position.distance_squared_to(origin()) <= reach:
 			result.append(zombie)
 	return result

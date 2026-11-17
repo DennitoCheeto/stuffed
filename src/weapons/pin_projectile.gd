@@ -32,7 +32,7 @@ func launch(from: Weapon, direction: Vector2) -> void:
 	weapon = from
 	_numbers = from.current()
 	_direction = direction
-	global_position = from.player.global_position
+	global_position = from.origin()
 	size_to(from.area_scale())
 	rotation = direction.angle()
 	dress(from)

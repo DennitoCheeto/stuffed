@@ -92,6 +92,12 @@ func disarm(player: Player) -> void:
 		weapon.free()
 
 
+## Stops the siege's building turrets (tests about zombies reaching something).
+func silence_turrets(siege: Siege) -> void:
+	for turret: SiegeTurret in siege.turrets.values():
+		turret.stop()
+
+
 ## Holds an action for `frames` physics frames, then releases it.
 func hold_action(action: String, frames: int) -> void:
 	sender.action_down(action)

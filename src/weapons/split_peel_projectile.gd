@@ -35,7 +35,7 @@ func advance(delta: float) -> bool:
 
 
 func _split() -> void:
-	var home: Vector2 = global_position.direction_to(_boomerang.player.global_position)
+	var home: Vector2 = global_position.direction_to(_boomerang.origin())
 	for side: float in [-1.0, 1.0]:
 		var piece: SplitPeelProjectile = manager.spawn(SplitPeelProjectile) as SplitPeelProjectile
 		piece.launch(_boomerang, home.rotated(deg_to_rad(SPLIT_DEGREES) * side))

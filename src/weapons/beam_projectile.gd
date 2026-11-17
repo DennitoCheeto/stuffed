@@ -68,7 +68,6 @@ func advance(delta: float) -> bool:
 
 
 func _aim() -> void:
-	var player: Player = weapon.player
-	global_position = player.global_position
-	var aim: Vector2 = player.global_position.direction_to(player.aim_point())
-	rotation = (aim if aim != Vector2.ZERO else player.facing).angle()
+	global_position = weapon.origin()
+	var aim: Vector2 = weapon.origin().direction_to(weapon.aim_point())
+	rotation = (aim if aim != Vector2.ZERO else weapon.facing()).angle()

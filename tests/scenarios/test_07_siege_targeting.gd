@@ -27,6 +27,7 @@ func _start_siege(levels: Dictionary[String, int]) -> Siege:
 	hero.invincible = true
 	disarm(hero)
 	started.waves.finished = true
+	silence_turrets(started)
 	started.enemies.kill_all()
 	return started
 

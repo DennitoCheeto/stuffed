@@ -33,7 +33,7 @@ func launch(from: PeelBoomerang, direction: Vector2) -> void:
 	_boomerang = from
 	_numbers = from.current()
 	_direction = direction
-	global_position = from.player.global_position
+	global_position = from.origin()
 	size_to(from.area_scale())
 	dress(from)
 
@@ -41,7 +41,7 @@ func launch(from: PeelBoomerang, direction: Vector2) -> void:
 func advance(delta: float) -> bool:
 	var step: float = _numbers.speed * delta
 	if returning:
-		var target: Vector2 = _boomerang.player.global_position
+		var target: Vector2 = _boomerang.origin()
 		if global_position.distance_to(target) <= step + CATCH_DISTANCE:
 			_boomerang.peel_caught.emit()
 			Sfx.play(&"throw", 0.8)

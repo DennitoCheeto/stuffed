@@ -47,6 +47,6 @@ func radius() -> float:
 
 
 func _follow() -> void:
-	global_position = weapon.player.global_position
+	global_position = weapon.origin()
 	var factor: float = radius() / ProjectileLook.CLOUD_RADIUS
 	scale = _base_scale * factor * (1.0 + _swell)

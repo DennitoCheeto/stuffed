@@ -8,11 +8,16 @@ extends RefCounted
 ## Sources that are not weapons.
 const PARTY_POPPER: StringName = &"party_popper"
 const GOAL_POPS: StringName = &"goal_pops"
+## Siege turrets (spec 07 §4): buildings that fire on their own.
+const ARMORY: StringName = &"toy_box_armory"
+const WATCHTOWER: StringName = &"watchtower"
 ## Anything else (developer menu "kill all", a shot whose weapon just evolved away).
 const OTHER: StringName = &"other"
 const NAMES: Dictionary[StringName, String] = {
 	PARTY_POPPER: "Party Popper",
 	GOAL_POPS: "Victory pops",
+	ARMORY: "Toy Box Armory",
+	WATCHTOWER: "Watchtower",
 	OTHER: "Other",
 }
 
@@ -24,8 +29,11 @@ var total_kills: int = 0
 
 ## `weapon` dealt `damage` (already capped at the zombie's health); `killed` = it popped.
 func add_hit(weapon: Weapon, damage: float, killed: bool) -> void:
-	if weapon == null or not is_instance_valid(weapon) or weapon.player == null:
+	if weapon == null or not is_instance_valid(weapon):
 		add_other(OTHER, damage, killed)
+		return
+	if weapon.player == null:
+		add_other(weapon.tally_source if weapon.tally_source != &"" else OTHER, damage, killed)
 		return
 	var entry: WeaponTallyEntry = _row_for(weapon)
 	entry.level = weapon.level

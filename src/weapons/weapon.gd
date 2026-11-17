@@ -12,7 +12,12 @@ const RETRY_DELAY: float = 0.1
 
 var stats: WeaponStats
 var level: int = 1
+## The hero holding it; null for a turret (a building fires it in the siege, spec 07 §4).
 var player: Player
+## Turrets only: it fires only while a zombie is this close to it (pixels; 0 = hero weapon).
+var mount_range: float = 0.0
+## Turrets only: its row in the weapon tally (`WeaponTally.ARMORY` ...).
+var tally_source: StringName = &""
 
 var _cooldown_left: float = FIRST_ATTACK_DELAY
 var _current: WeaponLevel
@@ -25,6 +30,42 @@ func setup(weapon_stats: WeaponStats, owner_player: Player) -> void:
 	stats = weapon_stats
 	player = owner_player
 	name = String(stats.id)
+
+
+## Makes it a turret: a building fires it on its own at zombies within `reach` (no hero).
+func mount(weapon_stats: WeaponStats, weapon_level: int, reach: float, source: StringName) -> void:
+	setup(weapon_stats, null)
+	level = clampi(weapon_level, 1, weapon_stats.max_level())
+	mount_range = reach
+	tally_source = source
+
+
+func is_turret() -> bool:
+	return player == null and mount_range > 0.0
+
+
+## Where its shots start and come back to: the hero, or the turret itself.
+func origin() -> Vector2:
+	return player.global_position if player != null else global_position
+
+
+## Where aimed shots go: the hero's cursor, or a turret's nearest zombie in range.
+func aim_point() -> Vector2:
+	if player != null:
+		return player.aim_point()
+	var manager: EnemyManager = enemies()
+	var target: Zombie = manager.nearest(origin(), mount_range) if manager != null else null
+	return target.position if target != null else origin() + Vector2.RIGHT
+
+
+## The way it fires when there is nothing to aim at.
+func facing() -> Vector2:
+	return player.facing if player != null else Vector2.RIGHT
+
+
+## The holder's damage bonus (Sharp Scissors); 1 for a turret.
+func damage_scale() -> float:
+	return player.damage_multiplier if player != null else 1.0
 
 
 ## The numbers for the current level, with the owner's items applied (Sharp Scissors, Long
@@ -64,11 +105,16 @@ func projectiles() -> ProjectileManager:
 
 
 func _physics_process(delta: float) -> void:
-	if player == null or player.is_dead():
+	if player == null and not is_turret():
+		return
+	if player != null and player.is_dead():
 		return
 	_sound_wait -= delta
-	_cooldown_left -= delta * player.attack_speed
+	_cooldown_left -= delta * (player.attack_speed if player != null else 1.0)
 	if _cooldown_left > 0.0:
+		return
+	if is_turret() and not _zombie_in_range():
+		_cooldown_left = RETRY_DELAY
 		return
 	if attack():
 		_cooldown_left = current().cooldown
@@ -83,6 +129,11 @@ func _physics_process(delta: float) -> void:
 ## One attack. Returns false if there was nothing to attack (then it tries again soon).
 func attack() -> bool:
 	return false
+
+
+func _zombie_in_range() -> bool:
+	var manager: EnemyManager = enemies()
+	return manager != null and manager.nearest(origin(), mount_range) != null
 
 
 func _with_bonuses(base: WeaponLevel) -> WeaponLevel:

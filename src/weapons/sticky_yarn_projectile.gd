@@ -53,7 +53,7 @@ func advance(delta: float) -> bool:
 		_cooldowns[id] -= delta
 		if _cooldowns[id] <= 0.0:
 			_cooldowns.erase(id)
-	var hurt: float = weapon.stats.linger_damage * weapon.player.damage_multiplier
+	var hurt: float = weapon.stats.linger_damage * weapon.damage_scale()
 	for zombie: Zombie in manager.enemies.query_circle(global_position, radius()):
 		zombie.slow(weapon.stats.slow, SLOW_AFTER)
 		var id: int = zombie.get_instance_id()

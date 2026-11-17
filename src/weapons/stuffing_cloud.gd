@@ -12,7 +12,7 @@ func attack() -> bool:
 		return false
 	var cloud: CloudProjectile = _cloud(shots)
 	var numbers: WeaponLevel = current()
-	var center: Vector2 = player.global_position
+	var center: Vector2 = origin()
 	for zombie: Zombie in manager.query_circle(center, numbers.area):
 		var push: Vector2 = center.direction_to(zombie.position) * stats.knockback
 		manager.damage(zombie, numbers.damage, push, self)

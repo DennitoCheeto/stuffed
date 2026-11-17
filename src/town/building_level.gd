@@ -35,6 +35,11 @@ extends Resource
 @export var siege_health: float = 0.0
 ## Bait (Lucky Jar): zombies this close to its walls (pixels) go for it first. 0 = no bait.
 @export var siege_bait: float = 0.0
+## Turret (Toy Box Armory, Watchtower): the level of the weapon it fires; 0 = no turret. The
+## weapon is `BuildingDef.siege_weapon`, or the hero's starting weapon when that is empty.
+@export var siege_weapon_level: int = 0
+## Turret: it fires at zombies this close to it (pixels).
+@export var siege_range: float = 0.0
 
 
 ## Material id -> amount, only the materials this level needs.
