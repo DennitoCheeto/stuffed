@@ -338,7 +338,9 @@ func _alive_players() -> Array[Player]:
 
 
 func _move(zombie: Zombie, target: Player, goal: SiegeTarget, delta: float) -> void:
-	var walk: Vector2 = _around_furniture(zombie, _walk(zombie, target, goal))
+	# In the siege a goal (the fort or a building, see SiegeTargets) wins over a hero.
+	var walk: Vector2 = goal.walk(zombie) if goal != null else _walk(zombie, target)
+	walk = _around_furniture(zombie, walk)
 	zombie.heading = walk.normalized()
 	var step: Vector2 = (walk + zombie.knockback) * delta + _separation(zombie)
 	_place(zombie, zombie.position + step)
@@ -450,10 +452,7 @@ func _may_burst() -> bool:
 
 ## Where a zombie wants to go: straight at its target, or (ranged zombies) to a spot at their
 ## keep distance. A ranged zombie stands still while it winds up.
-func _walk(zombie: Zombie, target: Player, goal: SiegeTarget = null) -> Vector2:
-	if goal != null:
-		# In the siege: to the fort or a building (see SiegeTargets).
-		return goal.walk(zombie)
+func _walk(zombie: Zombie, target: Player) -> Vector2:
 	if target == null or zombie.stun_left > 0.0:
 		return Vector2.ZERO
 	var toward: Vector2 = zombie.position.direction_to(target.global_position)
