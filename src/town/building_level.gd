@@ -30,6 +30,12 @@ extends Resource
 ## tent until there is a free bed, then moves into town.
 @export var plushie_beds: int = 0
 
+@export_group("Night siege")
+## Health in the night siege at this level (spec 07 §4).
+@export var siege_health: float = 0.0
+## Bait (Lucky Jar): zombies this close to its walls (pixels) go for it first. 0 = no bait.
+@export var siege_bait: float = 0.0
+
 
 ## Material id -> amount, only the materials this level needs.
 func cost() -> Dictionary[String, int]:

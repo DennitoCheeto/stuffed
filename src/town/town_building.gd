@@ -60,6 +60,8 @@ var affordable: bool = false
 var trick_ready: bool = false
 ## True while the info card shows this building (the card says it all, the tag steps aside).
 var card_shown: bool = false
+## Knocked down in the night siege (spec 07 §4): tipped over, sunk a little and greyed out.
+var knocked_down: bool = false
 
 var _shake_left: float = 0.0
 ## 0..1 while popping up, 1 when still.
@@ -71,6 +73,9 @@ var _bob_time: float = 0.0
 ## The top of the drawing (above its bottom middle) for the level in `_top_level`, cached.
 var _look_top: float = 0.0
 var _top_level: int = -1
+## The knocked-down pose: tilt (radians) and height share.
+var _knocked_tilt: float = 0.0
+var _knocked_sink: float = 1.0
 
 
 func _init(town_spot: TownSpot, start_level: int, is_unlocked: bool) -> void:
@@ -189,6 +194,24 @@ func is_yarn_falling() -> bool:
 	return _yarn_fall < 1.0
 
 
+## Night siege: the building's health is gone. It tips over by `tilt_degrees`, sinks to `sink`
+## of its height and greys out with `tint`, with a puff.
+func knock_down(tilt_degrees: float, sink: float, tint: Color) -> void:
+	if knocked_down:
+		return
+	knocked_down = true
+	_knocked_tilt = deg_to_rad(tilt_degrees)
+	_knocked_sink = sink
+	self_modulate = tint
+	add_child(TownPuff.new(spot.rect, 0.9))
+	queue_redraw()
+
+
+## The top of the drawing in town pixels (where tags and bars float above).
+func top_y() -> float:
+	return spot.rect.end.y + shown_look().bounds().position.y
+
+
 func _process(delta: float) -> void:
 	_update_can_build()
 	if can_build_tag.visible or new_trick_tag.visible:
@@ -257,7 +280,10 @@ func _draw() -> void:
 	if _shake_left > 0.0:
 		shake = Vector2(sin(_shake_left * 90.0), cos(_shake_left * 70.0)) * SHAKE_PIXELS
 	var bottom: Vector2 = Vector2(spot.rect.get_center().x, spot.rect.end.y)
-	draw_set_transform(bottom + shake, 0.0, Vector2.ONE * pop_scale())
+	var pose: Vector2 = Vector2.ONE * pop_scale()
+	if knocked_down:
+		pose.y *= _knocked_sink
+	draw_set_transform(bottom + shake, _knocked_tilt, pose)
 	shown_look().draw(self)
 	draw_set_transform(shake)
 	if shown_level == 0:
