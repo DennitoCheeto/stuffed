@@ -12,6 +12,8 @@ var fort: TownFort
 var buildings: Dictionary[StringName, TownBuilding] = {}
 var dusk: TownDusk
 
+var _floor: TownFloor
+
 
 ## Nothing to build before `setup`: the Bedroom's walls and looks are not wanted here.
 func _ready() -> void:
@@ -24,7 +26,8 @@ func setup(town_layout: TownLayout, save: TownSave) -> void:
 	size = layout.size
 	wall_thickness = layout.wall_thickness
 	furniture = null
-	add_child(TownFloor.new(layout))
+	_floor = TownFloor.new(layout)
+	add_child(_floor)
 	_build_walls()
 	for rect: Rect2 in _blocking_rects():
 		_add_wall(rect)
@@ -41,6 +44,12 @@ func setup(town_layout: TownLayout, save: TownSave) -> void:
 		standing.append(building)
 	dusk = TownDusk.new(TownDusk.lit_rects(fort, standing))
 	add_child(dusk)
+
+
+## Adds `node` just above the town floor: under the fort, the buildings and the heroes.
+func add_to_floor(node: Node2D) -> void:
+	add_child(node)
+	move_child(node, _floor.get_index() + 1)
 
 
 ## The room plus the pillow walls (the camera never shows anything outside).

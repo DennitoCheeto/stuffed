@@ -55,6 +55,11 @@ knocked_tilt_degrees = -9.0
 knocked_sink = 0.88
 knocked_tint = Color(0.72, 0.7, 0.74, 1)
 stand_up_seconds = 4.0
+heal_ring_color = Color(0.6, 0.9, 0.68, 1)
+trap_ring_color = Color(0.78, 0.7, 0.96, 1)
+trap_confetti_seconds = 0.9
+trap_sound = &"party_popper"
+trap_pitch = 1.35
 end_pause_seconds = 2.5
 reward = Dictionary[String, int]({
 "coins": 400,

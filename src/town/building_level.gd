@@ -38,8 +38,15 @@ extends Resource
 ## Turret (Toy Box Armory, Watchtower): the level of the weapon it fires; 0 = no turret. The
 ## weapon is `BuildingDef.siege_weapon`, or the hero's starting weapon when that is empty.
 @export var siege_weapon_level: int = 0
-## Turret: it fires at zombies this close to it (pixels).
+## Turret, healing ring, trap: how far it reaches (pixels; turrets from their firing spot, the
+## ring and the trap from the middle of the footprint).
 @export var siege_range: float = 0.0
+## Healing spot (Snack Bar): heroes in its ring heal this much health per second. 0 = none.
+@export var siege_heal: float = 0.0
+## Trap (Party Shop): a confetti pop every this many seconds. 0 = no trap.
+@export var siege_trap_seconds: float = 0.0
+## Trap: damage of each pop to every zombie inside `siege_range`.
+@export var siege_trap_damage: float = 0.0
 
 
 ## Material id -> amount, only the materials this level needs.

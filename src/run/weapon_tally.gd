@@ -11,6 +11,8 @@ const GOAL_POPS: StringName = &"goal_pops"
 ## Siege turrets (spec 07 §4): buildings that fire on their own.
 const ARMORY: StringName = &"toy_box_armory"
 const WATCHTOWER: StringName = &"watchtower"
+## The Party Shop's confetti trap.
+const PARTY_SHOP: StringName = &"party_shop"
 ## Anything else (developer menu "kill all", a shot whose weapon just evolved away).
 const OTHER: StringName = &"other"
 const NAMES: Dictionary[StringName, String] = {
@@ -18,6 +20,7 @@ const NAMES: Dictionary[StringName, String] = {
 	GOAL_POPS: "Victory pops",
 	ARMORY: "Toy Box Armory",
 	WATCHTOWER: "Watchtower",
+	PARTY_SHOP: "Party Shop",
 	OTHER: "Other",
 }
 
