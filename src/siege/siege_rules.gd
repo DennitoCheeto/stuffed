@@ -52,6 +52,17 @@ extends Resource
 ## A short moment to see the end (won or lost) before going home.
 @export var end_pause_seconds: float = 2.5
 
+@export_group("Building helpers")
+## The Snack Bar's healing ring and the Party Shop's trap ring on the ground: calm colours, never
+## enemy danger (spec 07 §7, AC-83).
+@export var heal_ring_color: Color = Color(0.6, 0.9, 0.68, 1.0)
+@export var trap_ring_color: Color = Color(0.78, 0.7, 0.96, 1.0)
+## How long a trap's confetti flies (seconds).
+@export var trap_confetti_seconds: float = 0.9
+## The trap's sound (a soft, higher Party Popper).
+@export var trap_sound: StringName = &"party_popper"
+@export var trap_pitch: float = 1.35
+
 @export_group("After the siege")
 ## The haul of the first won siege (material id -> amount).
 @export var reward: Dictionary[String, int] = {"coins": 400, "stuffing": 20, "thread": 4}

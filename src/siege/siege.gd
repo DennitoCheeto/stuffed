@@ -33,6 +33,8 @@ var fort_bar: FortHealthBar
 var building_bars: Dictionary[StringName, BuildingHealthBar] = {}
 ## Building spot id -> its turret (Toy Box Armory, Watchtower; spec 07 §4).
 var turrets: Dictionary[StringName, SiegeTurret] = {}
+## Building spot id -> its ring on the ground (Snack Bar healing ring, Party Shop confetti trap).
+var rings: Dictionary[StringName, SiegeRing] = {}
 ## True once the night is defended.
 var won: bool = false
 ## Wave banners shown so far (wave index), for tests.
@@ -204,6 +206,7 @@ func _add_buildings() -> void:
 		building_bars[spot.id] = bar
 		building.fell.connect(_on_building_fell.bind(look))
 		_add_turret(building, spot, look)
+		_add_ring(building, spot)
 
 
 ## A built turret building (Armory, Watchtower) fires on its own from the middle of its look.
@@ -222,6 +225,27 @@ func _add_turret(building: SiegeBuilding, spot: TownSpot, look: TownBuilding) ->
 	turret.setup(building, stats, data.siege_weapon_level, data.siege_range, at)
 	town_arena().add_child(turret)
 	turrets[spot.id] = turret
+
+
+## A built Snack Bar heals heroes in its ring, a built Party Shop pops confetti at zombies in
+## its ring (spec 07 §4). Both lie on the floor around the building.
+func _add_ring(building: SiegeBuilding, spot: TownSpot) -> void:
+	var data: BuildingLevel = spot.building.levels[building.level - 1]
+	var middle: Vector2 = spot.rect.get_center()
+	var ring: SiegeRing = null
+	if data.siege_heal > 0.0:
+		var heal: SiegeHealRing = SiegeHealRing.new()
+		var color: Color = siege_rules.heal_ring_color
+		heal.setup(building, data.siege_heal, data.siege_range, middle, color)
+		ring = heal
+	elif data.siege_trap_seconds > 0.0:
+		var trap: SiegeConfettiTrap = SiegeConfettiTrap.new()
+		trap.setup(building, data, middle, siege_rules, self)
+		ring = trap
+	if ring == null:
+		return
+	town_arena().add_to_floor(ring)
+	rings[spot.id] = ring
 
 
 ## The starting weapon of the first hero (co-op: player 1's), the Armory's turret weapon.
@@ -256,6 +280,8 @@ func _end(ending: String, title: String, subtitle: String) -> void:
 	enemies.calm = true
 	for turret: SiegeTurret in turrets.values():
 		turret.stop()
+	for ring: SiegeRing in rings.values():
+		ring.stop()
 	projectiles.clear_hostile()
 	hud.show_banner(title, subtitle, siege_rules.end_pause_seconds + 1.0)
 	# A timer connection (not await) so nothing fires if the siege is closed meanwhile.

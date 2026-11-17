@@ -14,6 +14,9 @@ stuffing = 0
 thread = 0
 effect = "Floor pickups drop 15% more often"
 siege_health = 200
+siege_range = 230.0
+siege_trap_seconds = 8.0
+siege_trap_damage = 15.0
 pickup_gap_cut = 0.15
 
 [sub_resource type="Resource" id="Resource_level_2"]
@@ -23,6 +26,9 @@ stuffing = 25
 thread = 0
 effect = "Floor pickups drop 30% more often"
 siege_health = 300
+siege_range = 230.0
+siege_trap_seconds = 6.0
+siege_trap_damage = 20.0
 pickup_gap_cut = 0.3
 
 [sub_resource type="Resource" id="Resource_level_3"]
@@ -32,6 +38,9 @@ stuffing = 40
 thread = 10
 effect = "Floor pickups 45% more often, the first after 15 s"
 siege_health = 450
+siege_range = 230.0
+siege_trap_seconds = 4.0
+siege_trap_damage = 25.0
 pickup_gap_cut = 0.45
 first_pickup_at = 15.0
 
