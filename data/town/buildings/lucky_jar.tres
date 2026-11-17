@@ -13,6 +13,8 @@ coins = 200
 stuffing = 0
 thread = 0
 effect = "+1 reroll, skip and banish per run"
+siege_health = 400
+siege_bait = 250
 extra_card_uses = 1
 
 [sub_resource type="Resource" id="Resource_level_2"]
@@ -21,6 +23,8 @@ coins = 600
 stuffing = 15
 thread = 0
 effect = "+2 rerolls, skips and banishes per run"
+siege_health = 600
+siege_bait = 350
 extra_card_uses = 2
 
 [sub_resource type="Resource" id="Resource_level_3"]
@@ -29,6 +33,8 @@ coins = 1200
 stuffing = 30
 thread = 6
 effect = "+3 rerolls, skips and banishes per run"
+siege_health = 900
+siege_bait = 450
 extra_card_uses = 3
 
 [resource]

@@ -13,6 +13,7 @@ coins = 350
 stuffing = 0
 thread = 0
 effect = "+10 max health"
+siege_health = 200
 max_health_bonus = 10.0
 
 [sub_resource type="Resource" id="Resource_level_2"]
@@ -21,6 +22,7 @@ coins = 800
 stuffing = 18
 thread = 0
 effect = "+20 max health"
+siege_health = 300
 max_health_bonus = 20.0
 
 [sub_resource type="Resource" id="Resource_level_3"]
@@ -29,6 +31,7 @@ coins = 1500
 stuffing = 35
 thread = 8
 effect = "+30 max health"
+siege_health = 450
 max_health_bonus = 30.0
 
 [resource]

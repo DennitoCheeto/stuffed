@@ -52,9 +52,9 @@ var projectiles: ProjectileManager
 var obstacles: Obstacles = Obstacles.new()
 ## Zombies never leave this area (the arena floor).
 var play_rect: Rect2 = Rect2()
-## The night siege's pillow fort (spec 07): zombies walk to it when no hero is close and knock
-## at it (null in a run).
-var fort: SiegeFort
+## The night siege (spec 07): the fort and buildings zombies walk to and knock at when no hero
+## draws them (null in a run).
+var siege: SiegeTargets
 var max_alive: int = 500
 ## Endless mode makes zombies tougher by raising these.
 var health_scale: float = 1.0
@@ -269,16 +269,19 @@ func _physics_process(delta: float) -> void:
 ## A zombie's normal turn: walk (or the boss's pattern), touch players, attack.
 func _take_turn(zombie: Zombie, players: Array[Player], delta: float) -> void:
 	var target: Player = _nearest_player(zombie.position, players)
-	if fort != null and not fort.chases(zombie, target):
-		target = null
+	var goal: SiegeTarget = null
+	if siege != null:
+		goal = siege.goal_for(zombie, target)
+		if goal != null:
+			target = null
 	if zombie.brain != null:
-		_move_boss(zombie, target, delta)
+		_move_boss(zombie, target, goal, delta)
 	else:
-		_move(zombie, target, delta)
+		_move(zombie, target, goal, delta)
 	if zombie.brain == null or not zombie.brain.is_airborne():
 		_touch_players(zombie, players)
-		if fort != null:
-			fort.touch(zombie, delta)
+		if siege != null:
+			siege.touch(zombie, delta)
 	if zombie.attack != null:
 		_attack(zombie, target, delta)
 
@@ -334,18 +337,18 @@ func _alive_players() -> Array[Player]:
 	return result
 
 
-func _move(zombie: Zombie, target: Player, delta: float) -> void:
-	var walk: Vector2 = _around_furniture(zombie, _walk(zombie, target))
+func _move(zombie: Zombie, target: Player, goal: SiegeTarget, delta: float) -> void:
+	var walk: Vector2 = _around_furniture(zombie, _walk(zombie, target, goal))
 	zombie.heading = walk.normalized()
 	var step: Vector2 = (walk + zombie.knockback) * delta + _separation(zombie)
 	_place(zombie, zombie.position + step)
 
 
 ## A boss goes where its brain says. The crowd doesn't push it: it pushes the crowd.
-func _move_boss(zombie: Zombie, target: Player, delta: float) -> void:
+func _move_boss(zombie: Zombie, target: Player, goal: SiegeTarget, delta: float) -> void:
 	var walk: Vector2 = zombie.brain.step(zombie, target, self, delta)
-	if target == null and fort != null and not zombie.brain.is_busy():
-		walk = fort.walk(zombie)
+	if goal != null and not zombie.brain.is_busy():
+		walk = goal.walk(zombie)
 	if zombie.brain.is_airborne():
 		zombie.heading = walk.normalized()
 		var inside: Rect2 = play_rect.grow(-zombie.radius())
@@ -447,10 +450,12 @@ func _may_burst() -> bool:
 
 ## Where a zombie wants to go: straight at its target, or (ranged zombies) to a spot at their
 ## keep distance. A ranged zombie stands still while it winds up.
-func _walk(zombie: Zombie, target: Player) -> Vector2:
+func _walk(zombie: Zombie, target: Player, goal: SiegeTarget = null) -> Vector2:
+	if goal != null:
+		# In the siege: to the fort or a building (see SiegeTargets).
+		return goal.walk(zombie)
 	if target == null or zombie.stun_left > 0.0:
-		# In the siege a zombie without a hero to chase walks to the fort.
-		return fort.walk(zombie) if target == null and fort != null else Vector2.ZERO
+		return Vector2.ZERO
 	var toward: Vector2 = zombie.position.direction_to(target.global_position)
 	toward *= zombie.current_speed()
 	var attack: SpitAttack = zombie.attack

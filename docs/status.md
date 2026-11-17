@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-11-16 (M4-01 merged, M4-02 siege flow in PR)_
+_Last updated: 2026-11-17 (M4-02 merged, M4-03 siege targeting in PR)_
 
 ## Where we are
 
@@ -18,7 +18,7 @@ _Last updated: 2026-11-16 (M4-01 merged, M4-02 siege flow in PR)_
 | M3.5 UI and juice | ✅ accepted 2026-10-25: spec 04 (PR #123), M3.5-01 … 08 (PRs #133, #137, #138, #140, #141, #143, #149, #150) + PO fixes #136, #146, #152, #154, #156 (late-game hitches), #158 |
 | M3.6 Sunny patchwork | 🚧 spec 05 approved 2026-10-25 (PR #160; AC-58 … AC-65, P-22 … P-25); milestone M3.6, issues #162–#170 (M3.6-01 … 09); M3.6-01 world palette (#162): merged (PR #171); hero clarity #172 (part 1): merged (PR #173, floors calmer #174); M3.6-02 art kit + Lucky Jar + Armory (#163): merged (PR #175); M3.6-03 other four buildings + fort + Scrapbook stand (#164): merged (PR #179); M3.6-04 town ground + compact layout (#165): merged (PR #181); M3.6-05 town text (#166): merged (PR #188); spec update #186 merged by the PO; M3.6-10 Party Shop + Hospital redraw (#187): merged (PR #190); M3.6-06 town life (#167): merged (PR #192); M3.6-07 Bedroom floor and room (#168): merged (PR #193); M3.6-08 Bedroom zones (#169): merged (PR #195); M3.6-09 perf check (#170): merged (PR #197), all 10 M3.6 tickets merged |
 | M3.7 Building tricks | 🚧 spec 06 approved 2026-10-27 (PR #199; AC-66 … AC-73, P-26 … P-28); issues #200–#209 (M3.7-01 … 10); M3.7-01 trick data + save v4 (#200): merged (PR #210); M3.7-02 Tricks panel (#201): merged (PR #212); M3.7-03 trick runtime (#202): merged (PR #214); M3.7-04 Armory tricks (#203): merged (PR #216); M3.7-05 Lucky Jar tricks (#204): merged (PR #218); M3.7-06 Watchtower tricks (#205): merged (PR #219); M3.7-07 Snack Bar tricks (#206): merged (PR #221); M3.7-08 Party Shop tricks (#207): merged (PR #222); M3.7-09 Plush Hospital tricks (#208): merged; M3.7-10 readability + prices (#209): merged, all 10 M3.7 tickets merged |
-| M4 Night siege | 🚧 spec 07 approved 2026-11-16 (PR #226; AC-74 … AC-84, P-29 … P-31); milestone M4, issues #228–#236 (M4-01 … 09); M4-01 siege data + save v5 + moon calendar (#228): merged (PR #237); M4-02 siege flow (#229): PR open |
+| M4 Night siege | 🚧 spec 07 approved 2026-11-16 (PR #226; AC-74 … AC-84, P-29 … P-31); milestone M4, issues #228–#236 (M4-01 … 09); M4-01 siege data + save v5 + moon calendar (#228): merged (PR #237); M4-02 siege flow (#229): merged (PR #238); M4-03 zombie targeting + building health + Lucky Jar bait (#230): PR open |
 | M3 Town | ✅ accepted 2026-10-24: spec 03 approved (PR #91); issues #92–#103; M3-01 save system (PR #105), M3-02 town + flow (PR #106), M3-03 materials (PR #107), M3-04 Way Home portal (PR #109), M3-05 rebuilding (PR #110), M3-06 Toy Box Armory (PR #114), M3-07 Lucky Jar + Watchtower + Snack Bar (PR #115), M3-08 Party Shop (PR #116), M3-09 rescue in the run (PR #117), M3-10 Plush Hospital + plushies in town (PR #118), M3-11 Scrapbook (PR #119), M3-12 co-op in town + dev menu + sounds (PR #120) |
 
 ## Next step
@@ -63,7 +63,7 @@ _Last updated: 2026-11-16 (M4-01 merged, M4-02 siege flow in PR)_
   `docs/specs/06-building-tricks.md`, AC-66 … AC-73, P-26 … P-28). Each building = a branch of 3 tricks, mostly new
   mechanics, 18 in total. Milestone **M3.7 — Building tricks**, issues **#200–#209** (M3.7-01 … 10).
   M3.7-01 trick data + save v4 + buying rules + dev menu (#200): merged (PR #210). M3.7-02 Tricks panel (#201): merged (PR #212). The panel opens with **T** (not E as the spec says: E
-  still builds/upgrades); PO to confirm. M3.7-03 trick runtime (#202): merged (PR #214). M3.7-04 Armory tricks (#203): merged (PR #216). M3.7-05 Lucky Jar tricks (#204): merged (PR #218). M3.7-06 Watchtower tricks (#205): merged (PR #219). M3.7-07 Snack Bar tricks (#206): merged (PR #221). M3.7-08 Party Shop tricks (#207): merged (PR #222). M3.7-09 Plush Hospital tricks (#208): merged. M3.7-10 readability + prices (#209): merged (prices kept at the first guess, ~11.1k coins; tune after the playtest). M3.6 + M3.7 playtests **postponed by the PO** (2026-11-16: "didnt play anything, lets just do more implementation ... i will do it then when we have more"): batch them with M4. **Spec 07 Night siege approved** (PO merged PR #226, 2026-11-16; `docs/specs/07-night-siege.md`, AC-74 … AC-84, P-29 … P-31). Milestone **M4 — Night siege**, issues **#228–#236** (M4-01 … 09). M4-01 siege data + save v5 + moon calendar + dev menu (#228): merged (PR #237). M4-02 siege flow (#229): PR open. **Next: M4-03 zombie targeting + building health + Lucky Jar bait (#230).** While waiting, approved open issues: #172 part 2 (clarity ladder), #147 (plushie looks + walk).
+  still builds/upgrades); PO to confirm. M3.7-03 trick runtime (#202): merged (PR #214). M3.7-04 Armory tricks (#203): merged (PR #216). M3.7-05 Lucky Jar tricks (#204): merged (PR #218). M3.7-06 Watchtower tricks (#205): merged (PR #219). M3.7-07 Snack Bar tricks (#206): merged (PR #221). M3.7-08 Party Shop tricks (#207): merged (PR #222). M3.7-09 Plush Hospital tricks (#208): merged. M3.7-10 readability + prices (#209): merged (prices kept at the first guess, ~11.1k coins; tune after the playtest). M3.6 + M3.7 playtests **postponed by the PO** (2026-11-16: "didnt play anything, lets just do more implementation ... i will do it then when we have more"): batch them with M4. **Spec 07 Night siege approved** (PO merged PR #226, 2026-11-16; `docs/specs/07-night-siege.md`, AC-74 … AC-84, P-29 … P-31). Milestone **M4 — Night siege**, issues **#228–#236** (M4-01 … 09). M4-01 siege data + save v5 + moon calendar + dev menu (#228): merged (PR #237). M4-02 siege flow (#229): merged (PR #238). M4-03 zombie targeting + building health + Lucky Jar bait (#230): PR open. **Next: M4-04 turrets: Toy Box Armory + Watchtower (#231).** While waiting, approved open issues: #172 part 2 (clarity ladder), #147 (plushie looks + walk).
   **PO direction (2026-10-27): features first, polish later.** Fewer look rounds / option boards; ship
   "good enough" art and batch nitpicks for a later iteration pass. After M3.6: skill / progress tree spec, M4 siege.
   Speedy Stitcher = "King beaten before 9:00": PO OK (2026-10-25).
@@ -539,8 +539,8 @@ _Last updated: 2026-11-16 (M4-01 merged, M4-02 siege flow in PR)_
   *before* `super()` in `Siege._ready`). Waves: `SiegeWaves` (pure clock: `tick`, `take_elites`, `take_boss`,
   `next_wave`) over `SiegeRules.wave_list` (`SiegeWave`: rate, enemies + weights, elites, boss, `boss_at`);
   zombies spawn at `arena.edge_point` (outside the pillow walls, `enemies.play_rect` = `spawn_area`). Fort:
-  `SiegeFort` (health from `fort_health_for(total_levels)`, `fell`), `enemies.fort` makes zombies walk to it
-  (`chases`, `walk`, `touch`) unless a hero is within `hero_reach`. HUD fort bar `FortHealthBar` (top middle,
+  `SiegeFort` (health from `fort_health_for(total_levels)`, `fell`); zombies walk to it via `enemies.siege`
+  (see "Siege targets"). HUD fort bar `FortHealthBar` (top middle,
   under the boss bar's place). Faster XP = `data/siege/siege_xp_rules.tres` on the siege's Pickups. Main:
   `start_siege` / `_end_siege` (→ `siege_ended`, town `welcome_banner`), `start_run` goes to the town while
   due, `save_now` never writes a siege as `unfinished_run`. Town: `town.dusk` (`TownDusk`: `CanvasModulate`
@@ -548,3 +548,13 @@ _Last updated: 2026-11-16 (M4-01 merged, M4-02 siege flow in PR)_
   the "horde is coming" banner waits for other banners (`_tell_the_horde_is_coming` in `settle`). Tricks are
   cleared for the siege until M4-08. Dev menu `DevMenu.NEXT_WAVE` / `WIN_SIEGE` / `HURT_FORT`. Tests:
   `test_siege_waves.gd`, `test_07_siege_flow.gd`.
+- Siege targets (M4-03, spec 07 §4-5, AC-77): `SiegeTarget` (rect, health, `touch`, `walk`, `fell`, `is_hurt`) is the
+  base of `SiegeFort` and `SiegeBuilding` (health `BuildingLevel.siege_health`, bait radius
+  `BuildingLevel.siege_bait`, Lucky Jar only; others draw zombies within `SiegeRules.building_reach`).
+  `SiegeTargets` (`siege.targets`, `enemies.siege`) picks a zombie's goal: bait → hero within `hero_reach` →
+  what it touches → nearest building in reach → fort (`goal_for`, null = chase the hero); `touch` hurts every
+  standing target it touches. Only built, undamaged buildings are in `targets.buildings` (`building(id)`,
+  `knocked_down()`). Fallen: `TownBuilding.knock_down(tilt, sink, tint)` (numbers `knocked_*` in
+  `siege_rules.tres`), bars `siege.building_bars` (`BuildingHealthBar`, shows only while hurt). Plushies join as
+  targets in M4-06 (another `SiegeTarget`). Zombies slide around a building slowly (~4 s past the armory).
+  Tests: `test_siege_targets.gd`, `test_07_siege_targeting.gd`.

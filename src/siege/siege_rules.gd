@@ -38,6 +38,15 @@ extends Resource
 @export var fort_touch_rate: float = 0.6
 ## Zombies on their way to the fort turn to a hero closer than this (pixels).
 @export var hero_reach: float = 260.0
+## Zombies on their way turn to a built building closer than this to its walls (pixels; the
+## Lucky Jar draws from further away, `BuildingLevel.siege_bait`).
+@export var building_reach: float = 110.0
+## Share of a zombie's touch damage a building takes per second while the zombie touches it.
+@export var building_touch_rate: float = 0.6
+## A knocked-down building tips over this far (degrees), sinks a little and greys out.
+@export var knocked_tilt_degrees: float = -9.0
+@export var knocked_sink: float = 0.88
+@export var knocked_tint: Color = Color(0.72, 0.7, 0.74, 1.0)
 ## A fallen hero stands back up at the fort after this many seconds.
 @export var stand_up_seconds: float = 4.0
 ## A short moment to see the end (won or lost) before going home.

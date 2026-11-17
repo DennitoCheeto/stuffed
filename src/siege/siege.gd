@@ -24,7 +24,11 @@ var town_save: TownSave = TownSave.new()
 var number: int = 1
 var waves: SiegeWaves
 var fort: SiegeFort
+## The fort and the built buildings the horde goes for (AC-77).
+var targets: SiegeTargets
 var fort_bar: FortHealthBar
+## Building spot id -> its small health bar (only built, undamaged buildings).
+var building_bars: Dictionary[StringName, BuildingHealthBar] = {}
 ## True once the night is defended.
 var won: bool = false
 ## Wave banners shown so far (wave index), for tests.
@@ -53,7 +57,9 @@ func _ready() -> void:
 		layout.fort_rect, health, siege_rules.hero_reach, siege_rules.fort_touch_rate
 	)
 	fort.fell.connect(_on_fort_fell)
-	enemies.fort = fort
+	targets = SiegeTargets.new(fort)
+	_add_buildings()
+	enemies.siege = targets
 	fort_bar = FortHealthBar.new(fort)
 	hud.add_child(fort_bar)
 	vignette.visible = false
@@ -174,6 +180,34 @@ func _announce_wave(index: int) -> void:
 	var subtitle: String = siege_rules.last_wave_subtitle if last else siege_rules.wave_subtitle
 	hud.show_banner(title, subtitle, WAVE_BANNER_SECONDS)
 	Sfx.play(&"elite")
+
+
+## Every built, undamaged building fights along (spec 07 §4): it gets health and a small bar.
+## Ruins and damaged buildings stand still and the horde ignores them.
+func _add_buildings() -> void:
+	var looks: Dictionary[StringName, TownBuilding] = town_arena().buildings
+	for spot: TownSpot in layout.spots:
+		var level: int = town_save.building_level(String(spot.id))
+		if level <= 0 or town_save.is_damaged(String(spot.id)) or not looks.has(spot.id):
+			continue
+		var building: SiegeBuilding = SiegeBuilding.new(spot, level, siege_rules)
+		targets.buildings.append(building)
+		var look: TownBuilding = looks[spot.id]
+		var bar: BuildingHealthBar = BuildingHealthBar.new(
+			building, Vector2(spot.rect.get_center().x, look.top_y())
+		)
+		town_arena().add_child(bar)
+		building_bars[spot.id] = bar
+		building.fell.connect(_on_building_fell.bind(look))
+
+
+## A building's health is gone: it tips over and stops fighting for the rest of the siege.
+func _on_building_fell(look: TownBuilding) -> void:
+	look.knock_down(
+		siege_rules.knocked_tilt_degrees, siege_rules.knocked_sink, siege_rules.knocked_tint
+	)
+	Sfx.play(&"stomp")
+	camera.shake(0.25)
 
 
 func _on_fort_fell() -> void:
