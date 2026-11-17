@@ -25,7 +25,10 @@ func _start_siege() -> Siege:
 	var town: Town = await go_to_town()
 	town.enter_bedroom()
 	await wait_physics_frames(2)
-	return main.current_screen as Siege
+	var started: Siege = main.current_screen as Siege
+	if started != null:
+		silence_turrets(started)
+	return started
 
 
 ## Waits up to `seconds` for the town banner to say `title`.
@@ -107,8 +110,12 @@ func test_ac76_the_siege_plays_in_the_town_with_the_run_controls() -> void:
 	assert_not_null(siege.town_arena().dusk, "at dusk")
 	hero.invincible = true
 	disarm(hero)
-	await wait_seconds(3.0)
-	assert_gt(spawned_at.size(), 0, "wave 1 brings zombies")
+	# Enough zombies that a random seed can't put them all on one side by chance.
+	for i: int in roundi(10.0 * FPS):
+		if spawned_at.size() >= 8:
+			break
+		await wait_physics_frames(1)
+	assert_gte(spawned_at.size(), 8, "wave 1 brings zombies")
 	var room: Rect2 = siege.layout.play_rect()
 	for at: Vector2 in spawned_at:
 		assert_false(room.has_point(at), "they come from outside the room's edges")

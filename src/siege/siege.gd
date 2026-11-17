@@ -14,6 +14,8 @@ const WON: String = "siege_won"
 const LOST: String = "siege_lost"
 ## How long a wave banner stays.
 const WAVE_BANNER_SECONDS: float = 2.6
+## Turrets fire from this share of the way up their building (0 = its footprint middle, 1 = top).
+const TURRET_HEIGHT: float = 0.5
 
 @export var siege_rules: SiegeRules
 @export var layout: TownLayout
@@ -29,6 +31,8 @@ var targets: SiegeTargets
 var fort_bar: FortHealthBar
 ## Building spot id -> its small health bar (only built, undamaged buildings).
 var building_bars: Dictionary[StringName, BuildingHealthBar] = {}
+## Building spot id -> its turret (Toy Box Armory, Watchtower; spec 07 §4).
+var turrets: Dictionary[StringName, SiegeTurret] = {}
 ## True once the night is defended.
 var won: bool = false
 ## Wave banners shown so far (wave index), for tests.
@@ -199,6 +203,34 @@ func _add_buildings() -> void:
 		town_arena().add_child(bar)
 		building_bars[spot.id] = bar
 		building.fell.connect(_on_building_fell.bind(look))
+		_add_turret(building, spot, look)
+
+
+## A built turret building (Armory, Watchtower) fires on its own from the middle of its look.
+func _add_turret(building: SiegeBuilding, spot: TownSpot, look: TownBuilding) -> void:
+	var data: BuildingLevel = spot.building.levels[building.level - 1]
+	if data.siege_weapon_level <= 0:
+		return
+	var stats: WeaponStats = spot.building.siege_weapon
+	if stats == null:
+		stats = _hero_weapon()
+	if stats == null:
+		return
+	var middle: Vector2 = spot.rect.get_center()
+	var at: Vector2 = Vector2(middle.x, lerpf(middle.y, look.top_y(), TURRET_HEIGHT))
+	var turret: SiegeTurret = SiegeTurret.new()
+	turret.setup(building, stats, data.siege_weapon_level, data.siege_range, at)
+	town_arena().add_child(turret)
+	turrets[spot.id] = turret
+
+
+## The starting weapon of the first hero (co-op: player 1's), the Armory's turret weapon.
+func _hero_weapon() -> WeaponStats:
+	var first: Player = null
+	for player: Player in Players.all(get_tree()):
+		if first == null or player.player_index < first.player_index:
+			first = player
+	return first.starting_weapon if first != null else null
 
 
 ## A building's health is gone: it tips over and stops fighting for the rest of the siege.
@@ -222,6 +254,8 @@ func _on_fort_fell() -> void:
 func _end(ending: String, title: String, subtitle: String) -> void:
 	over = true
 	enemies.calm = true
+	for turret: SiegeTurret in turrets.values():
+		turret.stop()
 	projectiles.clear_hostile()
 	hud.show_banner(title, subtitle, siege_rules.end_pause_seconds + 1.0)
 	# A timer connection (not await) so nothing fires if the siege is closed meanwhile.

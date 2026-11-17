@@ -56,6 +56,6 @@ func time_left() -> float:
 
 
 func _place() -> void:
-	global_position = weapon.player.global_position + Vector2.from_angle(angle) * _numbers.reach
+	global_position = weapon.origin() + Vector2.from_angle(angle) * _numbers.reach
 	# Point along the circle, the way the needle travels.
 	rotation = angle + PI / 2.0

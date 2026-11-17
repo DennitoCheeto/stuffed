@@ -1,0 +1,46 @@
+[gd_resource type="Resource" script_class="WeaponStats" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://src/weapons/weapon_stats.gd" id="1_stats"]
+[ext_resource type="Script" path="res://src/weapons/weapon_level.gd" id="2_level"]
+[ext_resource type="Script" path="res://src/siege/tower_pin.gd" id="3_behaviour"]
+
+[sub_resource type="Resource" id="Resource_level1"]
+script = ExtResource("2_level")
+damage = 45.0
+cooldown = 2.0
+reach = 1100.0
+count = 1
+speed = 1500.0
+pierce = 0
+card_text = "Watchtower Lv 1: a strong pin every 2 s."
+
+[sub_resource type="Resource" id="Resource_level2"]
+script = ExtResource("2_level")
+damage = 60.0
+cooldown = 1.5
+reach = 1100.0
+count = 1
+speed = 1500.0
+pierce = 0
+card_text = "Watchtower Lv 2: a strong pin every 1.5 s."
+
+[sub_resource type="Resource" id="Resource_level3"]
+script = ExtResource("2_level")
+damage = 75.0
+cooldown = 1.0
+reach = 1100.0
+count = 1
+speed = 1500.0
+pierce = 0
+card_text = "Watchtower Lv 3: a strong pin every second."
+
+[resource]
+script = ExtResource("1_stats")
+behaviour = ExtResource("3_behaviour")
+sound = &"pin"
+sound_pitch = 0.7
+id = &"watchtower_pin"
+display_name = "Watchtower pin"
+knockback = 140.0
+hit_radius = 10.0
+levels = Array[ExtResource("2_level")]([SubResource("Resource_level1"), SubResource("Resource_level2"), SubResource("Resource_level3")])

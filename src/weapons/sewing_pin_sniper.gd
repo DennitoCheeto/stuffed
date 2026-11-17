@@ -10,9 +10,9 @@ func attack() -> bool:
 	if manager == null or shots == null:
 		return false
 	var numbers: WeaponLevel = current()
-	var aim: Vector2 = player.global_position.direction_to(player.aim_point())
+	var aim: Vector2 = origin().direction_to(aim_point())
 	if aim == Vector2.ZERO:
-		aim = player.facing
+		aim = facing()
 	var spread: float = deg_to_rad(numbers.spread_degrees)
 	for i: int in numbers.count:
 		var offset: float = (i - (numbers.count - 1) / 2.0) * spread

@@ -14,6 +14,9 @@ extends Resource
 @export var art_scale: float = 1.0
 ## Its branch of 3 tricks (spec 06), bought in this order; trick N needs the building at Lv N.
 @export var tricks: Array[TrickDef] = []
+## Night siege turret (spec 07 §4): the weapon it fires when a level has `siege_weapon_level`.
+## Empty = the hero's starting weapon (Toy Box Armory).
+@export var siege_weapon: WeaponStats
 
 
 func max_level() -> int:

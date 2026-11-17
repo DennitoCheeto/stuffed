@@ -70,5 +70,5 @@ func advance(delta: float) -> bool:
 
 
 func _place() -> void:
-	global_position = weapon.player.global_position + Vector2.from_angle(angle) * radius
+	global_position = weapon.origin() + Vector2.from_angle(angle) * radius
 	rotation = angle + PI / 2.0

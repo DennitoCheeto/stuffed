@@ -16,10 +16,10 @@ func attack() -> bool:
 	if manager == null or shots == null:
 		return false
 	var numbers: WeaponLevel = current()
-	var target: Zombie = manager.nearest(player.global_position, numbers.reach * SEARCH_FACTOR)
+	var target: Zombie = manager.nearest(origin(), numbers.reach * SEARCH_FACTOR)
 	if target == null:
 		return false
-	var aim: Vector2 = player.global_position.direction_to(target.position)
+	var aim: Vector2 = origin().direction_to(target.position)
 	for i: int in numbers.count:
 		var peel: BoomerangProjectile = shots.spawn(_peel_kind()) as BoomerangProjectile
 		peel.launch(self, aim.rotated(_fan_angle(i, numbers)))

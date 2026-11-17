@@ -18,7 +18,7 @@ func launch(from: Weapon, direction: Vector2) -> void:
 	weapon = from
 	var numbers: WeaponLevel = from.current()
 	_time_left = SHOW_TIME
-	global_position = from.player.global_position
+	global_position = from.origin()
 	rotation = direction.angle()
 	scale = _base_scale * numbers.area / ProjectileLook.WHIP_RADIUS
 	modulate.a = 1.0
@@ -34,6 +34,6 @@ func launch(from: Weapon, direction: Vector2) -> void:
 
 func advance(delta: float) -> bool:
 	_time_left -= delta
-	global_position = weapon.player.global_position
+	global_position = weapon.origin()
 	modulate.a = _time_left / SHOW_TIME
 	return _time_left > 0.0

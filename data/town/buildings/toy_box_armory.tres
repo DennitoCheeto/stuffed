@@ -14,6 +14,8 @@ stuffing = 0
 thread = 0
 effect = "+2 weapons: Bouncy Yarn Ball, Thimble Mortar"
 siege_health = 200
+siege_weapon_level = 1
+siege_range = 450.0
 unlocks_weapons = Array[StringName]([&"bouncy_yarn_ball", &"thimble_mortar"])
 
 [sub_resource type="Resource" id="Resource_level_2"]
@@ -23,6 +25,8 @@ stuffing = 15
 thread = 0
 effect = "+2 more weapons: Thread Whip, Zipper Ray"
 siege_health = 300
+siege_weapon_level = 3
+siege_range = 450.0
 unlocks_weapons = Array[StringName]([&"thread_whip", &"zipper_ray"])
 
 [sub_resource type="Resource" id="Resource_level_3"]
@@ -32,6 +36,8 @@ stuffing = 30
 thread = 8
 effect = "Choose Banane's starting weapon"
 siege_health = 450
+siege_weapon_level = 5
+siege_range = 450.0
 start_weapon_choice = true
 
 [resource]

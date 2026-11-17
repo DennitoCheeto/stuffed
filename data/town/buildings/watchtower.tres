@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="BuildingDef" load_steps=10 format=3]
+[gd_resource type="Resource" script_class="BuildingDef" load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://src/town/building_def.gd" id="1_def"]
 [ext_resource type="Script" path="res://src/town/building_level.gd" id="2_level"]
@@ -6,6 +6,7 @@
 [ext_resource type="Resource" path="res://data/town/tricks/spyglass.tres" id="t1"]
 [ext_resource type="Resource" path="res://data/town/tricks/magnet_whistle.tres" id="t2"]
 [ext_resource type="Resource" path="res://data/town/tricks/treasure_map.tres" id="t3"]
+[ext_resource type="Resource" path="res://data/siege/watchtower_pin.tres" id="w1"]
 
 [sub_resource type="Resource" id="Resource_level_1"]
 script = ExtResource("2_level")
@@ -14,6 +15,8 @@ stuffing = 0
 thread = 0
 effect = "+10% pickup range"
 siege_health = 200
+siege_weapon_level = 1
+siege_range = 1000.0
 pickup_range_bonus = 0.1
 
 [sub_resource type="Resource" id="Resource_level_2"]
@@ -23,6 +26,8 @@ stuffing = 18
 thread = 0
 effect = "+20% pickup range"
 siege_health = 300
+siege_weapon_level = 2
+siege_range = 1000.0
 pickup_range_bonus = 0.2
 
 [sub_resource type="Resource" id="Resource_level_3"]
@@ -32,6 +37,8 @@ stuffing = 35
 thread = 8
 effect = "+30% pickup range"
 siege_health = 450
+siege_weapon_level = 3
+siege_range = 1000.0
 pickup_range_bonus = 0.3
 
 [resource]
@@ -42,3 +49,4 @@ summary = "Grab buttons from further away"
 levels = Array[ExtResource("2_level")]([SubResource("Resource_level_1"), SubResource("Resource_level_2"), SubResource("Resource_level_3")])
 art_scale = 1.25
 tricks = Array[ExtResource("3_trick")]([ExtResource("t1"), ExtResource("t2"), ExtResource("t3")])
+siege_weapon = ExtResource("w1")

@@ -13,10 +13,10 @@ func attack() -> bool:
 	if manager == null or shots == null:
 		return false
 	var numbers: WeaponLevel = current()
-	var target: Zombie = manager.nearest(player.global_position, numbers.reach * SEARCH_FACTOR)
+	var target: Zombie = manager.nearest(origin(), numbers.reach * SEARCH_FACTOR)
 	if target == null:
 		return false
-	var aim: Vector2 = player.global_position.direction_to(target.position)
+	var aim: Vector2 = origin().direction_to(target.position)
 	var spread: float = deg_to_rad(numbers.spread_degrees)
 	for i: int in numbers.count:
 		var offset: float = (i - (numbers.count - 1) / 2.0) * spread

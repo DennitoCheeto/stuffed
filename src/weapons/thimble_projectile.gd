@@ -72,7 +72,7 @@ func reset() -> void:
 func launch(from: Weapon, target: Vector2) -> void:
 	weapon = from
 	_numbers = from.current()
-	_from = from.player.global_position
+	_from = from.origin()
 	global_position = target
 	_flight_time = maxf(_from.distance_to(target) / maxf(_numbers.speed, 1.0), MIN_FLIGHT)
 	scale = _ring_scale()

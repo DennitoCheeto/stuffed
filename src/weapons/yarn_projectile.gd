@@ -37,7 +37,7 @@ func launch(from: Weapon, direction: Vector2) -> void:
 	_numbers = from.current()
 	_direction = direction
 	_time_left = _numbers.duration
-	global_position = from.player.global_position
+	global_position = from.origin()
 	size_to(from.area_scale())
 
 
