@@ -163,7 +163,8 @@ func test_ac78_the_trap_waits_loaded_until_a_zombie_comes() -> void:
 	zombie.move_speed = 0.0
 	await wait_physics_frames(3)
 	assert_eq(trap.pops, 1, "pops as soon as a zombie steps in")
-	assert_true(not is_instance_valid(zombie) or zombie.dead, "a shambler doesn't survive the confetti")
+	var popped: bool = not is_instance_valid(zombie) or zombie.dead
+	assert_true(popped, "a shambler doesn't survive the confetti")
 
 
 func test_ac78_damaged_and_unbuilt_buildings_have_no_ring() -> void:
