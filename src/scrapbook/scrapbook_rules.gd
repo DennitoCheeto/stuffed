@@ -106,18 +106,9 @@ func _plushies() -> ScrapbookPage:
 		var entry: ScrapbookEntry = ScrapbookEntry.new(who.id, who.display_name, who.scrapbook_text)
 		entry.picture = ScrapbookEntry.Picture.PLUSHIE
 		entry.plushie = who
-		entry.note = plays_with(who)
+		entry.note = "Rescued"
 		page.add(entry)
 	return page
-
-
-## A rescued plushie's note (spec 08 §11): "Rescued · Plays with: Snowball Toss · Chilly Hug".
-static func plays_with(who: PlushieDef) -> String:
-	var hero: HeroStats = HeroRoster.current().find(StringName(who.id))
-	if hero == null or hero.starting_weapon == null:
-		return "Rescued"
-	var weapon: String = hero.starting_weapon.display_name
-	return "Rescued · Plays with: %s · %s" % [weapon, hero.passive_name]
 
 
 func _icon(id: StringName, name: String, text: String) -> ScrapbookEntry:

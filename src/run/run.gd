@@ -282,14 +282,15 @@ func spawn_player(index: int, at: Vector2) -> Player:
 	return player
 
 
-## The hero id of every player, by player index (run log, end screen).
-func _heroes_played() -> PackedStringArray:
+## The hero id (or `names`: display name) of every player, by player index (log, end screen).
+func _heroes_played(names: bool) -> PackedStringArray:
 	var everyone: Array[Player] = Players.all(get_tree())
 	var ids: PackedStringArray = []
 	ids.resize(everyone.size())
 	for player: Player in everyone:
 		if player.player_index < ids.size():
-			ids[player.player_index] = String(player.stats.id)
+			var hero: HeroStats = player.stats
+			ids[player.player_index] = hero.display_name if names else String(hero.id)
 	return ids
 
 
@@ -500,7 +501,8 @@ func make_result(ending: String) -> RunResult:
 	result.killed_by = first.last_hit_by if first.is_dead() else ""
 	result.upgrades = first.picked_upgrades
 	result.player_count = Players.all(get_tree()).size()
-	result.heroes = _heroes_played()
+	result.heroes = _heroes_played(false)
+	result.hero_names = _heroes_played(true)
 	result.items = _items_of_everyone()
 	result.seed_value = seed_value
 	result.evolutions = evolution_log.duplicate(true)

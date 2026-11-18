@@ -687,3 +687,8 @@ _Last updated: 2026-11-18 (M5-07 merged (PR #266); M5-08 in review, M5-09 ready)
   `ScrapbookRules.plays_with(def)`. `RunResult.heroes` (id per player index) → log field `hero` (runs + sieges),
   end screen `WeaponColumn.heading_text` ("Player 2 · Pip") / `star_caption` ("Pip's Snowball Toss").
   Test: `test_08_coop_heroes.gd`.
+- Script cycles (M5-08): CI's typecheck (`tools/check.sh`) fails with "N resources still in use at exit" when a
+  new class reference closes a loop of scripts (here `ScrapbookRules` → `HeroRoster`, and `WeaponColumn` →
+  `HeroRoster`). Tests still pass, so check locally: `<godot_console> --headless --path . --check-only --script
+  res://src/arena/arena.gd` must print no ERROR. Fix: look the roster up from a UI/runtime script
+  (`ScrapbookBook.note_of`) or copy what is needed into the data (`RunResult.hero_names`).

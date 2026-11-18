@@ -82,3 +82,12 @@ func _first_free(save: TownSave, taken: Array[HeroStats]) -> HeroStats:
 		if not taken.has(hero):
 			return hero
 	return starter()
+
+
+## What a rescued plushie plays with as a hero (Scrapbook, spec 08 §11): "Snowball Toss · Chilly
+## Hug" ("" if it isn't a hero).
+func plays_with(who: PlushieDef) -> String:
+	var hero: HeroStats = find(StringName(who.id))
+	if hero == null or hero.starting_weapon == null:
+		return ""
+	return "%s · %s" % [hero.starting_weapon.display_name, hero.passive_name]

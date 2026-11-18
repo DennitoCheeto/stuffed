@@ -172,11 +172,20 @@ func show_details(tile: ScrapbookTile) -> void:
 	elif seen:
 		detail_name.text = shown.display_name
 		detail_text.text = shown.text
-		detail_note.text = shown.note
+		detail_note.text = note_of(shown)
 	else:
 		detail_name.text = ScrapbookTile.UNSEEN_NAME
 		detail_text.text = UNSEEN_TEXT
 		detail_note.text = HOW_TO_FIND.get(current_page().id, "")
+
+
+## An entry's note; a rescued plushie also says what it plays with as a hero (spec 08 §11):
+## "Rescued · Plays with: Snowball Toss · Chilly Hug".
+static func note_of(entry: ScrapbookEntry) -> String:
+	if entry.plushie == null:
+		return entry.note
+	var plays: String = HeroRoster.current().plays_with(entry.plushie)
+	return entry.note if plays.is_empty() else "%s · Plays with: %s" % [entry.note, plays]
 
 
 func _unhandled_input(event: InputEvent) -> void:

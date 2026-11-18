@@ -153,10 +153,7 @@ func _add_items(list: VBoxContainer, tags: PackedStringArray) -> void:
 
 ## The hero player `who` played this run (spec 08 §11), or "" if unknown (older results).
 static func hero_name(result: RunResult, who: int) -> String:
-	if who >= result.heroes.size():
-		return ""
-	var hero: HeroStats = HeroRoster.current().find(StringName(result.heroes[who]))
-	return hero.display_name if hero != null else ""
+	return result.hero_names[who] if who < result.hero_names.size() else ""
 
 
 ## "Player 2 · Pip" over a co-op column.

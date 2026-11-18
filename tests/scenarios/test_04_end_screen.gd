@@ -66,8 +66,9 @@ func _assert_star(column: WeaponColumn, result: RunResult) -> void:
 	var caption: String = WeaponColumn.star_caption(result, column.player, str(expected["name"]))
 	assert_eq(column.star_photo.caption.text, caption, "shown as a photo")
 	assert_string_contains(caption, str(expected["name"]))
-	if column.player < result.heroes.size():
-		assert_string_starts_with(caption, WeaponColumn.hero_name(result, column.player), "the hero")
+	if column.player < result.hero_names.size():
+		var hero: String = WeaponColumn.hero_name(result, column.player)
+		assert_string_starts_with(caption, hero, "the hero")
 	assert_eq(column.star_sticker.label.text, "Star of the run", "with its sticker")
 	var damage: String = WeaponReport.short_number(float(expected["damage"]))
 	assert_eq(column.star_damage_label.text, "%s damage" % damage)
@@ -152,7 +153,8 @@ func test_ac57_two_players_get_a_column_and_a_star_each() -> void:
 		assert_eq(column.player, index)
 		assert_not_null(column.heading, "a heading per column")
 		if column.heading != null:
-			assert_eq(column.heading.label.text, "Player %d · Banane" % (index + 1), "and the hero")
+			var heading: String = "Player %d · Banane" % (index + 1)
+			assert_eq(column.heading.label.text, heading, "and the hero")
 		_assert_star(column, end.result)
 		for weapon: Dictionary in column.listed():
 			assert_eq(int(weapon["player"]), index, "only this player's weapons")

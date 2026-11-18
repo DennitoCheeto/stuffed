@@ -6,7 +6,7 @@ extends "res://tests/scenarios/run_scenario.gd"
 
 const HEROES: HeroRoster = preload("res://data/heroes/hero_roster.tres")
 const RULES: WardrobeRules = preload("res://data/town/wardrobe_rules.tres")
-const RESCUE: RescueRules = preload("res://data/town/rescue_rules.tres")
+const SCRAPBOOK: ScrapbookRules = preload("res://data/scrapbook.tres")
 
 
 func _hero(id: String) -> HeroStats:
@@ -60,8 +60,9 @@ func test_ac91_siege_helpers_are_the_plushies_nobody_plays_and_banane() -> void:
 
 
 func test_spec08_scrapbook_says_what_a_plushie_plays_with() -> void:
-	var pip: PlushieDef = RESCUE.find("pip")
-	assert_eq(ScrapbookRules.plays_with(pip), "Rescued · Plays with: Snowball Toss · Chilly Hug")
+	var page: ScrapbookPage = SCRAPBOOK.pages()[4]
+	var pip: ScrapbookEntry = page.find("pip")
+	assert_eq(ScrapbookBook.note_of(pip), "Rescued · Plays with: Snowball Toss · Chilly Hug")
 
 
 func test_spec08_the_run_log_and_end_screen_name_the_hero() -> void:
