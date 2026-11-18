@@ -60,7 +60,8 @@ func _press_e() -> void:
 
 func test_ac43_a_new_save_never_offers_the_armory_weapons() -> void:
 	await _quiet_run()
-	assert_eq(run.perks.locked_weapons.size(), 4, "4 weapons wait in the Armory")
+	# 4 wait in the Armory, Snowball Toss waits for Pip (spec 08 §3).
+	assert_eq(run.perks.locked_weapons.size(), 5, "4 Armory weapons + Pip's")
 	run.upgrade_pool = _only(UNLOCKS)
 	var cards: Array[StringName] = await _level_up_cards()
 	assert_eq(cards.count(&"banana_snack"), 3, "only snacks are left")
@@ -88,7 +89,8 @@ func test_ac43_armory_level_2_adds_whip_and_ray() -> void:
 	var cards: Array[StringName] = await _level_up_cards()
 	assert_has(cards, &"thread_whip")
 	assert_has(cards, &"zipper_ray")
-	assert_eq(run.perks.locked_weapons.size(), 0, "every weapon is open")
+	assert_eq(run.perks.locked_weapons.size(), 1, "every Armory weapon is open")
+	assert_has(run.perks.locked_weapons, &"snowball_toss", "Pip's waits for her")
 
 
 func test_ac43_rebuilding_the_armory_shows_the_new_weapons() -> void:
