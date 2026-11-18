@@ -45,7 +45,7 @@ func _wait_for_end_screen(seconds: float) -> EndScreen:
 
 
 ## Puts the player next to `building` in town.
-func _walk_up_to(town: Town, building: TownBuilding) -> void:
+func _walk_up_to(building: TownBuilding) -> void:
 	var rect: Rect2 = building.spot.rect
 	first_player().global_position = Vector2(rect.get_center().x, rect.end.y + 30.0)
 	await wait_physics_frames(3)
@@ -153,7 +153,7 @@ func test_ac80_repair_costs_a_quarter_of_the_levels_coins() -> void:
 	assert_true(building.damaged)
 	assert_eq(building.repair_cost(), {"coins": 200}, "25% of level 2's 800 coins")
 	assert_true(building.price_tag.visible, "the repair price hangs under it")
-	await _walk_up_to(town, building)
+	await _walk_up_to(building)
 	assert_eq(town.card.now_label.text, RULES.damaged_card)
 	assert_string_contains(town.card.level_label.text, "Damaged")
 	assert_eq(town.prompt_label.text, "Needs 50 more coins")
