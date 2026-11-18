@@ -147,6 +147,11 @@ func _ready() -> void:
 		hug_charge.name = "BearHug"
 		hug_charge.setup(self)
 		add_child(hug_charge)
+	if stats.big_heart:
+		var heart: BigHeart = BigHeart.new()
+		heart.name = "BigHeart"
+		add_child(heart)
+		heart.setup(self)
 	if stats.chilly_hug:
 		var hug: ChillyHug = ChillyHug.new()
 		hug.name = "ChillyHug"

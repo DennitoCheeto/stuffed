@@ -669,3 +669,7 @@ _Last updated: 2026-11-18 (M5-04 merged (PR #263); M5-05 Böbö in review)_
   `enemies.damage_from(WeaponTally.BEAR_HUG, zombie, amount, push)` (push param is new). `HeroStats.damage_taken`
   (Böbö 0.8) sets `Player.damage_taken_multiplier` at the start. Tests: `test_paw_swat.gd`, `test_08_bobo.gd`
   (scenario tests that take a hit: kill nearby zombies first or they keep the hero invulnerable / dead).
+- BamBam (M5-06, spec 08 §3): Big Heart = `BigHeart` node (`src/passives/`, numbers `big_heart_*` in `bambam.tres`):
+  on `player.progress.leveled_up` heals every living hero within `big_heart_heal_reach` by `big_heart_heal` of their
+  max health and adds knockback to zombies within `big_heart_push_reach` (no damage); pink heart ring drawn on
+  `WorldLayers.OWN_SHOTS`. `pulses` / `pushed` for tests. Test: `test_08_bambam.gd` (co-op partner healed too).
