@@ -15,6 +15,9 @@ const COLUMNS: int = 5
 const TILE_SIZE: Vector2 = Vector2(196, 186)
 ## The current weapon's tile: teal stitches and a teal "Now" tag.
 const CURRENT_COLOR: Color = UiColors.STICKER_TEAL
+## The first tile: every hero starts with their own weapon (spec 08 §7, the default).
+const OWN: StringName = &"hero_own"
+const OWN_TEXT: String = "Hero's own weapon"
 
 ## Weapon id -> its tile.
 var tiles: Dictionary[StringName, SewnButton] = {}
@@ -45,7 +48,7 @@ func _init() -> void:
 	panel.content.add_child(box)
 	box.add_child(title)
 	var hint: Label = UiFonts.label(
-		"Banane starts every run with it.   Esc: close", 24, UiColors.INK_SOFT
+		"Every hero starts the next run with it.   Esc: close", 24, UiColors.INK_SOFT
 	)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(hint)
@@ -60,13 +63,19 @@ func is_open() -> bool:
 	return visible
 
 
-## Opens with one tile per weapon in `weapons`; `now` is the one Banane starts with now.
-func open(weapons: Array[UpgradeDef], now: StringName) -> void:
+## Opens with one tile per weapon in `weapons`, after a "Hero's own weapon" tile showing `own`
+## (null = none); `now` is the chosen one (`OWN` = the hero's own).
+func open(weapons: Array[UpgradeDef], now: StringName, own: UpgradeDef = null) -> void:
 	for old: Node in _grid.get_children():
 		_grid.remove_child(old)
 		old.queue_free()
 	tiles.clear()
 	current = now
+	if own != null:
+		var mine: SewnButton = _tile(own, now == OWN, OWN_TEXT)
+		mine.pressed.connect(choose.bind(OWN))
+		_grid.add_child(mine)
+		tiles[OWN] = mine
 	for weapon: UpgradeDef in weapons:
 		var tile: SewnButton = _tile(weapon, weapon.id == now)
 		tile.pressed.connect(choose.bind(weapon.id))
@@ -103,7 +112,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		close()
 
 
-func _tile(weapon: UpgradeDef, is_current: bool) -> SewnButton:
+func _tile(weapon: UpgradeDef, is_current: bool, words: String = "") -> SewnButton:
 	var tile: SewnButton = SewnButton.new()
 	tile.caption.visible = false
 	tile.box.radius = 24.0
@@ -122,7 +131,8 @@ func _tile(weapon: UpgradeDef, is_current: bool) -> SewnButton:
 	icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	column.add_child(icon)
-	var name_label: Label = UiFonts.label(weapon.display_name, 22, UiColors.INK, UiFonts.heading())
+	var text: String = weapon.display_name if words.is_empty() else words
+	var name_label: Label = UiFonts.label(text, 22, UiColors.INK, UiFonts.heading())
 	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	name_label.custom_minimum_size = Vector2(TILE_SIZE.x - 28.0, 0.0)

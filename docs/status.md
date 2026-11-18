@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-11-18 (M5-06 merged (PR #265); M5-07 Robbar in review, M5-08 ready)_
+_Last updated: 2026-11-18 (M5-07 merged (PR #266); M5-08 in review, M5-09 ready)_
 
 ## Where we are
 
@@ -19,7 +19,7 @@ _Last updated: 2026-11-18 (M5-06 merged (PR #265); M5-07 Robbar in review, M5-08
 | M3.6 Sunny patchwork | 🚧 spec 05 approved 2026-10-25 (PR #160; AC-58 … AC-65, P-22 … P-25); milestone M3.6, issues #162–#170 (M3.6-01 … 09); M3.6-01 world palette (#162): merged (PR #171); hero clarity #172 (part 1): merged (PR #173, floors calmer #174); M3.6-02 art kit + Lucky Jar + Armory (#163): merged (PR #175); M3.6-03 other four buildings + fort + Scrapbook stand (#164): merged (PR #179); M3.6-04 town ground + compact layout (#165): merged (PR #181); M3.6-05 town text (#166): merged (PR #188); spec update #186 merged by the PO; M3.6-10 Party Shop + Hospital redraw (#187): merged (PR #190); M3.6-06 town life (#167): merged (PR #192); M3.6-07 Bedroom floor and room (#168): merged (PR #193); M3.6-08 Bedroom zones (#169): merged (PR #195); M3.6-09 perf check (#170): merged (PR #197), all 10 M3.6 tickets merged |
 | M3.7 Building tricks | 🚧 spec 06 approved 2026-10-27 (PR #199; AC-66 … AC-73, P-26 … P-28); issues #200–#209 (M3.7-01 … 10); M3.7-01 trick data + save v4 (#200): merged (PR #210); M3.7-02 Tricks panel (#201): merged (PR #212); M3.7-03 trick runtime (#202): merged (PR #214); M3.7-04 Armory tricks (#203): merged (PR #216); M3.7-05 Lucky Jar tricks (#204): merged (PR #218); M3.7-06 Watchtower tricks (#205): merged (PR #219); M3.7-07 Snack Bar tricks (#206): merged (PR #221); M3.7-08 Party Shop tricks (#207): merged (PR #222); M3.7-09 Plush Hospital tricks (#208): merged; M3.7-10 readability + prices (#209): merged, all 10 M3.7 tickets merged |
 | M4 Night siege | 🚧 spec 07 approved 2026-11-16 (PR #226; AC-74 … AC-84, P-29 … P-31); milestone M4, issues #228–#236 (M4-01 … 09); M4-01 siege data + save v5 + moon calendar (#228): merged (PR #237); M4-02 siege flow (#229): merged (PR #238); M4-03 zombie targeting + building health + Lucky Jar bait (#230): merged (PR #239); M4-04 turrets: Armory + Watchtower (#231): merged (PR #240); M4-05 Snack Bar heal ring + Party Shop confetti trap (#232): merged (PR #241); M4-06 plushies help + Plush Hospital revive (#233): merged (PR #242); M4-07 after the siege: reward, damage, repair, end screen (#234): merged (PR #244); M4-08 siege HUD, tricks, co-op, run log (#235): merged (PR #245); M4-09 readability + perf (#236): merged (PR #246), all 9 M4 tickets merged; **acceptance playtest (P-22 … P-31) waiting for the PO** |
-| M5 Plushie heroes | 🚧 PO decision 2026-11-18: M5 next (before M4.5 equipment). Research `docs/research/04-hero-variety-research.md`; spec 08 approved (PO merged PR #249; `docs/specs/08-playable-plushies.md`, AC-85 … AC-94, P-32 … P-34); milestone M5, issues #250–#258 (M5-01 … 09); M5-01 hero data + save v6 + unlock + dev menu (#250): merged (PR #259); M5-02 hero puppets (#251): merged (PR #260); M5-03 Wardrobe + hero picker (#252): merged (PR #261); M5-04 Pip: Snowball Toss + Chilly Hug (#253): merged (PR #263); M5-05 Böbö: Paw Swat + Bear Hug (#254): merged (PR #264); M5-06 BamBam (#255): merged (PR #265); M5-07 Robbar (#256): PR open |
+| M5 Plushie heroes | 🚧 PO decision 2026-11-18: M5 next (before M4.5 equipment). Research `docs/research/04-hero-variety-research.md`; spec 08 approved (PO merged PR #249; `docs/specs/08-playable-plushies.md`, AC-85 … AC-94, P-32 … P-34); milestone M5, issues #250–#258 (M5-01 … 09); M5-01 hero data + save v6 + unlock + dev menu (#250): merged (PR #259); M5-02 hero puppets (#251): merged (PR #260); M5-03 Wardrobe + hero picker (#252): merged (PR #261); M5-04 Pip: Snowball Toss + Chilly Hug (#253): merged (PR #263); M5-05 Böbö: Paw Swat + Bear Hug (#254): merged (PR #264); M5-06 BamBam (#255): merged (PR #265); M5-07 Robbar (#256): merged (PR #266); M5-08 co-op heroes (#257): PR open; M5-09 readability (#258): next |
 | M3 Town | ✅ accepted 2026-10-24: spec 03 approved (PR #91); issues #92–#103; M3-01 save system (PR #105), M3-02 town + flow (PR #106), M3-03 materials (PR #107), M3-04 Way Home portal (PR #109), M3-05 rebuilding (PR #110), M3-06 Toy Box Armory (PR #114), M3-07 Lucky Jar + Watchtower + Snack Bar (PR #115), M3-08 Party Shop (PR #116), M3-09 rescue in the run (PR #117), M3-10 Plush Hospital + plushies in town (PR #118), M3-11 Scrapbook (PR #119), M3-12 co-op in town + dev menu + sounds (PR #120) |
 
 ## Next step
@@ -678,3 +678,17 @@ _Last updated: 2026-11-18 (M5-06 merged (PR #265); M5-07 Robbar in review, M5-08
   `belly_slide_reach` take `belly_slide_damage` once per slide (`WeaponTally.BELLY_SLIDE`), wet streak drawn
   top-level on `WorldLayers.FLOOR_MARKS` (`trail_size()`). Passives are created in `Player._add_passives()` (node
   named after its class, `setup(player)` after `add_child`). Test: `test_08_robbar.gd`.
+- Co-op heroes etc. (M5-08, spec 08 §7-9, §11, AC-91): `HeroRoster.heroes_for(save, count)` = one of each (a taken
+  or locked saved hero → first free unlocked one); used by `TownPerks.heroes` (`MAX_PLAYERS` slots),
+  `Town.spawn_player`, the Wardrobe and the picker. Siege helpers: `siege.helpers()` = in-town plushies nobody
+  plays + Banane's `town_member` when someone else plays (a `BananePuppet` child of the `SiegePlushie`; a
+  `BananePuppet` with no player/walker shows itself standing in `_ready`). Armory picker: first tile
+  `StartWeaponPicker.OWN` "Hero's own weapon" (default, sets `TownSave.start_weapon` = ""). Scrapbook plushie note
+  `ScrapbookRules.plays_with(def)`. `RunResult.heroes` (id per player index) → log field `hero` (runs + sieges),
+  end screen `WeaponColumn.heading_text` ("Player 2 · Pip") / `star_caption` ("Pip's Snowball Toss").
+  Test: `test_08_coop_heroes.gd`.
+- Script cycles (M5-08): CI's typecheck (`tools/check.sh`) fails with "N resources still in use at exit" when a
+  new class reference closes a loop of scripts (here `ScrapbookRules` → `HeroRoster`, and `WeaponColumn` →
+  `HeroRoster`). Tests still pass, so check locally: `<godot_console> --headless --path . --check-only --script
+  res://src/arena/arena.gd` must print no ERROR. Fix: look the roster up from a UI/runtime script
+  (`ScrapbookBook.note_of`) or copy what is needed into the data (`RunResult.hero_names`).

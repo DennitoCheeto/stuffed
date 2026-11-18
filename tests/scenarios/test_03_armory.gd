@@ -112,8 +112,9 @@ func test_ac43_level_3_lets_you_choose_the_starting_weapon_for_the_next_run() ->
 	assert_eq(town.card.note_label.text, "Starting weapon: Peel Boomerang", "his own at first")
 	await _press_e()
 	assert_true(town.picker.is_open(), "E opens the choice")
-	assert_eq(town.picker.tiles.size(), 10, "every unlocked weapon")
-	assert_eq(town.picker.current, &"peel_boomerang")
+	assert_eq(town.picker.tiles.size(), 11, "Hero's own weapon + every unlocked weapon")
+	assert_eq(town.picker.tiles.keys()[0], StartWeaponPicker.OWN, "the hero's own comes first")
+	assert_eq(town.picker.current, StartWeaponPicker.OWN, "and is the default")
 	assert_eq(town.process_mode, Node.PROCESS_MODE_DISABLED, "the town waits")
 	town.picker.tiles[&"thimble_mortar"].pressed.emit()
 	assert_false(town.picker.is_open(), "closes after the choice")
@@ -150,3 +151,16 @@ func test_esc_closes_the_choice_without_changing_it() -> void:
 	assert_false(town.picker.is_open())
 	assert_false(town.menu.is_open(), "Esc only closes the choice")
 	assert_eq(main.town.start_weapon, "")
+
+
+func test_spec08_hero_s_own_weapon_tile_clears_the_choice() -> void:
+	main.town.building_levels[ARMORY] = 3
+	main.town.start_weapon = "thimble_mortar"
+	var town: Town = await go_to_town()
+	await _stand_at(town, &"toy_box_armory")
+	await _press_e()
+	assert_eq(town.picker.current, &"thimble_mortar")
+	town.picker.tiles[StartWeaponPicker.OWN].pressed.emit()
+	assert_eq(main.town.start_weapon, "", "every hero starts with their own again")
+	run = await start_run()
+	assert_eq(first_player().weapons()[0].stats.id, &"peel_boomerang", "Banane's own")

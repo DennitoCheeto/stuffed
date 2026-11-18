@@ -83,7 +83,7 @@ func open(by: int, roster: HeroRoster, save: TownSave, taken: Dictionary[StringN
 	_order.clear()
 	_blocked.clear()
 	slot = by
-	var now: HeroStats = roster.hero_for(save, by)
+	var now: HeroStats = roster.heroes_for(save, HeroRoster.MAX_PLAYERS)[by]
 	for hero: HeroStats in roster.heroes:
 		var locked: bool = not roster.is_unlocked(hero, save)
 		var taken_by: int = taken.get(hero.id, -1)

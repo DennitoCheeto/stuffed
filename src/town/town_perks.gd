@@ -51,8 +51,7 @@ static func from_save(save: TownSave, layout: TownLayout) -> TownPerks:
 			if save.has_trick(String(trick.id)):
 				perks.tricks.append(trick)
 	perks.buddy = save.last_rescued
-	for slot: int in maxi(save.heroes.size(), 1):
-		perks.heroes.append(HeroRoster.current().hero_for(save, slot))
+	perks.heroes = HeroRoster.current().heroes_for(save, HeroRoster.MAX_PLAYERS)
 	# A hero's new weapon joins the cards once that hero is unlocked (spec 08 §3).
 	for hero: HeroStats in HeroRoster.current().heroes:
 		if hero.unlocks_weapon != null and not HeroRoster.current().is_unlocked(hero, save):

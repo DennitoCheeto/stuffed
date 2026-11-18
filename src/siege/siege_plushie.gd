@@ -63,6 +63,12 @@ func setup(who: PlushieDef, at: Vector2, rules: SiegeRules) -> void:
 	# Behind this node's own drawing, so the dizzy stars show in front of it.
 	look.show_behind_parent = true
 	add_child(look)
+	if who.shape == PlushieDef.Shape.BANANE:
+		# Banane helping in the siege while someone else plays him (spec 08 §9): his felt puppet.
+		var puppet: BananePuppet = BananePuppet.new()
+		puppet.position = -HeroMarker.FEET
+		puppet.show_behind_parent = true
+		add_child(puppet)
 	add_child(throw)
 
 
