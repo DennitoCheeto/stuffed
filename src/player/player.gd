@@ -137,26 +137,7 @@ func _ready() -> void:
 	var shape: CircleShape2D = CircleShape2D.new()
 	shape.radius = stats.hitbox_radius
 	_hitbox.shape = shape
-	if stats.slippery:
-		var slippery: Slippery = Slippery.new()
-		slippery.name = "Slippery"
-		add_child(slippery)
-		slippery.setup(self)
-	if stats.bear_hug:
-		var hug_charge: BearHug = BearHug.new()
-		hug_charge.name = "BearHug"
-		hug_charge.setup(self)
-		add_child(hug_charge)
-	if stats.big_heart:
-		var heart: BigHeart = BigHeart.new()
-		heart.name = "BigHeart"
-		add_child(heart)
-		heart.setup(self)
-	if stats.chilly_hug:
-		var hug: ChillyHug = ChillyHug.new()
-		hug.name = "ChillyHug"
-		hug.setup(self)
-		add_child(hug)
+	_add_passives()
 	if starting_weapon == null:
 		starting_weapon = stats.starting_weapon
 	if armed and starting_weapon != null:
@@ -165,6 +146,26 @@ func _ready() -> void:
 	if armed:
 		for extra: WeaponStats in extra_weapons:
 			add_weapon(extra)
+
+
+## The hero's passive (spec 08 §3), named after its class: Banane's Slippery, Böbö's BearHug,
+## BamBam's BigHeart, Robbar's BellySlide, Pip's ChillyHug.
+func _add_passives() -> void:
+	var passives: Array[Node] = []
+	if stats.slippery:
+		passives.append(Slippery.new())
+	if stats.bear_hug:
+		passives.append(BearHug.new())
+	if stats.big_heart:
+		passives.append(BigHeart.new())
+	if stats.belly_slide:
+		passives.append(BellySlide.new())
+	if stats.chilly_hug:
+		passives.append(ChillyHug.new())
+	for passive: Node in passives:
+		passive.name = (passive.get_script() as Script).get_global_name()
+		add_child(passive)
+		passive.call(&"setup", self)
 
 
 func _physics_process(delta: float) -> void:

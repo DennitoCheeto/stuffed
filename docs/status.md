@@ -673,3 +673,8 @@ _Last updated: 2026-11-18 (M5-05 merged (PR #264); M5-06 BamBam in review, M5-07
   on `player.progress.leveled_up` heals every living hero within `big_heart_heal_reach` by `big_heart_heal` of their
   max health and adds knockback to zombies within `big_heart_push_reach` (no damage); pink heart ring drawn on
   `WorldLayers.OWN_SHOTS`. `pulses` / `pushed` for tests. Test: `test_08_bambam.gd` (co-op partner healed too).
+- Robbar (M5-07, spec 08 §3): Belly Slide = `BellySlide` node (`src/passives/`, `belly_slide_*` in `robbar.tres`;
+  the long slide itself is `dash_distance` 180 / `dash_duration` 0.3): while dashing, zombies within
+  `belly_slide_reach` take `belly_slide_damage` once per slide (`WeaponTally.BELLY_SLIDE`), wet streak drawn
+  top-level on `WorldLayers.FLOOR_MARKS` (`trail_size()`). Passives are created in `Player._add_passives()` (node
+  named after its class, `setup(player)` after `add_child`). Test: `test_08_robbar.gd`.
