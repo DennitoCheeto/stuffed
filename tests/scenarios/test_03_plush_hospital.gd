@@ -70,6 +70,9 @@ func test_ac45_no_tent_while_nobody_waits() -> void:
 func test_ac45_the_hospital_moves_waiting_plushies_in_up_to_its_beds() -> void:
 	for id: String in ["pip", "bobo", "bambam"]:
 		main.town.plushies[id] = "waiting"
+		# Their "wants to play!" banners (Wardrobe, spec 08) were already shown.
+		main.town.revealed.append(WardrobeRules.HERO_PREFIX + id)
+	main.town.revealed.append(WardrobeRules.REVEALED_ID)
 	_open_hospital()
 	main.town.materials = PLENTY.duplicate()
 	var town: Town = await go_to_town()

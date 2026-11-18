@@ -43,6 +43,8 @@ var player_count: int = 1
 var floor_art: TownFloor
 var fort: TownFort
 var scrapbook: ScrapbookStand
+## Where you pick your hero (spec 08 §5).
+var wardrobe: TownWardrobe
 ## Nights until the horde, next to the door (spec 07 §2).
 var calendar: MoonCalendar
 ## Dusk (warm tint + fairy lights) while the night siege is due (null otherwise).
@@ -107,6 +109,8 @@ func _ready() -> void:
 	holder.add_child(fort)
 	scrapbook = ScrapbookStand.new(layout.scrapbook_rect)
 	holder.add_child(scrapbook)
+	wardrobe = TownWardrobe.new(self)
+	holder.add_child(wardrobe)
 	calendar = MoonCalendar.new(layout.calendar_position)
 	holder.add_child(calendar)
 	for spot: TownSpot in layout.spots:
@@ -127,6 +131,7 @@ func _ready() -> void:
 	refresh_tent()
 	for index: int in maxi(player_count, 1):
 		spawn_player(index)
+	wardrobe.refresh_members(true)
 	life = TownLife.new(layout)
 	add_child(life)
 	add_child(card)
@@ -141,7 +146,8 @@ func _ready() -> void:
 	refresh()
 	if welcome_banner.size() >= 2:
 		show_banner(welcome_banner[0], welcome_banner[1])
-	if not pending_reveals().is_empty() or can_move_in() or _warning_due():
+	var news: bool = can_move_in() or _warning_due() or wardrobe.has_news()
+	if not pending_reveals().is_empty() or news:
 		_settle_left = ARRIVAL_REVEAL_SECONDS
 	add_child(menu)
 	menu.resumed.connect(func() -> void: process_mode = Node.PROCESS_MODE_INHERIT)
@@ -169,6 +175,11 @@ func _physics_process(delta: float) -> void:
 			prompt = "E   Open the Scrapbook"
 			if pressed:
 				open_scrapbook()
+		elif wardrobe.is_near(player):
+			prompt = wardrobe.rules.prompt
+			if pressed:
+				_hide_banner()
+				wardrobe.open(player.player_index)
 		else:
 			var building: TownBuilding = building_near(player)
 			if building == null:
@@ -343,9 +354,7 @@ func open_scrapbook() -> void:
 ## Shows the starting weapon choice; the town waits until it closes.
 func open_weapon_picker() -> void:
 	process_mode = Node.PROCESS_MODE_DISABLED
-	_banner_left = 0.0
-	banner.visible = false
-	unlock_toast.visible = false
+	_hide_banner()
 	picker.open(perks().open_weapons(UPGRADE_POOL), start_weapon_id())
 
 
@@ -419,7 +428,8 @@ func _warning_due() -> bool:
 
 
 ## After a rebuild settles (and on arrival): the fort grows, newly unlocked ruins lose their
-## yarn, waiting plushies move into free Hospital beds and the first siege warning appears.
+## yarn, waiting plushies move into free Hospital beds, new heroes wave from the Wardrobe
+## (spec 08 §4) and the first siege warning appears.
 func settle() -> void:
 	var pieces: int = TownFort.pieces_for(save.total_levels(), layout.fort_piece_every)
 	if pieces > fort.pieces:
@@ -428,7 +438,12 @@ func settle() -> void:
 		Sfx.play(&"upgrade", 0.8)
 	reveal_new_buildings()
 	move_in_waiting()
+	wardrobe.refresh_members(false)
 	_refresh_dusk()
+	if wardrobe.has_news() and is_banner_showing():
+		_settle_left = maxf(_banner_left, 0.1)
+		return
+	wardrobe.announce()
 	if _warning_due() and is_banner_showing():
 		# Let the other banner finish first; the next settle shows the warning.
 		_settle_left = maxf(_banner_left, 0.1)
@@ -594,9 +609,10 @@ func random_town_spot() -> Vector2:
 ## The tent shows who still waits for a bed.
 func refresh_tent() -> void:
 	var waiting: Array[PlushieDef] = []
+	var played: PackedStringArray = wardrobe.played_plushie_ids()
 	for id: String in save.waiting_plushies():
 		var who: PlushieDef = RESCUE_RULES.find(id)
-		if who != null:
+		if who != null and not played.has(id):
 			waiting.append(who)
 	tent.show_waiting(waiting)
 
@@ -734,3 +750,10 @@ func _build_hud() -> void:
 	banner_subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	lines.add_child(banner_subtitle)
 	hud.add_child(unlock_toast)
+
+
+## Menus over the town (weapon picker, hero picker) hide the banner and the weapons toast.
+func _hide_banner() -> void:
+	_banner_left = 0.0
+	banner.visible = false
+	unlock_toast.visible = false

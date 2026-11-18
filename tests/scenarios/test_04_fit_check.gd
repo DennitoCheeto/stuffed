@@ -109,6 +109,12 @@ func _visit_all(window: Vector2i) -> void:
 	town.tricks.open(town.buildings[&"plush_hospital"])
 	await _check("tricks panel")
 	town.tricks.panel.close()
+	# Hero picker (spec 08 §5, AC-94): two heroes rescued, two still silhouettes.
+	town.save.plushies["pip"] = "in_town"
+	town.save.plushies["bobo"] = "waiting"
+	town.wardrobe.open(0)
+	await _check("hero picker")
+	town.wardrobe.picker.close()
 	town.open_menu()
 	town.menu.title_button.pressed.emit()
 	await _frames()
@@ -130,7 +136,7 @@ func _visit_all(window: Vector2i) -> void:
 	await _frames()
 	await _visit_run(main.current_screen as Run)
 	await _visit_siege()
-	assert_eq(checked.size(), 25, "every screen checked: %s" % [checked])
+	assert_eq(checked.size(), 26, "every screen checked: %s" % [checked])
 
 
 func _visit_run(run: Run) -> void:

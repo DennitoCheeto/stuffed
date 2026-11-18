@@ -212,13 +212,7 @@ func unlock_all_heroes() -> void:
 func next_hero() -> HeroStats:
 	var current: HeroStats = HeroRoster.current().hero_for(town.save, 0)
 	var next: HeroStats = HeroRoster.current().next_unlocked(town.save, current)
-	town.save.set_hero(0, String(next.id))
-	for player: Player in Players.all(town.get_tree()):
-		if player.player_index == 0:
-			var at: Vector2 = player.position
-			player.get_parent().remove_child(player)
-			player.queue_free()
-			town.spawn_player(0).position = at
+	town.wardrobe.swap(0, next)
 	_saved()
 	return next
 
