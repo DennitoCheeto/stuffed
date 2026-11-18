@@ -52,6 +52,7 @@ func test_the_siege_hud_shows_the_fort_the_waves_and_the_hero() -> void:
 	var counter: Rect2 = siege.wave_counter.get_global_rect()
 	assert_false(bar.intersects(counter), "side by side")
 	assert_eq(siege.pickup_arrows.fort, siege.fort, "the edge arrows watch the fort")
+	assert_false(siege.hud.jars.visible, "no empty material jars: the reward comes at the end")
 
 
 func test_ac82_in_co_op_every_hero_fights_and_stands_back_up() -> void:

@@ -85,6 +85,8 @@ func _ready() -> void:
 	hud.add_child(wave_counter)
 	pickup_arrows.watch_fort(fort, siege_rules.fort_arrow_seconds)
 	vignette.visible = false
+	# Kills bring nothing home here (the reward comes at the end): no empty jars on the HUD.
+	hud.jars.visible = false
 
 
 func _physics_process(delta: float) -> void:

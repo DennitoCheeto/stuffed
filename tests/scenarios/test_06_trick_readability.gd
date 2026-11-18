@@ -12,6 +12,7 @@ const PICKUP_RULES: FloorPickupRules = preload("res://data/floor_pickup_rules.tr
 const LAYOUT: TownLayout = preload("res://data/town/pillow_fort.tres")
 const DEADLY: float = 99999.0
 const OFF_SCREEN: Vector2 = Vector2(1600.0, 0.0)
+const ColorSweep: GDScript = preload("res://tests/scenarios/color_sweep.gd")
 
 var run: Run
 
@@ -41,45 +42,8 @@ func _shockwaves() -> Array[Node]:
 	return waves
 
 
-## Every colour `root` and its children carry: tints, Color variables, theme colour overrides,
-## their style boxes and plushie looks, and the Color constants of their scripts.
-func _colors_of(root: Object) -> Array[Color]:
-	var found: Array[Color] = []
-	var objects: Array[Object] = [root]
-	if root is Node:
-		objects.append_array((root as Node).find_children("*", "", true, false))
-	for object: Object in objects:
-		_add_properties(object, found)
-		var script: Script = object.get_script() as Script
-		if script != null:
-			for value: Variant in script.get_script_constant_map().values():
-				_add_value(value, found)
-	return found
-
-
-func _add_properties(object: Object, found: Array[Color]) -> void:
-	for property: Dictionary in object.get_property_list():
-		var value: Variant = object.get(String(property["name"]))
-		if value is StyleBox or value is PlushieDef:
-			_add_properties(value as Object, found)
-		else:
-			_add_value(value, found)
-
-
-func _add_value(value: Variant, found: Array[Color]) -> void:
-	if value is Color:
-		found.append(value as Color)
-	elif value is PackedColorArray:
-		for color: Color in value as PackedColorArray:
-			found.append(color)
-	elif value is Array:
-		for item: Variant in value as Array:
-			if item is Color:
-				found.append(item as Color)
-
-
 func _assert_calm(what: String, root: Object) -> void:
-	var colors: Array[Color] = _colors_of(root)
+	var colors: Array[Color] = ColorSweep.colors_of(root)
 	assert_gt(colors.size(), 0, "%s carries colours" % what)
 	for color: Color in colors:
 		assert_false(UiColors.is_danger(color), "%s uses danger %s" % [what, color.to_html()])
