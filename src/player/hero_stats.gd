@@ -55,6 +55,19 @@ extends Resource
 @export var bear_hug_shove: float = 260.0
 @export var bear_hug_damage: float = 6.0
 
+@export_group("Big Heart (BamBam's passive)")
+## Every level-up heals the hero and every hero nearby, and a heart pulse pushes zombies back.
+@export var big_heart: bool = false
+## Share of each hero's max health healed, and how close other heroes must be (pixels).
+@export var big_heart_heal: float = 0.25
+@export var big_heart_heal_reach: float = 250.0
+## How far the pulse reaches and how hard it pushes (like a weapon's knockback).
+@export var big_heart_push_reach: float = 150.0
+@export var big_heart_push: float = 320.0
+## The pulse ring: colour and how long it grows and fades (seconds).
+@export var big_heart_color: Color = Color(0.96, 0.66, 0.78, 0.8)
+@export var big_heart_seconds: float = 0.5
+
 @export_group("Chilly Hug (Pip's passive)")
 ## Zombies close to the hero move slower; shown as a soft frost ring (spec 08 §3).
 @export var chilly_hug: bool = false
