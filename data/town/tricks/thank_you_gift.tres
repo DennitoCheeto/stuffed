@@ -8,6 +8,7 @@ id = &"thank_you_gift"
 display_name = "Thank-you Gift"
 text = "Freeing a plushie drops a gift box."
 needs_level = 2
+in_siege = false
 coins = 600
 stuffing = 15
 thread = 0

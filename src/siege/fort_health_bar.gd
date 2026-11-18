@@ -3,7 +3,8 @@ extends ProgressBar
 ## The pillow fort's health at the top middle of the screen during the night siege (spec 07
 ## §2, §7), under the timer and the boss bar's place. A HUD felt backing with a soft teal fill
 ## (the player's side, never a danger colour) that turns gold when the fort is nearly down. The
-## full siege HUD (waves, edge arrow) comes with M4-08.
+## wave counter (`WaveCounter`) sits right of it; an edge arrow points to the fort when it is hit
+## off screen (`PickupArrows.watch_fort`).
 
 const SIZE: Vector2 = Vector2(420.0, 28.0)
 const TOP: float = 124.0

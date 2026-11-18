@@ -22,6 +22,9 @@ extends Resource
 @export var amount: float = 0.0
 ## How long the trick's effect lasts, if it lasts (Confetti Rush: seconds of running faster).
 @export var seconds: float = 0.0
+## False for Bedroom-only tricks (Treasure Map, Picnic, the rescue tricks): they are off in the
+## night siege (spec 07 §4).
+@export var in_siege: bool = true
 @export var coins: int = 0
 @export var stuffing: int = 0
 @export var thread: int = 0

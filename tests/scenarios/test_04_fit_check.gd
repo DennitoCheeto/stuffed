@@ -8,6 +8,7 @@ extends GutTest
 
 const MAIN_SCENE: PackedScene = preload("res://src/main/main.tscn")
 const ScreenFit: GDScript = preload("res://tests/scenarios/screen_fit.gd")
+const SIEGE_RULES: SiegeRules = preload("res://data/siege/siege_rules.tres")
 const TEST_LOG: String = "user://test_run_log.jsonl"
 const TEST_SAVE: String = "user://test_save.json"
 const TEST_SETTINGS: String = "user://test_settings.json"
@@ -128,7 +129,8 @@ func _visit_all(window: Vector2i) -> void:
 	town.enter_bedroom()
 	await _frames()
 	await _visit_run(main.current_screen as Run)
-	assert_eq(checked.size(), 22, "every screen checked: %s" % [checked])
+	await _visit_siege()
+	assert_eq(checked.size(), 25, "every screen checked: %s" % [checked])
 
 
 func _visit_run(run: Run) -> void:
@@ -182,6 +184,53 @@ func _visit_run(run: Run) -> void:
 	end.brought_home.finish()
 	_longest_titles(end)
 	await _check("end screen")
+
+
+## The night siege (AC-84): a damaged building's repair card and the calendar in town, the
+## siege HUD (fort bar, wave counter, boss bar, banner) and the siege's end screen.
+func _visit_siege() -> void:
+	(main.current_screen as EndScreen).fort_requested.emit()
+	await _frames()
+	main.town.damage(PackedStringArray(["snack_bar"]))
+	main.town.siege_nights = SIEGE_RULES.nights_between
+	main.show_town()
+	await _frames()
+	var town: Town = main.current_screen as Town
+	var rect: Rect2 = town.buildings[&"snack_bar"].spot.rect
+	Players.all(town.get_tree())[0].global_position = Vector2(rect.get_center().x, rect.end.y + 40)
+	await _check("town (repair card, calendar)")
+	assert_true(town.card.visible, "the repair card shows")
+	_check_world_labels([town.card, town.calendar])
+	main.town.siege_nights = 0
+	main.show_town()
+	await _frames()
+	(main.current_screen as Town).enter_bedroom()
+	await _frames()
+	var siege: Siege = main.current_screen as Siege
+	for hero: Player in Players.all(siege.get_tree()):
+		hero.invincible = true
+	_fill_the_build(siege)
+	var far: Vector2 = Players.all(siege.get_tree())[0].position + Vector2(3000, 0)
+	var boss: Zombie = siege.enemies.spawn_boss(SIEGE_RULES.wave_list[2].boss, far)
+	siege.hud.show_boss(boss)
+	siege.hud.show_banner("Wave 3 of 3", SIEGE_RULES.last_wave_subtitle, 5.0)
+	siege.waves.finished = true
+	await _check("siege (HUD, fort bar, waves, boss bar)")
+	siege.pause()
+	siege.pause_menu.quit_button.pressed.emit()
+	await _frames()
+	var end: EndScreen = main.current_screen as EndScreen
+	end.brought_home.finish()
+	await _check("siege end screen")
+
+
+## World-space pieces (they move with the camera) only need their texts to fit their boxes.
+func _check_world_labels(roots: Array[Node]) -> void:
+	for root: Node in roots:
+		for label: Node in root.find_children("*", "Label", true, false):
+			var shown: Label = label as Label
+			if shown.is_visible_in_tree():
+				assert_false(ScreenFit.is_cut_off(shown), "%s is cut off" % shown.text)
 
 
 func _boot(window: Vector2i) -> void:

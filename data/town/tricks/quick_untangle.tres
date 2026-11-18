@@ -9,6 +9,7 @@ display_name = "Quick Untangle"
 text = "Freeing a plushie takes half the time."
 amount = 0.5
 needs_level = 1
+in_siege = false
 coins = 250
 stuffing = 5
 thread = 0

@@ -9,10 +9,13 @@ const DEFAULT_PATH: String = "user://run_log.jsonl"
 static var path: String = DEFAULT_PATH
 
 
-## The fields of one log line.
+## The fields of one log line (a night siege gets its own, see `siege_entry`).
 static func to_entry(result: RunResult) -> Dictionary:
+	if result.is_siege():
+		return siege_entry(result)
 	return {
 		"date": Time.get_datetime_string_from_system(true),
+		"kind": "run",
 		"seed": result.seed_value,
 		"ending": result.ending,
 		"time_survived": snappedf(result.survived_seconds, 0.1),
@@ -36,6 +39,30 @@ static func to_entry(result: RunResult) -> Dictionary:
 		"rescue": _rescue_or_null(result.rescue),
 		"weapons": result.weapons.duplicate(true),
 		"titles": Array(result.titles),
+		"tricks": Array(result.tricks),
+		"trick_moments": _timed(result.trick_moments),
+	}
+
+
+## One night siege (spec 07 §10): which one, won, waves held, the fort's health left, what was
+## knocked down and damaged, the reward, and the fight's stats.
+static func siege_entry(result: RunResult) -> Dictionary:
+	return {
+		"date": Time.get_datetime_string_from_system(true),
+		"kind": "siege",
+		"number": result.siege_number,
+		"won": result.won,
+		"ending": result.ending,
+		"waves_held": result.waves_held,
+		"wave_count": result.wave_count,
+		"fort_health_left": snappedf(result.fort_health_left, 0.1),
+		"knocked_down": Array(result.knocked_down),
+		"damaged": Array(result.damaged),
+		"reward": result.materials_kept.duplicate(),
+		"time": snappedf(result.survived_seconds, 0.1),
+		"level": result.level,
+		"kills": result.kills,
+		"weapons": result.weapons.duplicate(true),
 		"tricks": Array(result.tricks),
 		"trick_moments": _timed(result.trick_moments),
 	}
