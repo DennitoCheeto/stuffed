@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="WeaponStats" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://src/weapons/weapon_stats.gd" id="1_stats"]
+[ext_resource type="Script" path="res://src/weapons/weapon_level.gd" id="2_level"]
+[ext_resource type="Script" path="res://src/siege/plushie_throw.gd" id="3_behaviour"]
+
+[sub_resource type="Resource" id="Resource_level1"]
+script = ExtResource("2_level")
+damage = 8.0
+cooldown = 2.0
+reach = 520.0
+count = 1
+speed = 650.0
+pierce = 0
+card_text = "A helping plushie: a small stuffing ball every 2 s."
+
+[resource]
+script = ExtResource("1_stats")
+behaviour = ExtResource("3_behaviour")
+sound = &"throw"
+sound_pitch = 1.6
+sound_gap = 0.6
+id = &"plushie_ball"
+display_name = "Stuffing ball"
+knockback = 40.0
+hit_radius = 9.0
+levels = Array[ExtResource("2_level")]([SubResource("Resource_level1")])

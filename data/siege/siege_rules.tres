@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="SiegeRules" load_steps=14 format=3]
+[gd_resource type="Resource" script_class="SiegeRules" load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://src/siege/siege_rules.gd" id="1_rules"]
 [ext_resource type="Script" path="res://src/siege/siege_wave.gd" id="2_wave"]
@@ -10,6 +10,7 @@
 [ext_resource type="Resource" path="res://data/bosses/big_ted.tres" id="8_big_ted"]
 [ext_resource type="Resource" path="res://data/elite_rules.tres" id="9_elite_rules"]
 [ext_resource type="Script" path="res://src/enemies/enemy_stats.gd" id="10_stats"]
+[ext_resource type="Resource" path="res://data/siege/plushie_ball.tres" id="11_plushie_ball"]
 
 [sub_resource type="Resource" id="Resource_wave_1"]
 script = ExtResource("2_wave")
@@ -60,6 +61,20 @@ trap_ring_color = Color(0.78, 0.7, 0.96, 1)
 trap_confetti_seconds = 0.9
 trap_sound = &"party_popper"
 trap_pitch = 1.35
+plushie_ball = ExtResource("11_plushie_ball")
+plushie_health = 45.0
+plushie_reach = 90.0
+plushie_touch_rate = 0.6
+plushie_footprint = 18.0
+plushie_size = 18.0
+plushie_halo = Color(1, 0.98, 0.92, 0.55)
+plushie_out_tilt = -24.0
+plushie_out_squash = 0.8
+dizzy_stars = 3
+dizzy_spin = 0.8
+dizzy_color = Color(1, 0.93, 0.56, 1)
+plushie_out_sound = &"puff"
+plushie_up_sound = &"hello"
 end_pause_seconds = 2.5
 reward = Dictionary[String, int]({
 "coins": 400,

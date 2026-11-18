@@ -47,6 +47,9 @@ extends Resource
 @export var siege_trap_seconds: float = 0.0
 ## Trap: damage of each pop to every zombie inside `siege_range`.
 @export var siege_trap_damage: float = 0.0
+## Plush Hospital: a knocked-out plushie stands back up after this many seconds. 0 = never
+## (it stays out until the siege ends).
+@export var siege_revive_seconds: float = 0.0
 
 
 ## Material id -> amount, only the materials this level needs.

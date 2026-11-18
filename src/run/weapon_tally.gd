@@ -13,6 +13,8 @@ const ARMORY: StringName = &"toy_box_armory"
 const WATCHTOWER: StringName = &"watchtower"
 ## The Party Shop's confetti trap.
 const PARTY_SHOP: StringName = &"party_shop"
+## The plushies' stuffing balls (spec 07 §4).
+const PLUSHIES: StringName = &"plushies"
 ## Anything else (developer menu "kill all", a shot whose weapon just evolved away).
 const OTHER: StringName = &"other"
 const NAMES: Dictionary[StringName, String] = {
@@ -21,6 +23,7 @@ const NAMES: Dictionary[StringName, String] = {
 	ARMORY: "Toy Box Armory",
 	WATCHTOWER: "Watchtower",
 	PARTY_SHOP: "Party Shop",
+	PLUSHIES: "Plushies",
 	OTHER: "Other",
 }
 
