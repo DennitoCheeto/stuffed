@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="HeroStats" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://src/player/hero_stats.gd" id="1_stats"]
+[ext_resource type="Resource" path="res://data/weapons/bouncy_yarn_ball.tres" id="2_weapon"]
+[ext_resource type="Resource" path="res://data/town/plushies/robbar.tres" id="3_plushie"]
+
+[resource]
+script = ExtResource("1_stats")
+id = &"robbar"
+display_name = "Robbar"
+plushie = ExtResource("3_plushie")
+max_health = 70.0
+move_speed = 175.0
+dash_distance = 120.0
+dash_duration = 0.15
+dash_cooldown = 1.0
+hurt_invulnerability = 0.5
+hitbox_radius = 9.0
+pickup_range = 60.0
+starting_weapon = ExtResource("2_weapon")
+slippery = false

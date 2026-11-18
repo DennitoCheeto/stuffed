@@ -7,8 +7,9 @@ extends RefCounted
 ## Bump when the meaning of a field changes; from_dict upgrades older saves. Version 3: the
 ## Scrapbook also lists plushies rescued before it existed. Version 4: bought building tricks
 ## (older saves have none). Version 5: the night siege countdown, sieges and damaged buildings
-## (older saves get no warning until the countdown starts as usual).
-const VERSION: int = 5
+## (older saves get no warning until the countdown starts as usual). Version 6: the hero each
+## player plays (spec 08; older saves play Banane).
+const VERSION: int = 6
 ## Plushie ids of the placeholder plushies (version 1) -> the real plushies that replaced them.
 const OLD_PLUSHIE_IDS: Dictionary[String, String] = {
 	"kitty": "pip",
@@ -44,6 +45,8 @@ var sieges_won: int = 0
 var damaged: PackedStringArray = []
 ## Banane's chosen starting weapon ("" = his own).
 var start_weapon: String = ""
+## The hero id each player slot plays (HeroStats.id; slot 0 = player 1). Missing = Banane.
+var heroes: PackedStringArray = []
 ## The haul of a run that was still going when last saved (RunHaul.to_dict(); empty = none).
 var unfinished_run: Dictionary = {}
 
@@ -54,6 +57,18 @@ func material(id: String) -> int:
 
 func building_level(id: String) -> int:
 	return building_levels.get(id, 0)
+
+
+## The hero id player `slot` picked ("" = none yet, plays the starter).
+func hero_id(slot: int) -> String:
+	return heroes[slot] if slot < heroes.size() else ""
+
+
+## Player `slot` plays hero `id` from now on (empty slots before it play the starter).
+func set_hero(slot: int, id: String) -> void:
+	while heroes.size() <= slot:
+		heroes.append("")
+	heroes[slot] = id
 
 
 func has_trick(id: String) -> bool:
@@ -239,6 +254,7 @@ func to_dict() -> Dictionary:
 		"revealed": Array(revealed),
 		"runs_started": runs_started,
 		"start_weapon": start_weapon,
+		"heroes": Array(heroes),
 		"titles_seen": Array(titles_seen),
 		"tricks": Array(tricks),
 		"last_rescued": last_rescued,
@@ -272,6 +288,9 @@ static func from_dict(data: Dictionary) -> TownSave:
 		save.revealed = PackedStringArray(shown as Array)
 	save.runs_started = int(data.get("runs_started", 0))
 	save.start_weapon = str(data.get("start_weapon", ""))
+	var played: Variant = data.get("heroes", [])
+	if played is Array:
+		save.heroes = PackedStringArray(played as Array)
 	var titles: Variant = data.get("titles_seen", [])
 	if titles is Array:
 		save.titles_seen = PackedStringArray(titles as Array)
