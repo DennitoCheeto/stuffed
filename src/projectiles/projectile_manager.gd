@@ -7,8 +7,9 @@ extends Node2D
 
 ## Weapons and enemies find the manager through this group.
 const GROUP: StringName = &"projectiles"
-## Draw order of the enemy-bullet layer (zombies, players, shots and bursts are below it).
-const HOSTILE_Z: int = 50
+## Draw order of the enemy-bullet layer (zombies, players, shots and bursts are below it; the
+## whole ladder is in WorldLayers).
+const HOSTILE_Z: int = WorldLayers.ENEMY_BULLETS
 
 ## Shots in flight.
 var active: Array[Projectile] = []
@@ -31,6 +32,7 @@ func _ready() -> void:
 	add_to_group(GROUP)
 	_friendly = Node2D.new()
 	_friendly.name = "Friendly"
+	_friendly.z_index = WorldLayers.OWN_SHOTS
 	add_child(_friendly)
 	_hostile = Node2D.new()
 	_hostile.name = "Hostile"
