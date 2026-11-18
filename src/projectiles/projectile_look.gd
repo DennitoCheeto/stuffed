@@ -29,6 +29,7 @@ const BOMB_BALL: StringName = &"shot/bomb_ball"
 const GLITTER: StringName = &"shot/glitter"
 const SPARKLE: StringName = &"shot/sparkle"
 const SNOWBALL: StringName = &"shot/snowball"
+const PAW: StringName = &"shot/paw"
 const BULLET: StringName = &"bullet/stuffing"
 const HAZARD: StringName = &"bullet/cloud"
 ## On-screen radius of the stuffing ball part; bigger bullets scale it.
@@ -89,6 +90,12 @@ const SPARKLE_RADIUS: float = 30.0
 const BULLET_COLOR: Color = Color("#ff3d6e")
 const BULLET_CORE_COLOR: Color = Color("#ffe1ea")
 const BULLET_OUTLINE_COLOR: Color = Color("#14101a")
+## Paw Swat (Böbö, spec 08 §3): a fat soft swipe with three claw marks, calm tan (Böbö's brown
+## would read as danger).
+const PAW_RADIUS: float = 70.0
+const PAW_ARC: float = 120.0
+const PAW_COLOR: Color = Color("#e6d4b4")
+const PAW_CLAW_COLOR: Color = Color("#a99274")
 ## Snowball Toss (Pip, spec 08 §3): a lumpy snowball with a blue shade.
 const SNOWBALL_RADIUS: float = 7.0
 const SNOWBALL_COLOR: Color = Color("#f6f9fd")
@@ -118,6 +125,7 @@ static func make_parts() -> Dictionary[StringName, FeltPiece]:
 		GLITTER: _star(GLITTER_RADIUS, 4),
 		SPARKLE: _star(SPARKLE_RADIUS, 8),
 		SNOWBALL: _snowball(),
+		PAW: _paw(),
 		BULLET: _bullet(),
 		HAZARD: _hazard(),
 	}
@@ -322,6 +330,34 @@ static func _whip() -> FeltPiece:
 	whip.polygon = outer
 	whip.color = WHIP_COLOR
 	return whip
+
+
+## A fat crescent around the pivot (like the whip's, thicker), with three claw marks across it.
+static func _paw() -> FeltPiece:
+	var paw: FeltPiece = FeltPiece.new()
+	paw.soft = false
+	var radius: float = PAW_RADIUS * UNITS
+	var half: float = deg_to_rad(PAW_ARC) / 2.0
+	var outer: PackedVector2Array = []
+	var inner: PackedVector2Array = []
+	for i: int in 25:
+		var t: float = i / 24.0
+		var angle: float = lerpf(-half, half, t)
+		outer.append(Vector2.from_angle(angle) * radius)
+		inner.append(Vector2.from_angle(angle) * radius * (1.0 - 0.4 * sin(PI * t)))
+	inner.reverse()
+	outer.append_array(inner)
+	paw.polygon = outer
+	paw.color = PAW_COLOR
+	for claw: float in [-0.3, 0.0, 0.3]:
+		var tip: Vector2 = Vector2.from_angle(claw * half)
+		var mark: PackedVector2Array = [
+			tip * radius * 0.68 + tip.orthogonal() * UNITS * 2.0,
+			tip * radius * 0.97,
+			tip * radius * 0.68 - tip.orthogonal() * UNITS * 2.0,
+		]
+		paw.add_layer(mark, PAW_CLAW_COLOR)
+	return paw
 
 
 ## A zipper from the pivot along +x, ZIPPER_LENGTH long, with teeth and a pull tab at the end.

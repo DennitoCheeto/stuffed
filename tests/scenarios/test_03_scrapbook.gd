@@ -60,7 +60,7 @@ func test_ac46_e_at_the_stand_opens_the_book_and_esc_closes_it() -> void:
 	assert_true(book.is_open(), "the book opens")
 	assert_eq(town.process_mode, Node.PROCESS_MODE_DISABLED, "the town waits")
 	assert_eq(book.current_page().title, "Weapons", "it opens on the first page")
-	assert_eq(book.tiles.size(), 15)
+	assert_eq(book.tiles.size(), 16)
 	await tap_action("pause")
 	assert_false(book.is_open(), "Esc closes it")
 	assert_eq(town.process_mode, Node.PROCESS_MODE_INHERIT, "the town goes on")
@@ -103,7 +103,7 @@ func test_ac46_every_page_counts_what_was_found_and_q_e_turn_the_pages() -> void
 	for tab: Button in book.tabs:
 		counts.append(tab.text)
 	var expected: Array[String] = [
-		"Weapons 2 / 15", "Items 1 / 8", "Enemies 3 / 8", "Floor pickups 0 / 3", "Plushies 1 / 4"
+		"Weapons 2 / 16", "Items 1 / 8", "Enemies 3 / 8", "Floor pickups 0 / 3", "Plushies 1 / 4"
 	]
 	assert_eq(counts, expected)
 	await _press_key(KEY_E)

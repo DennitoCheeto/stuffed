@@ -28,6 +28,7 @@ const LENGTHS: Dictionary[StringName, float] = {
 	&"zip": 0.32,
 	&"mortar": 0.3,
 	&"snowball": 0.28,
+	&"paw": 0.24,
 	&"needles": 0.4,
 	&"fluff": 0.35,
 	&"volley": 0.4,
@@ -120,6 +121,7 @@ static func _weapon_or_moment(sound: StringName) -> Callable:
 		&"zip": _zip,
 		&"mortar": _mortar,
 		&"snowball": _snowball,
+		&"paw": _paw,
 		&"needles": _needles,
 		&"fluff": _fluff,
 		&"volley": _volley,
@@ -328,6 +330,13 @@ static func _snowball(t: float) -> float:
 	var thump: float = Synth.noise(t) * packed * exp(-11.0 * t)
 	var tinkle: float = Synth.sine(Synth.sweep(t, 2600.0, 3100.0, 0.12)) * exp(-24.0 * t)
 	return 0.2 * thump + 0.05 * tinkle
+
+
+## Paw Swat (Böbö): a soft, heavy "fwump" of a big plush paw.
+static func _paw(t: float) -> float:
+	var swing: float = Synth.noise(t) * sin(PI * minf(t / 0.12, 1.0)) * exp(-9.0 * t)
+	var thud: float = Synth.sine(Synth.sweep(t, 140.0, 70.0, 0.18)) * exp(-12.0 * t)
+	return 0.14 * swing + 0.3 * thud
 
 
 ## Orbiting Needles: a quick glassy shimmer going up.

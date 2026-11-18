@@ -42,6 +42,19 @@ extends Resource
 ## Radius of a peel's slippery area, in pixels.
 @export var peel_radius: float = 18.0
 
+## Share of every hit the hero takes (Böbö's Bear Hug: 0.8 = 20% less). Thick Felt lowers it more.
+@export var damage_taken: float = 1.0
+
+@export_group("Bear Hug (Böbö's passive)")
+## The dash is a shoulder charge: zombies it touches are shoved away and take a little damage
+## (once per dash each).
+@export var bear_hug: bool = false
+## How far from the hero's middle the charge reaches (pixels).
+@export var bear_hug_reach: float = 34.0
+## How hard it shoves (like a weapon's knockback) and how much it hurts.
+@export var bear_hug_shove: float = 260.0
+@export var bear_hug_damage: float = 6.0
+
 @export_group("Chilly Hug (Pip's passive)")
 ## Zombies close to the hero move slower; shown as a soft frost ring (spec 08 §3).
 @export var chilly_hug: bool = false

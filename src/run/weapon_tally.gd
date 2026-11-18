@@ -15,6 +15,8 @@ const WATCHTOWER: StringName = &"watchtower"
 const PARTY_SHOP: StringName = &"party_shop"
 ## The plushies' stuffing balls (spec 07 §4).
 const PLUSHIES: StringName = &"plushies"
+## Hero passives that hit (spec 08 §3): Böbö's shoulder charge, Robbar's belly slide.
+const BEAR_HUG: StringName = &"bear_hug"
 ## Anything else (developer menu "kill all", a shot whose weapon just evolved away).
 const OTHER: StringName = &"other"
 const NAMES: Dictionary[StringName, String] = {
@@ -24,6 +26,7 @@ const NAMES: Dictionary[StringName, String] = {
 	WATCHTOWER: "Watchtower",
 	PARTY_SHOP: "Party Shop",
 	PLUSHIES: "Plushies",
+	BEAR_HUG: "Bear Hug",
 	OTHER: "Other",
 }
 
