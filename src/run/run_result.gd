@@ -25,6 +25,8 @@ var upgrades: PackedStringArray = []
 var items: Array[Dictionary] = []
 ## How many players played (the end screen shows one weapon column each).
 var player_count: int = 1
+## The hero each player played, by player index (spec 08 §11, e.g. ["pip", "banane"]).
+var heroes: PackedStringArray = []
 var seed_value: int = 0
 ## How the run ended: "died", "ended" (End run after the goal), "quit" (gave up) or "way_home"
 ## (the Way Home portal).

@@ -5,6 +5,8 @@ extends Resource
 ## in TownSave.plushies, "waiting" or "in_town"). Data: data/heroes/hero_roster.tres.
 
 const PATH: String = "res://data/heroes/hero_roster.tres"
+## Players a game can have (co-op): heroes are worked out for this many slots.
+const MAX_PLAYERS: int = 4
 
 static var _current: HeroRoster
 
@@ -60,3 +62,23 @@ func next_unlocked(save: TownSave, current: HeroStats) -> HeroStats:
 	var open: Array[HeroStats] = unlocked(save)
 	var at: int = open.find(current)
 	return open[(at + 1) % open.size()]
+
+
+## The heroes `count` players play, slot by slot (spec 08 §8): each their saved hero while it is
+## unlocked and no earlier player has it, else the first free unlocked hero. One of each.
+func heroes_for(save: TownSave, count: int) -> Array[HeroStats]:
+	var picked: Array[HeroStats] = []
+	for slot: int in maxi(count, 1):
+		var hero: HeroStats = hero_for(save, slot)
+		if picked.has(hero):
+			hero = _first_free(save, picked)
+		picked.append(hero)
+	return picked
+
+
+## The first unlocked hero nobody in `taken` plays (the starter if all are taken).
+func _first_free(save: TownSave, taken: Array[HeroStats]) -> HeroStats:
+	for hero: HeroStats in unlocked(save):
+		if not taken.has(hero):
+			return hero
+	return starter()

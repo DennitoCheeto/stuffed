@@ -74,6 +74,9 @@ func _ready() -> void:
 	_player = get_parent() as Player
 	walker = get_parent() as TownPlushie
 	_build()
+	if _player == null and walker == null:
+		# A picture of Banane (hero picker photo, siege helper): standing still.
+		show_still()
 	if _player != null:
 		_player.dashed.connect(_on_dashed)
 		_player.hurt.connect(_on_hurt)

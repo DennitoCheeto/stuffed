@@ -39,7 +39,7 @@ func _init(result: RunResult, who: int, pool: UpgradePool, show_heading: bool) -
 	add_theme_constant_override(&"separation", 10)
 	if show_heading:
 		var color: Color = HEADING_COLORS[who % HEADING_COLORS.size()]
-		heading = HandTitle.new("Player %d" % (who + 1), 32, color, -1.5)
+		heading = HandTitle.new(heading_text(result, who), 32, color, -1.5)
 		heading.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 		add_child(heading)
 	var weapons: Array[Dictionary] = WeaponReport.rows_of(result, who)
@@ -49,7 +49,7 @@ func _init(result: RunResult, who: int, pool: UpgradePool, show_heading: bool) -
 		add_child(empty_label)
 	else:
 		star = weapons[0]
-		add_child(_star_block(result, pool))
+		add_child(_star_block(result, pool, who))
 	scroll = ScrollContainer.new()
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -96,10 +96,11 @@ static func star_line(weapon: Dictionary) -> String:
 	return " · ".join(parts)
 
 
-func _star_block(result: RunResult, pool: UpgradePool) -> HBoxContainer:
+func _star_block(result: RunResult, pool: UpgradePool, who: int) -> HBoxContainer:
 	var block: HBoxContainer = HBoxContainer.new()
 	block.add_theme_constant_override(&"separation", 18)
-	star_photo = PhotoFrame.new(str(star.get("name", "")), STAR_PICTURE, -3.0, UiColors.TAPE_GOLD)
+	var caption: String = star_caption(result, who, str(star.get("name", "")))
+	star_photo = PhotoFrame.new(caption, STAR_PICTURE, -3.0, UiColors.TAPE_GOLD)
 	star_photo.caption.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	star_photo.caption.text_overrun_behavior = TextServer.OVERRUN_NO_TRIMMING
 	star_photo.caption.custom_minimum_size = Vector2(STAR_PICTURE.x, 0)
@@ -148,3 +149,24 @@ func _add_items(list: VBoxContainer, tags: PackedStringArray) -> void:
 		var tag: FabricTag = FabricTag.new(words, UiColors.TAG, UiColors.INK, TAG_SIZE)
 		item_tags.append(tag)
 		flow.add_child(tag)
+
+
+## The hero player `who` played this run (spec 08 §11), or "" if unknown (older results).
+static func hero_name(result: RunResult, who: int) -> String:
+	if who >= result.heroes.size():
+		return ""
+	var hero: HeroStats = HeroRoster.current().find(StringName(result.heroes[who]))
+	return hero.display_name if hero != null else ""
+
+
+## "Player 2 · Pip" over a co-op column.
+static func heading_text(result: RunResult, who: int) -> String:
+	var hero: String = hero_name(result, who)
+	var player: String = "Player %d" % (who + 1)
+	return player if hero.is_empty() else "%s · %s" % [player, hero]
+
+
+## The star photo's caption: "Pip's Snowball Toss".
+static func star_caption(result: RunResult, who: int, weapon: String) -> String:
+	var hero: String = hero_name(result, who)
+	return weapon if hero.is_empty() else "%s's %s" % [hero, weapon]

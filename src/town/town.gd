@@ -229,7 +229,7 @@ func spawn_player(index: int) -> Player:
 	var player: Player = PLAYER_SCENE.instantiate()
 	player.player_index = index
 	player.armed = false
-	player.stats = HeroRoster.current().hero_for(save, index)
+	player.stats = HeroRoster.current().heroes_for(save, HeroRoster.MAX_PLAYERS)[index]
 	player.position = layout.spawn_position + Vector2(layout.spawn_spacing * index, 0.0)
 	player.dashed.connect(func(_from: Vector2, _direction: Vector2) -> void: Sfx.play(&"dash"))
 	actors.add_child(player)
@@ -339,7 +339,7 @@ func perks() -> TownPerks:
 	return TownPerks.from_save(save, layout)
 
 
-## The weapon Banane starts the next run with (its upgrade pool id).
+## The weapon player 1's hero starts the next run with (its upgrade pool id).
 func start_weapon_id() -> StringName:
 	var hero: Player = Players.all(get_tree())[0]
 	return perks().starting_weapon(UPGRADE_POOL, hero.stats.starting_weapon).id
@@ -355,14 +355,25 @@ func open_scrapbook() -> void:
 func open_weapon_picker() -> void:
 	process_mode = Node.PROCESS_MODE_DISABLED
 	_hide_banner()
-	picker.open(perks().open_weapons(UPGRADE_POOL), start_weapon_id())
+	var own: UpgradeDef = UPGRADE_POOL.find(_own_weapon().id)
+	var now: StringName = StartWeaponPicker.OWN
+	if perks().start_weapon != &"":
+		now = start_weapon_id()
+	picker.open(perks().open_weapons(UPGRADE_POOL), now, own)
 
 
+## "Hero's own weapon" clears the choice: every hero starts with their own again (spec 08 §7).
 func _on_start_weapon_chosen(id: StringName) -> void:
-	save.start_weapon = String(id)
-	var weapon: UpgradeDef = UPGRADE_POOL.find(id)
-	Sfx.play(weapon.weapon.sound, weapon.weapon.sound_pitch)
+	var own: bool = id == StartWeaponPicker.OWN
+	save.start_weapon = "" if own else String(id)
+	var weapon: WeaponStats = _own_weapon() if own else UPGRADE_POOL.find(id).weapon
+	Sfx.play(weapon.sound, weapon.sound_pitch)
 	changed.emit()
+
+
+## Player 1's hero's own starting weapon.
+func _own_weapon() -> WeaponStats:
+	return Players.all(get_tree())[0].stats.starting_weapon
 
 
 ## The pool entries of the weapons `ids`.

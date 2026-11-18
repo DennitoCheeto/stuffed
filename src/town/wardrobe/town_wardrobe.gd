@@ -99,8 +99,7 @@ func swap(slot: int, hero: HeroStats) -> void:
 ## The rescued plushies the players play right now (they don't also live in town).
 func played_plushie_ids() -> PackedStringArray:
 	var ids: PackedStringArray = []
-	for slot: int in maxi(town.player_count, 1):
-		var hero: HeroStats = _roster.hero_for(town.save, slot)
+	for hero: HeroStats in _played():
 		if hero.plushie != null:
 			ids.append(hero.plushie.id)
 	return ids
@@ -108,8 +107,8 @@ func played_plushie_ids() -> PackedStringArray:
 
 ## True when Banane is played by somebody.
 func is_banane_played() -> bool:
-	for slot: int in maxi(town.player_count, 1):
-		if _roster.hero_for(town.save, slot).plushie == null:
+	for hero: HeroStats in _played():
+		if hero.plushie == null:
 			return true
 	return false
 
@@ -214,6 +213,11 @@ func _refresh_banane(arriving: bool) -> void:
 
 func _step_out(arriving: bool) -> Vector2:
 	return town.random_town_spot() if arriving else door()
+
+
+## The heroes the players in town play (one of each).
+func _played() -> Array[HeroStats]:
+	return _roster.heroes_for(town.save, maxi(town.player_count, 1))
 
 
 func _player(slot: int) -> Player:

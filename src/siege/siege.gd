@@ -301,16 +301,32 @@ func _add_plushies() -> void:
 		if data.siege_revive_seconds > 0.0:
 			hospital = building
 			seconds = data.siege_revive_seconds
-	for id: String in town_save.plushies:
-		var who: PlushieDef = RESCUE_RULES.find(id)
-		if town_save.plushies[id] != "in_town" or who == null:
-			continue
+	for who: PlushieDef in helpers():
+		var id: String = who.id
 		var helper: SiegePlushie = SiegePlushie.new()
 		helper.setup(who, _plushie_spot(plushies.size()), siege_rules)
 		helper.set_hospital(hospital, seconds)
 		town_arena().add_child(helper)
 		targets.plushies.append(helper.target)
 		plushies[id] = helper
+
+
+## Who helps by the fort (spec 08 §9): every plushie living in town that nobody plays, and
+## Banane when someone else plays.
+func helpers() -> Array[PlushieDef]:
+	var played: Array[HeroStats] = perks.heroes.slice(0, maxi(player_count, 1))
+	var result: Array[PlushieDef] = []
+	for id: String in town_save.plushies:
+		var who: PlushieDef = RESCUE_RULES.find(id)
+		if town_save.plushies[id] != "in_town" or who == null:
+			continue
+		var hero: HeroStats = HeroRoster.current().find(StringName(id))
+		if hero == null or not played.has(hero):
+			result.append(who)
+	var banane: HeroStats = HeroRoster.current().starter()
+	if not played.is_empty() and not played.has(banane) and banane.town_member != null:
+		result.append(banane.town_member)
+	return result
 
 
 ## Where the plushie number `index` (0 = the first) stands by the fort.

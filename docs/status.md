@@ -678,3 +678,12 @@ _Last updated: 2026-11-18 (M5-06 merged (PR #265); M5-07 Robbar in review, M5-08
   `belly_slide_reach` take `belly_slide_damage` once per slide (`WeaponTally.BELLY_SLIDE`), wet streak drawn
   top-level on `WorldLayers.FLOOR_MARKS` (`trail_size()`). Passives are created in `Player._add_passives()` (node
   named after its class, `setup(player)` after `add_child`). Test: `test_08_robbar.gd`.
+- Co-op heroes etc. (M5-08, spec 08 §7-9, §11, AC-91): `HeroRoster.heroes_for(save, count)` = one of each (a taken
+  or locked saved hero → first free unlocked one); used by `TownPerks.heroes` (`MAX_PLAYERS` slots),
+  `Town.spawn_player`, the Wardrobe and the picker. Siege helpers: `siege.helpers()` = in-town plushies nobody
+  plays + Banane's `town_member` when someone else plays (a `BananePuppet` child of the `SiegePlushie`; a
+  `BananePuppet` with no player/walker shows itself standing in `_ready`). Armory picker: first tile
+  `StartWeaponPicker.OWN` "Hero's own weapon" (default, sets `TownSave.start_weapon` = ""). Scrapbook plushie note
+  `ScrapbookRules.plays_with(def)`. `RunResult.heroes` (id per player index) → log field `hero` (runs + sieges),
+  end screen `WeaponColumn.heading_text` ("Player 2 · Pip") / `star_caption` ("Pip's Snowball Toss").
+  Test: `test_08_coop_heroes.gd`.

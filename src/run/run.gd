@@ -282,6 +282,17 @@ func spawn_player(index: int, at: Vector2) -> Player:
 	return player
 
 
+## The hero id of every player, by player index (run log, end screen).
+func _heroes_played() -> PackedStringArray:
+	var everyone: Array[Player] = Players.all(get_tree())
+	var ids: PackedStringArray = []
+	ids.resize(everyone.size())
+	for player: Player in everyone:
+		if player.player_index < ids.size():
+			ids[player.player_index] = String(player.stats.id)
+	return ids
+
+
 ## The Scrapbook (spec 03 §8) gets every weapon (evolutions too) and item a hero owns.
 func _note_loadout(player: Player) -> void:
 	for owned: Weapon in player.weapons():
@@ -489,6 +500,7 @@ func make_result(ending: String) -> RunResult:
 	result.killed_by = first.last_hit_by if first.is_dead() else ""
 	result.upgrades = first.picked_upgrades
 	result.player_count = Players.all(get_tree()).size()
+	result.heroes = _heroes_played()
 	result.items = _items_of_everyone()
 	result.seed_value = seed_value
 	result.evolutions = evolution_log.duplicate(true)

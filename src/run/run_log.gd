@@ -16,6 +16,7 @@ static func to_entry(result: RunResult) -> Dictionary:
 	return {
 		"date": Time.get_datetime_string_from_system(true),
 		"kind": "run",
+		"hero": Array(result.heroes),
 		"seed": result.seed_value,
 		"ending": result.ending,
 		"time_survived": snappedf(result.survived_seconds, 0.1),
@@ -50,6 +51,7 @@ static func siege_entry(result: RunResult) -> Dictionary:
 	return {
 		"date": Time.get_datetime_string_from_system(true),
 		"kind": "siege",
+		"hero": Array(result.heroes),
 		"number": result.siege_number,
 		"won": result.won,
 		"ending": result.ending,
