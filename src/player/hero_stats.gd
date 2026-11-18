@@ -68,6 +68,17 @@ extends Resource
 @export var big_heart_color: Color = Color(0.96, 0.66, 0.78, 0.8)
 @export var big_heart_seconds: float = 0.5
 
+@export_group("Belly Slide (Robbar's passive)")
+## The dash is a long belly slide (set `dash_distance` / `dash_duration`): every zombie on the way
+## takes a small hit, once per slide.
+@export var belly_slide: bool = false
+## How far from the hero's middle the slide hits (pixels) and how much.
+@export var belly_slide_reach: float = 26.0
+@export var belly_slide_damage: float = 10.0
+## The wet streak the slide leaves for a moment: colour and how long it stays (seconds).
+@export var belly_slide_trail_color: Color = Color(0.7, 0.86, 0.95, 0.55)
+@export var belly_slide_trail_seconds: float = 0.5
+
 @export_group("Chilly Hug (Pip's passive)")
 ## Zombies close to the hero move slower; shown as a soft frost ring (spec 08 §3).
 @export var chilly_hug: bool = false
