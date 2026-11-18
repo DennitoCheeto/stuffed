@@ -63,6 +63,33 @@ extends Resource
 @export var trap_sound: StringName = &"party_popper"
 @export var trap_pitch: float = 1.35
 
+@export_group("Plushies")
+## Every plushie living in town helps (spec 07 §4, AC-79): it stands by the fort
+## (`TownLayout.siege_plushie_spots`) and throws this weapon (a small stuffing ball every ~2 s).
+@export var plushie_ball: WeaponStats
+## Its health; at 0 it is knocked out (sits down, dizzy stars) until the Plush Hospital stands it
+## back up (`BuildingLevel.siege_revive_seconds`), or until the siege ends.
+@export var plushie_health: float = 45.0
+## Zombies on their way closer than this (pixels) turn to attack it.
+@export var plushie_reach: float = 90.0
+## Share of a zombie's touch damage it takes per second.
+@export var plushie_touch_rate: float = 0.6
+## Half the width of the patch of floor zombies knock at (around its feet).
+@export var plushie_footprint: float = 18.0
+## Drawing size (PlushieLook `size`) and the soft halo behind it (never a danger colour).
+@export var plushie_size: float = 18.0
+@export var plushie_halo: Color = Color(1, 0.98, 0.92, 0.55)
+## Knocked out: it tips over this far (degrees) and squashes down to this height.
+@export var plushie_out_tilt: float = -24.0
+@export var plushie_out_squash: float = 0.8
+## Dizzy stars circling its head while it is out: how many, turns per second, colour.
+@export var dizzy_stars: int = 3
+@export var dizzy_spin: float = 0.8
+@export var dizzy_color: Color = Color(1, 0.93, 0.56, 1)
+## Sounds when it is knocked out and when it stands back up.
+@export var plushie_out_sound: StringName = &"puff"
+@export var plushie_up_sound: StringName = &"hello"
+
 @export_group("After the siege")
 ## The haul of the first won siege (material id -> amount).
 @export var reward: Dictionary[String, int] = {"coins": 400, "stuffing": 20, "thread": 4}

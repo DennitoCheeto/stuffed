@@ -7,7 +7,8 @@ extends Run
 ## comes close. A fallen hero stands back up at the fort door after a few seconds; the siege is
 ## lost only when the fort falls, and won once the last wave is popped. XP buttons are worth
 ## more than in a run (data/siege/siege_xp_rules.tres). No floor pickups, no rescue, no Way
-## Home. Main sets `town_save` and `number` before adding it.
+## Home. Every plushie living in town helps (`plushies`, spec 07 §4). Main sets `town_save` and
+## `number` before adding it.
 
 ## How a siege ended (`RunResult.ending`); giving up from the pause menu stays "quit".
 const WON: String = "siege_won"
@@ -16,6 +17,9 @@ const LOST: String = "siege_lost"
 const WAVE_BANNER_SECONDS: float = 2.6
 ## Turrets fire from this share of the way up their building (0 = its footprint middle, 1 = top).
 const TURRET_HEIGHT: float = 0.5
+## More plushies than spots: the next round stands this far beside the first (pixels).
+const PLUSHIE_SPACING: float = 46.0
+const RESCUE_RULES: RescueRules = preload("res://data/town/rescue_rules.tres")
 
 @export var siege_rules: SiegeRules
 @export var layout: TownLayout
@@ -35,6 +39,8 @@ var building_bars: Dictionary[StringName, BuildingHealthBar] = {}
 var turrets: Dictionary[StringName, SiegeTurret] = {}
 ## Building spot id -> its ring on the ground (Snack Bar healing ring, Party Shop confetti trap).
 var rings: Dictionary[StringName, SiegeRing] = {}
+## Plushie id -> the plushie helping in this siege (every plushie living in town).
+var plushies: Dictionary[String, SiegePlushie] = {}
 ## True once the night is defended.
 var won: bool = false
 ## Wave banners shown so far (wave index), for tests.
@@ -65,6 +71,7 @@ func _ready() -> void:
 	fort.fell.connect(_on_fort_fell)
 	targets = SiegeTargets.new(fort)
 	_add_buildings()
+	_add_plushies()
 	enemies.siege = targets
 	fort_bar = FortHealthBar.new(fort)
 	hud.add_child(fort_bar)
@@ -248,6 +255,37 @@ func _add_ring(building: SiegeBuilding, spot: TownSpot) -> void:
 	rings[spot.id] = ring
 
 
+## Every plushie living in town stands by the fort and helps (spec 07 §4, AC-79). A built,
+## undamaged Plush Hospital stands knocked-out plushies back up.
+func _add_plushies() -> void:
+	var hospital: SiegeBuilding = null
+	var seconds: float = 0.0
+	for building: SiegeBuilding in targets.buildings:
+		var data: BuildingLevel = layout.spot(building.id).building.levels[building.level - 1]
+		if data.siege_revive_seconds > 0.0:
+			hospital = building
+			seconds = data.siege_revive_seconds
+	for id: String in town_save.plushies:
+		var who: PlushieDef = RESCUE_RULES.find(id)
+		if town_save.plushies[id] != "in_town" or who == null:
+			continue
+		var helper: SiegePlushie = SiegePlushie.new()
+		helper.setup(who, _plushie_spot(plushies.size()), siege_rules)
+		helper.set_hospital(hospital, seconds)
+		town_arena().add_child(helper)
+		targets.plushies.append(helper.target)
+		plushies[id] = helper
+
+
+## Where the plushie number `index` (0 = the first) stands by the fort.
+func _plushie_spot(index: int) -> Vector2:
+	var spots: PackedVector2Array = layout.siege_plushie_spots
+	if spots.is_empty():
+		return layout.spawn_position + Vector2(PLUSHIE_SPACING * (index + 1), 0.0)
+	var round_index: int = floori(float(index) / spots.size())
+	return spots[index % spots.size()] + Vector2(PLUSHIE_SPACING * round_index, 0.0)
+
+
 ## The starting weapon of the first hero (co-op: player 1's), the Armory's turret weapon.
 func _hero_weapon() -> WeaponStats:
 	var first: Player = null
@@ -282,6 +320,8 @@ func _end(ending: String, title: String, subtitle: String) -> void:
 		turret.stop()
 	for ring: SiegeRing in rings.values():
 		ring.stop()
+	for helper: SiegePlushie in plushies.values():
+		helper.stop()
 	projectiles.clear_hostile()
 	hud.show_banner(title, subtitle, siege_rules.end_pause_seconds + 1.0)
 	# A timer connection (not await) so nothing fires if the siege is closed meanwhile.

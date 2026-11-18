@@ -56,6 +56,11 @@ const SMOOTH_STEPS: int = 10
 ## Where plushies like to hang out (spec 05 §3.4): by the fort, at buildings once built.
 @export var plushie_spots: Array[PlushieSpot] = []
 
+@export_group("Night siege")
+## Where the plushies living in town stand in the night siege (spec 07 §4): around the fort, in
+## this order (feet). More plushies than spots: the rest stand a little beside the first ones.
+@export var siege_plushie_spots: PackedVector2Array = []
+
 
 func play_rect() -> Rect2:
 	return Rect2(Vector2.ZERO, size)

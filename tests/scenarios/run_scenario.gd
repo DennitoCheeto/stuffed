@@ -92,14 +92,16 @@ func disarm(player: Player) -> void:
 		weapon.free()
 
 
-## Stops the siege's building turrets and the Party Shop's trap (tests about zombies reaching
-## something).
+## Stops the siege's building turrets, the Party Shop's trap and the plushies' throws (tests about
+## zombies reaching something).
 func silence_turrets(siege: Siege) -> void:
 	for turret: SiegeTurret in siege.turrets.values():
 		turret.stop()
 	for ring: SiegeRing in siege.rings.values():
 		if ring is SiegeConfettiTrap:
 			ring.stop()
+	for helper: SiegePlushie in siege.plushies.values():
+		helper.stop()
 
 
 ## Holds an action for `frames` physics frames, then releases it.
