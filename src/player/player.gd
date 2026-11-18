@@ -108,6 +108,21 @@ var _speed_boost_left: float = 0.0
 @onready var _weapons: Node2D = $Weapons
 
 
+## A plushie hero (spec 08 §6) swaps Banane's puppet for its own before the puppet builds.
+func _enter_tree() -> void:
+	var puppet: Node = get_node_or_null(^"Puppet")
+	if stats.plushie == null or not puppet is BananePuppet:
+		return
+	var at: int = puppet.get_index()
+	remove_child(puppet)
+	puppet.free()
+	var plushie: PlushiePuppet = PlushiePuppet.new()
+	plushie.name = "Puppet"
+	plushie.setup(stats)
+	add_child(plushie)
+	move_child(plushie, at)
+
+
 func _ready() -> void:
 	add_to_group(GROUP)
 	_controls = PlayerInput.new(player_index)

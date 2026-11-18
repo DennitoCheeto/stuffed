@@ -38,3 +38,12 @@ extends Resource
 @export var peel_max: int = 3
 ## Radius of a peel's slippery area, in pixels.
 @export var peel_radius: float = 18.0
+
+@export_group("Puppet (plushie heroes)")
+## How tall the hero puppet is, feet to the top of the head, in pixels (Banane is about 75).
+@export var puppet_height: float = 72.0
+## The town walk (PlushieGait) runs this much faster on a hero, who moves faster than a plushie
+## strolling around the fort.
+@export var walk_speedup: float = 1.5
+## How fast the walk eases in and out when the hero starts and stops (1 / seconds).
+@export var stride_blend_speed: float = 6.0
