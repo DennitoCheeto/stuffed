@@ -8,11 +8,11 @@ extends Resource
 enum Shape {
 	## Pip: a huge round polar bear body with a tiny head and a scarf.
 	ROUND_BEAR,
-	## Böbö: a big classic teddy bear.
+	## Böbö: a big chonky brown bear (the IKEA Djungelskog one).
 	TEDDY,
 	## BamBam: a long tube body with round ears, a bowtie and a heart patch.
 	LONG,
-	## Robbar: a small chonky seal.
+	## Robbar: a small chubby seal, one round egg-shaped blob.
 	SEAL,
 }
 
@@ -27,12 +27,14 @@ enum Shape {
 @export var body_color: Color = Color("#d9c7b0")
 ## Muzzle, belly or face.
 @export var accent_color: Color = Color("#f2e6d6")
-## Scarf, bowtie or spots.
+## Scarf, bowtie, foot soles or spots.
 @export var detail_color: Color = Color("#c0392b")
-## Heart patch, inner ears, paw pads or toe dots.
+## Heart patch, inner ears, nose, paw pads or toe dots.
 @export var patch_color: Color = Color("#2a2230")
 ## How big it is next to the others (1 = normal; a smol seal is smaller).
 @export var height: float = 1.0
+## How it walks in town (issue #147; null = it slides without moving its body).
+@export var gait: PlushieGait
 
 
 ## A copy with every danger colour made dustier (UiColors.calmed), for a plushie in a run

@@ -1,15 +1,29 @@
-[gd_resource type="Resource" script_class="PlushieDef" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="PlushieDef" load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://src/rescue/plushie_def.gd" id="1_def"]
+[ext_resource type="Script" path="res://src/rescue/plushie_gait.gd" id="2_gait"]
+
+[sub_resource type="Resource" id="Resource_gait"]
+script = ExtResource("2_gait")
+kind = 1
+steps_per_second = 2.6
+foot_lift = 0.0
+foot_reach = 0.0
+arm_swing = 0.45
+body_bob = 0.0
+tilt = 0.05
+hop_height = 0.35
+squash = 0.18
 
 [resource]
 script = ExtResource("1_def")
 id = "robbar"
 display_name = "Robbar"
-scrapbook_text = "A smol chonky seal. Mostly naps, sometimes wiggles."
+scrapbook_text = "A smol chubby seal. Mostly naps, sometimes wiggles."
 shape = 3
-body_color = Color(0.79, 0.81, 0.83, 1)
-accent_color = Color(0.95, 0.95, 0.94, 1)
-detail_color = Color(0.5, 0.55, 0.58, 1)
+body_color = Color(0.96, 0.96, 0.95, 1)
+accent_color = Color(1, 0.97, 0.94, 1)
+detail_color = Color(0.53, 0.6, 0.68, 1)
 patch_color = Color(0.16, 0.13, 0.19, 1)
-height = 0.8
+height = 0.85
+gait = SubResource("Resource_gait")

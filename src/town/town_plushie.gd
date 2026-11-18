@@ -51,6 +51,10 @@ var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 ## Where the current climb ends, and whether it goes back down (leaving the spot).
 var _climb_to: Vector2 = Vector2.ZERO
 var _climb_down: bool = false
+## Seconds into the current walk (its PlushieGait cycle) and how much of the walk shows (0..1:
+## it eases in when it starts walking and out when it stops).
+var _walk_time: float = 0.0
+var _stride: float = 0.0
 
 
 ## `stitched` = it already lives here (no stitch-up moment).
@@ -90,6 +94,7 @@ func _exit_tree() -> void:
 func _physics_process(delta: float) -> void:
 	_time += delta
 	_wave_wait = maxf(_wave_wait - delta, 0.0)
+	_update_stride(delta)
 	queue_redraw()
 	if state == State.STITCHING:
 		_left -= delta
@@ -125,6 +130,27 @@ func _physics_process(delta: float) -> void:
 
 func is_stitching() -> bool:
 	return state == State.STITCHING
+
+
+## True while it walks or climbs (its body does the walk then).
+func is_moving() -> bool:
+	return state == State.WALKING or state == State.CLIMBING
+
+
+## Where its feet, arms and body are in its walk right now (a rest pose when standing still).
+func walk_pose() -> PlushiePose:
+	if plushie.gait == null:
+		return PlushiePose.new()
+	return plushie.gait.pose(_walk_time, _stride)
+
+
+func _update_stride(delta: float) -> void:
+	var goal: float = 1.0 if is_moving() else 0.0
+	_stride = move_toward(_stride, goal, delta * rules.stride_blend_speed)
+	if _stride > 0.0:
+		_walk_time += delta
+	else:
+		_walk_time = 0.0
 
 
 ## The nearest living player within waving distance (null = none).
@@ -314,10 +340,9 @@ func _draw() -> void:
 	if pose() == PlushieSpot.Pose.NAP:
 		_draw_nap()
 		return
-	var bob: float = 0.0
-	if state == State.WALKING or state == State.CLIMBING:
-		bob = -absf(sin(_time * TAU * 1.8)) * rules.bob_pixels
-	var squash: Vector2 = Vector2(_facing, 1.0)
+	var pose: PlushiePose = walk_pose()
+	var u: float = rules.size * plushie.height
+	var squash: Vector2 = Vector2(_facing, 1.0) * pose.squash
 	var seated: bool = pose() == PlushieSpot.Pose.SIT or pose() == PlushieSpot.Pose.READ
 	if state == State.SITTING or seated:
 		squash = Vector2(_facing * 1.06, 0.9)
@@ -325,8 +350,8 @@ func _draw() -> void:
 	if state == State.STITCHING:
 		stitch = 1.0 - _left / rules.stitch_seconds
 		squash *= lerpf(0.4, 1.0, minf(stitch * 2.0, 1.0))
-	draw_set_transform(Vector2(0.0, bob), 0.0, squash)
-	PlushieLook.draw(self, plushie, Vector2.ZERO, rules.size, wave_amount())
+	draw_set_transform(Vector2(0.0, -pose.hop * u), pose.tilt * _facing, squash)
+	PlushieLook.draw(self, plushie, Vector2.ZERO, rules.size, wave_amount(), pose)
 	draw_set_transform(Vector2.ZERO)
 	if state == State.STITCHING:
 		_draw_stitches(stitch)

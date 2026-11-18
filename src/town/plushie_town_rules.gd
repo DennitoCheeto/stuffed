@@ -28,8 +28,8 @@ extends Resource
 @export var wave_cooldown: float = 6.0
 ## Walks keep at least this far from buildings and walls (pixels).
 @export var keep_clear: float = 40.0
-## How many pixels it bobs up and down while walking.
-@export var bob_pixels: float = 4.0
+## How fast its walk (PlushieDef.gait) eases in and out when it starts or stops (per second).
+@export var stride_blend_speed: float = 6.0
 ## How likely the next walk goes to a free hangout spot (reading, table, nap, lookout).
 @export var spot_chance: float = 0.35
 ## Hanging out at a spot lasts this long (seconds, picked at random in between).
