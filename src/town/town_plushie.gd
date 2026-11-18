@@ -34,6 +34,8 @@ var name_tag: Label
 var hangouts: PlushieHangouts
 ## The spot it is walking to or hanging out at (null = none).
 var spot: PlushieSpot
+## Banane living in town (BANANE shape): his hero puppet, walked by this plushie (spec 08 §5).
+var puppet: BananePuppet
 
 ## Seconds left in the current state (idle, sitting, waving, stitching).
 var _left: float = 0.0
@@ -55,8 +57,6 @@ var _climb_down: bool = false
 ## it eases in when it starts walking and out when it stops).
 var _walk_time: float = 0.0
 var _stride: float = 0.0
-## Banane living in town (BANANE shape): his hero puppet, walked by this plushie (spec 08 §5).
-var puppet: BananePuppet
 
 
 ## `stitched` = it already lives here (no stitch-up moment).

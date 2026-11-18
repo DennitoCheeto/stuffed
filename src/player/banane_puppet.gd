@@ -43,10 +43,11 @@ const OUTLINE_COLOR: Color = Color("#1d1a24")
 
 var state: State = State.IDLE
 
-var _player: Player
 ## Set when Banane lives in town while another hero is played (spec 08 §5): the town plushie
 ## walking him around.
 var walker: TownPlushie
+
+var _player: Player
 var _time: float = 0.0
 var _state_time: float = 0.0
 var _side: float = 1.0
