@@ -1,15 +1,29 @@
-[gd_resource type="Resource" script_class="PlushieDef" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="PlushieDef" load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://src/rescue/plushie_def.gd" id="1_def"]
+[ext_resource type="Script" path="res://src/rescue/plushie_gait.gd" id="2_gait"]
+
+[sub_resource type="Resource" id="Resource_gait"]
+script = ExtResource("2_gait")
+kind = 0
+steps_per_second = 2.4
+foot_lift = 0.12
+foot_reach = 0.06
+arm_swing = 0.2
+body_bob = 0.05
+tilt = 0.13
+hop_height = 0.0
+squash = 0.0
 
 [resource]
 script = ExtResource("1_def")
 id = "bobo"
 display_name = "Böbö"
-scrapbook_text = "A big brown bear. Calm, strong and very huggable."
+scrapbook_text = "A big chonky brown bear. Calm, strong and very huggable."
 shape = 1
-body_color = Color(0.55, 0.37, 0.24, 1)
-accent_color = Color(0.85, 0.71, 0.55, 1)
-detail_color = Color(0.55, 0.37, 0.24, 1)
-patch_color = Color(0.23, 0.16, 0.13, 1)
-height = 1.1
+body_color = Color(0.5, 0.24, 0.17, 1)
+accent_color = Color(0.64, 0.38, 0.28, 1)
+detail_color = Color(0.78, 0.54, 0.31, 1)
+patch_color = Color(0.2, 0.11, 0.09, 1)
+height = 1.15
+gait = SubResource("Resource_gait")
