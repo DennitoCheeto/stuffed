@@ -43,6 +43,10 @@ const OUTLINE_COLOR: Color = Color("#1d1a24")
 
 var state: State = State.IDLE
 
+## Set when Banane lives in town while another hero is played (spec 08 §5): the town plushie
+## walking him around.
+var walker: TownPlushie
+
 var _player: Player
 var _time: float = 0.0
 var _state_time: float = 0.0
@@ -68,6 +72,7 @@ var _outlined: Array[FeltPiece] = []
 
 func _ready() -> void:
 	_player = get_parent() as Player
+	walker = get_parent() as TownPlushie
 	_build()
 	if _player != null:
 		_player.dashed.connect(_on_dashed)
@@ -77,7 +82,7 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-	if _player == null:
+	if _player == null and walker == null:
 		return
 	_time += delta
 	_state_time += delta
@@ -114,7 +119,7 @@ func _update_state() -> void:
 	match state:
 		State.DOWN:
 			# Stood back up (night siege).
-			if not _player.is_dead():
+			if not _is_down():
 				_enter(_moving_state())
 		State.QUACK:
 			if _state_time >= QUACK_TIME:
@@ -124,7 +129,7 @@ func _update_state() -> void:
 			if _state_time >= HIT_ANIM_TIME:
 				_enter(_moving_state())
 		State.DASH:
-			if _state_time >= DASH_ANIM_TIME and not _player.is_dashing():
+			if _state_time >= DASH_ANIM_TIME and not _is_dashing():
 				_enter(_moving_state())
 		_:
 			var moving: State = _moving_state()
@@ -133,7 +138,7 @@ func _update_state() -> void:
 
 
 func _moving_state() -> State:
-	if _player.velocity.length() > WALK_SPEED_THRESHOLD:
+	if _velocity().length() > WALK_SPEED_THRESHOLD:
 		return State.WALK
 	return State.IDLE
 
@@ -185,8 +190,9 @@ func _pose() -> Pose:
 
 
 func _apply(pose: Pose) -> void:
-	if absf(_player.facing.x) > 0.01:
-		_side = signf(_player.facing.x)
+	var facing: Vector2 = _facing()
+	if absf(facing.x) > 0.01:
+		_side = signf(facing.x)
 	_origin.scale = Vector2(DRAW_SCALE * _side, DRAW_SCALE)
 	_root.position = ROOT_PIVOT - ANCHOR + pose.lift
 	_root.rotation_degrees = pose.tilt
@@ -242,7 +248,7 @@ func _spring(t: float, frequency: float, decay: float) -> float:
 
 ## Blinks while Banane can't be hurt after a hit.
 func _update_invulnerable_blink() -> void:
-	var blinking: bool = _player.hurt_invulnerable_left() > 0.0
+	var blinking: bool = _player != null and _player.hurt_invulnerable_left() > 0.0
 	var shown: bool = fmod(_time, INVULNERABLE_BLINK * 2.0) < INVULNERABLE_BLINK
 	modulate.a = 0.35 if blinking and not shown else 1.0
 
@@ -343,6 +349,35 @@ func _svg(numbers: Array) -> PackedVector2Array:
 
 func _points(numbers: Array) -> PackedVector2Array:
 	return FeltShapes.points(PackedFloat32Array(numbers))
+
+
+## Shows Banane standing still without a hero or walker (the hero picker's photo).
+func show_still() -> void:
+	_apply(Pose.new())
+
+
+func _velocity() -> Vector2:
+	if _player != null:
+		return _player.velocity
+	if walker != null and walker.is_moving():
+		return walker.facing() * WALK_SPEED_THRESHOLD * 2.0
+	return Vector2.ZERO
+
+
+func _facing() -> Vector2:
+	if _player != null:
+		return _player.facing
+	if walker != null:
+		return walker.facing()
+	return Vector2.RIGHT
+
+
+func _is_down() -> bool:
+	return _player != null and _player.is_dead()
+
+
+func _is_dashing() -> bool:
+	return _player != null and _player.is_dashing()
 
 
 ## Where every piece is in one moment of an animation.

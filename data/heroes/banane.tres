@@ -1,7 +1,8 @@
-[gd_resource type="Resource" script_class="HeroStats" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="HeroStats" load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://src/player/hero_stats.gd" id="1_stats"]
 [ext_resource type="Resource" path="res://data/weapons/peel_boomerang.tres" id="2_weapon"]
+[ext_resource type="Resource" path="res://data/heroes/banane_town.tres" id="3_town"]
 
 [resource]
 script = ExtResource("1_stats")
@@ -21,3 +22,9 @@ peel_lifetime = 4.0
 peel_stun = 1.0
 peel_max = 3
 peel_radius = 18.0
+passive_name = "Slippery"
+passive_text = "Every dash leaves a peel. Zombies slip on it."
+strength = "Easy, all-round"
+weakness = "None, the classic"
+try_on_text = ""
+town_member = ExtResource("3_town")

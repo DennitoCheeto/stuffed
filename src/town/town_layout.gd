@@ -16,6 +16,8 @@ const SMOOTH_STEPS: int = 10
 @export var door_rect: Rect2 = Rect2(1205, 800, 90, 100)
 ## The Scrapbook stand (blocks walking).
 @export var scrapbook_rect: Rect2 = Rect2(1560, 955, 140, 90)
+## The Wardrobe where you pick your hero (spec 08 §5), next to the door. It doesn't block walking.
+@export var wardrobe_rect: Rect2 = Rect2(960, 880, 84, 100)
 ## The moon calendar's post (its bottom middle, spec 07 §2). It doesn't block walking.
 @export var calendar_position: Vector2 = Vector2(880, 995)
 ## A player closer than this to the door or the stand can press E there.

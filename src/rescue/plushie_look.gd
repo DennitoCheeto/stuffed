@@ -39,9 +39,11 @@ static func draw(
 ) -> void:
 	var u: float = size * plushie.height
 	var now: PlushiePose = pose if pose != null else PlushiePose.new()
-	if shadow:
+	if shadow and plushie.shape != PlushieDef.Shape.BANANE:
 		canvas.draw_colored_polygon(ellipse(at, u * 1.1, u * 0.3), SHADOW_COLOR)
 	match plushie.shape:
+		PlushieDef.Shape.BANANE:
+			pass
 		PlushieDef.Shape.ROUND_BEAR:
 			_draw_round_bear(canvas, plushie, at, u, wave, now)
 		PlushieDef.Shape.LONG:

@@ -14,6 +14,8 @@ enum Shape {
 	LONG,
 	## Robbar: a small chubby seal, one round egg-shaped blob.
 	SEAL,
+	## Banane living in town (spec 08 §5): not drawn by PlushieLook, his hero puppet walks.
+	BANANE,
 }
 
 ## Saved in the town (TownSave.plushies) and in the run log, e.g. "pip". Never change it

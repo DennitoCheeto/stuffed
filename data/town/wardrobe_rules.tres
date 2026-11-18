@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="WardrobeRules" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/town/wardrobe/wardrobe_rules.gd" id="1_rules"]
+
+[resource]
+script = ExtResource("1_rules")
+unlock_title = "%s wants to play!"
+unlock_title_many = "%s want to play!"
+later_subtitle = "Pick them at the Wardrobe."
+sign_text = "Wardrobe"
+prompt = "E   Open the Wardrobe"
+picker_title = "Who plays?"
+picker_hint = "Your hero for the next run and siege.   Esc: close"
+locked_text = "Rescue me in the Bedroom"
+taken_text = "Player %d plays %s"
+now_text = "Now"
+swap_sound = &"pop"
+swap_pitch = 1.2
+reveal_sound = &"new_building"
+art_scale = 1.2

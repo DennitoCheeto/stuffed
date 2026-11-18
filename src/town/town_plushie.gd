@@ -34,6 +34,8 @@ var name_tag: Label
 var hangouts: PlushieHangouts
 ## The spot it is walking to or hanging out at (null = none).
 var spot: PlushieSpot
+## Banane living in town (BANANE shape): his hero puppet, walked by this plushie (spec 08 §5).
+var puppet: BananePuppet
 
 ## Seconds left in the current state (idle, sitting, waving, stitching).
 var _left: float = 0.0
@@ -80,6 +82,10 @@ func _init(
 
 
 func _ready() -> void:
+	if plushie.shape == PlushieDef.Shape.BANANE:
+		puppet = BananePuppet.new()
+		puppet.position = -HeroMarker.FEET
+		add_child(puppet)
 	name_tag = TownArt.label(plushie.display_name, NAME_SIZE)
 	add_child(name_tag)
 	var top: float = PlushieLook.top(plushie, rules.size)
@@ -130,6 +136,11 @@ func _physics_process(delta: float) -> void:
 
 func is_stitching() -> bool:
 	return state == State.STITCHING
+
+
+## Which way it looks (left or right).
+func facing() -> Vector2:
+	return Vector2(_facing, 0.0)
 
 
 ## True while it walks or climbs (its body does the walk then).

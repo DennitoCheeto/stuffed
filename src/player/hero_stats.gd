@@ -47,3 +47,17 @@ extends Resource
 @export var walk_speedup: float = 1.5
 ## How fast the walk eases in and out when the hero starts and stops (1 / seconds).
 @export var stride_blend_speed: float = 6.0
+
+@export_group("Wardrobe (spec 08 §5)")
+## The passive's name and what it does, in one line for the hero picker.
+@export var passive_name: String = ""
+@export var passive_text: String = ""
+## One strength and one weakness, shown as two small tags.
+@export var strength: String = ""
+@export var weakness: String = ""
+## The banner's subtitle the first time this hero is unlocked, e.g. "Try her on at the
+## Wardrobe." (its title is WardrobeRules.unlock_title).
+@export var try_on_text: String = ""
+## Banane only: how he lives in town while someone else is played (a PlushieDef with the
+## BANANE shape: his hero puppet walks around). Plushie heroes use `plushie`.
+@export var town_member: PlushieDef
