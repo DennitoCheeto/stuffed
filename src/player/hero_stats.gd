@@ -1,8 +1,14 @@
 class_name HeroStats
 extends Resource
-## Balance numbers for one hero. Tune them in data/heroes/*.tres, not in code.
+## Balance numbers for one hero. Tune them in data/heroes/*.tres, not in code. The heroes in
+## pick order live in data/heroes/hero_roster.tres (HeroRoster, spec 08).
 
+## Saved per player slot in TownSave.heroes, e.g. "pip". Never change it.
+@export var id: StringName = &""
 @export var display_name: String = "Hero"
+## The rescued plushie this hero is (null = Banane, always playable). Freeing that plushie in
+## the Bedroom unlocks the hero (spec 08 §4).
+@export var plushie: PlushieDef
 @export var max_health: float = 100.0
 ## Pixels per second.
 @export var move_speed: float = 150.0

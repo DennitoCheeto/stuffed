@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="HeroRoster" load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://src/player/hero_roster.gd" id="1_roster"]
+[ext_resource type="Script" path="res://src/player/hero_stats.gd" id="2_stats"]
+[ext_resource type="Resource" path="res://data/heroes/banane.tres" id="3_banane"]
+[ext_resource type="Resource" path="res://data/heroes/pip.tres" id="4_pip"]
+[ext_resource type="Resource" path="res://data/heroes/bobo.tres" id="5_bobo"]
+[ext_resource type="Resource" path="res://data/heroes/bambam.tres" id="6_bambam"]
+[ext_resource type="Resource" path="res://data/heroes/robbar.tres" id="7_robbar"]
+
+[resource]
+script = ExtResource("1_roster")
+heroes = Array[ExtResource("2_stats")]([ExtResource("3_banane"), ExtResource("4_pip"), ExtResource("5_bobo"), ExtResource("6_bambam"), ExtResource("7_robbar")])

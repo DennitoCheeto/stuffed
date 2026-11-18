@@ -218,6 +218,7 @@ func spawn_player(index: int) -> Player:
 	var player: Player = PLAYER_SCENE.instantiate()
 	player.player_index = index
 	player.armed = false
+	player.stats = HeroRoster.current().hero_for(save, index)
 	player.position = layout.spawn_position + Vector2(layout.spawn_spacing * index, 0.0)
 	player.dashed.connect(func(_from: Vector2, _direction: Vector2) -> void: Sfx.play(&"dash"))
 	actors.add_child(player)

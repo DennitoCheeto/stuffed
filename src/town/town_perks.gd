@@ -8,7 +8,7 @@ extends RefCounted
 var locked_weapons: Array[StringName] = []
 ## True once the player may choose Banane's starting weapon (Toy Box Armory Lv 3).
 var can_choose_start_weapon: bool = false
-## The chosen starting weapon (an upgrade pool id; "" = Banane's own).
+## The chosen starting weapon (an upgrade pool id; "" = the hero's own).
 var start_weapon: StringName = &""
 ## Extra rerolls, skips and banishes per run (Lucky Jar).
 var extra_card_uses: int = 0
@@ -24,6 +24,8 @@ var first_pickup_at: float = 0.0
 var tricks: Array[TrickDef] = []
 ## Plushie Buddy: the id of the plushie rescued last ("" = none yet).
 var buddy: String = ""
+## The hero each player slot plays (spec 08), slot 0 = player 1. Empty = the hero scene's own.
+var heroes: Array[HeroStats] = []
 
 
 ## The perks of the town in `save`, with the buildings standing on the spots of `layout`.
@@ -49,10 +51,17 @@ static func from_save(save: TownSave, layout: TownLayout) -> TownPerks:
 			if save.has_trick(String(trick.id)):
 				perks.tricks.append(trick)
 	perks.buddy = save.last_rescued
+	for slot: int in maxi(save.heroes.size(), 1):
+		perks.heroes.append(HeroRoster.current().hero_for(save, slot))
 	var chosen: StringName = StringName(save.start_weapon)
 	if perks.can_choose_start_weapon and not perks.locked_weapons.has(chosen):
 		perks.start_weapon = chosen
 	return perks
+
+
+## The hero player `index` plays (null = keep the hero scene's own, Banane).
+func hero(index: int) -> HeroStats:
+	return heroes[index] if index < heroes.size() else null
 
 
 ## The level whose bonuses work in runs: a building a lost siege damaged gives nothing until it

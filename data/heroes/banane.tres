@@ -5,6 +5,7 @@
 
 [resource]
 script = ExtResource("1_stats")
+id = &"banane"
 display_name = "Banane"
 max_health = 100.0
 move_speed = 150.0

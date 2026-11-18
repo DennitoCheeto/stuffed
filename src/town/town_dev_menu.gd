@@ -2,8 +2,8 @@ class_name TownDevMenu
 extends CanvasLayer
 ## Developer menu in town (F1, spec 03 §10): give materials, rebuild or upgrade any building for
 ## free, add a plushie, fill or clear the Scrapbook, give or clear all tricks, call the night
-## siege, damage or repair buildings, reset the whole town. Everything it changes is saved
-## right away (through the town's `changed`).
+## siege, damage or repair buildings, unlock or switch heroes, reset the whole town. Everything
+## it changes is saved right away (through the town's `changed`).
 
 const PANEL_COLOR: Color = Color(0.1, 0.09, 0.13, 0.92)
 ## What "Give materials" puts in the jars (developer shortcut, not balance).
@@ -19,6 +19,8 @@ const CLEAR_TRICKS: String = "Clear tricks"
 const SIEGE_NOW: String = "Siege now"
 const DAMAGE_ONE: String = "Damage a building"
 const REPAIR_ALL: String = "Repair all"
+const UNLOCK_HEROES: String = "Unlock all heroes"
+const NEXT_HERO: String = "Next hero"
 const RESET: String = "Reset town"
 const RESET_SURE: String = "Really reset?"
 ## The Scrapbook's pages and entries (to fill it).
@@ -83,6 +85,7 @@ func _build() -> void:
 	_row(column, [FILL_BOOK, CLEAR_BOOK], [fill_scrapbook, clear_scrapbook])
 	_row(column, [GIVE_TRICKS, CLEAR_TRICKS], [give_all_tricks, clear_tricks])
 	_row(column, [SIEGE_NOW, DAMAGE_ONE, REPAIR_ALL], [siege_now, damage_one, repair_all])
+	_row(column, [UNLOCK_HEROES, NEXT_HERO], [unlock_all_heroes, next_hero])
 	_row(column, [RESET], [_ask_reset])
 
 
@@ -191,6 +194,33 @@ func damage_one() -> String:
 func repair_all() -> void:
 	town.save.damaged.clear()
 	_saved()
+
+
+## Every plushie hero counts as freed (spec 08 §12): the ones not home yet wait in the tent.
+func unlock_all_heroes() -> void:
+	for hero: HeroStats in HeroRoster.current().heroes:
+		if hero.plushie == null or town.save.plushies.has(hero.plushie.id):
+			continue
+		town.save.plushies[hero.plushie.id] = "waiting"
+		town.save.mark_seen(ScrapbookRules.PLUSHIES, hero.plushie.id)
+	town.refresh_tent()
+	town.move_in_waiting()
+	_saved()
+
+
+## Player 1 switches to the next unlocked hero, at once in the town. Returns the new hero.
+func next_hero() -> HeroStats:
+	var current: HeroStats = HeroRoster.current().hero_for(town.save, 0)
+	var next: HeroStats = HeroRoster.current().next_unlocked(town.save, current)
+	town.save.set_hero(0, String(next.id))
+	for player: Player in Players.all(town.get_tree()):
+		if player.player_index == 0:
+			var at: Vector2 = player.position
+			player.get_parent().remove_child(player)
+			player.queue_free()
+			town.spawn_player(0).position = at
+	_saved()
+	return next
 
 
 ## The first press asks, the second one resets.
