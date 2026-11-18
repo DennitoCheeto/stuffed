@@ -6,6 +6,7 @@ extends SceneTree
 ## Add `-- --shot=C:/path/frame.png` to also save one frame as a picture.
 ## Add `-- --siege` for the night siege (spec 07 §11): every building at its top level firing, all
 ## plushies helping and `SIEGE_ZOMBIES` zombies around the fort, at dusk in the town.
+## Add `-- --hero=pip` to play as that hero (spec 08 §13: compare draw calls with Banane's).
 
 const MAIN_SCENE: PackedScene = preload("res://src/main/main.tscn")
 const SHAMBLER: EnemyStats = preload("res://data/enemies/shambler.tres")
@@ -46,6 +47,10 @@ func _start() -> void:
 	for i: int in 5:
 		await process_frame
 	_siege = OS.get_cmdline_user_args().has("--siege")
+	var hero: String = _arg("--hero=")
+	if not hero.is_empty():
+		main.town.plushies[hero] = "in_town"
+		main.town.set_hero(0, hero)
 	(main.current_screen as TitleScreen).start_button.pressed.emit()
 	for i: int in 3:
 		await physics_frame
@@ -67,7 +72,7 @@ func _start() -> void:
 		_crowd_center = siege.layout.fort_rect.get_center()
 		banane.global_position = _crowd_center + Vector2(0.0, siege.layout.fort_rect.size.y)
 	banane.invincible = true
-	var boomerang: Weapon = banane.weapon(&"peel_boomerang")
+	var boomerang: Weapon = banane.weapons()[0]
 	_sniper = banane.add_weapon(SNIPER)
 	for i: int in 4:
 		boomerang.level_up()
@@ -140,6 +145,14 @@ func _ready_the_town(main: Main) -> void:
 	for id: String in PLUSHIES:
 		main.town.plushies[id] = "in_town"
 	main.town.siege_nights = 0
+
+
+## The value of a `--name=value` argument ("" if not given).
+func _arg(prefix: String) -> String:
+	for arg: String in OS.get_cmdline_user_args():
+		if arg.begins_with(prefix):
+			return arg.trim_prefix(prefix)
+	return ""
 
 
 func _save_shot() -> void:

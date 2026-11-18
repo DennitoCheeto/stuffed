@@ -692,3 +692,10 @@ _Last updated: 2026-11-18 (M5-07 merged (PR #266); M5-08 in review, M5-09 ready)
   `HeroRoster`). Tests still pass, so check locally: `<godot_console> --headless --path . --check-only --script
   res://src/arena/arena.gd` must print no ERROR. Fix: look the roster up from a UI/runtime script
   (`ScrapbookBook.note_of`) or copy what is needed into the data (`RunResult.hero_names`).
+- Hero readability + cost (M5-09, spec 08 §13, AC-93/94): `test_08_hero_readability.gd` sweeps every hero effect
+  colour (`chilly_ring_color`, `big_heart_color`, `belly_slide_trail_color`, `EFFECT_SHOTS` in `ProjectileLook`) and
+  each plushie puppet for danger colours and checks the zombie ink keeps the strongest contrast on every floor
+  (dusk too); a new hero effect colour goes into that list. Draw-cost proxy: a plushie hero's puppet has no more
+  drawn canvas items than Banane's. Real GPU: `tools/benchmark.gd -- --hero=<id>`. 2026-11-18 (500 zombies, ~590
+  shots, 400 bullets): Banane 160 draw calls, Pip 119, Böbö 103, BamBam 99, Robbar 102. Hero picker is in the fit
+  check (M5-03).
