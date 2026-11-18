@@ -49,14 +49,25 @@ func _remove(index: int) -> void:
 
 
 func _draw() -> void:
+	# All outlines first, then all fills: two batches instead of two draw calls per number (the
+	# outline and fill glyphs come from different textures; spec 07 §11).
 	var font: Font = ThemeDB.fallback_font
+	var align: HorizontalAlignment = HORIZONTAL_ALIGNMENT_CENTER
 	for i: int in _ages.size():
-		var progress: float = _ages[i] / LIFETIME
-		var at: Vector2 = _positions[i] + Vector2(0.0, -RISE * progress)
-		var fill: Color = COLOR
-		fill.a *= 1.0 - progress * progress
 		var edge: Color = OUTLINE_COLOR
-		edge.a *= fill.a
-		var align: HorizontalAlignment = HORIZONTAL_ALIGNMENT_CENTER
-		draw_string_outline(font, at, _texts[i], align, 40.0, FONT_SIZE, 4, edge)
-		draw_string(font, at, _texts[i], align, 40.0, FONT_SIZE, fill)
+		edge.a *= _alpha(i)
+		draw_string_outline(font, _shown_at(i), _texts[i], align, 40.0, FONT_SIZE, 4, edge)
+	for i: int in _ages.size():
+		var fill: Color = COLOR
+		fill.a *= _alpha(i)
+		draw_string(font, _shown_at(i), _texts[i], align, 40.0, FONT_SIZE, fill)
+
+
+## Number `i` fades out as it rises.
+func _alpha(i: int) -> float:
+	var progress: float = _ages[i] / LIFETIME
+	return 1.0 - progress * progress
+
+
+func _shown_at(i: int) -> Vector2:
+	return _positions[i] + Vector2(0.0, -RISE * _ages[i] / LIFETIME)

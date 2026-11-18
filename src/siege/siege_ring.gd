@@ -9,6 +9,8 @@ extends Node2D
 ## Stitches around the ring and how much of each step is thread.
 const STITCHES: int = 32
 const STITCH_SHARE: float = 0.6
+## Straight pieces per stitch (it follows the ring's curve).
+const STITCH_BENDS: int = 3
 const WIDTH: float = 5.0
 ## Ring opacity at rest and at full glow; the soft fill inside at full glow.
 const REST_ALPHA: float = 0.5
@@ -73,7 +75,19 @@ func _draw() -> void:
 		var fill: Color = color
 		fill.a = FILL_ALPHA * glow
 		draw_circle(Vector2.ZERO, radius, fill)
+	draw_multiline(stitch_lines(radius), ring, WIDTH, true)
+
+
+## The ring's stitches as line pairs (each stitch a short bent run of `STITCH_BENDS` lines), drawn
+## in one go: one draw call for the whole ring instead of one per stitch (spec 07 §11).
+static func stitch_lines(reach: float) -> PackedVector2Array:
+	var lines: PackedVector2Array = []
 	var step: float = TAU / STITCHES
 	for i: int in STITCHES:
 		var start: float = i * step
-		draw_arc(Vector2.ZERO, radius, start, start + step * STITCH_SHARE, 4, ring, WIDTH, true)
+		for bend: int in STITCH_BENDS:
+			var from: float = start + step * STITCH_SHARE * bend / STITCH_BENDS
+			var to: float = start + step * STITCH_SHARE * (bend + 1) / STITCH_BENDS
+			lines.append(Vector2.from_angle(from) * reach)
+			lines.append(Vector2.from_angle(to) * reach)
+	return lines
