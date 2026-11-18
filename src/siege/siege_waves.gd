@@ -87,6 +87,18 @@ func take_boss() -> BossDef:
 	return wave_now.boss
 
 
+## How many waves were held off so far: every wave that stopped coming (a won siege held them
+## all, `won`). A wave that is still coming, or whose zombies are still around, isn't held yet.
+func held(won: bool) -> int:
+	if won:
+		return count()
+	if wave < 0:
+		return 0
+	if resting:
+		return wave + 1
+	return wave
+
+
 ## Developer menu: the next wave starts right away (after the last one, the waves are over).
 ## Returns the index of the wave that started (-1 = none).
 func next_wave() -> int:

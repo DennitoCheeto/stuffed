@@ -212,6 +212,9 @@ static var _current: WorldPalette
 ## A ruin's colours: share of the way to grey, and how much darker.
 @export_range(0.0, 1.0) var ruin_grey: float = 0.5
 @export_range(0.0, 1.0) var ruin_dim: float = 0.06
+## A building a lost siege damaged (spec 07 §6): felt patches sewn over it and loose threads.
+@export var damage_patches: Array[Color] = []
+@export var loose_thread: Color = Color.BLACK
 ## Flags and bunting flutter (spec 05 §3.4): how far a loose cloth end moves (px) and how fast.
 @export_range(0.0, 10.0) var flutter_pixels: float = 2.5
 @export var flutter_speed: float = 5.0

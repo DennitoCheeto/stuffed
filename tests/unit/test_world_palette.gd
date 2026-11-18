@@ -26,6 +26,7 @@ const WORLD_ART_SCRIPTS: Array[String] = [
 	"res://src/town/art/fort_look.gd",
 	"res://src/town/art/scrapbook_look.gd",
 	"res://src/town/art/town_ground_look.gd",
+	"res://src/town/art/damage_look.gd",
 	"res://src/town/town_fort.gd",
 	"res://src/town/scrapbook_stand.gd",
 	"res://src/town/town_life.gd",

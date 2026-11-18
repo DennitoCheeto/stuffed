@@ -45,6 +45,9 @@ var plushies: Dictionary[String, SiegePlushie] = {}
 var won: bool = false
 ## Wave banners shown so far (wave index), for tests.
 var wave_banners: Array[int] = []
+## Buildings knocked down in the fight (ids), noted when the siege ends: a lost siege damages
+## them (spec 07 §6); a won one stands them back up.
+var knocked_ids: PackedStringArray = []
 
 ## Fallen heroes (player index) -> seconds until they stand back up.
 var _fallen: Dictionary[int, float] = {}
@@ -110,12 +113,36 @@ func win() -> void:
 		if not player.is_dead():
 			player.celebrate()
 	enemies.pop_all_in_chain(fort.rect.get_center(), POP_CHAIN_TIME)
+	_stand_buildings_up()
 
 
+## Won: buildings knocked down in the fight pop back up with a puff, no damage (spec 07 §6).
+func _stand_buildings_up() -> void:
+	var looks: Dictionary[StringName, TownBuilding] = town_arena().buildings
+	for building: SiegeBuilding in targets.buildings:
+		if building.is_fallen():
+			building.revive()
+			looks[building.id].stand_up()
+
+
+## A siege's result also tells which siege it was, the waves held and what was knocked down.
+## Giving up counts as lost (`won` stays false).
 func make_result(ending: String) -> RunResult:
 	var result: RunResult = super(ending)
 	result.won = ending == WON
+	result.siege_number = number
+	result.wave_count = waves.count()
+	result.waves_held = waves.held(result.won)
+	# Giving up mid-fight (no won/lost ending yet): what is down right now counts.
+	result.knocked_down = _knocked_now() if _ending.is_empty() else knocked_ids.duplicate()
 	return result
+
+
+func _knocked_now() -> PackedStringArray:
+	var ids: PackedStringArray = []
+	for id: StringName in targets.knocked_down():
+		ids.append(String(id))
+	return ids
 
 
 ## A siege brings nothing home by the kill: its reward comes at the end (spec 07 §6, M4-07).
@@ -314,6 +341,7 @@ func _on_fort_fell() -> void:
 
 ## The siege is over: nothing new comes, the zombies calm down, a banner, then home.
 func _end(ending: String, title: String, subtitle: String) -> void:
+	knocked_ids = _knocked_now()
 	over = true
 	enemies.calm = true
 	for turret: SiegeTurret in turrets.values():

@@ -64,6 +64,12 @@ var titles: PackedStringArray = []
 var tricks: PackedStringArray = []
 ## The first time each trick fired: {"id", "time": run seconds, "player": 0-based index}.
 var trick_moments: Array[Dictionary] = []
+## Night siege only (spec 07 §6): which siege (1 = the first; 0 = an expedition), waves held of
+## how many, and the buildings knocked down in the fight (ids).
+var siege_number: int = 0
+var waves_held: int = 0
+var wave_count: int = 0
+var knocked_down: PackedStringArray = []
 
 
 ## How the run ended for the town (spec 03 §10): "king", "way_home", "died" or "gave_up".
@@ -78,6 +84,11 @@ func run_end() -> String:
 	return "died"
 
 
+## True for a night siege's result (not an expedition).
+func is_siege() -> bool:
+	return siege_number > 0
+
+
 ## Id of the plushie freed in this run ("" = none).
 func rescued_plushie() -> String:
 	if rescue.get("freed", false):
@@ -86,6 +97,8 @@ func rescued_plushie() -> String:
 
 
 func title() -> String:
+	if is_siege():
+		return SiegeRules.current().won_banner if won else SiegeRules.current().lost_banner
 	if won:
 		return "You survived!"
 	if ending == "way_home":

@@ -40,6 +40,7 @@ func setup(town_layout: TownLayout, save: TownSave) -> void:
 		var level: int = save.building_level(String(spot.id))
 		var building: TownBuilding = TownBuilding.new(spot, level, _is_open(spot, save))
 		add_child(building)
+		building.show_damaged(level > 0 and save.is_damaged(String(spot.id)))
 		buildings[spot.id] = building
 		standing.append(building)
 	dusk = TownDusk.new(TownDusk.lit_rects(fort, standing))

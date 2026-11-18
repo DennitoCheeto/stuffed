@@ -40,10 +40,13 @@ func _wait_for_banner(town: Town, title: String, seconds: float) -> bool:
 	return false
 
 
+## Waits for the siege's end screen, presses "Back to the fort" and returns the town.
 func _wait_for_town(seconds: float) -> Town:
 	for i: int in roundi(seconds * FPS):
 		if main.current_screen is Town:
 			break
+		if main.current_screen is EndScreen:
+			(main.current_screen as EndScreen).fort_requested.emit()
 		await wait_physics_frames(1)
 	await wait_physics_frames(1)
 	return main.current_screen as Town

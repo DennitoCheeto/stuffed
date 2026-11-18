@@ -30,7 +30,7 @@ var buddy: String = ""
 static func from_save(save: TownSave, layout: TownLayout) -> TownPerks:
 	var perks: TownPerks = TownPerks.new()
 	for spot: TownSpot in layout.spots:
-		var level: int = save.building_level(String(spot.id))
+		var level: int = _working_level(save, spot)
 		perks.locked_weapons.append_array(spot.building.locked_weapons_at(level))
 		if spot.building.chooses_start_weapon(level):
 			perks.can_choose_start_weapon = true
@@ -42,14 +42,25 @@ static func from_save(save: TownSave, layout: TownLayout) -> TownPerks:
 			perks.pickup_gap_cut += reached.pickup_gap_cut
 			if reached.first_pickup_at > 0.0:
 				perks.first_pickup_at = _earliest(perks.first_pickup_at, reached.first_pickup_at)
-	for trick: TrickDef in TrickBook.all_tricks(layout):
-		if save.has_trick(String(trick.id)):
-			perks.tricks.append(trick)
+	for spot: TownSpot in layout.spots:
+		if save.is_damaged(String(spot.id)):
+			continue
+		for trick: TrickDef in spot.building.tricks:
+			if save.has_trick(String(trick.id)):
+				perks.tricks.append(trick)
 	perks.buddy = save.last_rescued
 	var chosen: StringName = StringName(save.start_weapon)
 	if perks.can_choose_start_weapon and not perks.locked_weapons.has(chosen):
 		perks.start_weapon = chosen
 	return perks
+
+
+## The level whose bonuses work in runs: a building a lost siege damaged gives nothing until it
+## is repaired (spec 07 §6, AC-80), as if it were still a ruin.
+static func _working_level(save: TownSave, spot: TownSpot) -> int:
+	if save.is_damaged(String(spot.id)):
+		return 0
+	return save.building_level(String(spot.id))
 
 
 ## The earlier of two first-drop times, where 0 means "not set".
