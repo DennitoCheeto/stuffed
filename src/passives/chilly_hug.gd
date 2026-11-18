@@ -20,8 +20,9 @@ var _time: float = 0.0
 
 func setup(owner_player: Player) -> void:
 	player = owner_player
-	# On the floor, under zombies and the hero.
-	z_index = -1
+	# On the floor, under zombies and the hero (WorldLayers), like the hero ring.
+	z_as_relative = false
+	z_index = WorldLayers.FLOOR_MARKS
 
 
 func _physics_process(delta: float) -> void:

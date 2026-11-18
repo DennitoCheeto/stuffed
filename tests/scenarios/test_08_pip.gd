@@ -41,6 +41,8 @@ func test_ac88_chilly_hug_slows_zombies_close_to_pip() -> void:
 	assert_eq(far.slow_amount, 0.0, "far away: normal speed")
 	assert_almost_eq(boss.slow_amount, PIP.chilly_boss_slow, 0.001, "bosses: a bit slower")
 	assert_true((pip.get_node("ChillyHug") as ChillyHug).visible, "frost ring shows")
+	var ring: ChillyHug = pip.get_node("ChillyHug") as ChillyHug
+	assert_eq(WorldLayers.absolute_z(ring), WorldLayers.FLOOR_MARKS, "on the floor")
 
 
 func test_ac89_a_snowball_bursts_and_slows_the_group() -> void:
