@@ -66,7 +66,7 @@ func test_every_unlock_names_a_weapon_in_the_pool() -> void:
 
 
 func test_a_fresh_run_without_a_town_has_every_weapon() -> void:
-	assert_eq(TownPerks.new().open_weapons(POOL).size(), 11)
+	assert_eq(TownPerks.new().open_weapons(POOL).size(), 12)
 
 
 func test_locked_weapons_never_come_up_on_cards() -> void:

@@ -10,8 +10,13 @@ var _base_scale: Vector2 = Vector2.ONE
 
 
 func _init() -> void:
-	ProjectileLook.apply(self, ProjectileLook.WHIP)
+	ProjectileLook.apply(self, _part())
 	_base_scale = scale
+
+
+## The look (Paw Swat shows a paw swipe).
+func _part() -> StringName:
+	return ProjectileLook.WHIP
 
 
 func launch(from: Weapon, direction: Vector2) -> void:
@@ -20,7 +25,7 @@ func launch(from: Weapon, direction: Vector2) -> void:
 	_time_left = SHOW_TIME
 	global_position = from.origin()
 	rotation = direction.angle()
-	scale = _base_scale * numbers.area / ProjectileLook.WHIP_RADIUS
+	scale = _base_scale * numbers.area / _part_radius()
 	modulate.a = 1.0
 	var half_width: float = deg_to_rad(numbers.spread_degrees) / 2.0
 	var push_strength: float = from.stats.knockback
@@ -30,6 +35,11 @@ func launch(from: Weapon, direction: Vector2) -> void:
 			continue
 		var push: Vector2 = to_zombie.normalized() * push_strength
 		manager.enemies.damage(zombie, numbers.damage, push, weapon)
+
+
+## The look's radius at scale 1 (it is stretched to the weapon's area).
+func _part_radius() -> float:
+	return ProjectileLook.WHIP_RADIUS
 
 
 func advance(delta: float) -> bool:

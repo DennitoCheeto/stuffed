@@ -130,6 +130,7 @@ func _ready() -> void:
 	z_index = WorldLayers.HEROES - WorldLayers.ENEMIES
 	_controls = PlayerInput.new(player_index)
 	max_health = stats.max_health + bonus_max_health
+	damage_taken_multiplier = stats.damage_taken
 	health = max_health
 	pickup_range = stats.pickup_range * (1.0 + bonus_pickup_share)
 	progress = LevelProgress.new(xp_rules)
@@ -141,6 +142,11 @@ func _ready() -> void:
 		slippery.name = "Slippery"
 		add_child(slippery)
 		slippery.setup(self)
+	if stats.bear_hug:
+		var hug_charge: BearHug = BearHug.new()
+		hug_charge.name = "BearHug"
+		hug_charge.setup(self)
+		add_child(hug_charge)
 	if stats.chilly_hug:
 		var hug: ChillyHug = ChillyHug.new()
 		hug.name = "ChillyHug"

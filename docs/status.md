@@ -662,3 +662,10 @@ _Last updated: 2026-11-18 (M5-03 merged (PR #261), #172 part 2 merged (PR #262);
   `WorldLayers.FLOOR_MARKS` (hero ring, Chilly Hug). `test_clarity_ladder.gd` checks every `ProjectileLook`
   own-shot colour is non-danger and quieter than the zombie ink on every floor; `WorldLayers.absolute_z(node)` for
   tests. #172 stays open until the PO's playtest.
+- Böbö (M5-05, spec 08 §3): Paw Swat = `PawSwat` (extends `ThreadWhip`, `_aim` = `facing()`) + `PawProjectile`
+  (extends `WhipProjectile`: `_part` / `_part_radius`); data `data/weapons/paw_swat.tres`, part `ProjectileLook.PAW`
+  (calm tan: Böbö's brown is a danger colour), icon `paw`, sound `paw`. Bear Hug = `BearHug` node (`src/passives/`):
+  while dashing, zombies within `bear_hug_reach` are shoved (`bear_hug_shove`) and hurt once per dash via
+  `enemies.damage_from(WeaponTally.BEAR_HUG, zombie, amount, push)` (push param is new). `HeroStats.damage_taken`
+  (Böbö 0.8) sets `Player.damage_taken_multiplier` at the start. Tests: `test_paw_swat.gd`, `test_08_bobo.gd`
+  (scenario tests that take a hit: kill nearby zombies first or they keep the hero invulnerable / dead).

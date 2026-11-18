@@ -152,11 +152,13 @@ func damage(zombie: Zombie, amount: float, push: Vector2 = Vector2.ZERO, by: Wea
 
 
 ## Like `damage`, from something that isn't a weapon (`source` = WeaponTally.PARTY_POPPER ...).
-func damage_from(source: StringName, zombie: Zombie, amount: float) -> bool:
+func damage_from(
+	source: StringName, zombie: Zombie, amount: float, push: Vector2 = Vector2.ZERO
+) -> bool:
 	if not is_instance_valid(zombie) or zombie.dead:
 		return false
 	var dealt: float = clampf(amount, 0.0, maxf(zombie.health, 0.0))
-	var died: bool = _hurt(zombie, amount, Vector2.ZERO)
+	var died: bool = _hurt(zombie, amount, push)
 	tally.add_other(source, dealt, died)
 	return died
 
