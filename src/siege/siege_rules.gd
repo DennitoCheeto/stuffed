@@ -6,6 +6,10 @@ extends Resource
 ## The countdown lives in `TownSave.siege_nights`: -1 = no warning yet, N = nights to go,
 ## 0 = the siege is due. A "night" is one expedition that ended (any ending, spec 07 §3).
 
+const PATH: String = "res://data/siege/siege_rules.tres"
+
+static var _current: SiegeRules
+
 ## The first warning appears once this many buildings are rebuilt (something to defend).
 @export var first_trigger_buildings: int = 2
 ## Nights to go when the first warning appears.
@@ -99,6 +103,13 @@ extends Resource
 @export var consolation_share: float = 0.3
 ## Repairing a damaged building costs this share of its current level's coins.
 @export var repair_share: float = 0.25
+## A damaged building in town leans this far (degrees), greys towards `damaged_tint` and gets
+## this many felt patches with loose threads (colours in the world palette).
+@export var damaged_tilt_degrees: float = -4.0
+@export var damaged_tint: Color = Color(0.84, 0.82, 0.84, 1.0)
+@export var damaged_patches: int = 3
+## The stitch-up moment when it is repaired: its sound.
+@export var repair_sound: StringName = &"rebuild"
 
 @export_group("Texts")
 ## The moon calendar's sign: nights to go ("%d" = how many).
@@ -125,6 +136,26 @@ extends Resource
 @export var won_subtitle: String = "The fort stands. The horde runs home."
 @export var lost_banner: String = "The horde got in"
 @export var lost_subtitle: String = "The fort fell. They leave at dawn."
+## The end screen after a siege: the run line ("%d of %d" waves) and the note over the haul.
+@export var waves_line: String = "Waves held: %d of %d"
+@export var won_note: String = "The night's reward!"
+@export var lost_note: String = "A small thank-you for trying."
+## On the end screen when buildings were damaged ("%s" = their names).
+@export var damaged_line: String = "Damaged: %s. Repair them at the fort."
+## Back in town, when buildings were damaged.
+@export var damaged_subtitle: String = "Some buildings need a repair. Walk up and press E."
+## The info card of a damaged building, and what E does there.
+@export var damaged_card: String = "Damaged: repair to turn its bonuses back on"
+@export var damaged_tag: String = "Damaged"
+@export var repair_prompt: String = "E   Repair"
+
+
+## The game's siege rules, loaded at first use. For scripts the rules' own resources depend on
+## (a `preload` there would load in a circle): run results, town buildings.
+static func current() -> SiegeRules:
+	if _current == null:
+		_current = load(PATH) as SiegeRules
+	return _current
 
 
 ## Shows the first warning once enough buildings stand. Returns true if it just appeared.
@@ -189,6 +220,11 @@ func reward_for(number: int) -> Dictionary[String, int]:
 ## What losing siege `number` still brings home.
 func consolation_for(number: int) -> Dictionary[String, int]:
 	return _scaled((1.0 + reward_growth * maxi(number - 1, 0)) * consolation_share)
+
+
+## What siege `number` brings home: the reward when `won`, else the consolation haul.
+func haul_for(number: int, won: bool) -> Dictionary[String, int]:
+	return reward_for(number) if won else consolation_for(number)
 
 
 ## What repairing a building damaged at `level` costs (coins, rounded up).

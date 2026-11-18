@@ -151,3 +151,16 @@ func test_zombies_touching_the_fort_knock_it_down() -> void:
 
 func _near_radius() -> float:
 	return SHAMBLER.radius + 2.0
+
+
+func test_ac80_waves_held_counts_the_waves_that_stopped_coming() -> void:
+	var waves: SiegeWaves = SiegeWaves.new(RULES)
+	assert_eq(waves.held(false), 0, "before the first wave")
+	waves.tick(0.1)
+	assert_eq(waves.held(false), 0, "wave 1 still coming")
+	_run(waves, RULES.wave_seconds + 0.5)
+	assert_true(waves.resting)
+	assert_eq(waves.held(false), 1, "wave 1 held, resting")
+	waves.next_wave()
+	assert_eq(waves.held(false), 1, "wave 2 still coming")
+	assert_eq(waves.held(true), 3, "a won siege held them all")

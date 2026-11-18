@@ -141,3 +141,35 @@ func test_ac81_an_older_save_has_no_warning_yet() -> void:
 	assert_eq(loaded.sieges_played, 0)
 	assert_eq(loaded.damaged.size(), 0)
 	assert_true(RULES.warn_if_ready(loaded), "the countdown appears as usual")
+
+
+func test_ac80_won_gives_the_reward_lost_a_consolation_share() -> void:
+	assert_eq(_amounts(RULES.haul_for(1, true)), [400, 20, 4] as Array[int])
+	assert_eq(_amounts(RULES.haul_for(1, false)), [120, 6, 1] as Array[int])
+	assert_eq(_amounts(RULES.haul_for(2, true)), [500, 25, 5] as Array[int])
+
+
+func test_ac80_damage_and_repair_only_built_buildings() -> void:
+	var town: TownSave = _town(2)
+	town.damage(PackedStringArray(["lucky_jar", "watchtower", "lucky_jar"]))
+	assert_eq(town.damaged, PackedStringArray(["lucky_jar"]), "ruins and repeats are skipped")
+	town.repair("lucky_jar")
+	assert_false(town.is_damaged("lucky_jar"))
+	town.add_materials({"coins": 30, "thread": 2})
+	town.add_materials({"coins": 5})
+	assert_eq(town.material("coins"), 35)
+	assert_eq(town.material("thread"), 2)
+
+
+func test_ac80_a_damaged_building_gives_no_bonus_and_no_trick() -> void:
+	var layout: TownLayout = load("res://data/town/pillow_fort.tres")
+	var town: TownSave = TownSave.new()
+	town.building_levels = {"snack_bar": 3, "lucky_jar": 2}
+	town.tricks = PackedStringArray(["second_helping", "shiny_card"])
+	var before: TownPerks = TownPerks.from_save(town, layout)
+	town.damage(PackedStringArray(["snack_bar"]))
+	var after: TownPerks = TownPerks.from_save(town, layout)
+	assert_gt(before.max_health_bonus, 0.0)
+	assert_eq(after.max_health_bonus, 0.0, "Snack Bar bonus off")
+	assert_eq(after.extra_card_uses, before.extra_card_uses, "the Lucky Jar still helps")
+	assert_eq(after.trick_ids(), PackedStringArray(["shiny_card"]), "tricks of working ones")

@@ -89,6 +89,9 @@ func show_result(run_result: RunResult) -> void:
 		_columns_row.add_child(column)
 	extras_label.text = extras_text(result)
 	extras_label.visible = not extras_label.text.is_empty()
+	# After a siege the way on is home to the fort (the next expedition starts there).
+	try_again_button.visible = not result.is_siege()
+	seed_label.visible = not result.is_siege()
 
 
 ## Sticks the run titles on the page (rarest first); they slap on after the Star of the run,
@@ -122,7 +125,10 @@ func show_titles(earned: Array[RunTitle], gap: float = 0.25) -> void:
 ## The parts of the run line under the title.
 static func stat_lines(run_result: RunResult) -> PackedStringArray:
 	var lines: PackedStringArray = []
-	if run_result.endless_seconds > 0.0:
+	if run_result.is_siege():
+		var waves: Array[int] = [run_result.waves_held, run_result.wave_count]
+		lines.append(SiegeRules.current().waves_line % waves)
+	elif run_result.endless_seconds > 0.0:
 		var goal: float = run_result.survived_seconds - run_result.endless_seconds
 		var endless: String = TimeFormat.clock(run_result.endless_seconds)
 		lines.append("%s + %s endless" % [TimeFormat.clock(goal), endless])
@@ -131,7 +137,7 @@ static func stat_lines(run_result: RunResult) -> PackedStringArray:
 	lines.append("Level %d" % run_result.level)
 	var zombies: String = "zombie" if run_result.kills == 1 else "zombies"
 	lines.append("%s %s stuffed" % [WeaponReport.grouped(run_result.kills), zombies])
-	if run_result.killed_by != "":
+	if run_result.killed_by != "" and not run_result.is_siege():
 		lines.append("Got stuffed by %s" % run_result.killed_by)
 	return lines
 

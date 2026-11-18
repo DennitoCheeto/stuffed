@@ -131,18 +131,54 @@ func start_siege() -> void:
 	_switch_to(siege)
 
 
-## A siege ended (won, lost, or given up = lost): the countdown starts again, saved at once,
-## and the town tells how it went.
+## A siege ended (won, lost, or given up = lost; spec 07 §6, AC-80): won brings the reward
+## home, lost a consolation haul and damages every building knocked down in the fight. The
+## countdown starts again, all saved at once; the end screen shows how it went, and the town
+## tells it again on arrival.
 func _end_siege(result: RunResult) -> void:
 	player_count = maxi(Players.all(get_tree()).size(), 1)
-	var won: bool = result.ending == Siege.WON
+	var won: bool = result.won
+	var before: Dictionary[String, int] = town.materials.duplicate()
+	var haul: Dictionary[String, int] = SIEGE_RULES.haul_for(result.siege_number, won)
+	town.add_materials(haul)
+	result.materials_kept = haul
+	var damaged: PackedStringArray = []
+	if not won:
+		for id: String in result.knocked_down:
+			if town.building_level(id) > 0 and not town.is_damaged(id):
+				damaged.append(id)
+		town.damage(damaged)
 	SIEGE_RULES.siege_ended(town, won)
 	SaveStore.write(town)
 	if won:
 		_siege_news = PackedStringArray([SIEGE_RULES.won_banner, SIEGE_RULES.won_subtitle])
-	else:
+	elif damaged.is_empty():
 		_siege_news = PackedStringArray([SIEGE_RULES.lost_banner, SIEGE_RULES.lost_subtitle])
-	show_town()
+	else:
+		_siege_news = PackedStringArray([SIEGE_RULES.lost_banner, SIEGE_RULES.damaged_subtitle])
+	Crosshair.stop()
+	_play_music(&"town")
+	var end: EndScreen = END_SCENE.instantiate()
+	end.show_result(result)
+	end.brought_home.show_haul(haul, before, 1.0)
+	end.brought_home.show_siege(
+		SIEGE_RULES.won_note if won else SIEGE_RULES.lost_note, _damaged_line(damaged)
+	)
+	end.brought_home.show_horde(SIEGE_RULES.end_line(town.siege_nights))
+	end.fort_requested.connect(show_town)
+	end.try_again_requested.connect(show_town)
+	_switch_to(end)
+
+
+## "Damaged: Snack Bar, Lucky Jar. Repair them at the fort." ("" = nothing was damaged).
+func _damaged_line(ids: PackedStringArray) -> String:
+	if ids.is_empty():
+		return ""
+	var names: PackedStringArray = []
+	for id: String in ids:
+		var spot: TownSpot = TOWN_LAYOUT.spot(StringName(id))
+		names.append(spot.building.display_name if spot != null else id)
+	return SIEGE_RULES.damaged_line % ", ".join(names)
 
 
 ## The end screen for a finished or given-up run (also written to the run log): its stats and

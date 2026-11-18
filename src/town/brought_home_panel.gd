@@ -31,6 +31,8 @@ var rescue_label: Label
 var rescue_photo: PhotoFrame
 ## "2 nights until the horde!" (spec 07 §2; hidden before the first warning).
 var horde_label: Label
+## "Damaged: Snack Bar. Repair them at the fort." after a lost siege (hidden otherwise).
+var damage_label: Label
 ## Material id -> "+12" counter (this run).
 var gained: Dictionary[String, JarCounter] = {}
 ## Material id -> total in the jars.
@@ -73,6 +75,9 @@ func _init() -> void:
 	horde_label.add_theme_font_override(&"font", UiFonts.hand())
 	horde_label.visible = false
 	add_child(horde_label)
+	damage_label = _text(20, NOTE_COLOR)
+	damage_label.visible = false
+	add_child(damage_label)
 	_rescue_box = VBoxContainer.new()
 	_rescue_box.alignment = BoxContainer.ALIGNMENT_CENTER
 	_rescue_box.add_theme_constant_override(&"separation", 6)
@@ -107,6 +112,14 @@ func show_haul(
 func show_horde(line: String) -> void:
 	horde_label.text = line
 	horde_label.visible = not line.is_empty()
+
+
+## After a night siege (spec 07 §6): `note` over the haul ("The night's reward!") and the
+## line naming the damaged buildings (empty = hide it).
+func show_siege(note: String, damage_line: String) -> void:
+	note_label.text = note
+	damage_label.text = damage_line
+	damage_label.visible = not damage_line.is_empty()
 
 
 ## Shows that the plushie `plushie_name` was rescued in this run and moves into town, with a

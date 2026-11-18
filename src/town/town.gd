@@ -258,7 +258,7 @@ func open_buildings() -> Array[TownBuilding]:
 ## What pressing E at `building` does: pays for its next level if the jars hold enough and plays
 ## the rebuild moment. Returns false (and only shows what's missing) if it can't.
 func try_build(building: TownBuilding) -> bool:
-	if building.is_busy() or not building.unlocked:
+	if building.is_busy() or not building.unlocked or building.damaged:
 		return false
 	var next: BuildingLevel = building.building.next(building.level)
 	if next == null:
@@ -295,10 +295,24 @@ func _raise(building: TownBuilding, next: BuildingLevel) -> void:
 ## What pressing E next to `building` does: choose the starting weapon at a fully built Toy
 ## Box Armory, else rebuild or upgrade it.
 func interact(building: TownBuilding) -> void:
-	if can_choose_start_weapon(building):
+	if building.damaged:
+		_repair(building)
+	elif can_choose_start_weapon(building):
 		open_weapon_picker()
 	else:
 		try_build(building)
+
+
+## Repairs a damaged building if the jars hold its price (spec 07 §6, AC-80): it stands straight
+## with a stitch-up moment, its bonuses and tricks work again, saved at once.
+func _repair(building: TownBuilding) -> void:
+	if building.is_busy() or not save.spend(building.repair_cost()):
+		Sfx.play(&"nope")
+		return
+	save.repair(String(building.spot.id))
+	building.play_repair()
+	refresh()
+	changed.emit()
 
 
 ## True when E at `building` opens the starting weapon choice (nothing left to upgrade there).

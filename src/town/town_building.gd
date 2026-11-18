@@ -62,6 +62,9 @@ var trick_ready: bool = false
 var card_shown: bool = false
 ## Knocked down in the night siege (spec 07 §4): tipped over, sunk a little and greyed out.
 var knocked_down: bool = false
+## A lost siege damaged it (spec 07 §6): it leans, greys a little and wears felt patches until
+## it is repaired. It keeps its level; its bonuses and tricks are off in runs meanwhile.
+var damaged: bool = false
 
 var _shake_left: float = 0.0
 ## 0..1 while popping up, 1 when still.
@@ -115,14 +118,15 @@ func refresh(save: TownSave) -> void:
 		cost_row.remove_child(counter)
 		counter.queue_free()
 	cost_counters.clear()
+	show_damaged(level > 0 and save.is_damaged(String(spot.id)))
 	var next: BuildingLevel = building.next(level)
-	affordable = unlocked and next != null and save.can_afford(next.cost())
-	trick_ready = level > 0 and TrickBook.buyable(save, building) >= 0
-	price_tag.visible = unlocked and level == 0 and next != null
+	affordable = unlocked and not damaged and next != null and save.can_afford(next.cost())
+	trick_ready = level > 0 and not damaged and TrickBook.buyable(save, building) >= 0
+	price_tag.visible = damaged or (unlocked and level == 0 and next != null)
 	_update_can_build()
 	if not price_tag.visible:
 		return
-	var cost: Dictionary[String, int] = next.cost()
+	var cost: Dictionary[String, int] = repair_cost() if damaged else next.cost()
 	for material: String in cost:
 		var counter: JarCounter = JarCounter.new(material, 20, 26.0).on_felt()
 		counter.show_amount(cost[material])
@@ -176,6 +180,41 @@ func play_build(new_level: int) -> void:
 	else:
 		_pop_up(0.9, 0.55)
 		Sfx.play(&"upgrade")
+
+
+## What repairing it costs now (25% of its level's coins, spec 07 §6; empty = not damaged).
+func repair_cost() -> Dictionary[String, int]:
+	if not damaged:
+		return {}
+	return SiegeRules.current().repair_cost(building.reached(level))
+
+
+## The stitch-up moment after a repair: it stands straight again with a puff.
+func play_repair() -> void:
+	show_damaged(false)
+	_pop_up(0.9, 0.8)
+	Sfx.play(SiegeRules.current().repair_sound)
+
+
+## A won siege: a knocked-down building pops back up with a puff, no damage (spec 07 §6).
+func stand_up() -> void:
+	if not knocked_down:
+		return
+	knocked_down = false
+	_knocked_tilt = 0.0
+	_knocked_sink = 1.0
+	self_modulate = Color.WHITE
+	add_child(TownPuff.new(spot.rect, 0.9))
+	queue_redraw()
+
+
+## Shows (or stops showing) the damaged look (the siege shows it too: they stand still there).
+func show_damaged(on: bool) -> void:
+	if damaged == on:
+		return
+	damaged = on
+	self_modulate = SiegeRules.current().damaged_tint if on else Color.WHITE
+	queue_redraw()
 
 
 ## The yarn falls off: the ruin can be rebuilt now ("New building!").
@@ -283,8 +322,14 @@ func _draw() -> void:
 	var pose: Vector2 = Vector2.ONE * pop_scale()
 	if knocked_down:
 		pose.y *= _knocked_sink
-	draw_set_transform(bottom + shake, _knocked_tilt, pose)
+	var rules: SiegeRules = SiegeRules.current()
+	var tilt: float = _knocked_tilt
+	if damaged:
+		tilt = deg_to_rad(rules.damaged_tilt_degrees)
+	draw_set_transform(bottom + shake, tilt, pose)
 	shown_look().draw(self)
+	if damaged:
+		DamageLook.draw(self, shown_look().bounds(), rules.damaged_patches, hash(spot.id))
 	draw_set_transform(shake)
 	if shown_level == 0:
 		_draw_ruin_yarn(spot.rect)

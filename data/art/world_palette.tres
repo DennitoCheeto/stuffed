@@ -117,3 +117,5 @@ floor_brightness_min = 0.65
 grain_strength = 0.045
 flutter_pixels = 2.5
 flutter_speed = 5.0
+damage_patches = Array[Color]([Color(0.86, 0.82, 0.74, 1), Color(0.76, 0.8, 0.86, 1), Color(0.82, 0.76, 0.84, 1)])
+loose_thread = Color(0.45, 0.42, 0.5, 1)

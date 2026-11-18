@@ -85,7 +85,11 @@ func show_for(target: TownBuilding, save: TownSave, above: bool, note: String = 
 	var def: BuildingDef = target.building
 	title_label.text = def.display_name
 	level_label.text = level_text(target.level, def.max_level())
-	if target.level == 0:
+	if target.damaged:
+		level_label.text += " · " + SiegeRules.current().damaged_tag
+		now_label.text = SiegeRules.current().damaged_card
+		next_label.text = ""
+	elif target.level == 0:
 		now_label.text = def.summary
 		next_label.text = "Rebuilt: " + def.effect_at(1)
 	else:
@@ -132,6 +136,9 @@ static func level_text(level: int, top: int) -> String:
 static func action_text(target: TownBuilding, save: TownSave) -> String:
 	if not target.unlocked:
 		return target.spot.unlock_hint()
+	if target.damaged:
+		var short: Dictionary[String, int] = save.missing(target.repair_cost())
+		return SiegeRules.current().repair_prompt if short.is_empty() else missing_text(short)
 	var next: BuildingLevel = target.building.next(target.level)
 	if next == null:
 		if target.building.chooses_start_weapon(target.level):
@@ -179,6 +186,8 @@ func _show_cost(target: TownBuilding, save: TownSave) -> void:
 
 
 static func _cost(target: TownBuilding) -> Dictionary[String, int]:
+	if target.damaged:
+		return target.repair_cost()
 	var result: Dictionary[String, int] = {}
 	var next: BuildingLevel = target.building.next(target.level)
 	if next != null:

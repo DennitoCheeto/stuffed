@@ -104,6 +104,26 @@ func spend(cost: Dictionary[String, int]) -> bool:
 	return true
 
 
+## Puts `amounts` into the jars (a siege's reward, spec 07 §6).
+func add_materials(amounts: Dictionary[String, int]) -> void:
+	for id: String in amounts:
+		materials[id] = material(id) + amounts[id]
+
+
+## A lost siege damaged the buildings `ids` (built ones only, each listed once).
+func damage(ids: PackedStringArray) -> void:
+	for id: String in ids:
+		if building_level(id) > 0 and not damaged.has(id):
+			damaged.append(id)
+
+
+## Building `id` was repaired: its bonuses and tricks work again.
+func repair(id: String) -> void:
+	var at: int = damaged.find(id)
+	if at >= 0:
+		damaged.remove_at(at)
+
+
 ## Plushies that moved into town.
 func plushies_in_town() -> int:
 	var count: int = 0
