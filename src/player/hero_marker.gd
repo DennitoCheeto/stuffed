@@ -18,7 +18,9 @@ var color: Color = UiColors.PLAYER_MARKERS[0]
 
 
 func _ready() -> void:
-	z_index = -1
+	# Always on the floor, even though the hero itself is drawn over zombies (WorldLayers).
+	z_as_relative = false
+	z_index = WorldLayers.FLOOR_MARKS
 	var player: Player = get_parent() as Player
 	var index: int = player.player_index if player != null else 0
 	color = UiColors.PLAYER_MARKERS[posmod(index, UiColors.PLAYER_MARKERS.size())]

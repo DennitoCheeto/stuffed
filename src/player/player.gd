@@ -125,6 +125,9 @@ func _enter_tree() -> void:
 
 func _ready() -> void:
 	add_to_group(GROUP)
+	# Over zombies, shots and bursts, under enemy bullets (the clarity ladder, #172). Heroes live
+	# under the run's actors node, which holds the zombies.
+	z_index = WorldLayers.HEROES - WorldLayers.ENEMIES
 	_controls = PlayerInput.new(player_index)
 	max_health = stats.max_health + bonus_max_health
 	health = max_health
