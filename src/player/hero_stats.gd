@@ -26,6 +26,9 @@ extends Resource
 @export var pickup_range: float = 60.0
 ## The weapon the hero starts every run with.
 @export var starting_weapon: WeaponStats
+## A new weapon this hero brings (Snowball Toss, Paw Swat): it joins the level-up cards for
+## every hero once this hero is unlocked (spec 08 §3). Null = none.
+@export var unlocks_weapon: WeaponStats
 
 @export_group("Slippery (Banane's passive)")
 ## Every dash drops a banana peel where it started (off for heroes without the passive).
@@ -38,6 +41,18 @@ extends Resource
 @export var peel_max: int = 3
 ## Radius of a peel's slippery area, in pixels.
 @export var peel_radius: float = 18.0
+
+@export_group("Chilly Hug (Pip's passive)")
+## Zombies close to the hero move slower; shown as a soft frost ring (spec 08 §3).
+@export var chilly_hug: bool = false
+## How close (pixels from the hero's middle).
+@export var chilly_radius: float = 90.0
+## How much slower (0.3 = 30%); bosses get `chilly_boss_slow` instead.
+@export var chilly_slow: float = 0.3
+@export var chilly_boss_slow: float = 0.15
+## The frost ring on the floor: colour, and how fast it breathes (per second).
+@export var chilly_ring_color: Color = Color(0.72, 0.86, 0.98, 0.35)
+@export var chilly_ring_pulse: float = 0.6
 
 @export_group("Puppet (plushie heroes)")
 ## How tall the hero puppet is, feet to the top of the head, in pixels (Banane is about 75).

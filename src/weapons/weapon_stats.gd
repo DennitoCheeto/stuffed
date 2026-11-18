@@ -20,6 +20,8 @@ extends Resource
 ## Lingering areas (Yarn Bomb's sticky yarn): zombies inside move this much slower (0.5 = half
 ## speed) ...
 @export var slow: float = 0.0
+## Hits that slow (Snowball Toss): how long the slow lasts, in seconds.
+@export var slow_seconds: float = 0.0
 ## ... and take this much damage every `hit_interval`.
 @export var linger_damage: float = 0.0
 ## Evolved weapons: how their shots look (null = the normal look).
