@@ -123,5 +123,5 @@ func test_town_perks_hand_each_player_their_hero() -> void:
 	town.set_hero(0, "robbar")
 	var perks: TownPerks = TownPerks.from_save(town, LAYOUT)
 	assert_eq(perks.hero(0), _hero("robbar"))
-	assert_null(perks.hero(1), "player 2 never picked: the hero scene's own (Banane)")
+	assert_eq(perks.hero(1), HEROES.starter(), "player 2 never picked: Banane (one of each)")
 	assert_null(TownPerks.new().hero(0), "a run without a town keeps Banane")
