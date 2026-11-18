@@ -9,6 +9,7 @@ display_name = "Plushie Buddy"
 text = "Your last rescued plushie comes along and collects buttons."
 amount = 160.0
 needs_level = 3
+in_siege = false
 coins = 1000
 stuffing = 25
 thread = 6

@@ -102,3 +102,32 @@ func test_ac32_floor_pickups_are_saved_and_read_back_the_same() -> void:
 
 func test_default_path_is_the_user_folder() -> void:
 	assert_eq(RunLog.DEFAULT_PATH, "user://run_log.jsonl")
+
+
+func test_a_night_siege_is_logged_as_a_siege_line() -> void:
+	var result: RunResult = RunResult.new()
+	result.siege_number = 2
+	result.won = false
+	result.ending = "siege_lost"
+	result.waves_held = 1
+	result.wave_count = 3
+	result.fort_health_left = 0.04
+	result.knocked_down = PackedStringArray(["lucky_jar", "snack_bar"])
+	result.damaged = PackedStringArray(["lucky_jar"])
+	result.materials_kept = {"coins": 150, "stuffing": 7}
+	result.survived_seconds = 97.26
+	assert_true(RunLog.append(result))
+	assert_true(RunLog.append(_result()))
+	var entries: Array[Dictionary] = RunLog.read_all()
+	var entry: Dictionary = entries[0]
+	assert_eq(entry["kind"], "siege")
+	assert_eq(int(entry["number"]), 2)
+	assert_eq(entry["won"], false)
+	assert_eq(int(entry["waves_held"]), 1)
+	assert_eq(int(entry["wave_count"]), 3)
+	assert_eq(entry["fort_health_left"], 0.0)
+	assert_eq(entry["knocked_down"], ["lucky_jar", "snack_bar"])
+	assert_eq(entry["damaged"], ["lucky_jar"])
+	assert_eq(int(entry["reward"]["coins"]), 150)
+	assert_eq(entry["time"], 97.3)
+	assert_eq(entries[1]["kind"], "run", "an expedition says so too")

@@ -33,6 +33,7 @@ var fort: SiegeFort
 ## The fort and the built buildings the horde goes for (AC-77).
 var targets: SiegeTargets
 var fort_bar: FortHealthBar
+var wave_counter: WaveCounter
 ## Building spot id -> its small health bar (only built, undamaged buildings).
 var building_bars: Dictionary[StringName, BuildingHealthBar] = {}
 ## Building spot id -> its turret (Toy Box Armory, Watchtower; spec 07 §4).
@@ -59,6 +60,8 @@ var _ending: String = ""
 
 func _ready() -> void:
 	town_arena().setup(layout, town_save)
+	# Bedroom-only tricks (Treasure Map, Picnic, rescue tricks) are off tonight (spec 07 §4).
+	perks.keep_siege_tricks()
 	super()
 	var area: Rect2 = town_arena().spawn_area(siege_rules.spawn_margin)
 	enemies.play_rect = area
@@ -78,6 +81,9 @@ func _ready() -> void:
 	enemies.siege = targets
 	fort_bar = FortHealthBar.new(fort)
 	hud.add_child(fort_bar)
+	wave_counter = WaveCounter.new(waves, siege_rules)
+	hud.add_child(wave_counter)
+	pickup_arrows.watch_fort(fort, siege_rules.fort_arrow_seconds)
 	vignette.visible = false
 
 
@@ -133,6 +139,7 @@ func make_result(ending: String) -> RunResult:
 	result.siege_number = number
 	result.wave_count = waves.count()
 	result.waves_held = waves.held(result.won)
+	result.fort_health_left = fort.health
 	# Giving up mid-fight (no won/lost ending yet): what is down right now counts.
 	result.knocked_down = _knocked_now() if _ending.is_empty() else knocked_ids.duplicate()
 	return result

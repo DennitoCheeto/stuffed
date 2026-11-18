@@ -3,7 +3,8 @@ extends Control
 ## Small arrows at the screen edge that point to floor pickups (spec 02b §4), the Way Home
 ## portal (spec 03 §4), a tangled plushie (spec 03 §7) and the Treasure Map box (spec 06 §3)
 ## when they are out of sight. With the Spyglass trick (spec 06 §3) they also point to elites
-## and bosses off screen (bosses get a bigger arrow).
+## and bosses off screen (bosses get a bigger arrow). In the night siege one points to the pillow
+## fort for a moment after it was hit while it is off screen (spec 07 §7).
 
 ## An arrow pointed to an elite or boss this frame (Spyglass at work).
 signal threat_pointed
@@ -21,11 +22,18 @@ const NUDGE_SPEED: float = 1.5
 const THREAT_COLOR: Color = Color("#f59bff")
 ## ... and a boss's arrow is this much bigger.
 const BOSS_SCALE: float = 1.5
+## The fort arrow: the fort bar's teal (the player's side, never a danger colour), a bit bigger.
+const FORT_COLOR: Color = FortHealthBar.FILL_COLOR
+const FORT_SCALE: float = 1.4
 
 ## Where the pickups lie (the run's floor items).
 var floor_items: Node2D
 ## Spyglass: the zombies to point at (null = no Spyglass).
 var threats: EnemyManager
+## Night siege: the fort to point at while it is under attack (null = not a siege).
+var fort: SiegeTarget
+## Seconds the fort arrow still shows after the last hit (0 = not under attack).
+var fort_alarm: float = 0.0
 ## Each arrow's tip (screen pixels), the direction it points, its colour (the portal's is soft
 ## blue) and its size (1 = normal), rebuilt every frame.
 var points: PackedVector2Array = []
@@ -34,6 +42,7 @@ var colors: PackedColorArray = []
 var sizes: PackedFloat32Array = []
 
 var _time: float = 0.0
+var _fort_alarm_seconds: float = 0.0
 
 
 func _ready() -> void:
@@ -57,7 +66,29 @@ func _process(delta: float) -> void:
 			_point_at(to_screen * (child as Node2D).global_position, view, color, 1.0)
 	if threats != null:
 		_point_at_threats(view, to_screen)
+	fort_alarm = maxf(fort_alarm - delta, 0.0)
+	if fort != null and fort_alarm > 0.0:
+		_point_at_fort(view, to_screen)
 	queue_redraw()
+
+
+## Night siege: point to the fort whenever it is hit, for `seconds` after each hit.
+func watch_fort(target: SiegeTarget, seconds: float) -> void:
+	fort = target
+	_fort_alarm_seconds = seconds
+	fort.health_changed.connect(_on_fort_health_changed)
+
+
+func _on_fort_health_changed(health: float, max_health: float) -> void:
+	if health < max_health and not fort.is_fallen():
+		fort_alarm = _fort_alarm_seconds
+
+
+## The fort arrow, only while no part of the fort is on screen.
+func _point_at_fort(view: Rect2, to_screen: Transform2D) -> void:
+	var on_screen: Rect2 = to_screen * fort.rect
+	if not view.intersects(on_screen):
+		_point_at(on_screen.get_center(), view, FORT_COLOR, FORT_SCALE)
 
 
 ## Spyglass: an arrow for every living elite and boss off screen.

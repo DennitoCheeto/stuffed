@@ -116,11 +116,7 @@ func start_siege() -> void:
 	siege.town_save = town
 	siege.number = town.sieges_played + 1
 	siege.player_count = player_count
-	var perks: TownPerks = TownPerks.from_save(town, TOWN_LAYOUT)
-	# Tricks in the siege come with M4-08 (spec 07 §4).
-	perks.tricks.clear()
-	perks.buddy = ""
-	siege.perks = perks
+	siege.perks = TownPerks.from_save(town, TOWN_LAYOUT)
 	siege.finished.connect(_end_siege)
 	siege.gave_up.connect(_end_siege)
 	siege.restart_requested.connect(func(_seed_value: int) -> void: start_siege())
@@ -148,8 +144,10 @@ func _end_siege(result: RunResult) -> void:
 			if town.building_level(id) > 0 and not town.is_damaged(id):
 				damaged.append(id)
 		town.damage(damaged)
+	result.damaged = damaged
 	SIEGE_RULES.siege_ended(town, won)
 	SaveStore.write(town)
+	RunLog.append(result)
 	if won:
 		_siege_news = PackedStringArray([SIEGE_RULES.won_banner, SIEGE_RULES.won_subtitle])
 	elif damaged.is_empty():

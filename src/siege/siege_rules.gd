@@ -55,6 +55,9 @@ static var _current: SiegeRules
 @export var stand_up_seconds: float = 4.0
 ## A short moment to see the end (won or lost) before going home.
 @export var end_pause_seconds: float = 2.5
+## The edge arrow points to the fort for this many seconds after it was hit (when it is off
+## screen).
+@export var fort_arrow_seconds: float = 2.0
 
 @export_group("Building helpers")
 ## The Snack Bar's healing ring and the Party Shop's trap ring on the ground: calm colours, never
@@ -132,6 +135,11 @@ static var _current: SiegeRules
 @export var wave_banner: String = "Wave %d of %d"
 @export var wave_subtitle: String = "Keep them away from the fort!"
 @export var last_wave_subtitle: String = "The last wave! Something big is coming..."
+## The HUD wave counter: during a wave ("%d of %d"), in the breather ("%d" seconds), and once
+## the last wave stopped coming.
+@export var wave_counter: String = "Wave %d of %d"
+@export var breather_counter: String = "Next wave in %d"
+@export var last_ones_counter: String = "Pop the last ones!"
 @export var won_banner: String = "Night defended!"
 @export var won_subtitle: String = "The fort stands. The horde runs home."
 @export var lost_banner: String = "The horde got in"

@@ -70,6 +70,9 @@ var siege_number: int = 0
 var waves_held: int = 0
 var wave_count: int = 0
 var knocked_down: PackedStringArray = []
+## The fort's health when the siege ended, and the buildings it damaged (set by Main; ids).
+var fort_health_left: float = 0.0
+var damaged: PackedStringArray = []
 
 
 ## How the run ended for the town (spec 03 §10): "king", "way_home", "died" or "gave_up".

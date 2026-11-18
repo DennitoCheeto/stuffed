@@ -68,6 +68,18 @@ static func _earliest(current: float, other: float) -> float:
 	return other if current <= 0.0 else minf(current, other)
 
 
+## For the night siege (spec 07 §4): only the tricks that make sense there stay on (Bedroom-only
+## ones, `TrickDef.in_siege` false, are off), and no Plushie Buddy comes along.
+func keep_siege_tricks() -> void:
+	var kept: Array[TrickDef] = []
+	for bought: TrickDef in tricks:
+		if bought.in_siege:
+			kept.append(bought)
+	tricks = kept
+	if not has_trick(&"plushie_buddy"):
+		buddy = ""
+
+
 ## The bought trick `id` (null = not bought).
 func trick(id: StringName) -> TrickDef:
 	for bought: TrickDef in tricks:
