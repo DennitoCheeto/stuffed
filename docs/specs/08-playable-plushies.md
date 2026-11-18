@@ -25,8 +25,9 @@ Not in this spec: equipment (M4.5), new heroes beyond the four, evolutions for t
 
 ## 2. What the player experiences
 
-1. You free Pip in the Bedroom. Back home the Plush Hospital stitches her up and she moves in (as today).
-2. The moment the first plushie moves in, a felt **Wardrobe** pops up next to the fort door with a banner:
+1. You free Pip in the Bedroom. That unlocks her as a hero right away (PO answer 2026-11-18); the Plush Hospital
+   and moving in work as today.
+2. The first time you come home with a freed plushie, a felt **Wardrobe** pops up next to the fort door with a banner:
    **"Pip wants to play! Try her on at the Wardrobe."**
 3. E at the Wardrobe opens the **hero picker**: one photo per hero (Banane first), with name, weapon, passive and a
    strength/weakness line. Heroes you haven't rescued yet are felt silhouettes: **"Rescue me in the Bedroom"**.
@@ -71,9 +72,12 @@ Rules:
 
 ## 4. Unlocking
 
-- A hero is playable once its plushie has **moved in** (`TownSave.plushies[id] == "in_town"`, after the Plush
-  Hospital). Rescue rules don't change.
-- The Wardrobe appears with the first unlocked plushie (vision §6.9: reveal when needed), with the banner above.
+- A hero is playable once its plushie is **freed in the Bedroom** and the run is banked (any entry in
+  `TownSave.plushies`, "waiting" in the tent or "in_town"; PO answer 2026-11-18). Rescue rules don't change.
+- A plushie you play is not also in the tent or the town; if you swap away from a plushie still waiting for the
+  Hospital, it goes back to the tent.
+- The Wardrobe appears on the first arrival home with an unlocked plushie (vision §6.9: reveal when needed), with
+  the banner above.
   Each later unlock shows a short banner **"Böbö wants to play!"**.
 - Banane is always playable.
 
@@ -146,7 +150,7 @@ Rules:
 
 ## 14. Acceptance criteria
 
-- **AC-85** A plushie that has moved in is playable; the Wardrobe appears with the first one (banner); locked heroes
+- **AC-85** A plushie freed in the Bedroom is playable once the run is banked; the Wardrobe appears with the first one (banner); locked heroes
   show as silhouettes with "Rescue me in the Bedroom"; Banane is always playable.
 - **AC-86** E at the Wardrobe opens the hero picker; picking swaps the hero in the town at once; the swapped-out
   hero (Banane too) becomes a town member; the next run and siege use the picked hero.
@@ -173,9 +177,9 @@ Rules:
 2. Picking: **a Wardrobe next to the fort door; swapped-out heroes become town members** (PO idea 2026-11-18).
 3. Armory: **hero's own weapon by default, the Armory picker can still override it** (PO said yes).
 4. Co-op: **one of each hero** (PO said yes).
-5. New weapons for everyone: **Snowball Toss and Paw Swat join everyone's cards once their hero is unlocked** — or
-   keep them hero-only?
-6. Unlock moment: **when the plushie moves in (after the Hospital)** — or already when freed in the Bedroom?
+5. New weapons for everyone: **Snowball Toss and Paw Swat join everyone's cards once their hero is unlocked** (PO
+   said yes).
+6. Unlock moment: **when the plushie is freed in the Bedroom** (PO answer 2026-11-18).
 
 ## 16. Not in this spec
 
