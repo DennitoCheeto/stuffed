@@ -141,6 +141,11 @@ func _ready() -> void:
 		slippery.name = "Slippery"
 		add_child(slippery)
 		slippery.setup(self)
+	if stats.chilly_hug:
+		var hug: ChillyHug = ChillyHug.new()
+		hug.name = "ChillyHug"
+		hug.setup(self)
+		add_child(hug)
 	if starting_weapon == null:
 		starting_weapon = stats.starting_weapon
 	if armed and starting_weapon != null:

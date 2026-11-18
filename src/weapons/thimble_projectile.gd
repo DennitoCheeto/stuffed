@@ -53,7 +53,7 @@ func _init() -> void:
 	_shadow.scale *= SHADOW_SIZE / ProjectileLook.SHADOW_RADIUS
 	for i: int in DUST_COUNT:
 		_dust.append(_floating(ProjectileLook.DUST))
-	_thimble = _floating(ProjectileLook.THIMBLE)
+	_thimble = _floating(_ball_part())
 	# Flies above the zombies.
 	_thimble.z_index = 2
 
@@ -125,8 +125,19 @@ func _land() -> void:
 	for zombie: Zombie in manager.enemies.query_circle(global_position, blast_radius()):
 		var push: Vector2 = global_position.direction_to(zombie.position) * weapon.stats.knockback
 		manager.enemies.damage(zombie, _numbers.damage, push, weapon)
+		_landed_on(zombie)
 	for dust: Sprite2D in _dust:
 		dust.visible = true
+
+
+## What flies (Snowball Toss throws a snowball instead).
+func _ball_part() -> StringName:
+	return ProjectileLook.THIMBLE
+
+
+## Called for every zombie the landing hits (after the damage).
+func _landed_on(_zombie: Zombie) -> void:
+	pass
 
 
 ## Thimble, its shadow and the ring's fill at `progress` (0 = thrown, 1 = landed).

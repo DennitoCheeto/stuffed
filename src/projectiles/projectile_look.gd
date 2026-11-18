@@ -28,6 +28,7 @@ const STORM_NEEDLE: StringName = &"shot/storm_needle"
 const BOMB_BALL: StringName = &"shot/bomb_ball"
 const GLITTER: StringName = &"shot/glitter"
 const SPARKLE: StringName = &"shot/sparkle"
+const SNOWBALL: StringName = &"shot/snowball"
 const BULLET: StringName = &"bullet/stuffing"
 const HAZARD: StringName = &"bullet/cloud"
 ## On-screen radius of the stuffing ball part; bigger bullets scale it.
@@ -88,6 +89,10 @@ const SPARKLE_RADIUS: float = 30.0
 const BULLET_COLOR: Color = Color("#ff3d6e")
 const BULLET_CORE_COLOR: Color = Color("#ffe1ea")
 const BULLET_OUTLINE_COLOR: Color = Color("#14101a")
+## Snowball Toss (Pip, spec 08 §3): a lumpy snowball with a blue shade.
+const SNOWBALL_RADIUS: float = 7.0
+const SNOWBALL_COLOR: Color = Color("#f6f9fd")
+const SNOWBALL_SHADE_COLOR: Color = Color("#c6d8ec")
 
 
 static func make_parts() -> Dictionary[StringName, FeltPiece]:
@@ -112,6 +117,7 @@ static func make_parts() -> Dictionary[StringName, FeltPiece]:
 		BOMB_BALL: _yarn(BOMB_COLOR, BOMB_STRAND_COLOR),
 		GLITTER: _star(GLITTER_RADIUS, 4),
 		SPARKLE: _star(SPARKLE_RADIUS, 8),
+		SNOWBALL: _snowball(),
 		BULLET: _bullet(),
 		HAZARD: _hazard(),
 	}
@@ -222,6 +228,22 @@ static func _thimble() -> FeltPiece:
 	var rim: PackedVector2Array = FeltShapes.ellipse(Vector2(0, 8) * unit, Vector2(8, 2) * unit)
 	thimble.add_layer(rim, THIMBLE_COLOR.darkened(0.15))
 	return thimble
+
+
+## A lumpy snowball: a white ball, a blue shade on its lower side and a few lumps.
+static func _snowball() -> FeltPiece:
+	var radius: float = SNOWBALL_RADIUS * UNITS
+	var ball: FeltPiece = FeltPiece.new()
+	ball.polygon = FeltShapes.circle(Vector2.ZERO, radius, 14)
+	ball.color = SNOWBALL_COLOR
+	var shade: PackedVector2Array = FeltShapes.ellipse(
+		Vector2(radius * 0.15, radius * 0.4), Vector2(radius * 0.75, radius * 0.45)
+	)
+	ball.add_layer(shade, SNOWBALL_SHADE_COLOR)
+	for lump: Vector2 in [Vector2(-0.45, -0.35), Vector2(0.3, -0.5), Vector2(-0.1, 0.05)]:
+		var dot: PackedVector2Array = FeltShapes.circle(lump * radius, radius * 0.18, 8)
+		ball.add_layer(dot, SNOWBALL_SHADE_COLOR.lightened(0.4))
+	return ball
 
 
 ## A flat dark ellipse with a pale rim (readable on the dark floor); fills SHADOW_RADIUS across.

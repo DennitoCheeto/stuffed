@@ -16,10 +16,20 @@ func attack() -> bool:
 	if targets.is_empty():
 		return false
 	for i: int in current().count:
-		var target: Zombie = targets[_rng.randi_range(0, targets.size() - 1)]
-		var thimble: ThimbleProjectile = shots.spawn(ThimbleProjectile) as ThimbleProjectile
+		var target: Zombie = _pick_target(targets, i)
+		var thimble: ThimbleProjectile = shots.spawn(_shot_kind()) as ThimbleProjectile
 		thimble.launch(self, target.position)
 	return true
+
+
+## Where shot number `index` of this attack goes (a random zombie on screen).
+func _pick_target(targets: Array[Zombie], _index: int) -> Zombie:
+	return targets[_rng.randi_range(0, targets.size() - 1)]
+
+
+## The lobbed shot (a ThimbleProjectile or a subclass).
+func _shot_kind() -> GDScript:
+	return ThimbleProjectile
 
 
 ## Living zombies inside the visible part of the world (a turret: within its range).

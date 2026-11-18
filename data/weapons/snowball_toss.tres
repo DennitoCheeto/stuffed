@@ -1,0 +1,83 @@
+[gd_resource type="Resource" script_class="WeaponStats" load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://src/weapons/weapon_stats.gd" id="1_stats"]
+[ext_resource type="Script" path="res://src/weapons/weapon_level.gd" id="2_level"]
+[ext_resource type="Script" path="res://src/weapons/snowball_toss.gd" id="3_behaviour"]
+
+[sub_resource type="Resource" id="Resource_level1"]
+script = ExtResource("2_level")
+damage = 8.0
+cooldown = 1.4
+reach = 0.0
+count = 1
+speed = 420.0
+pierce = 0
+area = 50.0
+duration = 0.0
+spread_degrees = 0.0
+card_text = "Lobs a snowball at the nearest group of zombies. It bursts and slows them for a moment."
+
+[sub_resource type="Resource" id="Resource_level2"]
+script = ExtResource("2_level")
+damage = 8.0
+cooldown = 1.4
+reach = 0.0
+count = 2
+speed = 420.0
+pierce = 0
+area = 50.0
+duration = 0.0
+spread_degrees = 0.0
+card_text = "2 snowballs."
+
+[sub_resource type="Resource" id="Resource_level3"]
+script = ExtResource("2_level")
+damage = 8.0
+cooldown = 1.4
+reach = 0.0
+count = 2
+speed = 420.0
+pierce = 0
+area = 62.0
+duration = 0.0
+spread_degrees = 0.0
+card_text = "Bigger burst."
+
+[sub_resource type="Resource" id="Resource_level4"]
+script = ExtResource("2_level")
+damage = 12.0
+cooldown = 1.4
+reach = 0.0
+count = 2
+speed = 420.0
+pierce = 0
+area = 62.0
+duration = 0.0
+spread_degrees = 0.0
+card_text = "Damage 8 → 12."
+
+[sub_resource type="Resource" id="Resource_level5"]
+script = ExtResource("2_level")
+damage = 12.0
+cooldown = 1.2
+reach = 0.0
+count = 3
+speed = 420.0
+pierce = 0
+area = 62.0
+duration = 0.0
+spread_degrees = 0.0
+card_text = "3 snowballs, and lobs every 1.4 → 1.2 seconds."
+
+[resource]
+script = ExtResource("1_stats")
+sound = &"snowball"
+id = &"snowball_toss"
+display_name = "Snowball Toss"
+run_title = "Snow Day"
+behaviour = ExtResource("3_behaviour")
+knockback = 40.0
+hit_radius = 0.0
+slow = 0.4
+slow_seconds = 1.5
+levels = Array[ExtResource("2_level")]([SubResource("Resource_level1"), SubResource("Resource_level2"), SubResource("Resource_level3"), SubResource("Resource_level4"), SubResource("Resource_level5")])

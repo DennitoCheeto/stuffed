@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="HeroStats" load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://src/player/hero_stats.gd" id="1_stats"]
-[ext_resource type="Resource" path="res://data/weapons/thimble_mortar.tres" id="2_weapon"]
+[ext_resource type="Resource" path="res://data/weapons/snowball_toss.tres" id="2_weapon"]
 [ext_resource type="Resource" path="res://data/town/plushies/pip.tres" id="3_plushie"]
 
 [resource]
@@ -18,6 +18,7 @@ hurt_invulnerability = 0.5
 hitbox_radius = 12.0
 pickup_range = 60.0
 starting_weapon = ExtResource("2_weapon")
+unlocks_weapon = ExtResource("2_weapon")
 slippery = false
 puppet_height = 72.0
 walk_speedup = 1.5
@@ -27,3 +28,9 @@ passive_text = "Zombies close to Pip move slower."
 strength = "Crowd control"
 weakness = "Low damage"
 try_on_text = "Try her on at the Wardrobe."
+chilly_hug = true
+chilly_radius = 90.0
+chilly_slow = 0.3
+chilly_boss_slow = 0.15
+chilly_ring_color = Color(0.72, 0.86, 0.98, 0.35)
+chilly_ring_pulse = 0.6

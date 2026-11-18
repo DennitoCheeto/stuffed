@@ -8,8 +8,8 @@ const RING_COLOR: Color = Color("#4a4358")
 const EVOLVED_RING_COLOR: Color = Color("#f2c230")
 const EVOLVED: Array[StringName] = [&"split", &"storm", &"volley", &"bomb"]
 
-## Which icon to draw: boomerang, pin, needles, buttons, cloud, yarn, thimble, cannon, whip,
-## zipper, feet, stuffing, magnet, hands, scissors, thread, spool, felt, snack, dice, arrow.
+## Which icon to draw: boomerang, pin, needles, buttons, cloud, yarn, thimble, snowball, cannon,
+## whip, zipper, feet, stuffing, magnet, hands, scissors, thread, spool, felt, snack, dice, arrow.
 ## "" draws only the empty round back (an empty HUD slot).
 var icon: StringName = &"":
 	set(value):
@@ -57,6 +57,8 @@ func _draw() -> void:
 			_yarn()
 		&"thimble":
 			_thimble()
+		&"snowball":
+			_snowball()
 		&"cannon":
 			_cannon()
 		&"whip":
@@ -195,6 +197,14 @@ func _thimble() -> void:
 		for x: float in [-6.0, 0.0, 6.0]:
 			draw_circle(Vector2(x, y), 2.0, Color("#8d8676"))
 	draw_rect(Rect2(-18, 14, 36, 6), Color("#aaa395"))
+
+
+func _snowball() -> void:
+	draw_circle(Vector2(0, 2), 20.0, Color("#f6f9fd"))
+	draw_arc(Vector2(0, 2), 20.0, 0.2, PI - 0.2, 16, Color("#c6d8ec"), 6.0)
+	for lump: Vector2 in [Vector2(-8, -6), Vector2(6, -10), Vector2(2, 0)]:
+		draw_circle(lump, 3.0, Color("#dce8f5"))
+	draw_arc(Vector2(0, 2), 20.0, 0.0, TAU, 32, Color("#8fa8c6"), 2.0)
 
 
 func _cannon() -> void:

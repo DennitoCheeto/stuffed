@@ -27,6 +27,7 @@ const LENGTHS: Dictionary[StringName, float] = {
 	&"cannon": 0.35,
 	&"zip": 0.32,
 	&"mortar": 0.3,
+	&"snowball": 0.28,
 	&"needles": 0.4,
 	&"fluff": 0.35,
 	&"volley": 0.4,
@@ -118,6 +119,7 @@ static func _weapon_or_moment(sound: StringName) -> Callable:
 		&"cannon": _cannon,
 		&"zip": _zip,
 		&"mortar": _mortar,
+		&"snowball": _snowball,
 		&"needles": _needles,
 		&"fluff": _fluff,
 		&"volley": _volley,
@@ -318,6 +320,14 @@ static func _mortar(t: float) -> float:
 	var hollow: float = Synth.sine(Synth.sweep(t, 300.0, 180.0, 0.1)) * exp(-14.0 * t)
 	hollow += 0.4 * Synth.sine(Synth.sweep(t, 750.0, 450.0, 0.1)) * exp(-20.0 * t)
 	return 0.25 * hollow
+
+
+## Snowball Toss (Pip): a soft packed-snow "pfumph" with a tiny icy tinkle on top.
+static func _snowball(t: float) -> float:
+	var packed: float = Synth.sine(Synth.sweep(t, 260.0, 120.0, 0.2))
+	var thump: float = Synth.noise(t) * packed * exp(-11.0 * t)
+	var tinkle: float = Synth.sine(Synth.sweep(t, 2600.0, 3100.0, 0.12)) * exp(-24.0 * t)
+	return 0.2 * thump + 0.05 * tinkle
 
 
 ## Orbiting Needles: a quick glassy shimmer going up.
