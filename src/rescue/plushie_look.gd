@@ -27,17 +27,20 @@ const SEAL_BACK_LAYERS: int = 4
 
 ## Draws `plushie` on `canvas`, standing on `at`. `wave` (0..1) lifts its right arm (or
 ## flipper) to wave; `pose` (null = standing still) moves feet, arms and body while it walks.
+## `shadow` false leaves out the floor shadow (a hero puppet draws its own, it stays down).
 static func draw(
 	canvas: CanvasItem,
 	plushie: PlushieDef,
 	at: Vector2,
 	size: float,
 	wave: float = 0.0,
-	pose: PlushiePose = null
+	pose: PlushiePose = null,
+	shadow: bool = true
 ) -> void:
 	var u: float = size * plushie.height
 	var now: PlushiePose = pose if pose != null else PlushiePose.new()
-	canvas.draw_colored_polygon(ellipse(at, u * 1.1, u * 0.3), SHADOW_COLOR)
+	if shadow:
+		canvas.draw_colored_polygon(ellipse(at, u * 1.1, u * 0.3), SHADOW_COLOR)
 	match plushie.shape:
 		PlushieDef.Shape.ROUND_BEAR:
 			_draw_round_bear(canvas, plushie, at, u, wave, now)
