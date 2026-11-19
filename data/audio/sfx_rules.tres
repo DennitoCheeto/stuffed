@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="SfxRules" format=3]
+
+[ext_resource type="Script" path="res://src/audio/sfx_rules.gd" id="1_rules"]
+
+[resource]
+script = ExtResource("1_rules")
+voices = Dictionary[StringName, int]({
+&"boss_hit": 2,
+&"coin": 4,
+&"evolution": 1,
+&"fluff": 2,
+&"hit": 5,
+&"pickup": 4,
+&"pop": 6
+})
+default_voices = 3
+starts_per_frame = 2
+pitch_variation = 0.08
+varied = Array[StringName]([&"hit", &"pop", &"pickup", &"quack", &"squeak", &"grumble", &"trill", &"bark", &"dash", &"coin", &"hurt", &"throw", &"pin", &"buttons", &"boing", &"whip", &"cannon", &"zip", &"mortar", &"snowball", &"paw", &"needles", &"fluff", &"volley", &"storm", &"split", &"sticky"])
+varied_pitch = 0.12
+pitch_overrides = Dictionary[StringName, float]({
+&"pickup": 0.03
+})
+varied_volume_db = 3.0

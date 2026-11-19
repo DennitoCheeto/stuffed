@@ -8,6 +8,7 @@
 script = ExtResource("1_stats")
 id = &"bobo"
 display_name = "Böbö"
+level_up_sound = &"grumble"
 plushie = ExtResource("3_plushie")
 max_health = 150.0
 move_speed = 125.0
