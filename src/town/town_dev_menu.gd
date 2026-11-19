@@ -131,6 +131,7 @@ func build_everything() -> void:
 			building.level += 1
 		building.shown_level = building.level
 		building.unlocked = true
+		building.appear()
 		building.queue_redraw()
 		town.save.building_levels[String(spot.id)] = building.level
 	town.settle()

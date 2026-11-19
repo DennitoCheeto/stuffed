@@ -20,7 +20,7 @@ func test_every_spot_has_its_building_from_the_buildings_folder() -> void:
 	for file: String in DirAccess.get_files_at(BUILDINGS_DIR):
 		if file.ends_with(".tres"):
 			files += 1
-	assert_eq(files, 6, "one data file per building")
+	assert_eq(files, 7, "one data file per building")
 	for spot: TownSpot in LAYOUT.spots:
 		assert_not_null(spot.building, "%s has a building" % spot.id)
 		if spot.building == null:
