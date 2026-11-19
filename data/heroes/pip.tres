@@ -8,6 +8,7 @@
 script = ExtResource("1_stats")
 id = &"pip"
 display_name = "Pip"
+level_up_sound = &"squeak"
 plushie = ExtResource("3_plushie")
 max_health = 100.0
 move_speed = 150.0
