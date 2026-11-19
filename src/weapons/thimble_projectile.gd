@@ -77,6 +77,11 @@ func launch(from: Weapon, target: Vector2) -> void:
 	_flight_time = maxf(_from.distance_to(target) / maxf(_numbers.speed, 1.0), MIN_FLIGHT)
 	scale = _ring_scale()
 	self_modulate.a = RING_OPACITY
+	# Top-level sprites don't take the own-shots layer's opacity: give it to them here.
+	_thimble.modulate.a = GameSettings.own_effects
+	_shadow.modulate.a = GameSettings.own_effects
+	for dust: Sprite2D in _dust:
+		dust.modulate.a = GameSettings.own_effects
 	_place(0.0)
 
 

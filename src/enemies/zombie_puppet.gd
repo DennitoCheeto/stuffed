@@ -80,7 +80,7 @@ func animate(time: float, moving: bool, since_hit: float, facing_left: bool) -> 
 	if since_hit < 0.5:
 		squish = exp(-7.0 * since_hit) * cos(TAU * 3.0 * since_hit)
 	root.scale = Vector2(1.0 + 0.18 * squish, 1.0 - 0.22 * squish)
-	flash.visible = since_hit < FLASH_TIME
+	flash.visible = since_hit < FLASH_TIME and GameSettings.flashes
 
 
 ## Puffs up before spitting (call after `animate`): 0 = normal, 1 = fully puffed, about to spit.

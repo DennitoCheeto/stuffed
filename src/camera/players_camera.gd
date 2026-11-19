@@ -1,7 +1,7 @@
 class_name PlayersCamera
 extends Camera2D
 ## Follows the group of players smoothly (with one player: Banane) and stops at the arena walls.
-## Shakes a little when a player gets hurt.
+## Shakes a little when a player gets hurt (scaled by the Screen shake setting, 0 = none).
 
 ## Strongest shake, in pixels.
 const MAX_SHAKE: float = 10.0
@@ -24,7 +24,7 @@ func _physics_process(_delta: float) -> void:
 
 func _process(delta: float) -> void:
 	trauma = maxf(trauma - SHAKE_DECAY * delta, 0.0)
-	var strength: float = MAX_SHAKE * trauma * trauma
+	var strength: float = MAX_SHAKE * trauma * trauma * GameSettings.screen_shake
 	offset = Vector2(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0)) * strength
 
 

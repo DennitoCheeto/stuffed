@@ -59,6 +59,7 @@ func _process(delta: float) -> void:
 		return
 	_left = maxf(_left - delta, 0.0)
 	visible = _left > 0.0
+	modulate.a = GameSettings.own_effects
 	queue_redraw()
 
 

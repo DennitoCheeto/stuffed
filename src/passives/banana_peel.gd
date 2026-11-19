@@ -34,7 +34,7 @@ func _physics_process(delta: float) -> void:
 	if _age >= lifetime:
 		remove()
 		return
-	modulate.a = clampf((lifetime - _age) / FADE_TIME, 0.0, 1.0)
+	modulate.a = clampf((lifetime - _age) / FADE_TIME, 0.0, 1.0) * GameSettings.own_effects
 	var group: StringName = EnemyManager.GROUP
 	var manager: EnemyManager = get_tree().get_first_node_in_group(group) as EnemyManager
 	if manager == null:

@@ -31,6 +31,7 @@ func _physics_process(delta: float) -> void:
 	visible = player.armed and not player.is_dead()
 	if not visible:
 		return
+	modulate.a = GameSettings.own_effects
 	queue_redraw()
 	var manager: EnemyManager = get_tree().get_first_node_in_group(EnemyManager.GROUP)
 	if manager == null:

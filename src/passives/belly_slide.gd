@@ -33,6 +33,7 @@ func _on_dashed(_from_position: Vector2, _direction: Vector2) -> void:
 
 func _physics_process(delta: float) -> void:
 	_age_trail(delta)
+	modulate.a = GameSettings.own_effects
 	if not player.armed or not player.is_dashing():
 		return
 	_trail.append(player.global_position + HeroMarker.FEET * 0.5)
