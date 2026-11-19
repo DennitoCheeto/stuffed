@@ -276,6 +276,7 @@ func spawn_player(index: int, at: Vector2) -> Player:
 	player.starting_weapon = perks.starting_weapon(upgrade_pool, player.stats.starting_weapon)
 	player.bonus_max_health = perks.max_health_bonus
 	player.bonus_pickup_share = perks.pickup_range_bonus
+	player.gear = perks.gear(index)
 	tricks.prepare_hero(player)
 	player.died.connect(_on_player_died)
 	player.hurt.connect(_on_player_hurt.bind(player))

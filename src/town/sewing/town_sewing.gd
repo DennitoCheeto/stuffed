@@ -16,6 +16,7 @@ func _init(owner_town: Town) -> void:
 	town = owner_town
 	table.act_requested.connect(_on_act_requested)
 	table.take_off_requested.connect(_on_take_off_requested)
+	table.hide_requested.connect(_on_hide_requested)
 	table.upgrade_requested.connect(_on_upgrade_requested)
 	table.closed.connect(_on_closed)
 
@@ -85,6 +86,26 @@ func take_off(slot: GearDef.Slot, by: int = 0) -> bool:
 	return true
 
 
+## Every hero in town wears what the save says (after sewing, wearing, hiding or the dev menu).
+func dress_players() -> void:
+	if not town.is_inside_tree():
+		return
+	for player: Player in Players.all(town.get_tree()):
+		player.wear_gear(WornGear.of(town.save, player.player_index))
+
+
+## Player `by` hides (`on`) or shows again what they wear in gear slot `slot` (a `GearDef.Slot`;
+## -1 = every slot), saved at once (AC-100b). A hidden piece still works.
+func set_hidden(slot: int, on: bool, by: int = 0) -> void:
+	if slot < 0:
+		town.save.gear.set_all_hidden(by, on)
+	else:
+		town.save.gear.set_hidden(by, GearDef.SLOT_NAMES[slot], on)
+	Sfx.play(&"page")
+	town.refresh()
+	town.changed.emit()
+
+
 ## The hero player `by` plays in town (player 1 if that player isn't here).
 func _hero_of(by: int) -> HeroStats:
 	var players: Array[Player] = Players.all(town.get_tree())
@@ -125,3 +146,8 @@ func _on_upgrade_requested() -> void:
 func _on_closed() -> void:
 	_closed_at = Engine.get_physics_frames()
 	town.process_mode = Node.PROCESS_MODE_INHERIT
+
+
+func _on_hide_requested(slot: int, on: bool) -> void:
+	set_hidden(slot, on, table.opener)
+	table.refresh()

@@ -66,6 +66,16 @@ func is_hidden(player: int, slot: String) -> bool:
 	return player >= 0 and player < hidden.size() and hidden[player].has(slot)
 
 
+## True when player `player` hides gear slot `slot` (a `GearDef.Slot`; -1 = every slot hidden).
+func slot_hidden(player: int, slot: int) -> bool:
+	if slot >= 0:
+		return is_hidden(player, GearDef.SLOT_NAMES[slot])
+	for slot_name: String in GearDef.SLOT_NAMES:
+		if not is_hidden(player, slot_name):
+			return false
+	return true
+
+
 ## Hides (or shows again) what player `player` wears in `slot`.
 func set_hidden(player: int, slot: String, on: bool) -> void:
 	while hidden.size() <= player:

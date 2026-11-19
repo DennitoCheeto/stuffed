@@ -10,6 +10,8 @@ signal died(player: Player)
 signal celebrated
 ## Weapons or items were added or levelled up (the HUD redraws its icons).
 signal loadout_changed
+## What the hero wears changed (`wear_gear`): the puppet redraws its gear.
+signal gear_changed
 ## A weapon evolved (the gift box moment shows it).
 signal evolved(weapon: Weapon)
 ## Second Helping: the shield (health over full) went up or down.
@@ -88,6 +90,8 @@ var extra_weapons: Array[WeaponStats] = []
 ## own); set before adding the hero.
 var bonus_max_health: float = 0.0
 var bonus_pickup_share: float = 0.0
+## The sewn-on gear this hero wears (spec 09 §7, §8; set before adding the hero, or `wear_gear`).
+var gear: WornGear = WornGear.new()
 ## Ids of the town's building tricks this hero has (spec 06; every hero gets all of them).
 var tricks: PackedStringArray = []
 ## True once this hero's first level-up of the run is done (Show-and-Tell trick).
@@ -367,6 +371,12 @@ func try_dash() -> bool:
 
 func can_dash() -> bool:
 	return not is_dead() and not is_dashing() and _dash_cooldown_left <= 0.0
+
+
+## Puts on what `worn` says (the town changed it): the puppet redraws the gear at once.
+func wear_gear(worn: WornGear) -> void:
+	gear = worn
+	gear_changed.emit()
 
 
 func is_dashing() -> bool:

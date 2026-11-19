@@ -236,6 +236,7 @@ func spawn_player(index: int) -> Player:
 	player.player_index = index
 	player.armed = false
 	player.stats = HeroRoster.current().heroes_for(save, HeroRoster.MAX_PLAYERS)[index]
+	player.gear = WornGear.of(save, index)
 	player.position = layout.spawn_position + Vector2(layout.spawn_spacing * index, 0.0)
 	player.dashed.connect(func(_from: Vector2, _direction: Vector2) -> void: Sfx.play(&"dash"))
 	actors.add_child(player)
@@ -433,6 +434,7 @@ func refresh() -> void:
 	for id: StringName in buildings:
 		buildings[id].refresh(save)
 	sewing.refresh_tag()
+	sewing.dress_players()
 	_refresh_calendar()
 
 
