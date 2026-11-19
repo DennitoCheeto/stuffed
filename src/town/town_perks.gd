@@ -28,6 +28,8 @@ var buddy: String = ""
 var heroes: Array[HeroStats] = []
 ## Sewing patterns the town owns (gear ids, spec 09 §4): they never drop in a run again.
 var patterns: PackedStringArray = []
+## What each player slot wears (spec 09 §8), by player index.
+var worn: Array[WornGear] = []
 
 
 ## The perks of the town in `save`, with the buildings standing on the spots of `layout`.
@@ -55,6 +57,8 @@ static func from_save(save: TownSave, layout: TownLayout) -> TownPerks:
 	perks.buddy = save.last_rescued
 	perks.patterns = save.gear.patterns.duplicate()
 	perks.heroes = HeroRoster.current().heroes_for(save, HeroRoster.MAX_PLAYERS)
+	for index: int in HeroRoster.MAX_PLAYERS:
+		perks.worn.append(WornGear.of(save, index))
 	# A hero's new weapon joins the cards once that hero is unlocked (spec 08 §3).
 	for hero: HeroStats in HeroRoster.current().heroes:
 		if hero.unlocks_weapon != null and not HeroRoster.current().is_unlocked(hero, save):
@@ -63,6 +67,11 @@ static func from_save(save: TownSave, layout: TownLayout) -> TownPerks:
 	if perks.can_choose_start_weapon and not perks.locked_weapons.has(chosen):
 		perks.start_weapon = chosen
 	return perks
+
+
+## What player `index` wears (nothing in a run without a town).
+func gear(index: int) -> WornGear:
+	return worn[index] if index < worn.size() else WornGear.new()
 
 
 ## The hero player `index` plays (null = keep the hero scene's own, Banane).

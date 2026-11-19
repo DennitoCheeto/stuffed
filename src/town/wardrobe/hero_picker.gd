@@ -10,6 +10,8 @@ extends CanvasLayer
 signal chosen(slot: int, hero: HeroStats)
 ## The picker closed (after a choice or Esc).
 signal closed
+## The picking player wants to hide (`on`) or show gear slot `slot` on their hero (-1 = all).
+signal hide_requested(slot: int, on: bool)
 
 const TILE_SIZE: Vector2 = Vector2(270, 372)
 const PHOTO_SIZE: Vector2 = Vector2(214, 150)
@@ -33,6 +35,11 @@ var title: HandTitle
 var motion: ScreenMotion = ScreenMotion.new()
 ## Looks up each hero's starting weapon card (icon, name).
 var pool: UpgradePool
+## The gear toggles under the heroes (spec 09 §6, AC-100b): one eye per slot and "Hide all".
+## Shown while the picking player wears something.
+var gear_row: HBoxContainer = HBoxContainer.new()
+var eye_toggles: Array[GearEyeToggle] = []
+var hide_all_toggle: GearEyeToggle = GearEyeToggle.new(-1, "", true)
 
 var _rules: WardrobeRules = WardrobeRules.current()
 var _row: HBoxContainer
@@ -40,6 +47,8 @@ var _order: Array[HeroStats] = []
 ## Heroes that can't be picked (not rescued, or another player has them). Their tiles stay
 ## enabled: a disabled button fades its face and the silhouette's felt pieces would show through.
 var _blocked: Dictionary[StringName, bool] = {}
+var _gear_rules: GearRules = GearRules.current()
+var _save: TownSave
 
 
 func _init() -> void:
@@ -65,6 +74,7 @@ func _init() -> void:
 	_row = HBoxContainer.new()
 	_row.add_theme_constant_override(&"separation", 14)
 	box.add_child(_row)
+	_build_gear_row(box)
 
 
 func is_open() -> bool:
@@ -92,6 +102,8 @@ func open(by: int, roster: HeroRoster, save: TownSave, taken: Dictionary[StringN
 		_row.add_child(tile)
 		tiles[hero.id] = tile
 		_order.append(hero)
+	_save = save
+	show_gear()
 	visible = true
 	motion.open([panel])
 	if tiles.has(now.id):
@@ -128,6 +140,11 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"pause"):
 		get_viewport().set_input_as_handled()
 		close()
+		return
+	if event.is_action_pressed(KeyBindings.action_name("hide_gear", slot)):
+		get_viewport().set_input_as_handled()
+		var focused: GearEyeToggle = get_viewport().gui_get_focus_owner() as GearEyeToggle
+		_on_eye_pressed(focused if focused != null else hide_all_toggle)
 		return
 	var at: int = _number_of(event)
 	if at >= 0 and at < _order.size():
@@ -224,3 +241,42 @@ func _add_note(column: VBoxContainer, hero: HeroStats, text: String, color: Colo
 	note.custom_minimum_size = Vector2(TILE_SIZE.x - 28.0, 0.0)
 	column.add_child(note)
 	notes[hero.id] = note
+
+
+## Shows what the picking player wears on every unlocked hero's photo and the toggles' states
+## (after opening and after each toggle).
+func show_gear() -> void:
+	if _save == null:
+		return
+	var worn: WornGear = WornGear.of(_save, slot, _gear_rules)
+	for id: StringName in photos:
+		photos[id].wear(worn)
+	gear_row.visible = not worn.pieces.is_empty()
+	for eye: GearEyeToggle in eye_toggles:
+		var on: bool = _save.gear.slot_hidden(slot, eye.slot)
+		eye.show_hidden(on, _gear_rules.hidden_text if on else _gear_rules.shown_text)
+	var all: bool = _save.gear.slot_hidden(slot, -1)
+	var words: String = _gear_rules.show_all_text if all else _gear_rules.hide_all_text
+	hide_all_toggle.show_hidden(all, words)
+
+
+func _build_gear_row(box: VBoxContainer) -> void:
+	gear_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	gear_row.add_theme_constant_override(&"separation", 12)
+	gear_row.visible = false
+	var title_label: Label = UiFonts.label(_gear_rules.picker_gear_title, 20, UiColors.INK_SOFT)
+	title_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	gear_row.add_child(title_label)
+	for index: int in GearDef.SLOT_NAMES.size():
+		var eye: GearEyeToggle = GearEyeToggle.new(index, _gear_rules.slot_titles[index])
+		eye.pressed.connect(_on_eye_pressed.bind(eye))
+		gear_row.add_child(eye)
+		eye_toggles.append(eye)
+	hide_all_toggle.pressed.connect(_on_eye_pressed.bind(hide_all_toggle))
+	gear_row.add_child(hide_all_toggle)
+	box.add_child(gear_row)
+
+
+func _on_eye_pressed(eye: GearEyeToggle) -> void:
+	if visible:
+		hide_requested.emit(eye.slot, not eye.hidden_now)

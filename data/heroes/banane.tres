@@ -28,3 +28,6 @@ strength = "Easy, all-round"
 weakness = "None, the classic"
 try_on_text = ""
 town_member = ExtResource("3_town")
+body_anchor = Vector2(2, -22)
+charm_anchor = Vector2(-19, -26)
+head_anchor = Vector2(3, -71)

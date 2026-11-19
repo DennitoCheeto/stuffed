@@ -10,7 +10,15 @@ const TEST_SAVE: String = "user://test_save.json"
 const TEST_SETTINGS: String = "user://test_settings.json"
 ## The per-player actions `add_controls` makes for another player.
 const CONTROLS: Array[String] = [
-	"move_left", "move_right", "move_up", "move_down", "dash", "interact", "tricks", "use_pocket"
+	"move_left",
+	"move_right",
+	"move_up",
+	"move_down",
+	"dash",
+	"interact",
+	"tricks",
+	"use_pocket",
+	"hide_gear"
 ]
 
 var main: Main

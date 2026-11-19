@@ -98,6 +98,7 @@ func show_state(
 	var at: int = save.gear.stitch_level(id)
 	var known: bool = at > 0 or save.gear.has_pattern(id)
 	picture.locked = not known
+	picture.level = at
 	picture.queue_redraw()
 	name_label.text = piece.display_name if known else "?"
 	text_label.visible = known
