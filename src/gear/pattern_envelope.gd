@@ -70,10 +70,9 @@ func _draw() -> void:
 		lift + Vector2(-h.x, -h.y), lift + Vector2(h.x, -h.y), lift + Vector2(0.0, h.y * 0.25)
 	]
 	draw_colored_polygon(flap, FLAP_COLOR)
-	draw_dashed_line(
-		lift + Vector2(-h.x * 0.6, h.y * 0.6), lift + Vector2(h.x * 0.6, h.y * 0.6), PATTERN_COLOR,
-		2.0, 4.0
-	)
+	var cut_from: Vector2 = lift + Vector2(-h.x * 0.6, h.y * 0.6)
+	var cut_to: Vector2 = lift + Vector2(h.x * 0.6, h.y * 0.6)
+	draw_dashed_line(cut_from, cut_to, PATTERN_COLOR, 2.0, 4.0)
 	body.append(body[0])
 	draw_polyline(body, INK_COLOR, 2.5, true)
 	draw_polyline(flap, INK_COLOR, 2.0, true)
