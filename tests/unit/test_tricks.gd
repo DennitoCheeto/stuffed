@@ -36,6 +36,9 @@ func test_ac66_every_building_has_a_branch_of_3_tricks_in_data() -> void:
 	var ids: Dictionary[StringName, bool] = {}
 	for spot: TownSpot in LAYOUT.spots:
 		var def: BuildingDef = spot.building
+		if def.id == GearRules.current().workshop:
+			assert_eq(def.tricks.size(), 0, "no Workshop tricks yet (spec 09 §5)")
+			continue
 		assert_eq(def.tricks.size(), 3, "%s has 3 tricks" % def.id)
 		for i: int in def.tricks.size():
 			var trick: TrickDef = def.tricks[i]
@@ -53,6 +56,8 @@ func test_prices_rise_and_a_trick_is_cheaper_than_the_next_building_level() -> v
 	var total: int = 0
 	for spot: TownSpot in LAYOUT.spots:
 		var def: BuildingDef = spot.building
+		if def.tricks.is_empty():
+			continue
 		for i: int in def.tricks.size():
 			var trick: TrickDef = def.tricks[i]
 			total += trick.coins

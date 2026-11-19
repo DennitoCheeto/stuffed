@@ -116,6 +116,8 @@ func _ready() -> void:
 	for spot: TownSpot in layout.spots:
 		var level: int = save.building_level(String(spot.id))
 		var building: TownBuilding = TownBuilding.new(spot, level, _is_open(spot))
+		if spot.is_hidden_in(save):
+			building.hide_until_revealed()
 		holder.add_child(building)
 		buildings[spot.id] = building
 	tent = PlushieTent.new(PLUSHIE_RULES, layout.tent_position)
@@ -251,6 +253,8 @@ func building_near(player: Player) -> TownBuilding:
 	var best: TownBuilding = null
 	var best_distance: float = layout.reach
 	for id: StringName in buildings:
+		if buildings[id].waiting_for_reveal:
+			continue
 		var rect: Rect2 = buildings[id].spot.rect
 		var distance: float = TownLayout.distance_to(rect, player.global_position)
 		if distance <= best_distance:
@@ -296,6 +300,7 @@ func dev_build(building: TownBuilding) -> bool:
 func _raise(building: TownBuilding, next: BuildingLevel) -> void:
 	var new_level: int = building.level + 1
 	save.building_levels[String(building.spot.id)] = new_level
+	building.appear()
 	building.play_build(new_level)
 	if not next.unlocks_weapons.is_empty():
 		unlock_toast.show_weapons(_weapons(next.unlocks_weapons))
@@ -506,6 +511,7 @@ func reveal_new_buildings() -> Array[TownBuilding]:
 		return revealed
 	var names: PackedStringArray = []
 	for building: TownBuilding in revealed:
+		building.appear()
 		building.reveal()
 		names.append(building.building.display_name)
 		if not save.revealed.has(String(building.spot.id)):
@@ -686,6 +692,9 @@ func _give_patterns() -> void:
 	)
 	show_banner(news[0], news[1])
 	Sfx.play(GearRules.current().pattern_sound)
+	if not pending_reveals().is_empty():
+		# The first pattern brings the Sewing Workshop: its "New building!" follows this banner.
+		_settle_left = maxf(_settle_left, _banner_left + 0.1)
 	changed.emit()
 
 
@@ -721,7 +730,7 @@ func _build_walls() -> void:
 		Rect2(Vector2(-t, 0.0), Vector2(t, layout.size.y)),
 		Rect2(Vector2(layout.size.x, 0.0), Vector2(t, layout.size.y)),
 	]
-	rects.append_array(layout.blocking_rects())
+	rects.append_array(layout.blocking_rects(save))
 	for rect: Rect2 in rects:
 		var body: StaticBody2D = StaticBody2D.new()
 		body.collision_layer = Arena.WALL_LAYER

@@ -108,7 +108,8 @@ func test_ac76_the_siege_plays_in_the_town_with_the_run_controls() -> void:
 	assert_eq(hero.weapons().size(), 1, "with the starting weapon")
 	assert_eq(siege.wave_banners, [0] as Array[int])
 	assert_eq(siege.hud.banner_title.text, "Wave 1 of 3")
-	assert_eq(siege.town_arena().buildings.size(), siege.layout.spots.size(), "the town room")
+	var shown: int = siege.layout.spots.size() - 1
+	assert_eq(siege.town_arena().buildings.size(), shown, "the town room (no Workshop yet)")
 	assert_eq(siege.town_arena().buildings[&"lucky_jar"].level, 1)
 	assert_not_null(siege.town_arena().dusk, "at dusk")
 	hero.invincible = true

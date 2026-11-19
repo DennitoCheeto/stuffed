@@ -1,0 +1,36 @@
+[gd_resource type="Resource" script_class="BuildingDef" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://src/town/building_def.gd" id="1_def"]
+[ext_resource type="Script" path="res://src/town/building_level.gd" id="2_level"]
+
+[sub_resource type="Resource" id="Resource_level_1"]
+script = ExtResource("2_level")
+coins = 400
+stuffing = 0
+thread = 0
+effect = "Sew Head and Body pieces"
+siege_health = 200
+
+[sub_resource type="Resource" id="Resource_level_2"]
+script = ExtResource("2_level")
+coins = 1000
+stuffing = 20
+thread = 0
+effect = "Charm slot, stitch pieces to Lv 2"
+siege_health = 300
+
+[sub_resource type="Resource" id="Resource_level_3"]
+script = ExtResource("2_level")
+coins = 1800
+stuffing = 40
+thread = 10
+effect = "Stitch pieces to Lv 3"
+siege_health = 450
+
+[resource]
+script = ExtResource("1_def")
+id = &"sewing_workshop"
+display_name = "Sewing Workshop"
+summary = "Sew gear for your plushie"
+levels = Array[ExtResource("2_level")]([SubResource("Resource_level_1"), SubResource("Resource_level_2"), SubResource("Resource_level_3")])
+art_scale = 1.1

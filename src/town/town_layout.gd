@@ -29,7 +29,7 @@ const SMOOTH_STEPS: int = 10
 @export var spawn_spacing: float = 90.0
 ## The fort gets a new piece (flag, lights, ...) after every this many rebuilds/upgrades.
 @export var fort_piece_every: int = 3
-## The 6 building spots around the fort.
+## The 7 building spots around the fort.
 @export var spots: Array[TownSpot] = []
 ## AC-62: every building's middle is at most this far from the door's middle (the town before
 ## spec 05 had its farthest building 732 px away; about 20% closer).
@@ -73,10 +73,13 @@ func outer_rect() -> Rect2:
 	return play_rect().grow(wall_thickness)
 
 
-## Everything that blocks walking: the fort, the stand and every building spot.
-func blocking_rects() -> Array[Rect2]:
+## Everything that blocks walking: the fort, the stand and every building spot. With `save`,
+## spots that show nothing yet (`TownSpot.is_hidden_in`) are left out.
+func blocking_rects(save: TownSave = null) -> Array[Rect2]:
 	var rects: Array[Rect2] = [fort_rect, scrapbook_rect]
 	for spot: TownSpot in spots:
+		if save != null and spot.is_hidden_in(save):
+			continue
 		rects.append(spot.rect)
 	return rects
 

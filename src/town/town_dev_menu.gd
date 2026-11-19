@@ -131,6 +131,7 @@ func build_everything() -> void:
 			building.level += 1
 		building.shown_level = building.level
 		building.unlocked = true
+		building.appear()
 		building.queue_redraw()
 		town.save.building_levels[String(spot.id)] = building.level
 	town.settle()
@@ -228,6 +229,7 @@ func next_hero() -> HeroStats:
 func give_all_patterns() -> void:
 	for piece: GearDef in GearRules.current().pieces:
 		town.save.gear.add_pattern(String(piece.id))
+	town.reveal_new_buildings()
 	_saved()
 
 

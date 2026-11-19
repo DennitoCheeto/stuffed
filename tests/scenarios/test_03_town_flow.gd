@@ -65,7 +65,11 @@ func test_ac37_new_game_opens_the_town_with_fort_door_scrapbook_and_6_ruins() ->
 	assert_not_null(town.fort, "the fort in the middle")
 	assert_true(town.layout.fort_rect.encloses(town.layout.door_rect), "the door is in the fort")
 	assert_not_null(town.scrapbook, "the Scrapbook stand")
-	assert_eq(town.buildings.size(), 6, "6 ruins")
+	var ruins: int = 0
+	for id: StringName in town.buildings:
+		if town.buildings[id].is_visible_in_tree():
+			ruins += 1
+	assert_eq(ruins, 6, "6 ruins (the Sewing Workshop waits for a pattern)")
 	var open_ids: Array[StringName] = []
 	for ruin: TownBuilding in town.open_buildings():
 		open_ids.append(ruin.spot.id)
