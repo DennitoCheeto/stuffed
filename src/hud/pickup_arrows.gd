@@ -121,22 +121,18 @@ func _point_at(at: Vector2, view: Rect2, color: Color, grow_by: float) -> bool:
 func _arrow_color(item: Node) -> Color:
 	if item.is_queued_for_deletion():
 		return Color.TRANSPARENT
-	var pickup: FloorPickup = item as FloorPickup
-	if pickup != null and not pickup.taken:
-		return FloorPickupLook.GLOW_COLOR
-	var portal: WayHomePortal = item as WayHomePortal
-	if portal != null and not portal.used:
-		return WayHomePortal.GLOW_COLOR
-	var plushie: TangledPlushie = item as TangledPlushie
-	if plushie != null and not plushie.used:
-		return TangledPlushie.GLOW_COLOR
-	var envelope: PatternEnvelope = item as PatternEnvelope
-	if envelope != null and not envelope.taken:
-		return PatternEnvelope.GLOW_COLOR
-	var box: GiftBox = item as GiftBox
-	if box != null and box.treasure and not box.opened:
-		return GiftBoxLook.GLOW_COLOR
-	return Color.TRANSPARENT
+	var color: Color = Color.TRANSPARENT
+	if item is FloorPickup and not (item as FloorPickup).taken:
+		color = FloorPickupLook.GLOW_COLOR
+	elif item is WayHomePortal and not (item as WayHomePortal).used:
+		color = WayHomePortal.GLOW_COLOR
+	elif item is TangledPlushie and not (item as TangledPlushie).used:
+		color = TangledPlushie.GLOW_COLOR
+	elif item is PatternEnvelope and not (item as PatternEnvelope).taken:
+		color = PatternEnvelope.GLOW_COLOR
+	elif item is GiftBox and (item as GiftBox).treasure and not (item as GiftBox).opened:
+		color = GiftBoxLook.GLOW_COLOR
+	return color
 
 
 ## Where a line from the middle of `area` in `direction` leaves it.
