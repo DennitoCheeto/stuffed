@@ -54,28 +54,13 @@ func test_every_listed_action_exists_with_its_own_shipped_key() -> void:
 
 
 func test_ac112_every_action_can_be_rebound() -> void:
-	var free_keys: Array[Key] = [
-		KEY_F2,
-		KEY_F3,
-		KEY_F4,
-		KEY_F5,
-		KEY_F6,
-		KEY_F7,
-		KEY_F8,
-		KEY_F9,
-		KEY_F10,
-		KEY_F12,
-		KEY_HOME,
-		KEY_END,
-		KEY_INSERT,
-		KEY_DELETE,
-		KEY_SHIFT,
-	]
+	# F13, F14, ...: keys nothing uses.
 	for i: int in KeyBindings.ACTIONS.size():
 		var id: String = KeyBindings.ACTIONS[i]
-		assert_eq(KeyBindings.bind(id, free_keys[i]), "", "%s: nothing swapped" % id)
-		assert_eq(KeyBindings.key_of(id), free_keys[i], "%s rebound" % id)
-		assert_eq(_first_key(KeyBindings.action_name(id)), free_keys[i], "%s in the InputMap" % id)
+		var key: Key = (KEY_F13 + i) as Key
+		assert_eq(KeyBindings.bind(id, key), "", "%s: nothing swapped" % id)
+		assert_eq(KeyBindings.key_of(id), key, "%s rebound" % id)
+		assert_eq(_first_key(KeyBindings.action_name(id)), key, "%s in the InputMap" % id)
 	assert_false(KeyBindings.is_default())
 
 
@@ -137,7 +122,8 @@ func test_ac112_bindings_survive_save_and_reload() -> void:
 	KeyBindings.bind("card_4", KEY_F2)
 	assert_true(GameSettings.save(), "written")
 	var text: String = FileAccess.get_file_as_string(TEST_PATH)
-	assert_string_contains(text, '"p1"',"stored per player index")
+	var saved: Dictionary = JSON.parse_string(text)
+	assert_true(saved["bindings"].has("p1"), "stored per player index")
 	KeyBindings.reset()
 	assert_eq(KeyBindings.key_of("dash"), KEY_SPACE, "reset in between")
 	GameSettings.load_saved()
@@ -148,16 +134,17 @@ func test_ac112_bindings_survive_save_and_reload() -> void:
 
 
 func test_broken_or_odd_bindings_keep_the_shipped_keys() -> void:
-	_write('{"bindings": "nonsense"}')
+	_write(JSON.stringify({"bindings": "nonsense"}))
 	GameSettings.load_saved()
 	assert_true(KeyBindings.is_default(), "not a dictionary")
-	_write('{"bindings": {"p1": {"dash": "Escape", "skip": "NoSuchKey", "tricks": 7}}}')
+	var odd: Dictionary = {"dash": "Escape", "skip": "NoSuchKey", "tricks": 7}
+	_write(JSON.stringify({"bindings": {"p1": odd}}))
 	GameSettings.load_saved()
 	assert_true(KeyBindings.is_default(), "fixed, unknown and odd keys are ignored")
-	_write('{"bindings": {"p1": {"dash": "E"}}}')
+	_write(JSON.stringify({"bindings": {"p1": {"dash": "E"}}}))
 	GameSettings.load_saved()
 	assert_true(KeyBindings.is_default(), "one key on two actions: shipped keys")
-	_write('{"bindings": {"p1": {"dash": "Shift"}}}')
+	_write(JSON.stringify({"bindings": {"p1": {"dash": "Shift"}}}))
 	GameSettings.load_saved()
 	assert_eq(KeyBindings.key_of("dash"), KEY_SHIFT, "a partial file applies what it has")
 	assert_eq(KeyBindings.key_of("interact"), KEY_E, "the rest stays shipped")

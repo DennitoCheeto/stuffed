@@ -10,9 +10,10 @@ signal buy_requested(index: int)
 signal closed
 
 const FIRST_HINT: String = "Tricks work in every run. Buy them in order."
-const CONTROLS_HINT: String = (
-	"Click or {card_1} / {card_2} / {card_3}: buy        {tricks} or Esc: close"
-)
+## Which keys do what (the keys are filled in, see `KeyBindings.fill`).
+const BUY_HINT: String = "Click or {card_1} / {card_2} / {card_3}: buy"
+const CLOSE_HINT: String = "{tricks} or Esc: close"
+const CONTROLS_HINT: String = BUY_HINT + "        " + CLOSE_HINT
 const PICK_ACTIONS: Array[StringName] = [&"pick_card_1", &"pick_card_2", &"pick_card_3"]
 const STRIP_COLOR: Color = UiColors.STICKER_PINK
 const THREAD_COLOR: Color = UiColors.PURPLE
