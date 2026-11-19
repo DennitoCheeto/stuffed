@@ -6,6 +6,8 @@ extends CanvasLayer
 ## Continue, Enter, Space or E. Keeps running while the run is frozen. In the Stitched Scrapbook
 ## look (spec 04 §6.4): the felt cloth over the dimmed run, a hand-written title, the contents as
 ## taped felt patches that drop in, and Continue as the gold sewn button.
+## An evolution first plays the sewing reveal (spec 10 §3): weapon + item sewn into the evolved
+## weapon with an "EVOLVED!" stamp; any key jumps to its end.
 
 ## The moment is over (confirmed).
 signal finished
@@ -39,6 +41,10 @@ const NOT_SKIPPING: Array[StringName] = [
 ## The keys that close the contents, besides player 1's interact key (and a gamepad's A
 ## button).
 const CONFIRM_KEYS: Array[Key] = [KEY_ENTER, KEY_KP_ENTER, KEY_SPACE]
+## The sewing reveal of an evolution (spec 10 §3) and how long its finished stamp stays before
+## the cards come.
+const MOMENT: EvolutionMomentRules = preload("res://data/ui/evolution_moment.tres")
+const REVEAL_HOLD: float = 0.4
 
 ## How long the opening lasts, when keys start to skip it and when confirming starts to work
 ## (from the gift box rules).
@@ -55,6 +61,8 @@ var lid_popped: bool = false
 var showing_contents: bool = false
 ## The box holds an evolution (bigger title, confetti and sound).
 var evolution: bool = false
+## True while the sewing reveal plays (after the lid popped, before the cards).
+var revealing: bool = false
 ## The contents shown, one card each.
 var cards: Array[GiftCardView] = []
 var art: GiftBoxArt
@@ -66,8 +74,10 @@ var card_row: HBoxContainer
 var continue_button: SewnButton = SewnButton.new(CONTINUE_TEXT, true, 28)
 var motion: ScreenMotion = ScreenMotion.new()
 var confetti: CPUParticles2D
+var reveal: EvolutionReveal = EvolutionReveal.new(MOMENT)
 
 var _gift: GiftContents
+var _hold_left: float = 0.0
 
 
 func _init() -> void:
@@ -92,6 +102,8 @@ func open(gift: GiftContents, rules: GiftBoxRules) -> void:
 	lid_popped = false
 	showing_contents = false
 	evolution = gift.is_evolution()
+	revealing = false
+	reveal.visible = false
 	title_label.text = EVOLUTION_TITLE if evolution else TITLE
 	var title_color: Color = EVOLUTION_COLOR if evolution else HIGHLIGHT_COLOR
 	title_label.add_theme_color_override("font_color", title_color)
@@ -142,6 +154,9 @@ func _process(delta: float) -> void:
 		contents_time += delta
 		continue_button.disabled = not can_confirm()
 		return
+	if revealing:
+		_play_reveal(delta)
+		return
 	var share: float = time / maxf(opening_seconds, 0.001)
 	if share < LID_POP_AT:
 		# The box shakes harder and harder before it opens.
@@ -153,7 +168,10 @@ func _process(delta: float) -> void:
 		if not lid_popped:
 			_pop_lid()
 	if time >= opening_seconds:
-		_show_contents()
+		if evolution:
+			_start_reveal()
+		else:
+			_show_contents()
 
 
 func _input(event: InputEvent) -> void:
@@ -168,7 +186,11 @@ func _input(event: InputEvent) -> void:
 	if time < skip_delay:
 		return
 	get_viewport().set_input_as_handled()
-	_show_contents()
+	if evolution and not (revealing and reveal.is_done()):
+		_start_reveal()
+		reveal.finish()
+	else:
+		_show_contents()
 
 
 ## A fresh key, click or gamepad button press that isn't movement.
@@ -205,6 +227,8 @@ func _pop_lid() -> void:
 func _show_contents() -> void:
 	if not lid_popped:
 		_pop_lid()
+	revealing = false
+	reveal.visible = false
 	showing_contents = true
 	contents_time = 0.0
 	continue_button.text = KeyBindings.fill(CONTINUE_TEXT)
@@ -257,6 +281,13 @@ func _build() -> void:
 	card_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(card_row)
 	_build_continue()
+	reveal.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	reveal.offset_left = -reveal.custom_minimum_size.x / 2.0
+	reveal.offset_right = reveal.custom_minimum_size.x / 2.0
+	reveal.offset_top = -reveal.custom_minimum_size.y / 2.0
+	reveal.offset_bottom = reveal.custom_minimum_size.y / 2.0
+	reveal.visible = false
+	add_child(reveal)
 	_build_confetti()
 
 
@@ -293,3 +324,27 @@ func _build_confetti() -> void:
 	colors.offsets = PackedFloat32Array([0.0, 0.25, 0.5, 0.75, 1.0])
 	confetti.color_initial_ramp = colors
 	add_child(confetti)
+
+
+## The lid popped on an evolution: the weapon and the item get sewn together (spec 10 §3).
+func _start_reveal() -> void:
+	if not lid_popped:
+		_pop_lid()
+	if revealing:
+		return
+	revealing = true
+	_hold_left = REVEAL_HOLD
+	art.visible = false
+	hint_label.visible = true
+	var into: StringName = _gift.evolution.icon
+	reveal.start(_gift.evolution_from_icon, _gift.evolution_partner_icon, into)
+	reveal.visible = true
+
+
+func _play_reveal(delta: float) -> void:
+	if not reveal.is_done():
+		reveal.advance(delta)
+		return
+	_hold_left -= delta
+	if _hold_left <= 0.0:
+		_show_contents()

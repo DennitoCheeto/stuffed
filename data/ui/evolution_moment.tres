@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="EvolutionMomentRules" format=3]
+
+[ext_resource type="Script" path="res://src/run/evolution_moment_rules.gd" id="1_rules"]
+
+[resource]
+script = ExtResource("1_rules")
+reveal_seconds = 1.5
+stamp_text = "EVOLVED!"
+icon_start_x = 280.0
+icon_meet_x = 70.0
+stitches = 5
+slow_seconds = 0.4
+slow_scale = 0.3
+pulse_seconds = 0.6
+pulse_radius = 260.0
+pulse_width = 8.0
+pulse_color = Color(0.949, 0.761, 0.188, 1)
+big_attack_scale = 1.5
+big_attack_seconds = 0.5

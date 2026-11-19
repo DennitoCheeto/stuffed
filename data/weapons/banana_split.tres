@@ -29,6 +29,7 @@ flash_radius = 30.0
 [resource]
 script = ExtResource("1_stats")
 sound = &"split"
+sting = &"sting_split"
 id = &"banana_split"
 display_name = "Banana Split"
 run_title = "Split Superstar"

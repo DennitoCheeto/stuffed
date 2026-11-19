@@ -43,6 +43,7 @@ func contents(
 		var base: UpgradeDef = pool.find(gift.evolution.weapon)
 		gift.evolution_from = base.display_name
 		gift.evolution_from_icon = base.icon
+		gift.evolution_partner_icon = pool.find(gift.evolution.partner).icon
 		return gift
 	var working: Dictionary[StringName, int] = levels.duplicate()
 	var given: Array[StringName] = []

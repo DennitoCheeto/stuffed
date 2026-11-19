@@ -72,6 +72,7 @@ var goal_time: float = 0.0
 var hit_stops: int = 0
 ## The gift box moment (built in code, on top of the run).
 var gift_screen: GiftBoxScreen = GiftBoxScreen.new()
+var evolution_moment: EvolutionMoment = EvolutionMoment.new()
 ## Evolutions so far, for the run log: {"weapon", "time", "player"}.
 var evolution_log: Array[Dictionary] = []
 ## Run time when the mini-boss / the boss was first beaten (-1 = not yet).
@@ -198,6 +199,7 @@ func _ready() -> void:
 	level_up_screen.skip_requested.connect(_on_skip_requested)
 	level_up_screen.banish_requested.connect(_on_banish_requested)
 	add_child(gift_screen)
+	add_child(evolution_moment)
 	gift_screen.finished.connect(_on_gift_moment_finished)
 	goal_screen.end_chosen.connect(_on_end_chosen)
 	goal_screen.endless_chosen.connect(_on_endless_chosen)
@@ -829,6 +831,7 @@ func _on_player_evolved(new_weapon: Weapon, player: Player) -> void:
 	}
 	evolution_log.append(entry)
 	enemies.tally.evolve(new_weapon)
+	evolution_moment.evolved(new_weapon)
 
 
 func _on_player_died(_player: Player) -> void:
