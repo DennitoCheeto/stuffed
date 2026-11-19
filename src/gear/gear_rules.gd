@@ -34,6 +34,36 @@ static var _current: GearRules
 ## Developer menu "Drop pattern": this far from player 1.
 @export var envelope_dev_offset: Vector2 = Vector2(0.0, -90.0)
 
+@export_group("Sewing table")
+@export var table_title: String = "Sewing table"
+## What E does at a built Workshop (keys filled in by `KeyBindings.fill`).
+@export var table_prompt: String = "{interact}   Open the sewing table"
+## Which keys do what on the table.
+@export var table_hint: String = "{interact} or click: sew, stitch or wear      {reroll}: take off"
+@export var table_close_hint: String = "Esc: close"
+## The slot names on the hero photo, in `GearDef.Slot` order.
+@export var slot_titles: PackedStringArray = ["Head", "Body", "Charm"]
+@export var empty_slot: String = "nothing on"
+## The main action on a tile.
+@export var sew_text: String = "Sew"
+@export var stitch_text: String = "Stitch to Lv %d"
+@export var wear_text: String = "Wear"
+@export var take_off_text: String = "Take off"
+## Why a tile can't do more right now.
+@export var building_source_text: String = "Build the %s to Lv %d"
+@export var needs_workshop_text: String = "Needs Workshop Lv %d"
+@export var taken_text: String = "Player %d wears it"
+@export var maxed_text: String = "Top stitch level!"
+@export var repair_text: String = "Repair the Workshop first"
+## The Workshop's own upgrade, as a button on the table.
+@export var upgrade_text: String = "Upgrade the Workshop to Lv %d"
+## Floats over the Workshop while something can be sewn or stitched (like "Can build!").
+@export var can_sew_tag: String = "Can sew!"
+## The sewing moment: seconds the needle bobs before the pop.
+@export var sewing_seconds: float = 0.55
+## How big the felt puff is when a piece is sewn (a building's rebuild puff is 1).
+@export var sewing_puff: float = 0.45
+
 
 static func current() -> GearRules:
 	if _current == null:

@@ -42,3 +42,5 @@ seconds = 3.0
 every = 0.0
 radius = 0.0
 factor = 0.0
+color = Color(0.941, 0.827, 0.416, 1)
+found_text = "Elites sometimes drop this"

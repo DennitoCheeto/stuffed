@@ -42,3 +42,5 @@ seconds = 0.0
 every = 0.0
 radius = 0.0
 factor = 0.15
+color = Color(0.624, 0.82, 0.722, 1)
+found_text = ""

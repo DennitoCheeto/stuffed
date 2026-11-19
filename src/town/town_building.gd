@@ -113,6 +113,8 @@ func _ready() -> void:
 	add_child(can_build_tag)
 	new_trick_tag.visible = false
 	add_child(new_trick_tag)
+	if is_workshop():
+		new_trick_tag.label.text = GearRules.current().can_sew_tag
 
 
 ## Updates the price tag and the "Can build!" tag for the town's jars right now.
@@ -125,6 +127,8 @@ func refresh(save: TownSave) -> void:
 	var next: BuildingLevel = building.next(level)
 	affordable = unlocked and not damaged and next != null and save.can_afford(next.cost())
 	trick_ready = level > 0 and not damaged and TrickBook.buyable(save, building) >= 0
+	if is_workshop():
+		trick_ready = level > 0 and not damaged and GearBook.can_sew_any(save)
 	price_tag.visible = damaged or (unlocked and level == 0 and next != null)
 	_update_can_build()
 	if not price_tag.visible:
@@ -151,6 +155,11 @@ func shows_can_build() -> bool:
 ## True while the "New trick!" tag floats over the building.
 func shows_new_trick() -> bool:
 	return new_trick_tag.visible
+
+
+## True for the Sewing Workshop: its tag says "Can sew!" instead of "New trick!" (spec 09 §6).
+func is_workshop() -> bool:
+	return spot.id == GearRules.current().workshop
 
 
 ## Every piece of text the building shows on its own (without a player next to it).

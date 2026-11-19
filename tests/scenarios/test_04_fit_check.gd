@@ -111,6 +111,7 @@ func _visit_all(window: Vector2i) -> void:
 	town.tricks.open(town.buildings[&"plush_hospital"])
 	await _check("tricks panel")
 	town.tricks.panel.close()
+	await _visit_sewing_table(town)
 	# Hero picker (spec 08 §5, AC-94): two heroes rescued, two still silhouettes.
 	town.save.plushies["pip"] = "in_town"
 	town.save.plushies["bobo"] = "waiting"
@@ -138,7 +139,7 @@ func _visit_all(window: Vector2i) -> void:
 	await _frames()
 	await _visit_run(main.current_screen as Run)
 	await _visit_siege()
-	assert_eq(checked.size(), 29, "every screen checked: %s" % [checked])
+	assert_eq(checked.size(), 30, "every screen checked: %s" % [checked])
 
 
 func _visit_run(run: Run) -> void:
@@ -309,6 +310,26 @@ func _max_the_town(town: Town) -> void:
 		town.save.materials[material] = 99999
 	town.refresh()
 	await wait_seconds(2.0)
+
+
+## The sewing table (spec 09 §6, AC-104) with every kind of tile: sewn and worn at the top
+## level, sewn, found, locked (the longest "drops this" text), and the Workshop at Lv 2 so the
+## upgrade button and its price show too.
+func _visit_sewing_table(town: Town) -> void:
+	var workshop: TownBuilding = town.buildings[&"sewing_workshop"]
+	var built: int = workshop.level
+	workshop.level = 2
+	town.save.building_levels["sewing_workshop"] = 2
+	for id: String in ["lookout_cap", "pin_cushion_hat", "patch_vest", "jingle_bell", "raincoat"]:
+		town.save.gear.add_pattern(id)
+	town.save.gear.stitches["lookout_cap"] = 2
+	town.save.gear.stitches["patch_vest"] = 1
+	town.save.gear.put_on(0, "head", "lookout_cap")
+	town.sewing.open(workshop)
+	await _check("sewing table")
+	town.sewing.table.close()
+	workshop.level = built
+	town.save.building_levels["sewing_workshop"] = built
 
 
 ## The town's moments at once with long words: Banane at a building (card and prompt), the
