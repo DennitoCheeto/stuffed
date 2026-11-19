@@ -54,9 +54,7 @@ static func stitch_cap(save: TownSave, rules: GearRules = GearRules.current()) -
 
 
 ## The next sewing step of `piece` for the town in `save`.
-static func step_of(
-	save: TownSave, piece: GearDef, rules: GearRules = GearRules.current()
-) -> Step:
+static func step_of(save: TownSave, piece: GearDef, rules: GearRules = GearRules.current()) -> Step:
 	var id: String = String(piece.id)
 	var at: int = save.gear.stitch_level(id)
 	if at >= piece.max_level():

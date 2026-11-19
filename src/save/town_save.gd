@@ -270,6 +270,7 @@ func to_dict() -> Dictionary:
 	gear.write_to(data)
 	return data
 
+
 ## Reads a saved dictionary; missing fields keep their defaults, so older saves still load.
 static func from_dict(data: Dictionary) -> TownSave:
 	var save: TownSave = TownSave.new()
