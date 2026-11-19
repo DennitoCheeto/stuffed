@@ -42,6 +42,7 @@ static func to_entry(result: RunResult) -> Dictionary:
 		"titles": Array(result.titles),
 		"tricks": Array(result.tricks),
 		"trick_moments": _timed(result.trick_moments),
+		"patterns_found": _timed(result.patterns_found),
 	}
 
 

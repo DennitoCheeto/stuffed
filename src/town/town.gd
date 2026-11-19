@@ -147,6 +147,7 @@ func _ready() -> void:
 	if welcome_banner.size() >= 2:
 		show_banner(welcome_banner[0], welcome_banner[1])
 	var news: bool = can_move_in() or _warning_due() or wardrobe.has_news()
+	news = news or not GearBook.building_patterns_due(save).is_empty()
 	if not pending_reveals().is_empty() or news:
 		_settle_left = ARRIVAL_REVEAL_SECONDS
 	add_child(menu)
@@ -440,7 +441,7 @@ func _warning_due() -> bool:
 
 ## After a rebuild settles (and on arrival): the fort grows, newly unlocked ruins lose their
 ## yarn, waiting plushies move into free Hospital beds, new heroes wave from the Wardrobe
-## (spec 08 §4) and the first siege warning appears.
+## (spec 08 §4), the first siege warning appears and building patterns arrive (spec 09 §4).
 func settle() -> void:
 	var pieces: int = TownFort.pieces_for(save.total_levels(), layout.fort_piece_every)
 	if pieces > fort.pieces:
@@ -460,6 +461,7 @@ func settle() -> void:
 		_settle_left = maxf(_banner_left, 0.1)
 	else:
 		_warn_of_the_horde()
+	_give_patterns()
 	_tell_the_horde_is_coming()
 
 
@@ -667,6 +669,22 @@ func _refresh_dusk() -> void:
 		# The banner waits for the next settle, after any other news of the arrival.
 		_horde_news = true
 		_settle_left = maxf(_settle_left, 0.1)
+
+
+## Building patterns the town has earned (Lv 2, spec 09 §4, AC-95) come with one banner, after
+## any other banner of the build or the arrival has finished. Old saves catch up on arrival.
+func _give_patterns() -> void:
+	if GearBook.building_patterns_due(save).is_empty():
+		return
+	if is_banner_showing():
+		_settle_left = maxf(_settle_left, maxf(_banner_left, 0.1))
+		return
+	var news: PackedStringArray = GearRules.current().pattern_news(
+		GearBook.give_building_patterns(save)
+	)
+	show_banner(news[0], news[1])
+	Sfx.play(GearRules.current().pattern_sound)
+	changed.emit()
 
 
 ## "The horde is coming!" once dusk has come, after any other banner has finished.

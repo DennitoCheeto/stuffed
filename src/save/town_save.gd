@@ -161,7 +161,8 @@ func waiting_plushies() -> PackedStringArray:
 
 
 ## Adds `share` of a run's haul to the jars (rounded up; coins get `coin_bonus` more, from
-## plushies in town), takes in its freed plushie and puts all it found into the Scrapbook.
+## plushies in town), takes in its freed plushie and its sewing patterns and puts all it found
+## into the Scrapbook.
 func bank(haul: RunHaul, share: float, coin_bonus: float = 0.0) -> void:
 	var kept: Dictionary[String, int] = haul.kept(share, coin_bonus)
 	for id: String in kept:
@@ -174,6 +175,9 @@ func bank(haul: RunHaul, share: float, coin_bonus: float = 0.0) -> void:
 	for page: String in haul.seen:
 		for id: String in haul.seen[page]:
 			mark_seen(page, id)
+	# Patterns are kept whole, even from a lost run (spec 09 §4).
+	for id: String in haul.patterns:
+		gear.add_pattern(id)
 
 
 ## How many Scrapbook entries `haul` found that the book doesn't have yet (its freed plushie too).

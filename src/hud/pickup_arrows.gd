@@ -1,10 +1,11 @@
 class_name PickupArrows
 extends Control
 ## Small arrows at the screen edge that point to floor pickups (spec 02b §4), the Way Home
-## portal (spec 03 §4), a tangled plushie (spec 03 §7) and the Treasure Map box (spec 06 §3)
-## when they are out of sight. With the Spyglass trick (spec 06 §3) they also point to elites
-## and bosses off screen (bosses get a bigger arrow). In the night siege one points to the pillow
-## fort for a moment after it was hit while it is off screen (spec 07 §7).
+## portal (spec 03 §4), a tangled plushie (spec 03 §7), the Treasure Map box (spec 06 §3) and
+## sewing pattern envelopes (spec 09 §4) when they are out of sight. With the Spyglass trick
+## (spec 06 §3) they also point to elites and bosses off screen (bosses get a bigger arrow). In
+## the night siege one points to the pillow fort for a moment after it was hit while it is off
+## screen (spec 07 §7).
 
 ## An arrow pointed to an elite or boss this frame (Spyglass at work).
 signal threat_pointed
@@ -129,6 +130,9 @@ func _arrow_color(item: Node) -> Color:
 	var plushie: TangledPlushie = item as TangledPlushie
 	if plushie != null and not plushie.used:
 		return TangledPlushie.GLOW_COLOR
+	var envelope: PatternEnvelope = item as PatternEnvelope
+	if envelope != null and not envelope.taken:
+		return PatternEnvelope.GLOW_COLOR
 	var box: GiftBox = item as GiftBox
 	if box != null and box.treasure and not box.opened:
 		return GiftBoxLook.GLOW_COLOR
