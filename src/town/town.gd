@@ -173,7 +173,7 @@ func _physics_process(delta: float) -> void:
 			if pressed:
 				enter_bedroom()
 		elif is_at_scrapbook(player):
-			prompt = "E   Open the Scrapbook"
+			prompt = "{interact}   Open the Scrapbook"
 			if pressed:
 				open_scrapbook()
 		elif wardrobe.is_near(player):
@@ -197,7 +197,7 @@ func _physics_process(delta: float) -> void:
 		card.hide_card()
 	for id: StringName in buildings:
 		buildings[id].card_shown = buildings[id] == shown
-	prompt_label.text = prompt
+	prompt_label.text = KeyBindings.fill(prompt)
 	prompt_label.visible = not prompt.is_empty()
 	if _settle_left > 0.0:
 		_settle_left -= delta
@@ -644,7 +644,9 @@ func enter_bedroom() -> void:
 
 
 func _door_prompt() -> String:
-	return SIEGE_RULES.door_prompt if SIEGE_RULES.is_due(save) else "E   Go to the Bedroom"
+	if SIEGE_RULES.is_due(save):
+		return SIEGE_RULES.door_prompt
+	return "{interact}   Go to the Bedroom"
 
 
 ## Dusk comes (with a banner, see `_tell_the_horde_is_coming`) when the siege is due and goes

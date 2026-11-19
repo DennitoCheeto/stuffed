@@ -63,6 +63,7 @@ func _ready() -> void:
 	# Bedroom-only tricks (Treasure Map, Picnic, rescue tricks) are off tonight (spec 07 §4).
 	perks.keep_siege_tricks()
 	super()
+	music.follows_clock = false
 	var area: Rect2 = town_arena().spawn_area(siege_rules.spawn_margin)
 	enemies.play_rect = area
 	projectiles.play_rect = area
@@ -226,6 +227,7 @@ func _edge_point(radius: float) -> Vector2:
 
 func _announce_wave(index: int) -> void:
 	wave_banners.append(index)
+	music.follow_wave(index)
 	var last: bool = index == waves.count() - 1
 	var title: String = siege_rules.wave_banner % [index + 1, waves.count()]
 	var subtitle: String = siege_rules.last_wave_subtitle if last else siege_rules.wave_subtitle

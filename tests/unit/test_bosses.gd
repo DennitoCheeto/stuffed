@@ -86,4 +86,4 @@ func test_he_summons_a_ring_of_runners_and_lunges_when_angry() -> void:
 
 
 func test_boss_music_is_a_track() -> void:
-	assert_true(MusicPlayer.TRACKS.has(&"boss"))
+	assert_not_null(MusicPlayer.RULES.track(&"boss"))

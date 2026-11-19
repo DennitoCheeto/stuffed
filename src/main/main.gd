@@ -124,7 +124,7 @@ func start_siege() -> void:
 	siege.music_requested.connect(_play_music)
 	town.unfinished_run = {}
 	SaveStore.write(town)
-	_play_music(&"run")
+	_play_music(&"siege")
 	_switch_to(siege)
 
 
@@ -154,7 +154,9 @@ func _end_siege(result: RunResult) -> void:
 	elif damaged.is_empty():
 		_siege_news = PackedStringArray([SIEGE_RULES.lost_banner, SIEGE_RULES.lost_subtitle])
 	else:
-		_siege_news = PackedStringArray([SIEGE_RULES.lost_banner, SIEGE_RULES.damaged_subtitle])
+		var repair_note: String = KeyBindings.fill(SIEGE_RULES.damaged_subtitle)
+		_siege_news = PackedStringArray([SIEGE_RULES.lost_banner, repair_note])
+	music.play_stinger(&"siege_won" if won else &"siege_lost")
 	Crosshair.stop()
 	_play_music(&"town")
 	var end: EndScreen = END_SCENE.instantiate()

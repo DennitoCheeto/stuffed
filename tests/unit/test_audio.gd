@@ -36,20 +36,6 @@ func test_sweep_reaches_the_target_pitch() -> void:
 	assert_almost_eq(late / step, 800.0, 1.0, "after the sweep it holds the end pitch")
 
 
-func test_music_stays_in_range_and_loops_seamlessly() -> void:
-	var music: MusicPlayer = MusicPlayer.new()
-	music.use_track(&"title")
-	var bpm: float = MusicPlayer.TRACKS[&"title"][0]
-	var loop_seconds: float = 16.0 * 60.0 / bpm
-	var t: float = 0.0
-	while t < loop_seconds:
-		var value: float = music.sample_at(t)
-		assert_true(absf(value) <= 1.5, "in range at %.2f" % t)
-		assert_almost_eq(music.sample_at(t + loop_seconds), value, 0.001, "loops at %.2f" % t)
-		t += 0.37
-	music.free()
-
-
 ## Average loudness (root mean square of the samples).
 func _loudness(sound: StringName) -> float:
 	var wav: AudioStreamWAV = SfxBank.make(sound)
@@ -124,23 +110,6 @@ func test_jar_coins_are_quieter_than_xp() -> void:
 		quietest_danger = minf(quietest_danger, _loudness(sound))
 	assert_lt(_loudness(&"coin"), _loudness(&"pickup"), "quieter than an XP plip")
 	assert_lt(_loudness(&"coin"), quietest_danger * 0.5, "much quieter than danger")
-
-
-func test_every_music_track_stays_in_range_and_town_is_the_calmest() -> void:
-	var music: MusicPlayer = MusicPlayer.new()
-	for track: StringName in MusicPlayer.TRACKS:
-		music.use_track(track)
-		var bpm: float = MusicPlayer.TRACKS[track][0]
-		var loop_seconds: float = 16.0 * 60.0 / bpm
-		for t: float in [0.0, 1.3, 4.7, 9.1]:
-			var value: float = music.sample_at(t)
-			assert_true(absf(value) <= 1.5, "%s in range" % track)
-			if track == &"title" or track == &"town":
-				var again: float = music.sample_at(t + loop_seconds)
-				assert_almost_eq(again, value, 0.001, "%s loops" % track)
-		if track != &"town":
-			assert_lt(MusicPlayer.TRACKS[&"town"][0], bpm, "town is slower than %s" % track)
-	music.free()
 
 
 ## Spec 04 §7: the menu sounds exist and stay soft, never close to enemy danger.

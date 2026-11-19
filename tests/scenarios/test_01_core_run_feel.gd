@@ -22,7 +22,10 @@ func _music_bus_muffled() -> bool:
 func test_ac31_music_plays_on_the_title_screen() -> void:
 	assert_true(main.music.playing, "music is playing")
 	assert_eq(main.music.track, &"title")
-	assert_eq(main.music.bus, &"Music")
+	assert_true(await wait_until(main.music.deck.is_started, 30.0), "its layers play")
+	for player: AudioStreamPlayer in main.music.deck.players:
+		assert_eq(player.bus, &"Music", "on the Music slider")
+	assert_eq(main.music.stinger_player.bus, &"Music")
 
 
 func test_ac31_music_plays_during_the_run() -> void:

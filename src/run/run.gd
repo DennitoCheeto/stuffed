@@ -107,6 +107,8 @@ var rescue_rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var tricks: RunTricks
 ## Sewing pattern drops in this run (spec 09 §4).
 var patterns: RunPatterns
+## Music intensity and stingers (spec 10 §4.1).
+var music: RunMusic
 ## This run's rescue (null = none), and the tangled plushie once it has appeared.
 var rescue_plan: RescuePlan
 var rescue: TangledPlushie
@@ -216,6 +218,8 @@ func _ready() -> void:
 	hud.follow_player(first, upgrade_pool)
 	camera.set_bounds(arena.outer_rect())
 	camera.snap_to_players()
+	music = RunMusic.new(self)
+	add_child(music)
 	tricks.run_started()
 	Crosshair.use()
 	_show_clock()
