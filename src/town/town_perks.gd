@@ -26,6 +26,8 @@ var tricks: Array[TrickDef] = []
 var buddy: String = ""
 ## The hero each player slot plays (spec 08), slot 0 = player 1. Empty = the hero scene's own.
 var heroes: Array[HeroStats] = []
+## Sewing patterns the town owns (gear ids, spec 09 §4): they never drop in a run again.
+var patterns: PackedStringArray = []
 
 
 ## The perks of the town in `save`, with the buildings standing on the spots of `layout`.
@@ -51,6 +53,7 @@ static func from_save(save: TownSave, layout: TownLayout) -> TownPerks:
 			if save.has_trick(String(trick.id)):
 				perks.tricks.append(trick)
 	perks.buddy = save.last_rescued
+	perks.patterns = save.gear.patterns.duplicate()
 	perks.heroes = HeroRoster.current().heroes_for(save, HeroRoster.MAX_PLAYERS)
 	# A hero's new weapon joins the cards once that hero is unlocked (spec 08 §3).
 	for hero: HeroStats in HeroRoster.current().heroes:

@@ -21,6 +21,7 @@ const REFILL: String = "Refill rerolls/skips/banishes"
 const NEXT_WAVE: String = "Next wave"
 const WIN_SIEGE: String = "Win siege"
 const HURT_FORT: String = "Hurt the fort"
+const DROP_PATTERN: String = "Drop pattern"
 ## "Hurt the fort" takes this share of its full health.
 const FORT_HURT_SHARE: float = 0.25
 ## Width of the line listing the town's tricks (it wraps instead of widening the panel).
@@ -179,6 +180,7 @@ func _build() -> void:
 	_build_floor_drops(column)
 	_row(column, ["Spawn Big Ted", "Jump to Big Ted"], [_spawn_mini_boss, _jump_to_mini_boss])
 	_row(column, ["Open Way Home", "Start rescue now"], [_open_way_home, _start_rescue])
+	_row(column, [DROP_PATTERN], [_drop_pattern])
 	_row(column, ["Spawn the King", "Jump to the King"], [_spawn_boss, _jump_to_boss])
 	var evolutions: Array[EvolutionDef] = run.upgrade_pool.evolutions
 	for first: int in range(0, evolutions.size(), 2):
@@ -351,6 +353,14 @@ func _open_way_home() -> void:
 ## A tangled plushie appears now (spec 03 §10), even in a run without a planned rescue.
 func _start_rescue() -> void:
 	run.start_rescue()
+
+
+## The next sewing pattern a boss or elite could still drop, next to player 1 (spec 09 §11).
+func _drop_pattern() -> void:
+	var piece: GearDef = run.patterns.next_drop()
+	if piece != null:
+		var offset: Vector2 = run.patterns.rules.envelope_dev_offset
+		run.patterns.drop(piece, _player().global_position + offset)
 
 
 ## A gift box a few steps to the right of player 1.

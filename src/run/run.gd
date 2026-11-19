@@ -105,6 +105,8 @@ var rescued_before: PackedStringArray = []
 var rescue_rng: RandomNumberGenerator = RandomNumberGenerator.new()
 ## The building tricks in this run (spec 06).
 var tricks: RunTricks
+## Sewing pattern drops in this run (spec 09 §4).
+var patterns: RunPatterns
 ## Music intensity and stingers (spec 10 §4.1).
 var music: RunMusic
 ## This run's rescue (null = none), and the tangled plushie once it has appeared.
@@ -163,6 +165,8 @@ func _ready() -> void:
 	rescue_rng.seed = seed_value * 7 + 11
 	tricks = RunTricks.new(self)
 	tricks.rng.seed = seed_value * 23 + 13
+	patterns = RunPatterns.new(self)
+	patterns.rng.seed = seed_value * 29 + 17
 	rescue_plan = rescue_rules.plan(run_number, rescued_before, rescue_rng)
 	floor_pickup_drops = FloorPickupDrops.new(
 		floor_pickup_rules, pickup_rng, perks.pickup_gap_cut, perks.first_pickup_at
@@ -523,6 +527,7 @@ func make_result(ending: String) -> RunResult:
 	result.lowest_health_at_goal = lowest_health_at_goal
 	result.tricks = perks.trick_ids()
 	result.trick_moments = tricks.moments.duplicate(true)
+	result.patterns_found = patterns.found.duplicate(true)
 	for player: Player in Players.all(get_tree()):
 		for weapon: Weapon in player.weapons():
 			result.weapon_titles[String(weapon.stats.id)] = weapon.stats.run_title
@@ -672,6 +677,7 @@ func _on_zombie_killed(zombie: Zombie) -> void:
 	if _drops_enabled:
 		pickups.drop(zombie.xp_button(), zombie.position)
 		_collect_kill(zombie)
+		patterns.zombie_killed(zombie)
 		var kind: FloorPickupDef = floor_pickup_drops.roll(elapsed, floor_pickups().size())
 		if kind != null:
 			drop_floor_pickup(kind.id, zombie.position)

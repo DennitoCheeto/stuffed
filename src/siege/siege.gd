@@ -69,6 +69,8 @@ func _ready() -> void:
 	projectiles.play_rect = area
 	spawner.active = false
 	floor_pickup_drops.next_drop_at = INF
+	# Sewing patterns only drop on expeditions (spec 09 §4).
+	patterns.enabled = false
 	enemies.health_scale = siege_rules.health_scale(number)
 	waves = SiegeWaves.new(siege_rules)
 	var health: float = siege_rules.fort_health_for(town_save.total_levels())
