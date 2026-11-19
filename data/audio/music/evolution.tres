@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="MusicTrack" format=3]
+
+[ext_resource type="Script" path="res://src/audio/music_track.gd" id="1_track"]
+[ext_resource type="Script" path="res://src/audio/music_layer.gd" id="2_layer"]
+
+[sub_resource type="Resource" id="Resource_layer_1"]
+script = ExtResource("2_layer")
+instrument = 6
+steps = "0.1.2.3.4.5.6.7."
+octave = 24
+volume = 0.3
+level = 0
+
+[sub_resource type="Resource" id="Resource_layer_2"]
+script = ExtResource("2_layer")
+instrument = 4
+steps = "............x..."
+octave = 0
+volume = 0.28
+level = 0
+
+[resource]
+script = ExtResource("1_track")
+id = &"evolution"
+bpm = 160.0
+roots = PackedInt32Array(60)
+layers = Array[ExtResource("2_layer")]([SubResource("Resource_layer_1"), SubResource("Resource_layer_2")])
+loops = false

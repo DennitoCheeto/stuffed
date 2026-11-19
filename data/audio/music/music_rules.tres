@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="MusicRules" format=3]
+
+[ext_resource type="Script" path="res://src/audio/music_rules.gd" id="1_rules"]
+[ext_resource type="Script" path="res://src/audio/music_track.gd" id="2_track"]
+[ext_resource type="Resource" path="res://data/audio/music/title.tres" id="3_title"]
+[ext_resource type="Resource" path="res://data/audio/music/town.tres" id="4_town"]
+[ext_resource type="Resource" path="res://data/audio/music/run.tres" id="5_run"]
+[ext_resource type="Resource" path="res://data/audio/music/boss.tres" id="6_boss"]
+[ext_resource type="Resource" path="res://data/audio/music/siege.tres" id="7_siege"]
+[ext_resource type="Resource" path="res://data/audio/music/endless.tres" id="8_endless"]
+[ext_resource type="Resource" path="res://data/audio/music/goal.tres" id="9_goal"]
+[ext_resource type="Resource" path="res://data/audio/music/hero_died.tres" id="10_hero_died"]
+[ext_resource type="Resource" path="res://data/audio/music/siege_won.tres" id="11_siege_won"]
+[ext_resource type="Resource" path="res://data/audio/music/siege_lost.tres" id="12_siege_lost"]
+[ext_resource type="Resource" path="res://data/audio/music/evolution.tres" id="13_evolution"]
+
+[resource]
+script = ExtResource("1_rules")
+tracks = Array[ExtResource("2_track")]([ExtResource("3_title"), ExtResource("4_town"), ExtResource("5_run"), ExtResource("6_boss"), ExtResource("7_siege"), ExtResource("8_endless")])
+stingers = Array[ExtResource("2_track")]([ExtResource("9_goal"), ExtResource("10_hero_died"), ExtResource("11_siege_won"), ExtResource("12_siege_lost"), ExtResource("13_evolution")])
+crossfade_seconds = 1.0
+layer_fade_seconds = 2.0
+loudness = 0.5
+stinger_loudness = 0.6
+run_drums_seconds = 120.0
+run_drums_crowd = 150
+run_full_seconds = 300.0
+check_seconds = 0.5
