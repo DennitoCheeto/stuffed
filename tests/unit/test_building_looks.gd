@@ -2,7 +2,8 @@ extends GutTest
 ## The building art kit (spec 05 §2.2, §3.2, AC-60; spec 09 §5): all seven town buildings have
 ## their own look for ruin, Lv 1, Lv 2 and Lv 3, each level adds at least one visible piece, the
 ## ruin is the same object broken and greyed, every look fits its spot, uses no danger colour and
-## is baked once into a mesh. The fort grows a piece at a time and the Scrapbook stand is drawn with the kit too.
+## is baked once into a mesh. The fort grows a piece at a time and the Scrapbook stand is drawn
+## with the kit too.
 
 const LAYOUT: TownLayout = preload("res://data/town/pillow_fort.tres")
 const PALETTE: WorldPalette = preload("res://data/art/world_palette.tres")
