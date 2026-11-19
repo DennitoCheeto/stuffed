@@ -49,13 +49,15 @@ func _drawn_alpha(item: CanvasItem) -> float:
 	return alpha
 
 
-## The biggest camera offset over `frames` frames after a full shake.
+## The biggest camera offset along one axis over `frames` frames after a full shake (each axis
+## is at most the shake strength; the length can be up to √2 times that).
 func _shake_seen(frames: int) -> float:
 	run.camera.shake(1.0)
 	var most: float = 0.0
 	for i: int in frames:
 		await wait_process_frames(1)
-		most = maxf(most, run.camera.offset.length())
+		var offset: Vector2 = run.camera.offset
+		most = maxf(most, maxf(absf(offset.x), absf(offset.y)))
 	return most
 
 
