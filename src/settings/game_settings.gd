@@ -1,10 +1,17 @@
 class_name GameSettings
 extends RefCounted
-## Player options changed in the pause menu. They take effect right away and are saved to
-## user://settings.json (hard rule 10), so they survive closing the game.
+## Player options changed in Settings. They take effect right away and are saved to
+## user://settings.json (hard rule 10), so they survive closing the game. A broken or old file
+## never crashes: whatever is missing or wrong keeps its default.
+
+## Screen tab (spec 10 §5): Fullscreen = the game owns the monitor, Borderless = a window
+## without a frame that covers the screen (quick Alt+Tab).
+enum WindowMode { WINDOWED, FULLSCREEN, BORDERLESS }
 
 const BUSES: Array[StringName] = [&"Master", &"Effects", &"Music"]
 const DEFAULT_PATH: String = "user://settings.json"
+## How a window mode is written in the settings file (index = `WindowMode`).
+const WINDOW_MODE_IDS: PackedStringArray = ["windowed", "fullscreen", "borderless"]
 
 ## Tests point this at a scratch file.
 static var path: String = DEFAULT_PATH
@@ -12,6 +19,11 @@ static var path: String = DEFAULT_PATH
 static var damage_numbers: bool = true
 ## "Menu animations: reduced" (spec 04 §3): no wobble, no drop-ins, instant count-ups.
 static var reduced_motion: bool = false
+static var window_mode: WindowMode = WindowMode.WINDOWED
+static var vsync: bool = true
+## What `apply_screen` last asked the display for (the headless test display ignores it).
+static var applied_window: DisplayServer.WindowMode = DisplayServer.WINDOW_MODE_WINDOWED
+static var applied_vsync: bool = true
 
 
 ## Volume of an audio bus, 0 (silent) to 1 (full).
@@ -34,6 +46,34 @@ static func set_volume(bus: StringName, amount: float) -> void:
 	AudioServer.set_bus_volume_db(index, linear_to_db(maxf(clamped, 0.001)))
 
 
+## The display's window mode for one of ours.
+static func display_mode(mode: WindowMode) -> DisplayServer.WindowMode:
+	match mode:
+		WindowMode.FULLSCREEN:
+			return DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN
+		WindowMode.BORDERLESS:
+			return DisplayServer.WINDOW_MODE_FULLSCREEN
+	return DisplayServer.WINDOW_MODE_WINDOWED
+
+
+## F11 / Alt+Enter: a window goes fullscreen, any full screen goes back to a window.
+static func toggled_mode(mode: WindowMode) -> WindowMode:
+	return WindowMode.FULLSCREEN if mode == WindowMode.WINDOWED else WindowMode.WINDOWED
+
+
+## Puts the window mode and V-Sync on the screen.
+static func apply_screen() -> void:
+	applied_window = display_mode(window_mode)
+	applied_vsync = vsync
+	if DisplayServer.get_name() == "headless":
+		return
+	if DisplayServer.window_get_mode() != applied_window:
+		DisplayServer.window_set_mode(applied_window)
+	DisplayServer.window_set_vsync_mode(
+		DisplayServer.VSYNC_ENABLED if vsync else DisplayServer.VSYNC_DISABLED
+	)
+
+
 ## Every option as plain data (what goes into the settings file).
 static func to_dict() -> Dictionary:
 	var volumes: Dictionary = {}
@@ -42,18 +82,32 @@ static func to_dict() -> Dictionary:
 	return {
 		"damage_numbers": damage_numbers,
 		"reduced_motion": reduced_motion,
+		"window_mode": WINDOW_MODE_IDS[window_mode],
+		"vsync": vsync,
 		"volumes": volumes,
 	}
 
 
-## Applies saved options; anything missing keeps its default.
+## Applies saved options; anything missing or of the wrong kind keeps its default.
 static func apply_dict(data: Dictionary) -> void:
-	damage_numbers = bool(data.get("damage_numbers", true))
-	reduced_motion = bool(data.get("reduced_motion", false))
-	var volumes: Dictionary = data.get("volumes", {}) as Dictionary
+	damage_numbers = _flag(data, "damage_numbers", true)
+	reduced_motion = _flag(data, "reduced_motion", false)
+	vsync = _flag(data, "vsync", true)
+	var mode: Variant = data.get("window_mode", "")
+	var index: int = WINDOW_MODE_IDS.find(mode) if mode is String else -1
+	window_mode = WindowMode.WINDOWED if index < 0 else index as WindowMode
+	var volumes: Variant = data.get("volumes", {})
+	if not volumes is Dictionary:
+		return
 	for bus: StringName in BUSES:
-		if volumes.has(String(bus)):
-			set_volume(bus, float(volumes[String(bus)]))
+		var amount: Variant = (volumes as Dictionary).get(String(bus))
+		if amount is float or amount is int:
+			set_volume(bus, float(amount))
+
+
+## Back to how a fresh install starts (volumes are left alone).
+static func reset() -> void:
+	apply_dict({})
 
 
 ## Writes the options to the settings file. Returns false if it couldn't be written.
@@ -67,13 +121,21 @@ static func save() -> bool:
 	return true
 
 
-## Reads the settings file (if there is one); without one, the options go back to defaults.
+## Reads the settings file (if there is one); without one (or a broken one), the options go
+## back to defaults.
 static func load_saved() -> void:
 	var data: Variant = null
 	if FileAccess.file_exists(path):
-		data = JSON.parse_string(FileAccess.get_file_as_string(path))
+		# JSON.new().parse stays quiet on a broken file (parse_string logs an error).
+		var json: JSON = JSON.new()
+		if json.parse(FileAccess.get_file_as_string(path)) == OK:
+			data = json.data
 	if data is Dictionary:
 		apply_dict(data as Dictionary)
 	else:
-		damage_numbers = true
-		reduced_motion = false
+		reset()
+
+
+static func _flag(data: Dictionary, key: String, fallback: bool) -> bool:
+	var value: Variant = data.get(key, fallback)
+	return value if value is bool else fallback

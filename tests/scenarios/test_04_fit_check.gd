@@ -85,7 +85,9 @@ func _visit_all(window: Vector2i) -> void:
 	var title: TitleScreen = main.current_screen as TitleScreen
 	await _check("title (new game)")
 	title.open_settings()
-	await _check("settings (title)")
+	for tab: int in SettingsPanel.TAB_NAMES.size():
+		title.settings.show_tab(tab)
+		await _check("settings (title, %s)" % SettingsPanel.TAB_NAMES[tab])
 	title.settings.close()
 	title.start_button.pressed.emit()
 	await _frames()
@@ -136,7 +138,7 @@ func _visit_all(window: Vector2i) -> void:
 	await _frames()
 	await _visit_run(main.current_screen as Run)
 	await _visit_siege()
-	assert_eq(checked.size(), 26, "every screen checked: %s" % [checked])
+	assert_eq(checked.size(), 29, "every screen checked: %s" % [checked])
 
 
 func _visit_run(run: Run) -> void:
