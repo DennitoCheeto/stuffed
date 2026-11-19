@@ -1,8 +1,8 @@
 class_name RunHaul
 extends RefCounted
-## What a run has collected for the town so far (spec 03 §3): materials, a freed plushie and
-## what it found for the Scrapbook (§8). Saved every few seconds while the run goes, so closing
-## the game never loses it.
+## What a run has collected for the town so far (spec 03 §3): materials, a freed plushie, what
+## it found for the Scrapbook (§8) and sewing patterns (spec 09 §4). Saved every few seconds
+## while the run goes, so closing the game never loses it.
 
 ## Material id ("coins", "stuffing", "thread") -> amount collected in this run.
 var materials: Dictionary[String, int] = {}
@@ -10,6 +10,8 @@ var materials: Dictionary[String, int] = {}
 var rescued: String = ""
 ## Scrapbook page -> ids seen in this run. All of it goes into the book, whatever share is kept.
 var seen: Dictionary[String, PackedStringArray] = {}
+## Sewing patterns found in this run (gear ids, spec 09 §4): kept whatever share is kept.
+var patterns: PackedStringArray = []
 
 
 func add(material: String, amount: int) -> void:
@@ -40,6 +42,7 @@ func to_dict() -> Dictionary:
 		"materials": materials.duplicate(),
 		"rescued": rescued,
 		"seen": TownSave.pages_to_dict(seen),
+		"patterns": Array(patterns),
 	}
 
 
@@ -51,4 +54,7 @@ static func from_dict(data: Dictionary) -> RunHaul:
 			haul.materials[str(key)] = int(saved[key])
 	haul.rescued = str(data.get("rescued", ""))
 	haul.seen = TownSave.pages_from(data.get("seen", {}))
+	var found: Variant = data.get("patterns", [])
+	if found is Array:
+		haul.patterns = PackedStringArray(found as Array)
 	return haul

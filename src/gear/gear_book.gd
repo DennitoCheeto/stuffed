@@ -147,3 +147,26 @@ static func total_cost(rules: GearRules = GearRules.current()) -> Dictionary[Str
 			for id: String in cost:
 				result[id] = result.get(id, 0) + cost[id]
 	return result
+
+
+## Pieces whose building pattern the town has earned but doesn't own yet (spec 09 §4): their
+## building stands at the pattern's level (Lv 2) or higher. Old saves catch up this way too.
+static func building_patterns_due(
+	save: TownSave, rules: GearRules = GearRules.current()
+) -> Array[GearDef]:
+	var result: Array[GearDef] = []
+	for piece: GearDef in rules.pieces_from(GearDef.Source.BUILDING):
+		var built: int = save.building_level(String(piece.source))
+		if built >= piece.source_level and not save.gear.has_pattern(String(piece.id)):
+			result.append(piece)
+	return result
+
+
+## Gives the town every building pattern it has earned. Returns the new ones.
+static func give_building_patterns(
+	save: TownSave, rules: GearRules = GearRules.current()
+) -> Array[GearDef]:
+	var due: Array[GearDef] = building_patterns_due(save, rules)
+	for piece: GearDef in due:
+		save.gear.add_pattern(String(piece.id))
+	return due

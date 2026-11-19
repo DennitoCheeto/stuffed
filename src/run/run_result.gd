@@ -68,6 +68,8 @@ var titles: PackedStringArray = []
 var tricks: PackedStringArray = []
 ## The first time each trick fired: {"id", "time": run seconds, "player": 0-based index}.
 var trick_moments: Array[Dictionary] = []
+## Sewing patterns found in this run (spec 09 §10): {"pattern": gear id, "time": run seconds}.
+var patterns_found: Array[Dictionary] = []
 ## Night siege only (spec 07 §6): which siege (1 = the first; 0 = an expedition), waves held of
 ## how many, and the buildings knocked down in the fight (ids).
 var siege_number: int = 0
