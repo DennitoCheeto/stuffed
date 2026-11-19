@@ -141,8 +141,8 @@ func _distance_to_line(line: PackedVector2Array, point: Vector2) -> float:
 
 
 func test_the_town_music_is_calmer_than_the_run() -> void:
-	assert_true(MusicPlayer.TRACKS.has(&"town"))
-	assert_lt(MusicPlayer.TRACKS[&"town"][0], MusicPlayer.TRACKS[&"run"][0])
+	assert_not_null(MusicPlayer.RULES.track(&"town"))
+	assert_lt(MusicPlayer.RULES.track(&"town").bpm, MusicPlayer.RULES.track(&"run").bpm)
 
 
 func test_brought_home_says_what_share_was_kept() -> void:

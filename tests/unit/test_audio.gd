@@ -111,6 +111,7 @@ func test_jar_coins_are_quieter_than_xp() -> void:
 	assert_lt(_loudness(&"coin"), _loudness(&"pickup"), "quieter than an XP plip")
 	assert_lt(_loudness(&"coin"), quietest_danger * 0.5, "much quieter than danger")
 
+
 ## Spec 04 §7: the menu sounds exist and stay soft, never close to enemy danger.
 func test_menu_sounds_are_softer_than_enemy_danger() -> void:
 	var quietest_danger: float = INF
