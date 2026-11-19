@@ -1,0 +1,44 @@
+[gd_resource type="Resource" script_class="GearDef" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://src/gear/gear_def.gd" id="1_def"]
+[ext_resource type="Script" path="res://src/gear/gear_level.gd" id="2_level"]
+
+[sub_resource type="Resource" id="Resource_level_1"]
+script = ExtResource("2_level")
+coins = 400
+stuffing = 10
+thread = 2
+amount = 0.4
+effect = "40% faster firing"
+
+[sub_resource type="Resource" id="Resource_level_2"]
+script = ExtResource("2_level")
+coins = 450
+stuffing = 14
+thread = 4
+amount = 0.55
+effect = "55% faster firing"
+
+[sub_resource type="Resource" id="Resource_level_3"]
+script = ExtResource("2_level")
+coins = 550
+stuffing = 18
+thread = 6
+amount = 0.7
+effect = "70% faster firing"
+
+[resource]
+script = ExtResource("1_def")
+id = &"wind_up_key"
+display_name = "Wind-up Key"
+slot = 2
+text = "Every 20 s the key winds up and your weapons fire faster for a few seconds."
+source_kind = 1
+source = &"sock_puppet_king"
+source_level = 2
+drop_chance = 0.0
+levels = Array[ExtResource("2_level")]([SubResource("Resource_level_1"), SubResource("Resource_level_2"), SubResource("Resource_level_3")])
+seconds = 4.0
+every = 20.0
+radius = 0.0
+factor = 0.0

@@ -1,0 +1,44 @@
+[gd_resource type="Resource" script_class="GearDef" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://src/gear/gear_def.gd" id="1_def"]
+[ext_resource type="Script" path="res://src/gear/gear_level.gd" id="2_level"]
+
+[sub_resource type="Resource" id="Resource_level_1"]
+script = ExtResource("2_level")
+coins = 300
+stuffing = 4
+thread = 0
+amount = 1.6
+effect = "x1.6 pickup range"
+
+[sub_resource type="Resource" id="Resource_level_2"]
+script = ExtResource("2_level")
+coins = 350
+stuffing = 8
+thread = 2
+amount = 1.8
+effect = "x1.8 pickup range"
+
+[sub_resource type="Resource" id="Resource_level_3"]
+script = ExtResource("2_level")
+coins = 450
+stuffing = 12
+thread = 4
+amount = 2.2
+effect = "x2.2 pickup range"
+
+[resource]
+script = ExtResource("1_def")
+id = &"lookout_cap"
+display_name = "Lookout Cap"
+slot = 0
+text = "Stand still for 1 s and your pickup range grows until you move."
+source_kind = 0
+source = &"watchtower"
+source_level = 2
+drop_chance = 0.0
+levels = Array[ExtResource("2_level")]([SubResource("Resource_level_1"), SubResource("Resource_level_2"), SubResource("Resource_level_3")])
+seconds = 1.0
+every = 0.0
+radius = 0.0
+factor = 0.0

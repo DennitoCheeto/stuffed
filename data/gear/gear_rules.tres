@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="GearRules" load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://src/gear/gear_rules.gd" id="1_rules"]
+[ext_resource type="Script" path="res://src/gear/gear_def.gd" id="2_def"]
+[ext_resource type="Resource" path="res://data/gear/pin_cushion_hat.tres" id="3_pin_cushion_hat"]
+[ext_resource type="Resource" path="res://data/gear/lookout_cap.tres" id="4_lookout_cap"]
+[ext_resource type="Resource" path="res://data/gear/propeller_cap.tres" id="5_propeller_cap"]
+[ext_resource type="Resource" path="res://data/gear/raincoat.tres" id="6_raincoat"]
+[ext_resource type="Resource" path="res://data/gear/patch_vest.tres" id="7_patch_vest"]
+[ext_resource type="Resource" path="res://data/gear/picnic_apron.tres" id="8_picnic_apron"]
+[ext_resource type="Resource" path="res://data/gear/jingle_bell.tres" id="9_jingle_bell"]
+[ext_resource type="Resource" path="res://data/gear/lucky_button.tres" id="10_lucky_button"]
+[ext_resource type="Resource" path="res://data/gear/wind_up_key.tres" id="11_wind_up_key"]
+
+[resource]
+script = ExtResource("1_rules")
+pieces = Array[ExtResource("2_def")]([ExtResource("3_pin_cushion_hat"), ExtResource("4_lookout_cap"), ExtResource("5_propeller_cap"), ExtResource("6_raincoat"), ExtResource("7_patch_vest"), ExtResource("8_picnic_apron"), ExtResource("9_jingle_bell"), ExtResource("10_lucky_button"), ExtResource("11_wind_up_key")])
+workshop = &"sewing_workshop"
+slot_levels = Array[int]([1, 1, 2])
+stitch_caps = Array[int]([0, 1, 2, 3])

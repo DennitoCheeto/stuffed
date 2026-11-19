@@ -8,8 +8,9 @@ extends RefCounted
 ## Scrapbook also lists plushies rescued before it existed. Version 4: bought building tricks
 ## (older saves have none). Version 5: the night siege countdown, sieges and damaged buildings
 ## (older saves get no warning until the countdown starts as usual). Version 6: the hero each
-## player plays (spec 08; older saves play Banane).
-const VERSION: int = 6
+## player plays (spec 08; older saves play Banane). Version 7: sewn-on gear (spec 09: patterns,
+## sewn pieces, what each player wears and hides; older saves have none).
+const VERSION: int = 7
 ## Plushie ids of the placeholder plushies (version 1) -> the real plushies that replaced them.
 const OLD_PLUSHIE_IDS: Dictionary[String, String] = {
 	"kitty": "pip",
@@ -47,6 +48,8 @@ var damaged: PackedStringArray = []
 var start_weapon: String = ""
 ## The hero id each player slot plays (HeroStats.id; slot 0 = player 1). Missing = Banane.
 var heroes: PackedStringArray = []
+## Sewing patterns found, pieces sewn and what each player wears (spec 09).
+var gear: TownGear = TownGear.new()
 ## The haul of a run that was still going when last saved (RunHaul.to_dict(); empty = none).
 var unfinished_run: Dictionary = {}
 
@@ -245,7 +248,7 @@ static func pages_from(value: Variant) -> Dictionary[String, PackedStringArray]:
 
 
 func to_dict() -> Dictionary:
-	return {
+	var data: Dictionary = {
 		"version": VERSION,
 		"materials": materials.duplicate(),
 		"building_levels": building_levels.duplicate(),
@@ -264,6 +267,8 @@ func to_dict() -> Dictionary:
 		"damaged": Array(damaged),
 		"unfinished_run": unfinished_run.duplicate(true),
 	}
+	gear.write_to(data)
+	return data
 
 
 ## Reads a saved dictionary; missing fields keep their defaults, so older saves still load.
@@ -308,6 +313,7 @@ static func from_dict(data: Dictionary) -> TownSave:
 	var broken: Variant = data.get("damaged", [])
 	if broken is Array:
 		save.damaged = PackedStringArray(broken as Array)
+	save.gear = TownGear.read_from(data)
 	var unfinished: Variant = data.get("unfinished_run", {})
 	if unfinished is Dictionary:
 		var saved: Dictionary = unfinished as Dictionary

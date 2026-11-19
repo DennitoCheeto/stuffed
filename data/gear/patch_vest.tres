@@ -1,0 +1,44 @@
+[gd_resource type="Resource" script_class="GearDef" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://src/gear/gear_def.gd" id="1_def"]
+[ext_resource type="Script" path="res://src/gear/gear_level.gd" id="2_level"]
+
+[sub_resource type="Resource" id="Resource_level_1"]
+script = ExtResource("2_level")
+coins = 300
+stuffing = 4
+thread = 0
+amount = 20.0
+effect = "Patch back in 20 s"
+
+[sub_resource type="Resource" id="Resource_level_2"]
+script = ExtResource("2_level")
+coins = 350
+stuffing = 8
+thread = 2
+amount = 16.0
+effect = "Patch back in 16 s"
+
+[sub_resource type="Resource" id="Resource_level_3"]
+script = ExtResource("2_level")
+coins = 450
+stuffing = 12
+thread = 4
+amount = 12.0
+effect = "Patch back in 12 s"
+
+[resource]
+script = ExtResource("1_def")
+id = &"patch_vest"
+display_name = "Patch Vest"
+slot = 1
+text = "A felt patch blocks one hit, then grows back."
+source_kind = 0
+source = &"plush_hospital"
+source_level = 2
+drop_chance = 0.0
+levels = Array[ExtResource("2_level")]([SubResource("Resource_level_1"), SubResource("Resource_level_2"), SubResource("Resource_level_3")])
+seconds = 0.0
+every = 0.0
+radius = 0.0
+factor = 0.0
