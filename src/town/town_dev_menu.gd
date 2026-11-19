@@ -229,6 +229,7 @@ func next_hero() -> HeroStats:
 func give_all_patterns() -> void:
 	for piece: GearDef in GearRules.current().pieces:
 		town.save.gear.add_pattern(String(piece.id))
+	town.reveal_new_buildings()
 	_saved()
 
 
