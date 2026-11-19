@@ -17,6 +17,7 @@ func test_dev_menu_gives_sews_maxes_and_clears_gear() -> void:
 	assert_eq(main.town.gear.patterns.size(), count, "every pattern")
 	assert_eq(main.town.gear.stitches.size(), 0, "nothing sewn yet")
 	assert_eq(SaveStore.read().gear.patterns.size(), count, "saved")
+	assert_true(town.buildings[_rules().workshop].is_visible_in_tree(), "the Workshop appears")
 	town.dev_menu.press(TownDevMenu.GIVE_PATTERNS)
 	assert_eq(main.town.gear.patterns.size(), count, "no doubles")
 	town.dev_menu.press(TownDevMenu.SEW_ALL)

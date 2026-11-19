@@ -65,6 +65,9 @@ var knocked_down: bool = false
 ## A lost siege damaged it (spec 07 §6): it leans, greys a little and wears felt patches until
 ## it is repaired. It keeps its level; its bonuses and tricks are off in runs meanwhile.
 var damaged: bool = false
+## Not drawn and blocks nothing until its "New building!" moment (the Sewing Workshop waits for
+## the first gear pattern, spec 09 §5).
+var waiting_for_reveal: bool = false
 
 var _shake_left: float = 0.0
 ## 0..1 while popping up, 1 when still.
@@ -217,11 +220,39 @@ func show_damaged(on: bool) -> void:
 	queue_redraw()
 
 
-## The yarn falls off: the ruin can be rebuilt now ("New building!").
+## The yarn falls off: the ruin can be rebuilt now ("New building!"). A spot that waited for a
+## pattern never had yarn.
 func reveal() -> void:
 	unlocked = true
-	_yarn_fall = 0.0
+	if not spot.needs_pattern:
+		_yarn_fall = 0.0
 	queue_redraw()
+
+
+## Keeps the spot empty (no drawing, no wall) until `appear`.
+func hide_until_revealed() -> void:
+	waiting_for_reveal = true
+	visible = false
+
+
+## A hidden spot shows up with a pop and a puff, and blocks walking from now on.
+func appear() -> void:
+	if not waiting_for_reveal:
+		return
+	waiting_for_reveal = false
+	visible = true
+	var body: StaticBody2D = StaticBody2D.new()
+	body.name = "Wall"
+	body.collision_layer = Arena.WALL_LAYER
+	body.collision_mask = 0
+	body.position = spot.rect.get_center()
+	var shape: RectangleShape2D = RectangleShape2D.new()
+	shape.size = spot.rect.size
+	var collision: CollisionShape2D = CollisionShape2D.new()
+	collision.shape = shape
+	body.add_child(collision)
+	add_child(body)
+	_pop_up(0.55, 1.0)
 
 
 ## True while the rebuild moment or the yarn falling is still playing.

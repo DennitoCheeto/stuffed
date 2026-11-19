@@ -6,7 +6,13 @@ extends RefCounted
 
 ## Buildings drawn with the kit.
 const KIT_BUILDINGS: Array[StringName] = [
-	&"lucky_jar", &"toy_box_armory", &"watchtower", &"snack_bar", &"party_shop", &"plush_hospital"
+	&"lucky_jar",
+	&"toy_box_armory",
+	&"watchtower",
+	&"snack_bar",
+	&"party_shop",
+	&"plush_hospital",
+	&"sewing_workshop",
 ]
 
 static var _kept: Dictionary[String, BuildingSketch] = {}
@@ -40,4 +46,6 @@ static func _build(building: BuildingDef, level: int) -> BuildingSketch:
 			return PartyShopLook.build(level, building.art_scale)
 		&"plush_hospital":
 			return HospitalLook.build(level, building.art_scale)
+		&"sewing_workshop":
+			return WorkshopLook.build(level, building.art_scale)
 	return null

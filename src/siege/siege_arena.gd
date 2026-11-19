@@ -13,6 +13,7 @@ var buildings: Dictionary[StringName, TownBuilding] = {}
 var dusk: TownDusk
 
 var _floor: TownFloor
+var _save: TownSave
 
 
 ## Nothing to build before `setup`: the Bedroom's walls and looks are not wanted here.
@@ -23,6 +24,7 @@ func _ready() -> void:
 ## Builds the town room from `town_layout` with the buildings of `save`.
 func setup(town_layout: TownLayout, save: TownSave) -> void:
 	layout = town_layout
+	_save = save
 	size = layout.size
 	wall_thickness = layout.wall_thickness
 	furniture = null
@@ -37,6 +39,8 @@ func setup(town_layout: TownLayout, save: TownSave) -> void:
 	add_child(ScrapbookStand.new(layout.scrapbook_rect))
 	var standing: Array[TownBuilding] = []
 	for spot: TownSpot in layout.spots:
+		if spot.is_hidden_in(save):
+			continue
 		var level: int = save.building_level(String(spot.id))
 		var building: TownBuilding = TownBuilding.new(spot, level, _is_open(spot, save))
 		add_child(building)
@@ -86,7 +90,7 @@ func edge_point(margin: float, radius: float, rng: RandomNumberGenerator) -> Vec
 func _blocking_rects() -> Array[Rect2]:
 	if layout == null:
 		return []
-	return layout.blocking_rects()
+	return layout.blocking_rects(_save)
 
 
 ## True when `spot` stands open (rebuildable, its yarn gone) in `save`, like in the town.
