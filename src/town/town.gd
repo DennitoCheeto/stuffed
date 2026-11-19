@@ -85,6 +85,8 @@ var book: ScrapbookBook = ScrapbookBook.new()
 var dev_menu: TownDevMenu = TownDevMenu.new()
 ## Buying building tricks (spec 06).
 var tricks: TownTricks = TownTricks.new(self)
+## The sewing table at the Sewing Workshop (spec 09 §6).
+var sewing: TownSewing = TownSewing.new(self)
 
 ## Set once the Bedroom door was used (one press = one run).
 var _leaving: bool = false
@@ -145,6 +147,7 @@ func _ready() -> void:
 	camera.snap_to_players()
 	_build_hud()
 	tricks.attach(hud)
+	sewing.attach()
 	refresh()
 	if welcome_banner.size() >= 2:
 		show_banner(welcome_banner[0], welcome_banner[1])
@@ -188,7 +191,7 @@ func _physics_process(delta: float) -> void:
 			if building == null:
 				continue
 			if pressed:
-				interact(building)
+				interact(building, player.player_index)
 			elif player.just_pressed("tricks"):
 				tricks.open(building, player.player_index)
 			if shown == null:
@@ -310,11 +313,14 @@ func _raise(building: TownBuilding, next: BuildingLevel) -> void:
 	changed.emit()
 
 
-## What pressing E next to `building` does: choose the starting weapon at a fully built Toy
-## Box Armory, else rebuild or upgrade it.
-func interact(building: TownBuilding) -> void:
+## What pressing E next to `building` does (player `by`): repair it, open the sewing table at
+## a built Sewing Workshop, choose the starting weapon at a fully built Toy Box Armory, else
+## rebuild or upgrade it.
+func interact(building: TownBuilding, by: int = 0) -> void:
 	if building.damaged:
 		_repair(building)
+	elif TownSewing.opens_table(building):
+		sewing.open(building, by)
 	elif can_choose_start_weapon(building):
 		open_weapon_picker()
 	else:
@@ -426,6 +432,7 @@ func refresh() -> void:
 		jars[material].show_amount(save.material(material))
 	for id: StringName in buildings:
 		buildings[id].refresh(save)
+	sewing.refresh_tag()
 	_refresh_calendar()
 
 

@@ -456,6 +456,23 @@ func test_ac49_the_tricks_panel_toast_and_tag_are_felt() -> void:
 	assert_eq(town.tricks.toast.title_label.get_theme_font(&"font"), UiFonts.hand())
 
 
+func test_ac49_the_sewing_table_is_felt_with_sewn_tiles() -> void:
+	main.town.building_levels["sewing_workshop"] = 1
+	main.town.revealed.append("sewing_workshop")
+	main.town.gear.add_pattern("lookout_cap")
+	var town: Town = await go_to_town()
+	assert_true(town.sewing.open(town.buildings[&"sewing_workshop"]))
+	await wait_seconds(UiFeel.STYLE.open_seconds + SETTLE)
+	var table: SewingTable = town.sewing.table
+	_assert_themed(table, "sewing table")
+	assert_true(table.cloth.is_visible_in_tree(), "the felt cloth is behind it")
+	assert_eq(table.title.label.get_theme_font(&"font"), UiFonts.hand(), "hand-written title")
+	for tile: GearTile in table.tiles.values():
+		assert_true(tile is SewnButton, "%s is a sewn tile" % tile.piece.display_name)
+	assert_true(table.tiles[&"lookout_cap"].has_focus(), "keyboard ready on the piece to sew")
+	table.close()
+
+
 func test_ac49_the_unlock_toast_and_the_new_building_banner_are_felt() -> void:
 	var town: Town = await go_to_town()
 	var pool: UpgradePool = Town.UPGRADE_POOL

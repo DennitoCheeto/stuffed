@@ -32,6 +32,11 @@ const SLOT_NAMES: PackedStringArray = ["head", "body", "charm"]
 @export var drop_chance: float = 0.0
 ## Stitch levels 1-3 in order; level 1 is sewing the piece.
 @export var levels: Array[GearLevel] = []
+## Its felt colour (calm: never a danger colour, spec 09 §7).
+@export var color: Color = Color("#b9a3d6")
+## Where the pattern comes from, on its locked tile, for BOSS and ELITE pieces ("Big Ted drops
+## this"). BUILDING pieces say "Build the <building> to Lv 2" by themselves.
+@export var found_text: String = ""
 
 @export_group("Piece numbers")
 ## Numbers that don't change with the stitch level (0 = not used by this piece):

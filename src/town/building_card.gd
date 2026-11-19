@@ -141,6 +141,8 @@ static func action_text(target: TownBuilding, save: TownSave) -> String:
 		if not short.is_empty():
 			return missing_text(short)
 		return KeyBindings.fill(SiegeRules.current().repair_prompt)
+	if target.level > 0 and target.spot.id == GearRules.current().workshop:
+		return KeyBindings.fill(GearRules.current().table_prompt)
 	var next: BuildingLevel = target.building.next(target.level)
 	if next == null:
 		if target.building.chooses_start_weapon(target.level):
