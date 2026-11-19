@@ -44,7 +44,7 @@ func test_ac110_four_tabs_and_each_shows_its_own_page() -> void:
 	await wait_process_frames(1)
 	sender.key_up(KEY_E)
 	assert_eq(_shown_pages(page), [SettingsPanel.Tab.CONTROLS], "E: next tab")
-	assert_true(page.controls_note.is_visible_in_tree(), "Controls says keys come soon")
+	assert_true(page.controls.is_visible_in_tree(), "Controls shows the key list")
 	sender.key_down(KEY_E)
 	await wait_process_frames(1)
 	sender.key_up(KEY_E)

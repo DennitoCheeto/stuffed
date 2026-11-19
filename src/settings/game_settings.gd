@@ -103,6 +103,7 @@ static func to_dict() -> Dictionary:
 		"own_effects": own_effects,
 		"hints": hints,
 		"volumes": volumes,
+		"bindings": KeyBindings.to_dict(),
 	}
 
 
@@ -118,6 +119,7 @@ static func apply_dict(data: Dictionary) -> void:
 	var mode: Variant = data.get("window_mode", "")
 	var index: int = WINDOW_MODE_IDS.find(mode) if mode is String else -1
 	window_mode = WindowMode.WINDOWED if index < 0 else index as WindowMode
+	KeyBindings.apply_dict(data.get("bindings"))
 	var volumes: Variant = data.get("volumes", {})
 	if not volumes is Dictionary:
 		return
@@ -127,7 +129,7 @@ static func apply_dict(data: Dictionary) -> void:
 			set_volume(bus, float(amount))
 
 
-## Back to how a fresh install starts (volumes are left alone).
+## Back to how a fresh install starts (shipped keys too; volumes are left alone).
 static func reset() -> void:
 	apply_dict({})
 

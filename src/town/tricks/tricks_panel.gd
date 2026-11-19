@@ -10,7 +10,9 @@ signal buy_requested(index: int)
 signal closed
 
 const FIRST_HINT: String = "Tricks work in every run. Buy them in order."
-const CONTROLS_HINT: String = "Click or 1 / 2 / 3: buy        T or Esc: close"
+const CONTROLS_HINT: String = (
+	"Click or {card_1} / {card_2} / {card_3}: buy        {tricks} or Esc: close"
+)
 const PICK_ACTIONS: Array[StringName] = [&"pick_card_1", &"pick_card_2", &"pick_card_3"]
 const STRIP_COLOR: Color = UiColors.STICKER_PINK
 const THREAD_COLOR: Color = UiColors.PURPLE
@@ -107,7 +109,7 @@ func refresh(save: TownSave) -> void:
 	var def: BuildingDef = building.building
 	level_tag.label.text = BuildingCard.level_text(building.level, def.max_level())
 	var first_time: bool = save.tricks.is_empty()
-	hint_label.text = FIRST_HINT if first_time else CONTROLS_HINT
+	hint_label.text = FIRST_HINT if first_time else KeyBindings.fill(CONTROLS_HINT)
 	hint_label.add_theme_color_override(
 		&"font_color", UiColors.TEAL if first_time else UiColors.INK_SOFT
 	)

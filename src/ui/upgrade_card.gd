@@ -103,7 +103,7 @@ func _init() -> void:
 ## Shows `card_offer` as card number `number` (1 = the first).
 func show_offer(card_offer: UpgradeOffer, number: int) -> void:
 	offer = card_offer
-	key_tag.label.text = str(number)
+	key_tag.label.text = KeyBindings.key_text("card_%d" % number)
 	_icon.icon = offer.upgrade.icon
 	name_label.text = offer.upgrade.display_name
 	level_tag.label.text = offer.level_text()

@@ -2,10 +2,10 @@ class_name SettingsPanel
 extends CanvasLayer
 ## The one Settings page (spec 04 §6.2, spec 10 §5), opened from the run's pause menu, the
 ## town's Esc menu and the title screen. Four sewn tabs: Sound (Master / Effects / Music),
-## Screen (window mode, V-Sync), Controls (key changing, M6-03) and Readability (damage numbers,
-## flashes, screen shake, own effects, reduced menu animations, hints). Changes take effect at
-## once and are saved (GameSettings). Q / E or a click switch tabs; Back or Esc closes it and the
-## menu that opened it comes back (`closed`). Works while the game is frozen.
+## Screen (window mode, V-Sync), Controls (key changing, `ControlsPage`) and Readability
+## (damage numbers, flashes, screen shake, own effects, reduced menu animations, hints).
+## Changes take effect at once and are saved (GameSettings). Q / E or a click switch tabs; Back
+## or Esc closes it and the menu that opened it comes back (`closed`). Works while frozen.
 
 signal closed
 ## "Show hints again" was pressed: whoever keeps the seen hints (the save) forgets them.
@@ -29,7 +29,6 @@ const PAGE_SIZE: Vector2 = Vector2(640, 470)
 ## Fabric-tag tabs and choice buttons: plain, and the chosen one.
 const TAG_COLOR: Color = UiColors.TAG
 const TAG_ON_COLOR: Color = UiColors.STICKER_TEAL
-const CONTROLS_SOON: String = "Changing your keys comes here soon."
 const HINTS_AGAIN: String = "Show hints again"
 const HINTS_AGAIN_NOTE: String = "Every hint will show again."
 ## Width of the "40%" next to a slider.
@@ -54,7 +53,8 @@ var own_effects_slider: ThreadSlider
 var hints_check: FeltSwitch
 var hints_again_button: SewnButton
 var hints_note: Label
-var controls_note: Label
+## The Controls tab (key changing).
+var controls: ControlsPage
 var back_button: SewnButton
 var panel: FeltPanel = FeltPanel.new(-1.5)
 var motion: ScreenMotion = ScreenMotion.new()
@@ -120,6 +120,7 @@ func open() -> void:
 	hints_note.visible = false
 	for bus: StringName in VOLUMES:
 		slider_for(bus).set_value_no_signal(GameSettings.volume(bus))
+	controls.open()
 	sync_screen()
 	show_tab(Tab.SOUND)
 	visible = true
@@ -131,6 +132,7 @@ func open() -> void:
 func close() -> void:
 	if not visible:
 		return
+	controls.stop_listening()
 	visible = false
 	GameSettings.save()
 	closed.emit()
@@ -139,6 +141,7 @@ func close() -> void:
 ## Shows tab `index` (wraps around).
 func show_tab(index: int) -> void:
 	tab_index = wrapi(index, 0, TAB_NAMES.size())
+	controls.stop_listening()
 	for i: int in pages.size():
 		pages[i].visible = i == tab_index
 		_mark(tabs[i], i == tab_index)
@@ -218,8 +221,9 @@ func _build_screen(page: VBoxContainer) -> void:
 
 
 func _build_controls(page: VBoxContainer) -> void:
-	controls_note = UiFonts.label(CONTROLS_SOON, FONT_SIZE, UiColors.INK_SOFT)
-	page.add_child(controls_note)
+	controls = ControlsPage.new(_tag_button)
+	controls.changed.connect(_on_controls_changed)
+	page.add_child(controls)
 
 
 func _build_readability(page: VBoxContainer) -> void:
@@ -252,6 +256,10 @@ func _build_readability(page: VBoxContainer) -> void:
 	hints_note.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	hints_note.visible = false
 	page.add_child(hints_note)
+
+
+func _on_controls_changed() -> void:
+	GameSettings.save()
 
 
 func _on_damage_numbers_toggled(on: bool) -> void:

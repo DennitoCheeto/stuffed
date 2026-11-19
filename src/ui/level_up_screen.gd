@@ -99,6 +99,7 @@ func open(new_offers: Array[UpgradeOffer], with_moment: bool) -> void:
 	offers = new_offers
 	visible = true
 	_accepting = false
+	_show_keys()
 	_set_banishing(false)
 	_build_cards()
 	motion.finish()
@@ -217,14 +218,22 @@ func _set_banishing(on: bool) -> void:
 
 
 ## "1, 2 or 3" (or "1, 2, 3 or 4") for the cards on screen.
+## The Reroll / Skip / Banish tags show the keys bound right now.
+func _show_keys() -> void:
+	reroll_button.key_label.text = KeyBindings.key_text("reroll")
+	skip_button.key_label.text = KeyBindings.key_text("skip")
+	banish_button.key_label.text = KeyBindings.key_text("banish")
+
+
 func _card_numbers() -> String:
 	var count: int = maxi(offers.size(), 1)
 	var numbers: PackedStringArray = []
 	for number: int in range(1, count):
-		numbers.append(str(number))
+		numbers.append(KeyBindings.key_text("card_%d" % number))
+	var last: String = KeyBindings.key_text("card_%d" % count)
 	if numbers.is_empty():
-		return "1"
-	return "%s or %d" % [", ".join(numbers), count]
+		return last
+	return "%s or %s" % [", ".join(numbers), last]
 
 
 func _build_cards() -> void:

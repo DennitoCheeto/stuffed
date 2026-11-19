@@ -51,8 +51,8 @@ func key_text(action_name: String) -> String:
 		if key == null:
 			continue
 		if key.physical_keycode != KEY_NONE:
-			return OS.get_keycode_string(key.physical_keycode)
-		return OS.get_keycode_string(key.keycode)
+			return KeyBindings.key_name(key.physical_keycode)
+		return KeyBindings.key_name(key.keycode)
 	return "?"
 
 

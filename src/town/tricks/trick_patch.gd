@@ -49,7 +49,7 @@ func _init(shown: TrickDef) -> void:
 	name_label.custom_minimum_size = Vector2(PATCH_SIZE.x - TrickBadge.SIDE - 60.0, 0.0)
 	name_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	top.add_child(name_label)
-	text_label = _line(trick.text, 21, UiColors.INK)
+	text_label = _line(KeyBindings.fill(trick.text), 21, UiColors.INK)
 	text_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	column.add_child(text_label)
 	cost_row = HBoxContainer.new()
