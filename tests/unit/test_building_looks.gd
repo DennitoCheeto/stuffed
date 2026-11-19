@@ -35,7 +35,7 @@ const TOP_PARTS: Dictionary[StringName, Array] = {
 	&"snack_bar": [&"cupcake_tower", &"fairy_lights", &"second_table"],
 	&"party_shop": [&"third_box", &"bow", &"balloons", &"present_stand"],
 	&"plush_hospital": [&"downstairs_windows", &"roof_cross", &"flower_bushes"],
-	&"sewing_workshop": [&"sewing_machine", &"fabric", &"scissors", &"pin_flag", &"pincushion_roof"],
+	&"sewing_workshop": [&"sewing_machine", &"fabric", &"scissors", &"pin_flag", &"roof_pins"],
 }
 ## What Lv 1 and Lv 2 of the redrawn Party Shop and Hospital show (spec 05 §3.2, #187).
 const LEVEL_PARTS: Dictionary[String, Array] = {
