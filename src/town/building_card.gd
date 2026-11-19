@@ -138,16 +138,20 @@ static func action_text(target: TownBuilding, save: TownSave) -> String:
 		return target.spot.unlock_hint()
 	if target.damaged:
 		var short: Dictionary[String, int] = save.missing(target.repair_cost())
-		return SiegeRules.current().repair_prompt if short.is_empty() else missing_text(short)
+		if not short.is_empty():
+			return missing_text(short)
+		return KeyBindings.fill(SiegeRules.current().repair_prompt)
 	var next: BuildingLevel = target.building.next(target.level)
 	if next == null:
 		if target.building.chooses_start_weapon(target.level):
-			return "E   Choose starting weapon"
+			return KeyBindings.fill("{interact}   Choose starting weapon")
 		return "Fully upgraded!"
 	var missing: Dictionary[String, int] = save.missing(next.cost())
 	if not missing.is_empty():
 		return missing_text(missing)
-	return "E   Rebuild" if target.level == 0 else "E   Upgrade to level %d" % (target.level + 1)
+	if target.level == 0:
+		return KeyBindings.fill("{interact}   Rebuild")
+	return KeyBindings.fill("{interact}   Upgrade to level %d" % (target.level + 1))
 
 
 ## "T   Tricks (1 of 3)" at a built building with a branch of tricks, else "".
@@ -158,7 +162,8 @@ static func tricks_text(target: TownBuilding, save: TownSave) -> String:
 	for trick: TrickDef in target.building.tricks:
 		if save.has_trick(String(trick.id)):
 			bought += 1
-	return "T   Tricks (%d of %d)" % [bought, target.building.tricks.size()]
+	var words: String = "{tricks}   Tricks (%d of %d)" % [bought, target.building.tricks.size()]
+	return KeyBindings.fill(words)
 
 
 ## "Needs 40 more stuffing", or "Needs 40 more coins and 5 more thread".

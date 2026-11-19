@@ -9,7 +9,7 @@ const FADE_SECONDS: float = 0.5
 const POP_SECONDS: float = 0.25
 const TILT: float = -1.2
 const BOTTOM_GAP: float = 140.0
-const SUBTITLE: String = "Walk up to it and press T"
+const SUBTITLE: String = "Walk up to it and press {tricks}"
 
 var title_label: Label
 var subtitle_label: Label
@@ -43,6 +43,7 @@ func _init() -> void:
 ## "New: <building> tricks!", after `delay` seconds.
 func show_for(building_name: String, delay: float = 0.0) -> void:
 	title_label.text = "New: %s tricks!" % building_name
+	subtitle_label.text = KeyBindings.fill(SUBTITLE)
 	_wait = maxf(delay, 0.0)
 	_left = SHOW_SECONDS
 	visible = false

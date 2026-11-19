@@ -27,6 +27,7 @@ var _player: Player
 
 
 func _init() -> void:
+	add_to_group(KeyBindings.HINTS)
 	name = "PocketPatch"
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	custom_minimum_size = SIZE
@@ -62,6 +63,11 @@ func refresh() -> void:
 	if kind != null:
 		toy.texture = FeltAtlas.part_texture(FloorPickupLook.key(kind.id))
 		key_label.text = _player.key_text("use_pocket")
+
+
+## Keys were changed in Settings.
+func show_keys() -> void:
+	refresh()
 
 
 ## True while something is in the pocket (for tests).

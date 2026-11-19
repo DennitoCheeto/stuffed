@@ -130,7 +130,7 @@ static var _current: SiegeRules
 @export var due_banner: String = "The horde is coming!"
 @export var due_subtitle: String = "Build and repair, then defend the fort at the door."
 ## The door's prompt while the siege is due.
-@export var door_prompt: String = "E   Defend the fort"
+@export var door_prompt: String = "{interact}   Defend the fort"
 ## The banner when wave N of M starts ("%d of %d").
 @export var wave_banner: String = "Wave %d of %d"
 @export var wave_subtitle: String = "Keep them away from the fort!"
@@ -151,11 +151,11 @@ static var _current: SiegeRules
 ## On the end screen when buildings were damaged ("%s" = their names).
 @export var damaged_line: String = "Damaged: %s. Repair them at the fort."
 ## Back in town, when buildings were damaged.
-@export var damaged_subtitle: String = "Some buildings need a repair. Walk up and press E."
+@export var damaged_subtitle: String = "Some buildings need a repair. Walk up and press {interact}."
 ## The info card of a damaged building, and what E does there.
 @export var damaged_card: String = "Damaged: repair to turn its bonuses back on"
 @export var damaged_tag: String = "Damaged"
-@export var repair_prompt: String = "E   Repair"
+@export var repair_prompt: String = "{interact}   Repair"
 
 
 ## The game's siege rules, loaded at first use. For scripts the rules' own resources depend on

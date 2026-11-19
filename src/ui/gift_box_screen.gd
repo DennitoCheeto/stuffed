@@ -21,7 +21,7 @@ const EVOLUTION_COLOR: Color = UiColors.STICKER_PINK
 const CONFETTI: int = 90
 const EVOLUTION_CONFETTI: int = 220
 const OPENING_HINT: String = "Any key: skip"
-const CONTINUE_TEXT: String = "Continue  [Enter / Space / E]"
+const CONTINUE_TEXT: String = "Continue  [Enter / Space / {interact}]"
 const HIGHLIGHT_COLOR: Color = UiColors.GOLD
 ## The cards sit a little crooked, each its own way (degrees).
 const CARD_TILTS: Array[float] = [-2.0, 1.5, -1.0, 2.0, -1.5]
@@ -36,8 +36,9 @@ const CONFETTI_COLORS: PackedColorArray = [
 const NOT_SKIPPING: Array[StringName] = [
 	&"p1_move_left", &"p1_move_right", &"p1_move_up", &"p1_move_down"
 ]
-## The keys that close the contents (a gamepad's A button too).
-const CONFIRM_KEYS: Array[Key] = [KEY_ENTER, KEY_KP_ENTER, KEY_SPACE, KEY_E]
+## The keys that close the contents, besides player 1's interact key (and a gamepad's A
+## button).
+const CONFIRM_KEYS: Array[Key] = [KEY_ENTER, KEY_KP_ENTER, KEY_SPACE]
 
 ## How long the opening lasts, when keys start to skip it and when confirming starts to work
 ## (from the gift box rules).
@@ -188,6 +189,9 @@ func _is_confirm(event: InputEvent) -> bool:
 	if not (event is InputEventKey):
 		return false
 	var key: InputEventKey = event as InputEventKey
+	var interact: Key = KeyBindings.key_of("interact")
+	if key.physical_keycode == interact or key.keycode == interact:
+		return true
 	return CONFIRM_KEYS.has(key.keycode) or CONFIRM_KEYS.has(key.physical_keycode)
 
 
@@ -203,6 +207,7 @@ func _show_contents() -> void:
 		_pop_lid()
 	showing_contents = true
 	contents_time = 0.0
+	continue_button.text = KeyBindings.fill(CONTINUE_TEXT)
 	art.visible = false
 	hint_label.visible = false
 	var parts: Array[Wobbly] = []

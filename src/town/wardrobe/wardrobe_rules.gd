@@ -21,7 +21,7 @@ static var _current: WardrobeRules
 @export var later_subtitle: String = "Pick them at the Wardrobe."
 ## The sign under the Wardrobe and the prompt next to it.
 @export var sign_text: String = "Wardrobe"
-@export var prompt: String = "E   Open the Wardrobe"
+@export var prompt: String = "{interact}   Open the Wardrobe"
 ## The hero picker.
 @export var picker_title: String = "Who plays?"
 @export var picker_hint: String = "Your hero for the next run and siege.   Esc: close"

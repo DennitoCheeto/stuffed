@@ -154,7 +154,8 @@ func _end_siege(result: RunResult) -> void:
 	elif damaged.is_empty():
 		_siege_news = PackedStringArray([SIEGE_RULES.lost_banner, SIEGE_RULES.lost_subtitle])
 	else:
-		_siege_news = PackedStringArray([SIEGE_RULES.lost_banner, SIEGE_RULES.damaged_subtitle])
+		var repair_note: String = KeyBindings.fill(SIEGE_RULES.damaged_subtitle)
+		_siege_news = PackedStringArray([SIEGE_RULES.lost_banner, repair_note])
 	Crosshair.stop()
 	_play_music(&"town")
 	var end: EndScreen = END_SCENE.instantiate()

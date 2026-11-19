@@ -6,7 +6,7 @@
 script = ExtResource("1_trick")
 id = &"pocket_pickup"
 display_name = "Pocket Pickup"
-text = "Carry one floor pickup and use it with Q."
+text = "Carry one floor pickup and use it with {use_pocket}."
 needs_level = 3
 coins = 1000
 stuffing = 25
