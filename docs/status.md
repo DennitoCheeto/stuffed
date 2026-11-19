@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-11-19 (M4.5 Equipment: spec 09 approved (PR #270), issues #271–#280 created; next: M4.5-01)_
+_Last updated: 2026-11-19 (M4.5-01 gear data + save v7 (#271): PR open; next: M4.5-02)_
 
 ## Where we are
 
@@ -20,7 +20,7 @@ _Last updated: 2026-11-19 (M4.5 Equipment: spec 09 approved (PR #270), issues #2
 | M3.7 Building tricks | 🚧 spec 06 approved 2026-10-27 (PR #199; AC-66 … AC-73, P-26 … P-28); issues #200–#209 (M3.7-01 … 10); M3.7-01 trick data + save v4 (#200): merged (PR #210); M3.7-02 Tricks panel (#201): merged (PR #212); M3.7-03 trick runtime (#202): merged (PR #214); M3.7-04 Armory tricks (#203): merged (PR #216); M3.7-05 Lucky Jar tricks (#204): merged (PR #218); M3.7-06 Watchtower tricks (#205): merged (PR #219); M3.7-07 Snack Bar tricks (#206): merged (PR #221); M3.7-08 Party Shop tricks (#207): merged (PR #222); M3.7-09 Plush Hospital tricks (#208): merged; M3.7-10 readability + prices (#209): merged, all 10 M3.7 tickets merged |
 | M4 Night siege | 🚧 spec 07 approved 2026-11-16 (PR #226; AC-74 … AC-84, P-29 … P-31); milestone M4, issues #228–#236 (M4-01 … 09); M4-01 siege data + save v5 + moon calendar (#228): merged (PR #237); M4-02 siege flow (#229): merged (PR #238); M4-03 zombie targeting + building health + Lucky Jar bait (#230): merged (PR #239); M4-04 turrets: Armory + Watchtower (#231): merged (PR #240); M4-05 Snack Bar heal ring + Party Shop confetti trap (#232): merged (PR #241); M4-06 plushies help + Plush Hospital revive (#233): merged (PR #242); M4-07 after the siege: reward, damage, repair, end screen (#234): merged (PR #244); M4-08 siege HUD, tricks, co-op, run log (#235): merged (PR #245); M4-09 readability + perf (#236): merged (PR #246), all 9 M4 tickets merged; **acceptance playtest (P-22 … P-31) waiting for the PO** |
 | M5 Plushie heroes | ✅ built (playtest pending). PO decision 2026-11-18: M5 next (before M4.5 equipment). Research `docs/research/04-hero-variety-research.md`; spec 08 approved (PO merged PR #249; `docs/specs/08-playable-plushies.md`, AC-85 … AC-94, P-32 … P-34); milestone M5, issues #250–#258 (M5-01 … 09); M5-01 hero data + save v6 + unlock + dev menu (#250): merged (PR #259); M5-02 hero puppets (#251): merged (PR #260); M5-03 Wardrobe + hero picker (#252): merged (PR #261); M5-04 Pip: Snowball Toss + Chilly Hug (#253): merged (PR #263); M5-05 Böbö: Paw Swat + Bear Hug (#254): merged (PR #264); M5-06 BamBam (#255): merged (PR #265); M5-07 Robbar (#256): merged (PR #266); M5-08 co-op heroes (#257): merged (PR #267); M5-09 readability (#258): merged (PR #268). **All 9 M5 tickets merged; acceptance playtest (P-32 … P-34) goes into the big batch** |
-| M4.5 Equipment | 🚧 spec 09 approved 2026-11-19 (PO merged PR #270; incl. PO request: hide gear per slot) (`docs/specs/09-sewn-on-gear.md`, AC-95 … AC-104, P-35 … P-37): 9 pieces (3 Head / 3 Body / 3 Charm), patterns from building Lv 2 + Big Ted / King / elites, new 7th building Sewing Workshop, gear owned by the town and worn per player. Milestone M4.5, issues #271–#280 (M4.5-01 … 10). Next: M4.5-01 (#271) |
+| M4.5 Equipment | 🚧 spec 09 approved 2026-11-19 (PO merged PR #270; incl. PO request: hide gear per slot) (`docs/specs/09-sewn-on-gear.md`, AC-95 … AC-104, P-35 … P-37): 9 pieces (3 Head / 3 Body / 3 Charm), patterns from building Lv 2 + Big Ted / King / elites, new 7th building Sewing Workshop, gear owned by the town and worn per player. Milestone M4.5, issues #271–#280 (M4.5-01 … 10). M4.5-01 gear data + save v7 + rules + dev menu (#271): PR open. Next: M4.5-02 (#272) |
 | M3 Town | ✅ accepted 2026-10-24: spec 03 approved (PR #91); issues #92–#103; M3-01 save system (PR #105), M3-02 town + flow (PR #106), M3-03 materials (PR #107), M3-04 Way Home portal (PR #109), M3-05 rebuilding (PR #110), M3-06 Toy Box Armory (PR #114), M3-07 Lucky Jar + Watchtower + Snack Bar (PR #115), M3-08 Party Shop (PR #116), M3-09 rescue in the run (PR #117), M3-10 Plush Hospital + plushies in town (PR #118), M3-11 Scrapbook (PR #119), M3-12 co-op in town + dev menu + sounds (PR #120) |
 
 ## Next step
@@ -705,3 +705,13 @@ _Last updated: 2026-11-19 (M4.5 Equipment: spec 09 approved (PR #270), issues #2
   drawn canvas items than Banane's. Real GPU: `tools/benchmark.gd -- --hero=<id>`. 2026-11-18 (500 zombies, ~590
   shots, 400 bullets): Banane 160 draw calls, Pip 119, Böbö 103, BamBam 99, Robbar 102. Hero picker is in the fit
   check (M5-03).
+- Gear (M4.5-01, spec 09): pieces are `GearDef` (`data/gear/<id>.tres`: slot, text, `source_kind` BUILDING /
+  BOSS / ELITE + `source` = building id or boss file name, `drop_chance`, 3 `GearLevel`s with price, `amount`,
+  `effect`; piece-wide numbers `seconds` / `every` / `radius` / `factor`). `GearRules.current()`
+  (`data/gear/gear_rules.tres`: `pieces`, `workshop` id `sewing_workshop`, `slot_levels`, `stitch_caps`).
+  Save state lives in `TownSave.gear` (`TownGear`: `patterns`, `stitches`, `worn` / `hidden` per player slot;
+  JSON fields `patterns`, `gear`, `worn`, `hidden`, save v7) because `TownSave` is near gdlint's 30 public
+  methods. Rules in `GearBook` (static: `step_of` → `Step`, `sew` (also stitches, puts a new piece on an empty
+  slot), `wear_state` / `wear` (one copy per piece), `take_off`, `slot_open`, `stitch_cap` (0 while the Workshop
+  is damaged), `worn_pieces`, `total_cost`). Town dev menu `GIVE_PATTERNS` / `SEW_ALL` / `MAX_STITCHES` /
+  `CLEAR_GEAR`. Tests: `test_gear.gd`, `test_09_gear_dev_menu.gd`.

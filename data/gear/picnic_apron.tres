@@ -1,0 +1,44 @@
+[gd_resource type="Resource" script_class="GearDef" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://src/gear/gear_def.gd" id="1_def"]
+[ext_resource type="Script" path="res://src/gear/gear_level.gd" id="2_level"]
+
+[sub_resource type="Resource" id="Resource_level_1"]
+script = ExtResource("2_level")
+coins = 300
+stuffing = 4
+thread = 0
+amount = 60.0
+effect = "A snack every 60 s"
+
+[sub_resource type="Resource" id="Resource_level_2"]
+script = ExtResource("2_level")
+coins = 350
+stuffing = 8
+thread = 2
+amount = 50.0
+effect = "A snack every 50 s"
+
+[sub_resource type="Resource" id="Resource_level_3"]
+script = ExtResource("2_level")
+coins = 450
+stuffing = 12
+thread = 4
+amount = 40.0
+effect = "A snack every 40 s"
+
+[resource]
+script = ExtResource("1_def")
+id = &"picnic_apron"
+display_name = "Picnic Apron"
+slot = 1
+text = "Now and then you drop a snack that heals whoever picks it up."
+source_kind = 0
+source = &"snack_bar"
+source_level = 2
+drop_chance = 0.0
+levels = Array[ExtResource("2_level")]([SubResource("Resource_level_1"), SubResource("Resource_level_2"), SubResource("Resource_level_3")])
+seconds = 0.0
+every = 0.0
+radius = 0.0
+factor = 0.15

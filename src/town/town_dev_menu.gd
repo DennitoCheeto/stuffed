@@ -2,7 +2,8 @@ class_name TownDevMenu
 extends CanvasLayer
 ## Developer menu in town (F1, spec 03 §10): give materials, rebuild or upgrade any building for
 ## free, add a plushie, fill or clear the Scrapbook, give or clear all tricks, call the night
-## siege, damage or repair buildings, unlock or switch heroes, reset the whole town. Everything
+## siege, damage or repair buildings, unlock or switch heroes, give or clear sewn-on gear, reset
+## the whole town. Everything
 ## it changes is saved right away (through the town's `changed`).
 
 const PANEL_COLOR: Color = Color(0.1, 0.09, 0.13, 0.92)
@@ -21,6 +22,10 @@ const DAMAGE_ONE: String = "Damage a building"
 const REPAIR_ALL: String = "Repair all"
 const UNLOCK_HEROES: String = "Unlock all heroes"
 const NEXT_HERO: String = "Next hero"
+const GIVE_PATTERNS: String = "Give all patterns"
+const SEW_ALL: String = "Sew all"
+const MAX_STITCHES: String = "Max all stitches"
+const CLEAR_GEAR: String = "Clear gear"
 const RESET: String = "Reset town"
 const RESET_SURE: String = "Really reset?"
 ## The Scrapbook's pages and entries (to fill it).
@@ -86,6 +91,8 @@ func _build() -> void:
 	_row(column, [GIVE_TRICKS, CLEAR_TRICKS], [give_all_tricks, clear_tricks])
 	_row(column, [SIEGE_NOW, DAMAGE_ONE, REPAIR_ALL], [siege_now, damage_one, repair_all])
 	_row(column, [UNLOCK_HEROES, NEXT_HERO], [unlock_all_heroes, next_hero])
+	_row(column, [GIVE_PATTERNS, SEW_ALL], [give_all_patterns, sew_all])
+	_row(column, [MAX_STITCHES, CLEAR_GEAR], [max_all_stitches, clear_gear])
 	_row(column, [RESET], [_ask_reset])
 
 
@@ -215,6 +222,38 @@ func next_hero() -> HeroStats:
 	town.wardrobe.swap(0, next)
 	_saved()
 	return next
+
+
+## Every sewing pattern counts as found (spec 09 §11).
+func give_all_patterns() -> void:
+	for piece: GearDef in GearRules.current().pieces:
+		town.save.gear.add_pattern(String(piece.id))
+	_saved()
+
+
+## Every piece is sewn (its pattern found too), at least at stitch Lv 1; worn gear stays on.
+func sew_all() -> void:
+	_sew_every_piece(false)
+
+
+## Every piece is sewn at its top stitch level.
+func max_all_stitches() -> void:
+	_sew_every_piece(true)
+
+
+## No patterns, no sewn pieces, nothing worn or hidden.
+func clear_gear() -> void:
+	town.save.gear.clear()
+	_saved()
+
+
+func _sew_every_piece(to_top: bool) -> void:
+	var gear: TownGear = town.save.gear
+	for piece: GearDef in GearRules.current().pieces:
+		var id: String = String(piece.id)
+		gear.add_pattern(id)
+		gear.stitches[id] = piece.max_level() if to_top else maxi(gear.stitch_level(id), 1)
+	_saved()
 
 
 ## The first press asks, the second one resets.

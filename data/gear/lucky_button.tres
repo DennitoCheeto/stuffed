@@ -1,0 +1,44 @@
+[gd_resource type="Resource" script_class="GearDef" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://src/gear/gear_def.gd" id="1_def"]
+[ext_resource type="Script" path="res://src/gear/gear_level.gd" id="2_level"]
+
+[sub_resource type="Resource" id="Resource_level_1"]
+script = ExtResource("2_level")
+coins = 300
+stuffing = 4
+thread = 0
+amount = 0.04
+effect = "4% golden buttons"
+
+[sub_resource type="Resource" id="Resource_level_2"]
+script = ExtResource("2_level")
+coins = 350
+stuffing = 8
+thread = 2
+amount = 0.06
+effect = "6% golden buttons"
+
+[sub_resource type="Resource" id="Resource_level_3"]
+script = ExtResource("2_level")
+coins = 450
+stuffing = 12
+thread = 4
+amount = 0.08
+effect = "8% golden buttons"
+
+[resource]
+script = ExtResource("1_def")
+id = &"lucky_button"
+display_name = "Lucky Button"
+slot = 2
+text = "Some XP buttons drop golden, worth 5 times the XP."
+source_kind = 0
+source = &"lucky_jar"
+source_level = 2
+drop_chance = 0.0
+levels = Array[ExtResource("2_level")]([SubResource("Resource_level_1"), SubResource("Resource_level_2"), SubResource("Resource_level_3")])
+seconds = 0.0
+every = 0.0
+radius = 0.0
+factor = 5.0

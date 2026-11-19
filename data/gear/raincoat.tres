@@ -1,0 +1,44 @@
+[gd_resource type="Resource" script_class="GearDef" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://src/gear/gear_def.gd" id="1_def"]
+[ext_resource type="Script" path="res://src/gear/gear_level.gd" id="2_level"]
+
+[sub_resource type="Resource" id="Resource_level_1"]
+script = ExtResource("2_level")
+coins = 350
+stuffing = 6
+thread = 0
+amount = 0.3
+effect = "30% slower in puddles"
+
+[sub_resource type="Resource" id="Resource_level_2"]
+script = ExtResource("2_level")
+coins = 400
+stuffing = 10
+thread = 3
+amount = 0.4
+effect = "40% slower in puddles"
+
+[sub_resource type="Resource" id="Resource_level_3"]
+script = ExtResource("2_level")
+coins = 500
+stuffing = 14
+thread = 5
+amount = 0.5
+effect = "50% slower in puddles"
+
+[resource]
+script = ExtResource("1_def")
+id = &"raincoat"
+display_name = "Raincoat"
+slot = 1
+text = "Your dash leaves a puddle: zombies in it slow down, enemy bullets fizzle out."
+source_kind = 2
+source = &""
+source_level = 2
+drop_chance = 0.25
+levels = Array[ExtResource("2_level")]([SubResource("Resource_level_1"), SubResource("Resource_level_2"), SubResource("Resource_level_3")])
+seconds = 3.0
+every = 0.0
+radius = 0.0
+factor = 0.0
