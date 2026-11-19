@@ -1,60 +1,47 @@
 class_name MusicPlayer
-extends AudioStreamPlayer
-## Plays the background music, synthesized live (no music files): a calm music-box loop on the
-## title screen, a slower, cozier one in town, a bouncier toy-band loop during runs and a
-## driving minor loop with drums for the boss fight. Muffled while the game is paused.
+extends Node
+## The background music, made in code (spec 10 §4.1): one looping track per place (title, town,
+## run, boss, siege, endless) from data/audio/music/, built from instrument layers. Changing place
+## crossfades (`MusicRules.crossfade_seconds`); layers join and leave with the intensity (the run
+## grows over time and with the crowd, the siege with each wave). Stingers play once over the
+## music. Every track is rendered once per game on worker threads (no frame hitches) and kept for
+## all players. Muffled while the game is paused. Runs and sieges reach it through the `GROUP`.
 
-## Track name → [beats per minute, chord roots (MIDI, one per bar), lead octave shift].
-const TRACKS: Dictionary[StringName, Array] = {
-	&"title": [80.0, [60.0, 57.0, 53.0, 55.0], 12.0],
-	&"town": [70.0, [53.0, 57.0, 50.0, 55.0], 12.0],
-	&"run": [124.0, [57.0, 53.0, 48.0, 55.0], 0.0],
-	&"boss": [148.0, [57.0, 57.0, 53.0, 52.0], -12.0],
-}
-## Chord shape on top of each root: minor for A (57), major otherwise.
-const MAJOR: PackedFloat32Array = [0.0, 4.0, 7.0, 12.0]
-const MINOR: PackedFloat32Array = [0.0, 3.0, 7.0, 12.0]
-## Order the chord tones are played in (one per eighth note).
-const ARPEGGIO: PackedInt32Array = [0, 1, 2, 3, 2, 1, 2, 1]
-const LOUDNESS: float = 0.22
+const GROUP: StringName = &"music"
+const RULES: MusicRules = preload("res://data/audio/music/music_rules.tres")
 const MUFFLE_EFFECT: int = 0
 
+## Rendered clips per track / stinger id, shared by every MusicPlayer.
+static var _clips: Dictionary[StringName, Array] = {}
+static var _jobs: Dictionary[StringName, MusicJob] = {}
+
+## The place's track id (&"" = none yet).
 var track: StringName = &""
-
-var _playback: AudioStreamGeneratorPlayback
-var _sample: int = 0
-var _bpm: float = 120.0
-var _roots: Array = []
-var _lead_shift: float = 0.0
-
-
-func _ready() -> void:
-	bus = &"Music"
-	process_mode = Node.PROCESS_MODE_ALWAYS
-
-
-## Starts `track_name` ("title" or "run") from the beginning (keeps playing if already on it).
-func play_track(track_name: StringName) -> void:
-	if track_name == track and playing:
-		return
-	use_track(track_name)
-	var generator: AudioStreamGenerator = AudioStreamGenerator.new()
-	generator.mix_rate = Synth.RATE
-	generator.buffer_length = 0.3
-	stream = generator
-	_sample = 0
-	play()
-	_playback = get_stream_playback() as AudioStreamGeneratorPlayback
-	_fill()
+## True while a track is on (its clips may still be rendering for a moment after the boot).
+var playing: bool:
+	get:
+		return deck != null
+## 0 = calm, 1 = drums, 2 = everything (see `MusicRules.run_level`).
+var intensity: int = 0
+## The track fading in or playing.
+var deck: MusicDeck
+## Tracks fading out after a change of place.
+var fading_out: Array[MusicDeck] = []
+## Every stinger asked for, in order (for tests).
+var stingers_played: Array[StringName] = []
+var stinger_player: AudioStreamPlayer = AudioStreamPlayer.new()
 
 
-## Picks the song `sample_at` plays, without starting playback.
-func use_track(track_name: StringName) -> void:
-	track = track_name
-	var settings: Array = TRACKS[track_name]
-	_bpm = settings[0]
-	_roots = settings[1]
-	_lead_shift = settings[2]
+## Starts rendering every track and stinger (the title first).
+static func prepare_all() -> void:
+	for one: MusicTrack in RULES.tracks + RULES.stingers:
+		_request(one)
+
+
+## True once `id`'s clips are rendered.
+static func is_ready(id: StringName) -> bool:
+	_collect()
+	return _clips.has(id)
 
 
 ## Muffles the music (paused game) or makes it clear again.
@@ -64,42 +51,86 @@ static func set_muffled(muffled: bool) -> void:
 		AudioServer.set_bus_effect_enabled(index, MUFFLE_EFFECT, muffled)
 
 
-func _process(_delta: float) -> void:
-	_fill()
-
-
-func _fill() -> void:
-	if _playback == null or not playing:
+static func _request(one: MusicTrack) -> void:
+	if one == null or _clips.has(one.id) or _jobs.has(one.id):
 		return
-	var frames: int = _playback.get_frames_available()
-	for i: int in frames:
-		var value: float = sample_at(float(_sample) / Synth.RATE) * LOUDNESS
-		_playback.push_frame(Vector2(value, value))
-		_sample += 1
+	var job: MusicJob = MusicJob.new(one)
+	_jobs[one.id] = job
+	job.start()
 
 
-## The music at time t (seconds). A pure function of t, so the loop never drifts.
-func sample_at(t: float) -> float:
-	var beat: float = t * _bpm / 60.0
-	var bar: int = floori(beat / 4.0) % _roots.size()
-	var root: float = _roots[bar]
-	var chord: PackedFloat32Array = MINOR if int(root) % 12 == 9 else MAJOR
-	var eighth: float = beat * 2.0
-	var step: int = floori(eighth)
-	var since_step: float = (eighth - step) * 30.0 / _bpm
-	var note: float = root + 12.0 + _lead_shift + chord[ARPEGGIO[step % ARPEGGIO.size()]]
-	var hz: float = Synth.midi_hz(note)
-	var lead: float = Synth.sine(hz * since_step) + 0.25 * Synth.sine(hz * 3.0 * since_step)
-	lead *= Synth.pluck(since_step, 0.005, 6.0)
-	var since_beat: float = (beat - floorf(beat)) * 60.0 / _bpm
-	var bass_hz: float = Synth.midi_hz(root - 12.0)
-	var bass: float = Synth.triangle(bass_hz * since_beat) * Synth.pluck(since_beat, 0.01, 3.0)
-	var value: float = 0.55 * lead + 0.45 * bass
-	if track == &"run" or track == &"boss":
-		var off_beat: float = fposmod(beat + 0.5, 1.0) * 60.0 / _bpm
-		value += 0.12 * Synth.noise(t) * exp(-60.0 * off_beat)
-	if track == &"boss":
-		# A soft felt kick on every beat.
-		var kick: float = Synth.sine(Synth.sweep(since_beat, 120.0, 45.0, 0.12))
-		value += 0.5 * kick * exp(-18.0 * since_beat)
-	return value
+## Moves finished renders into the clip cache.
+static func _collect() -> void:
+	for id: StringName in _jobs.keys():
+		var job: MusicJob = _jobs[id]
+		if job.collect():
+			_clips[id] = job.clips
+			_jobs.erase(id)
+
+
+func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	add_to_group(GROUP)
+	stinger_player.bus = &"Music"
+	add_child(stinger_player)
+	prepare_all()
+
+
+## Changes to `track_name`'s music with a crossfade (keeps playing if already on it).
+func play_track(track_name: StringName) -> void:
+	if track_name == track and deck != null:
+		return
+	var next: MusicTrack = RULES.track(track_name)
+	if next == null:
+		push_warning("No music track %s" % track_name)
+		return
+	track = track_name
+	intensity = 0
+	if deck != null:
+		fading_out.append(deck)
+	deck = MusicDeck.new(next)
+	add_child(deck)
+	_request(next)
+	_start_when_ready()
+
+
+## The intensity level for layers (0-2); layers fade in or out to match.
+func set_intensity(level: int) -> void:
+	intensity = clampi(level, 0, 2)
+
+
+## Plays stinger `id` once over the music.
+func play_stinger(id: StringName) -> void:
+	stingers_played.append(id)
+	if not is_ready(id):
+		_request(RULES.stinger(id))
+		return
+	stinger_player.stream = _clips[id][0]
+	stinger_player.volume_db = linear_to_db(RULES.stinger_loudness)
+	stinger_player.play()
+
+
+func _process(delta: float) -> void:
+	_start_when_ready()
+	var fade_step: float = delta / maxf(RULES.crossfade_seconds, 0.01)
+	var layer_step: float = delta / maxf(RULES.layer_fade_seconds, 0.01)
+	if deck != null and deck.is_started():
+		deck.fade = minf(deck.fade + fade_step, 1.0)
+		deck.update(intensity, layer_step, RULES.loudness)
+	for old: MusicDeck in fading_out.duplicate():
+		old.fade = maxf(old.fade - fade_step, 0.0)
+		old.update(intensity, 0.0, RULES.loudness)
+		if old.fade <= 0.0:
+			fading_out.erase(old)
+			old.queue_free()
+
+
+func _start_when_ready() -> void:
+	if deck != null and not deck.is_started() and is_ready(deck.track.id):
+		deck.start(_clips_of(deck.track.id), intensity)
+
+
+func _clips_of(id: StringName) -> Array[AudioStreamWAV]:
+	var clips: Array[AudioStreamWAV] = []
+	clips.assign(_clips[id])
+	return clips
