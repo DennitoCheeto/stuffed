@@ -766,6 +766,13 @@ _Last updated: 2026-11-19 (M4.5-04 sewing table (#274): PR open; next: M4.5-05 g
   only on a worn piece, WEAR, TAKE_OFF, NONE); `GearBook.can_sew_any` drives the Workshop's tag (the
   `new_trick_tag` says "Can sew!" there, `TownBuilding.is_workshop()`). Texts and the sewing moment numbers are in
   `gear_rules.tres` ("Sewing table"); pieces have `GearDef.color` (calm) and `found_text` (boss/elite source).
+  `GearTile` only draws: `SewingTable._show_tile` works out its action, label, note (`note_for`) and price.
   `GearPicture` is a placeholder felt shape per slot until M4.5-05 draws the real pieces. R = the opener's
   `reroll` action. Fit check: 30 screens. Tests: `test_sewing_table_rules.gd`, `test_09_sewing_table.gd`.
 - Local only: `test_04_menu_look` "Esc opens the pause menu" fails when that file runs alone (also on `main`).
+- Typecheck "resources still in use" traps (M4.5-04, CI `tools/check.sh` checks every script as the entry; locally
+  run an `--import` first, results without it are unreliable): (1) a static function that calls static functions
+  defined **further down** in the same file leaked `TownSave`/`RunHaul`/`TownGear` (`GearBook`): add new static
+  helpers below the ones they call. (2) A `SewnButton` subclass holding both a `GearDef` and a `GearRules` leaks
+  `FeltDraw`/`StyleBoxFelt` (also on `main`): `GearTile` is a pure view that gets its numbers and texts from
+  `SewingTable`. Bisect with leave-one-out scratch scripts in `src/zz_tmp/` (delete them afterwards).

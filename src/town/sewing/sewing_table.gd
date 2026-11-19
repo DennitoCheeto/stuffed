@@ -99,12 +99,14 @@ func is_open() -> bool:
 
 ## Opens the table at the Workshop `target` for player `by` with the town in `save`.
 ## `names` maps building ids to their names (for "Build the Watchtower to Lv 2").
-func open(target: TownBuilding, save: TownSave, by: int, names: Dictionary[String, String]) -> void:
+## `hero` is the hero player `by` plays (on the photo).
+func open(
+	target: TownBuilding, save: TownSave, by: int, hero: HeroStats, names: Dictionary[String, String]
+) -> void:
 	building = target
 	opener = by
 	_save = save
 	_building_names = names
-	var hero: HeroStats = HeroRoster.current().heroes_for(save, HeroRoster.MAX_PLAYERS)[by]
 	for old: Node in photo_frame.picture.get_children():
 		photo_frame.picture.remove_child(old)
 		old.queue_free()
@@ -124,7 +126,7 @@ func refresh() -> void:
 	var def: BuildingDef = building.building
 	level_tag.label.text = BuildingCard.level_text(building.level, def.max_level())
 	for id: StringName in tiles:
-		tiles[id].show_state(_save, opener, _building_names)
+		_show_tile(tiles[id])
 	for slot: int in slot_labels.size():
 		slot_labels[slot].text = slot_text(slot as GearDef.Slot)
 	var hint: String = _rules.table_hint + "      " + _rules.table_close_hint
@@ -144,10 +146,46 @@ func slot_text(slot: GearDef.Slot) -> String:
 	return "%s %s" % [piece.display_name, GearTile.dots(at, piece.max_level())]
 
 
+## Why `piece`'s tile can't do more right now for the player at the table: another player
+## wears it, the slot or the next stitch needs a Workshop level, where its pattern comes from,
+## what's missing, or its top stitch level ("" when nothing is in the way).
+func note_for(piece: GearDef) -> String:
+	var wear: GearBook.Wear = GearBook.wear_state(_save, piece, opener, _rules)
+	if wear == GearBook.Wear.TAKEN:
+		return _rules.taken_text % (_save.gear.wearer_of(String(piece.id)) + 1)
+	if wear == GearBook.Wear.SLOT_LOCKED:
+		return _rules.needs_workshop_text % _rules.slot_level(piece.slot)
+	if wear == GearBook.Wear.CAN_WEAR:
+		return ""
+	return _step_note(piece, wear == GearBook.Wear.WORN)
+
+
+## The label of the main action `now` for a piece at stitch level `at` ("" for NONE).
+func action_text(now: GearBook.Action, at: int) -> String:
+	match now:
+		GearBook.Action.SEW:
+			return _rules.sew_text
+		GearBook.Action.STITCH:
+			return _rules.stitch_text % (at + 1)
+		GearBook.Action.WEAR:
+			return _rules.wear_text
+		GearBook.Action.TAKE_OFF:
+			return _rules.take_off_text
+	return ""
+
+
+## Where `piece`'s pattern comes from ("Build the Watchtower to Lv 2", "Big Ted drops this").
+func source_text(piece: GearDef) -> String:
+	if piece.source_kind != GearDef.Source.BUILDING:
+		return piece.found_text
+	var place: String = _building_names.get(String(piece.source), String(piece.source))
+	return _rules.building_source_text % [place, piece.source_level]
+
+
 ## The sewing moment on `piece`'s tile (already paid for): the needle, then a pop and a puff.
 func play_sewn(piece: GearDef) -> void:
 	var tile: GearTile = tiles[piece.id]
-	tile.play_sewn()
+	tile.play_sewn(_rules.sewing_seconds)
 	if not tile.is_sewing():
 		_pop(tile)
 		return
@@ -217,7 +255,7 @@ func _build_rows() -> void:
 		row_tag.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(row_tag)
 		for piece: GearDef in _rules.pieces_in(slot as GearDef.Slot):
-			var tile: GearTile = GearTile.new(piece, _rules)
+			var tile: GearTile = GearTile.new(piece)
 			tile.pressed.connect(_on_tile_pressed.bind(tile))
 			row.add_child(tile)
 			tiles[piece.id] = tile
@@ -273,3 +311,33 @@ func _pop(tile: GearTile) -> void:
 	Sfx.play(&"pop")
 	if is_inside_tree():
 		add_child(TownPuff.new(tile.get_global_rect(), _rules.sewing_puff))
+
+
+## The note about `piece`'s next sewing step (not sewn yet, or worn by the player at the table).
+func _step_note(piece: GearDef, worn: bool) -> String:
+	var step: GearBook.Step = GearBook.step_of(_save, piece, _rules)
+	var text: String = ""
+	if step == GearBook.Step.NO_PATTERN:
+		text = source_text(piece)
+	elif step == GearBook.Step.NO_WORKSHOP:
+		text = _rules.repair_text
+	elif step == GearBook.Step.NEEDS_LEVEL:
+		var level: int = GearBook.workshop_level_needed(_save, piece, _rules)
+		text = _rules.needs_workshop_text % level
+	elif step == GearBook.Step.MISSING:
+		var next: GearLevel = piece.level(_save.gear.stitch_level(String(piece.id)) + 1)
+		text = BuildingCard.missing_text(_save.missing(next.cost()))
+	elif step == GearBook.Step.MAXED and worn:
+		text = _rules.maxed_text
+	return text
+
+
+## Works out `tile`'s action for the player at the table and shows it (the tile only draws).
+func _show_tile(tile: GearTile) -> void:
+	var piece: GearDef = tile.piece
+	var now: GearBook.Action = GearBook.action_for(_save, piece, opener, _rules)
+	var at: int = _save.gear.stitch_level(String(piece.id))
+	var works: bool = GearBook.can_act(_save, piece, opener, _rules)
+	var worn: bool = _save.gear.wearer_of(String(piece.id)) == opener
+	var priced: bool = now == GearBook.Action.SEW or now == GearBook.Action.STITCH
+	tile.show_state(_save, now, action_text(now, at), works, worn, priced, note_for(piece))

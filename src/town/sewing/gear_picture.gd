@@ -4,7 +4,7 @@ extends Control
 ## vest, a charm on a loop) in the piece's own calm colour with the ink outline. A piece whose
 ## pattern wasn't found yet is a dark silhouette. M4.5-05 puts the real pieces on the heroes.
 
-const SILHOUETTE: Color = HeroPhoto.SILHOUETTE
+const SILHOUETTE: Color = Color(0.2, 0.18, 0.26, 1.0)
 const OUTLINE: Color = UiColors.INK
 const OUTLINE_WIDTH: float = 2.5
 const SEAM: Color = Color(1.0, 1.0, 1.0, 0.55)

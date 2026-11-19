@@ -12,10 +12,12 @@ const WORN_STITCH: Color = UiColors.TEAL
 const WORN_FILL: Color = UiColors.STICKER_TEAL
 const DOT_ON: String = "●"
 const DOT_OFF: String = "○"
+## Prices the jars can't pay yet (same grey as the town's price tags).
+const SHORT_TINT: Color = Color(0.55, 0.55, 0.6, 0.75)
 
 var piece: GearDef
-## The main action for the player at the table (GearBook.Action), set by `show_state`.
-var action: GearBook.Action = GearBook.Action.NONE
+## The main action for the player at the table (a `GearBook.Action`), set by `show_state`.
+var action: int = -1
 ## True when the main action works right now.
 var can_act: bool = false
 ## True when the player at the table wears it.
@@ -32,14 +34,12 @@ var action_tag: FabricTag = FabricTag.new("", UiColors.GOLD, UiColors.GOLD_INK, 
 var note_label: Label
 var needle: SewingNeedle = SewingNeedle.new()
 
-var _rules: GearRules
 var _sewing: Tween
 
 
-func _init(shown: GearDef, rules: GearRules = GearRules.current()) -> void:
+func _init(shown: GearDef) -> void:
 	super._init()
 	piece = shown
-	_rules = rules
 	name = "Gear_%s" % piece.id
 	caption.visible = false
 	grows_on_hover = false
@@ -68,7 +68,7 @@ func _init(shown: GearDef, rules: GearRules = GearRules.current()) -> void:
 	var words_width: float = TILE_SIZE.x - PICTURE_SIDE - 30.0
 	name_label = _line(piece.display_name, 24, UiColors.PURPLE, words_width, UiFonts.heading())
 	right.add_child(name_label)
-	text_label = _line(KeyBindings.fill(piece.text), 16, UiColors.INK, words_width)
+	text_label = _line(piece.text, 16, UiColors.INK, words_width)
 	text_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	right.add_child(text_label)
 	var bottom: HBoxContainer = HBoxContainer.new()
@@ -87,9 +87,13 @@ func _init(shown: GearDef, rules: GearRules = GearRules.current()) -> void:
 	face.add_child(needle)
 
 
-## Shows the tile for player `player` and the town in `save`: picture, dots, price, action
-## and note. `building_names` maps a building id to its name ("Build the Watchtower to Lv 2").
-func show_state(save: TownSave, player: int, building_names: Dictionary[String, String]) -> void:
+## Shows the tile for the town in `save`: picture, dots and name. The table works out the rest
+## (`SewingTable.refresh`): the main action `now` (a `GearBook.Action`) and its label, whether it
+## works right now, whether the player at the table wears it, and the `note` why it can't do
+## more. `priced` shows the price of the next stitch level.
+func show_state(
+	save: TownSave, now: int, label: String, works: bool, is_worn: bool, priced: bool, note: String
+) -> void:
 	var id: String = String(piece.id)
 	var at: int = save.gear.stitch_level(id)
 	var known: bool = at > 0 or save.gear.has_pattern(id)
@@ -98,14 +102,14 @@ func show_state(save: TownSave, player: int, building_names: Dictionary[String, 
 	name_label.text = piece.display_name if known else "?"
 	text_label.visible = known
 	dots_label.text = dots(at, piece.max_level()) if at > 0 else ""
-	action = GearBook.action_for(save, piece, player, _rules)
-	can_act = GearBook.can_act(save, piece, player, _rules)
-	worn = save.gear.wearer_of(id) == player
-	action_tag.label.text = action_text(action, at)
-	action_tag.visible = action != GearBook.Action.NONE
-	action_tag.modulate = Color.WHITE if can_act else TownBuilding.SHORT_TINT
-	_show_cost(save)
-	note_label.text = note(save, player, building_names)
+	action = now
+	can_act = works
+	worn = is_worn
+	action_tag.label.text = label
+	action_tag.visible = not label.is_empty()
+	action_tag.modulate = Color.WHITE if can_act else SHORT_TINT
+	_show_cost(save, priced)
+	note_label.text = note
 	note_label.visible = not note_label.text.is_empty()
 	if worn:
 		box.fill = WORN_FILL
@@ -116,66 +120,13 @@ func show_state(save: TownSave, player: int, building_names: Dictionary[String, 
 	queue_redraw()
 
 
-## The label of the main action ("Sew", "Stitch to Lv 2" ...; "" for NONE).
-func action_text(now: GearBook.Action, at: int) -> String:
-	match now:
-		GearBook.Action.SEW:
-			return _rules.sew_text
-		GearBook.Action.STITCH:
-			return _rules.stitch_text % (at + 1)
-		GearBook.Action.WEAR:
-			return _rules.wear_text
-		GearBook.Action.TAKE_OFF:
-			return _rules.take_off_text
-	return ""
-
-
-## Why the tile can't do more right now ("" when nothing is in the way).
-func note(save: TownSave, player: int, building_names: Dictionary[String, String]) -> String:
-	var wear: GearBook.Wear = GearBook.wear_state(save, piece, player, _rules)
-	match wear:
-		GearBook.Wear.TAKEN:
-			return _rules.taken_text % (save.gear.wearer_of(String(piece.id)) + 1)
-		GearBook.Wear.SLOT_LOCKED:
-			return _rules.needs_workshop_text % _rules.slot_level(piece.slot)
-		GearBook.Wear.CAN_WEAR:
-			return ""
-	return _step_note(save, building_names)
-
-
-## The note about the piece's next sewing step (for pieces not sewn yet or worn by this player).
-func _step_note(save: TownSave, building_names: Dictionary[String, String]) -> String:
-	var text: String = ""
-	match GearBook.step_of(save, piece, _rules):
-		GearBook.Step.NO_PATTERN:
-			text = source_text(building_names)
-		GearBook.Step.NO_WORKSHOP:
-			text = _rules.repair_text
-		GearBook.Step.NEEDS_LEVEL:
-			var level: int = GearBook.workshop_level_needed(save, piece, _rules)
-			text = _rules.needs_workshop_text % level
-		GearBook.Step.MISSING:
-			text = BuildingCard.missing_text(save.missing(_next_cost(save)))
-		GearBook.Step.MAXED:
-			text = _rules.maxed_text if worn else ""
-	return text
-
-
-## Where the pattern comes from ("Build the Watchtower to Lv 2", "Big Ted drops this").
-func source_text(building_names: Dictionary[String, String]) -> String:
-	if piece.source_kind != GearDef.Source.BUILDING:
-		return piece.found_text
-	var building: String = building_names.get(String(piece.source), String(piece.source))
-	return _rules.building_source_text % [building, piece.source_level]
-
-
 ## "●●○" for stitch level `at` of `top`.
 static func dots(at: int, top: int) -> String:
 	return DOT_ON.repeat(at) + DOT_OFF.repeat(maxi(top - at, 0))
 
 
-## The sewing moment: the needle bobs along a row of stitches, then a pop.
-func play_sewn() -> void:
+## The sewing moment: the needle bobs along a row of stitches for `seconds` (the table pops).
+func play_sewn(seconds: float) -> void:
 	if _sewing != null:
 		_sewing.kill()
 	if UiFeel.reduced() or not is_inside_tree():
@@ -183,7 +134,7 @@ func play_sewn() -> void:
 		return
 	needle.progress = 0.0
 	_sewing = create_tween()
-	_sewing.tween_property(needle, "progress", 1.0, _rules.sewing_seconds)
+	_sewing.tween_property(needle, "progress", 1.0, seconds)
 
 
 func is_sewing() -> bool:
@@ -196,12 +147,12 @@ func _next_cost(save: TownSave) -> Dictionary[String, int]:
 	return next.cost() if next != null else {}
 
 
-func _show_cost(save: TownSave) -> void:
+func _show_cost(save: TownSave, priced: bool) -> void:
 	for counter: JarCounter in cost_counters.values():
 		cost_row.remove_child(counter)
 		counter.queue_free()
 	cost_counters.clear()
-	if action != GearBook.Action.SEW and action != GearBook.Action.STITCH:
+	if not priced:
 		return
 	var cost: Dictionary[String, int] = _next_cost(save)
 	for material: String in cost:
@@ -210,7 +161,7 @@ func _show_cost(save: TownSave) -> void:
 		var counter: JarCounter = JarCounter.new(material, 18, 24.0).on_felt()
 		counter.show_amount(cost[material])
 		if save.material(material) < cost[material]:
-			counter.modulate = TownBuilding.SHORT_TINT
+			counter.modulate = SHORT_TINT
 		cost_row.add_child(counter)
 		cost_counters[material] = counter
 

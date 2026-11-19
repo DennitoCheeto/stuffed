@@ -432,6 +432,7 @@ func refresh() -> void:
 		jars[material].show_amount(save.material(material))
 	for id: StringName in buildings:
 		buildings[id].refresh(save)
+	sewing.refresh_tag()
 	_refresh_calendar()
 
 

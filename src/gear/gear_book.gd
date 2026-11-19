@@ -48,74 +48,6 @@ enum Action {
 }
 
 
-## The main action of `piece`'s tile for player `player`. SEW and STITCH may still be short of
-## materials (`can_act` says whether it works right now).
-static func action_for(
-	save: TownSave, piece: GearDef, player: int, rules: GearRules = GearRules.current()
-) -> Action:
-	var step: Step = step_of(save, piece, rules)
-	match wear_state(save, piece, player, rules):
-		Wear.NOT_SEWN:
-			return Action.SEW if step == Step.CAN_SEW or step == Step.MISSING else Action.NONE
-		Wear.CAN_WEAR:
-			return Action.WEAR
-		Wear.WORN:
-			if step == Step.CAN_STITCH or step == Step.MISSING:
-				return Action.STITCH
-			return Action.TAKE_OFF
-	return Action.NONE
-
-
-## True when `piece`'s main action works right now (sewing needs the materials).
-static func can_act(
-	save: TownSave, piece: GearDef, player: int, rules: GearRules = GearRules.current()
-) -> bool:
-	match action_for(save, piece, player, rules):
-		Action.SEW, Action.STITCH:
-			var step: Step = step_of(save, piece, rules)
-			return step == Step.CAN_SEW or step == Step.CAN_STITCH
-		Action.WEAR, Action.TAKE_OFF:
-			return true
-	return false
-
-
-## Does `piece`'s main action for player `player`: sewing pays once. Returns false (and changes
-## nothing) if it can't be done right now.
-static func act(
-	save: TownSave, piece: GearDef, player: int, rules: GearRules = GearRules.current()
-) -> bool:
-	if not can_act(save, piece, player, rules):
-		return false
-	match action_for(save, piece, player, rules):
-		Action.SEW, Action.STITCH:
-			return sew(save, piece, player, rules)
-		Action.WEAR:
-			return wear(save, piece, player, rules)
-		Action.TAKE_OFF:
-			return take_off(save, player, piece.slot)
-	return false
-
-
-## True when the jars can pay for sewing or stitching any piece (the Workshop's "Can sew!" tag).
-static func can_sew_any(save: TownSave, rules: GearRules = GearRules.current()) -> bool:
-	for piece: GearDef in rules.pieces:
-		var step: Step = step_of(save, piece, rules)
-		if step == Step.CAN_SEW or step == Step.CAN_STITCH:
-			return true
-	return false
-
-
-## The Workshop level `piece` needs for its next step: its slot, or the next stitch level.
-static func workshop_level_needed(
-	save: TownSave, piece: GearDef, rules: GearRules = GearRules.current()
-) -> int:
-	var next: int = save.gear.stitch_level(String(piece.id)) + 1
-	var needed: int = rules.slot_level(piece.slot)
-	for level: int in rules.stitch_caps.size():
-		if rules.stitch_caps[level] >= next:
-			return maxi(needed, level)
-	return maxi(needed, rules.stitch_caps.size() - 1)
-
 
 ## The Workshop's level (0 = not built).
 static func workshop_level(save: TownSave, rules: GearRules = GearRules.current()) -> int:
@@ -254,3 +186,71 @@ static func give_building_patterns(
 	for piece: GearDef in due:
 		save.gear.add_pattern(String(piece.id))
 	return due
+
+
+## The main action of `piece`'s tile for player `player`. SEW and STITCH may still be short of
+## materials (`can_act` says whether it works right now).
+static func action_for(
+	save: TownSave, piece: GearDef, player: int, rules: GearRules = GearRules.current()
+) -> Action:
+	var step: Step = step_of(save, piece, rules)
+	var wear_now: Wear = wear_state(save, piece, player, rules)
+	if wear_now == Wear.CAN_WEAR:
+		return Action.WEAR
+	var can_sew: bool = step == Step.CAN_SEW or step == Step.CAN_STITCH or step == Step.MISSING
+	if wear_now == Wear.NOT_SEWN and can_sew:
+		return Action.SEW
+	if wear_now != Wear.WORN:
+		return Action.NONE
+	if can_sew:
+		return Action.STITCH
+	return Action.TAKE_OFF
+
+
+## True when `piece`'s main action works right now (sewing needs the materials).
+static func can_act(
+	save: TownSave, piece: GearDef, player: int, rules: GearRules = GearRules.current()
+) -> bool:
+	var action: Action = action_for(save, piece, player, rules)
+	if action == Action.WEAR or action == Action.TAKE_OFF:
+		return true
+	if action == Action.NONE:
+		return false
+	var step: Step = step_of(save, piece, rules)
+	return step == Step.CAN_SEW or step == Step.CAN_STITCH
+
+
+## Does `piece`'s main action for player `player`: sewing pays once. Returns false (and changes
+## nothing) if it can't be done right now.
+static func act(
+	save: TownSave, piece: GearDef, player: int, rules: GearRules = GearRules.current()
+) -> bool:
+	if not can_act(save, piece, player, rules):
+		return false
+	var action: Action = action_for(save, piece, player, rules)
+	if action == Action.WEAR:
+		return wear(save, piece, player, rules)
+	if action == Action.TAKE_OFF:
+		return take_off(save, player, piece.slot)
+	return sew(save, piece, player, rules)
+
+
+## True when the jars can pay for sewing or stitching any piece (the Workshop's "Can sew!" tag).
+static func can_sew_any(save: TownSave, rules: GearRules = GearRules.current()) -> bool:
+	for piece: GearDef in rules.pieces:
+		var step: Step = step_of(save, piece, rules)
+		if step == Step.CAN_SEW or step == Step.CAN_STITCH:
+			return true
+	return false
+
+
+## The Workshop level `piece` needs for its next step: its slot, or the next stitch level.
+static func workshop_level_needed(
+	save: TownSave, piece: GearDef, rules: GearRules = GearRules.current()
+) -> int:
+	var next: int = save.gear.stitch_level(String(piece.id)) + 1
+	var needed: int = rules.slot_level(piece.slot)
+	for level: int in rules.stitch_caps.size():
+		if rules.stitch_caps[level] >= next:
+			return maxi(needed, level)
+	return maxi(needed, rules.stitch_caps.size() - 1)

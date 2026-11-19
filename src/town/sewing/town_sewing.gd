@@ -20,9 +20,26 @@ func _init(owner_town: Town) -> void:
 	table.closed.connect(_on_closed)
 
 
-## Adds the table to the town (from Town._ready).
+## Adds the table to the town (from Town._ready, after the buildings): the Workshop's tag
+## says "Can sew!" instead of "New trick!".
 func attach() -> void:
 	town.add_child(table)
+	var workshop: TownBuilding = _workshop()
+	if workshop != null:
+		workshop.new_trick_tag.label.text = GearRules.current().can_sew_tag
+
+
+## The Workshop floats "Can sew!" while the jars can pay for sewing or stitching a piece (from
+## Town.refresh, after the buildings refreshed).
+func refresh_tag() -> void:
+	var workshop: TownBuilding = _workshop()
+	if workshop != null:
+		var ready: bool = workshop.level > 0 and not workshop.damaged
+		workshop.trick_ready = ready and GearBook.can_sew_any(town.save)
+
+
+func _workshop() -> TownBuilding:
+	return town.buildings.get(GearRules.current().workshop) as TownBuilding
 
 
 ## True when E at `building` opens the sewing table: the Workshop, built and not damaged.
@@ -39,7 +56,7 @@ func open(building: TownBuilding, by: int = 0) -> bool:
 		return false
 	town.process_mode = Node.PROCESS_MODE_DISABLED
 	town.card.hide_card.call_deferred()
-	table.open(building, town.save, by, _building_names())
+	table.open(building, town.save, by, _hero_of(by), _building_names())
 	return true
 
 
@@ -66,6 +83,15 @@ func take_off(slot: GearDef.Slot, by: int = 0) -> bool:
 	town.refresh()
 	town.changed.emit()
 	return true
+
+
+## The hero player `by` plays in town (player 1 if that player isn't here).
+func _hero_of(by: int) -> HeroStats:
+	var players: Array[Player] = Players.all(town.get_tree())
+	for player: Player in players:
+		if player.player_index == by:
+			return player.stats
+	return players[0].stats
 
 
 func _building_names() -> Dictionary[String, String]:
