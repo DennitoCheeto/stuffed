@@ -97,13 +97,13 @@ func is_open() -> bool:
 	return visible
 
 
-## Opens the table at the Workshop `target` for player `by` with the town in `save`.
+## Opens the table at the Workshop `shop` for player `by` with the town in `save`.
 ## `names` maps building ids to their names (for "Build the Watchtower to Lv 2").
 ## `hero` is the hero player `by` plays (on the photo).
 func open(
-	target: TownBuilding, save: TownSave, by: int, hero: HeroStats, names: Dictionary[String, String]
+	shop: TownBuilding, save: TownSave, by: int, hero: HeroStats, names: Dictionary[String, String]
 ) -> void:
-	building = target
+	building = shop
 	opener = by
 	_save = save
 	_building_names = names

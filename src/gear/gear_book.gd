@@ -48,7 +48,6 @@ enum Action {
 }
 
 
-
 ## The Workshop's level (0 = not built).
 static func workshop_level(save: TownSave, rules: GearRules = GearRules.current()) -> int:
 	return save.building_level(String(rules.workshop))
