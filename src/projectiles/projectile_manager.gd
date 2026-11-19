@@ -100,6 +100,7 @@ func pop_enemy_bullets() -> PackedVector2Array:
 
 
 func _physics_process(delta: float) -> void:
+	_friendly.modulate.a = GameSettings.own_effects
 	targets.clear()
 	for player: Player in Players.all(get_tree()):
 		if not player.is_dead():

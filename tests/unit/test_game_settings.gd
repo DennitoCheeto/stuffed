@@ -121,3 +121,39 @@ func test_apply_screen_asks_the_display_for_the_options() -> void:
 	GameSettings.apply_screen()
 	assert_eq(GameSettings.applied_window, DisplayServer.WINDOW_MODE_WINDOWED)
 	assert_true(GameSettings.applied_vsync)
+
+
+func test_readability_options_survive_save_and_reload() -> void:
+	GameSettings.screen_shake = 0.4
+	GameSettings.flashes = false
+	GameSettings.own_effects = 0.65
+	GameSettings.hints = false
+	GameSettings.save()
+	GameSettings.reset()
+	assert_eq(GameSettings.screen_shake, 1.0, "reset in between")
+	GameSettings.load_saved()
+	assert_almost_eq(GameSettings.screen_shake, 0.4, 0.001)
+	assert_false(GameSettings.flashes)
+	assert_almost_eq(GameSettings.own_effects, 0.65, 0.001)
+	assert_false(GameSettings.hints)
+
+
+func test_readability_numbers_from_a_file_stay_in_range() -> void:
+	_write('{"screen_shake": 3, "own_effects": 0.1, "flashes": 0, "hints": "no"}')
+	GameSettings.load_saved()
+	assert_eq(GameSettings.screen_shake, 1.0, "shake at most 100%")
+	assert_eq(GameSettings.own_effects, GameSettings.READABILITY.own_effects_min, "never too faint")
+	assert_true(GameSettings.flashes, "not a switch value: default")
+	assert_true(GameSettings.hints, "not a switch value: default")
+	_write('{"screen_shake": -1, "own_effects": "half"}')
+	GameSettings.load_saved()
+	assert_eq(GameSettings.screen_shake, 0.0, "shake at least 0%")
+	assert_eq(GameSettings.own_effects, 1.0, "not a number: default")
+
+
+func test_the_hero_flash_is_softer_with_flashes_off() -> void:
+	assert_eq(GameSettings.hero_flash(), 1.0)
+	GameSettings.flashes = false
+	assert_eq(GameSettings.hero_flash(), GameSettings.READABILITY.hero_flash_soft)
+	assert_gt(GameSettings.hero_flash(), 0.0, "it still flashes")
+	assert_lt(GameSettings.hero_flash(), 1.0, "but softer")

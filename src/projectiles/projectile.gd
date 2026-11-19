@@ -60,11 +60,12 @@ func dress(from: Weapon) -> void:
 	_start_trail()
 
 
-## Hurts `zombie` like `EnemyManager.damage`; an evolved shot also leaves a sparkle pop there.
+## Hurts `zombie` like `EnemyManager.damage`; an evolved shot also leaves a sparkle pop there
+## (not with Flashes off).
 func hurt(zombie: Zombie, amount: float, push: Vector2) -> void:
 	var at: Vector2 = zombie.global_position
 	manager.enemies.damage(zombie, amount, push, weapon)
-	if look != null and look.flash_radius > 0.0:
+	if look != null and look.flash_radius > 0.0 and GameSettings.flashes:
 		var pop: SparkleProjectile = manager.spawn(SparkleProjectile) as SparkleProjectile
 		pop.launch(self, at)
 

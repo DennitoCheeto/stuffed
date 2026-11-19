@@ -12,6 +12,7 @@ const BUSES: Array[StringName] = [&"Master", &"Effects", &"Music"]
 const DEFAULT_PATH: String = "user://settings.json"
 ## How a window mode is written in the settings file (index = `WindowMode`).
 const WINDOW_MODE_IDS: PackedStringArray = ["windowed", "fullscreen", "borderless"]
+const READABILITY: ReadabilityRules = preload("res://data/ui/readability.tres")
 
 ## Tests point this at a scratch file.
 static var path: String = DEFAULT_PATH
@@ -21,6 +22,14 @@ static var damage_numbers: bool = true
 static var reduced_motion: bool = false
 static var window_mode: WindowMode = WindowMode.WINDOWED
 static var vsync: bool = true
+## Readability tab (spec 10 §5): camera shake 0 (none) to 1 (full).
+static var screen_shake: float = 1.0
+## Off: no white hit flashes on zombies or big hits; the hero's own hit flash gets softer.
+static var flashes: bool = true
+## Opacity of the players' own shots and effects (READABILITY.own_effects_min to 1).
+static var own_effects: float = 1.0
+## First-time hint notes (spec 10 §6).
+static var hints: bool = true
 ## What `apply_screen` last asked the display for (the headless test display ignores it).
 static var applied_window: DisplayServer.WindowMode = DisplayServer.WINDOW_MODE_WINDOWED
 static var applied_vsync: bool = true
@@ -44,6 +53,11 @@ static func set_volume(bus: StringName, amount: float) -> void:
 	var clamped: float = clampf(amount, 0.0, 1.0)
 	AudioServer.set_bus_mute(index, clamped <= 0.001)
 	AudioServer.set_bus_volume_db(index, linear_to_db(maxf(clamped, 0.001)))
+
+
+## How strong a hero's white hit flash is (softer with Flashes off).
+static func hero_flash() -> float:
+	return 1.0 if flashes else READABILITY.hero_flash_soft
 
 
 ## The display's window mode for one of ours.
@@ -84,6 +98,10 @@ static func to_dict() -> Dictionary:
 		"reduced_motion": reduced_motion,
 		"window_mode": WINDOW_MODE_IDS[window_mode],
 		"vsync": vsync,
+		"screen_shake": screen_shake,
+		"flashes": flashes,
+		"own_effects": own_effects,
+		"hints": hints,
 		"volumes": volumes,
 	}
 
@@ -93,6 +111,10 @@ static func apply_dict(data: Dictionary) -> void:
 	damage_numbers = _flag(data, "damage_numbers", true)
 	reduced_motion = _flag(data, "reduced_motion", false)
 	vsync = _flag(data, "vsync", true)
+	flashes = _flag(data, "flashes", true)
+	hints = _flag(data, "hints", true)
+	screen_shake = _number(data, "screen_shake", 1.0, 0.0, 1.0)
+	own_effects = _number(data, "own_effects", 1.0, READABILITY.own_effects_min, 1.0)
 	var mode: Variant = data.get("window_mode", "")
 	var index: int = WINDOW_MODE_IDS.find(mode) if mode is String else -1
 	window_mode = WindowMode.WINDOWED if index < 0 else index as WindowMode
@@ -139,3 +161,11 @@ static func load_saved() -> void:
 static func _flag(data: Dictionary, key: String, fallback: bool) -> bool:
 	var value: Variant = data.get(key, fallback)
 	return value if value is bool else fallback
+
+
+## A number option, kept inside `lo` .. `hi`; missing or not a number = `fallback`.
+static func _number(data: Dictionary, key: String, fallback: float, lo: float, hi: float) -> float:
+	var value: Variant = data.get(key, fallback)
+	if not (value is float or value is int):
+		return fallback
+	return clampf(float(value), lo, hi)

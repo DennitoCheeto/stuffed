@@ -215,7 +215,7 @@ func _apply() -> void:
 			var wobble: float = _spring(t, 3.0, 7.0)
 			squash *= Vector2(1.0 + 0.18 * wobble, 1.0 - 0.22 * wobble)
 			lift.x -= HIT_RECOIL * exp(-8.0 * t)
-			_flash = 1.0 if t < BananePuppet.HIT_FLASH_TIME else 0.0
+			_flash = GameSettings.hero_flash() if t < BananePuppet.HIT_FLASH_TIME else 0.0
 		State.CHEER:
 			var jump: float = sin(t / 0.5 * PI) if t < 0.5 else 0.0
 			lift.y -= CHEER_JUMP * jump

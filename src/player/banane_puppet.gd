@@ -84,6 +84,12 @@ func _ready() -> void:
 		_player.died.connect(_on_died)
 
 
+## How white the hit flash is right now (0 = none; softer with Flashes off).
+func flash() -> float:
+	var amount: Variant = null if _material == null else _material.get_shader_parameter("flash")
+	return float(amount) if amount is float else 0.0
+
+
 func _process(delta: float) -> void:
 	if _player == null and walker == null:
 		return
@@ -179,7 +185,7 @@ func _pose() -> Pose:
 			pose.squash = Vector2(1.0 + 0.18 * wobble, 1.0 - 0.22 * wobble)
 			pose.lift = Vector2(-12.0 * exp(-8.0 * t), 0.0)
 			pose.flap = 18.0 * wobble
-			pose.flash = 1.0 if t < HIT_FLASH_TIME else 0.0
+			pose.flash = GameSettings.hero_flash() if t < HIT_FLASH_TIME else 0.0
 			pose.eye_open = 0.1 if t < 0.35 else 1.0
 		State.QUACK:
 			_quack_pose(pose, t)
