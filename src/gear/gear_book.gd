@@ -32,7 +32,6 @@ enum Wear {
 	SLOT_LOCKED,
 }
 
-
 ## The main action of a piece's tile on the sewing table (spec 09 §6) for one player.
 enum Action {
 	## Not sewn yet: sew it (it goes on if that slot is empty).
