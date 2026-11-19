@@ -101,6 +101,10 @@ Rules:
   Workshop Lv 2"**.
 - Sewing a piece **puts it on** if that slot is empty. Wearing another piece of the same slot swaps it (free,
   any time). Taking off is free.
+- **Hide (PO request 2026-11-19):** each slot on the hero photo has a small eye toggle **"Show on hero" / "Hidden"**
+  (key **H** on the selected slot). A hidden piece still works fully (effect, stitch level, end screen tag), it just
+  isn't drawn on the hero, for players who want the plain plushie look. A **"Hide all"** toggle sits under the
+  photo. The same toggles are on the Wardrobe's hero picker, so you can change it where you pick your hero too.
 - Keys: arrows / mouse, E or click = the main action on the tile, **R** = take off, Esc closes. Short sewing moment
   (needle bobs, stitches appear, pop) like the build moment.
 - The town tag "Can sew!" shows on the Workshop when you can afford something new (like "Can build!").
@@ -115,6 +119,8 @@ Rules:
 - Each stitch level adds a visible detail (an extra stitch row / a button / a tassel).
 - Effect moments are visible too: the patch disappears and grows back, the key spins, the bell swings when it rings.
 - Gear colours are calm (no danger colours) and stay inside the hero's outline/contrast rules (#172).
+- A **hidden** slot (§6) draws nothing on the hero and shows no effect moment on the piece (no swinging bell, no
+  spinning key); the effect itself (shockwave, faster firing, ...) still shows in the world as normal.
 
 ## 8. Co-op (hard rule 11)
 
@@ -126,7 +132,7 @@ Rules:
 ## 9. Save (hard rule 10)
 
 - `TownSave` v7: `patterns` (ids found), `gear` (id → stitch level, 0 = not sewn), `worn` per player slot
-  (`{"head": id, "body": id, "charm": id}`). Older saves load with nothing, then get the patterns of buildings
+  (`{"head": id, "body": id, "charm": id}`), `hidden` per player slot (slot names that are hidden). Older saves load with nothing, then get the patterns of buildings
   already at Lv 2 (§4).
 - Tests save, reload and compare all three; another loads a v6 save.
 
@@ -162,6 +168,8 @@ Rules:
 - **AC-99** Each of the 9 pieces does what §3 says at each stitch level (one scenario per piece).
 - **AC-100** Worn pieces show on every hero at that hero's anchors, move with the puppet, show their stitch level,
   and stay on after a Wardrobe swap.
+- **AC-100b** Each slot can be hidden (and "Hide all") on the sewing table and the Wardrobe picker: a hidden piece
+  is not drawn on the hero but its effect still works; the choice is saved per player.
 - **AC-101** In co-op each player wears their own pieces; a piece can't be worn by two players at once.
 - **AC-102** Patterns, sewn pieces, stitch levels and worn gear survive closing and reopening (save, reload, compare);
   a v6 save loads.
@@ -182,6 +190,8 @@ Rules:
 4. Gear is **owned by the town, worn per player**, one copy of each piece (co-op: no piece twice).
 5. Patterns found in a run are **kept even when the run is lost** (like rescues).
 6. **No plain stat bonuses** on pieces for now (effects only); add small ones later if the playtest wants more power.
+7. Hiding gear (PO request 2026-11-19): **per slot + "Hide all", saved per player, on the sewing table and the
+   Wardrobe picker**; hidden pieces keep working.
 
 ## 15. Not in this spec
 
@@ -196,7 +206,7 @@ hero, Workshop tricks, idle production, gear evolutions, set bonuses.
    run dev menu — AC-95, AC-96
 3. Sewing Workshop building: spot, look Lv 0-3, reveal, levels, siege target, damaged rule — AC-97
 4. Sewing table panel + "Can sew!" tag + fit check — AC-98
-5. Gear on the hero: baked pieces, per-hero anchors, stitch details, Wardrobe photos — AC-100
+5. Gear on the hero: baked pieces, per-hero anchors, stitch details, Wardrobe photos, hide toggles — AC-100, AC-100b
 6. Head pieces: Pin Cushion Hat, Lookout Cap, Propeller Cap — AC-99
 7. Body pieces: Raincoat, Patch Vest, Picnic Apron — AC-99
 8. Charm pieces: Jingle Bell, Lucky Button, Wind-up Key — AC-99
