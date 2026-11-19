@@ -68,6 +68,35 @@ const LENGTHS: Dictionary[StringName, float] = {
 	# Building tricks (spec 06 §7): soft, never close to enemy danger.
 	&"whistle": 0.3,
 	&"pop_up": 0.45,
+	# Hero level-up voices (spec 10 §4.2); Banane keeps the quack.
+	&"squeak": 0.3,
+	&"grumble": 0.5,
+	&"trill": 0.45,
+	&"bark": 0.45,
+}
+
+## The frequent sounds get a soft felt "thump" under their click (spec 10 §4.2): sound → how
+## loud the thump is. Evolved weapons get a fuller one than their base weapon.
+const FELT_THUMP: Dictionary[StringName, float] = {
+	&"hit": 0.22,
+	&"pop": 0.26,
+	&"pickup": 0.08,
+	&"dash": 0.12,
+	&"coin": 0.05,
+	&"hurt": 0.14,
+	&"throw": 0.1,
+	&"pin": 0.08,
+	&"buttons": 0.1,
+	&"boing": 0.1,
+	&"whip": 0.09,
+	&"zip": 0.08,
+	&"mortar": 0.1,
+	&"snowball": 0.08,
+	&"needles": 0.06,
+	&"split": 0.16,
+	&"storm": 0.12,
+	&"volley": 0.14,
+	&"sticky": 0.12,
 }
 
 
@@ -108,7 +137,20 @@ static func make(sound: StringName) -> AudioStreamWAV:
 			voice = _goal
 		_:
 			voice = _weapon_or_moment(sound)
+	if FELT_THUMP.has(sound):
+		voice = _with_thump.bind(voice, FELT_THUMP[sound])
 	return Synth.render(LENGTHS[sound], voice)
+
+
+## A soft, low felt "thump": a short falling hum and a puff of muffled noise (peaks near 1).
+static func felt_thump(t: float) -> float:
+	var hum: float = Synth.sine(Synth.sweep(t, 150.0, 65.0, 0.08)) * exp(-26.0 * t)
+	var muffled: float = 0.5 * (Synth.noise(t) + Synth.noise(t - 0.0004)) * exp(-55.0 * t)
+	return hum * minf(t / 0.004, 1.0) + 0.25 * muffled
+
+
+static func _with_thump(t: float, click: Callable, amount: float) -> float:
+	return click.call(t) + amount * felt_thump(t)
 
 
 ## The sounds added in spec 02 (kept apart so `make` stays short).
@@ -155,8 +197,58 @@ static func _weapon_or_moment(sound: StringName) -> Callable:
 		&"star": _star,
 		&"whistle": _whistle,
 		&"pop_up": _pop_up,
+		&"squeak": _squeak,
+		&"grumble": _grumble,
+		&"trill": _trill,
+		&"bark": _bark,
 	}
 	return voices[sound]
+
+
+## Pip's level-up: a bright little penguin "squeak-eek", up and up.
+static func _squeak(t: float) -> float:
+	var value: float = 0.0
+	for start: float in [0.0, 0.12]:
+		if t >= start:
+			var local: float = t - start
+			var phase: float = Synth.sweep(local, 1100.0, 1700.0, 0.1) + 0.15 * sin(TAU * 30.0 * t)
+			value += Synth.triangle(phase) * Synth.pluck(local, 0.008, 22.0)
+	return 0.24 * value
+
+
+## Böbö's level-up: a low, happy bear "hrrrmm" with a little growl in it.
+static func _grumble(t: float) -> float:
+	var growl: float = 0.6 + 0.4 * sin(TAU * 28.0 * t)
+	var phase: float = Synth.sweep(t, 95.0, 125.0, 0.4) + 0.6 * sin(TAU * 4.0 * t)
+	var tone: float = 0.6 * Synth.saw(phase) + 0.4 * Synth.sine(phase * 2.0)
+	var shape: float = minf(t / 0.05, 1.0) * clampf((0.5 - t) / 0.15, 0.0, 1.0)
+	return 0.3 * tone * growl * shape
+
+
+## BamBam's level-up: a happy warbling trill going up (three quick notes).
+static func _trill(t: float) -> float:
+	var value: float = 0.0
+	var notes: PackedFloat32Array = [79.0, 83.0, 86.0]
+	for i: int in notes.size():
+		var start: float = i * 0.1
+		if t >= start:
+			var local: float = t - start
+			var hz: float = Synth.midi_hz(notes[i]) * (1.0 + 0.03 * sin(TAU * 22.0 * local))
+			value += Synth.sine(hz * local) * Synth.pluck(local, 0.01, 9.0)
+	return 0.2 * value
+
+
+## Robbar's level-up: a seal's "ork ork" bark, two short honks.
+static func _bark(t: float) -> float:
+	var value: float = 0.0
+	for start: float in [0.0, 0.2]:
+		if t >= start and t < start + 0.18:
+			var local: float = t - start
+			var phase: float = Synth.sweep(local, 260.0, 180.0, 0.16)
+			var honk: float = 0.6 * Synth.square(phase) + 0.4 * Synth.saw(phase * 2.0)
+			var shape: float = minf(local / 0.015, 1.0) * clampf((0.18 - local) / 0.06, 0.0, 1.0)
+			value += honk * shape
+	return 0.16 * value
 
 
 ## Boomerang throw / return: soft "whff".
@@ -216,7 +308,7 @@ static func _quack(t: float) -> float:
 	var phase: float = Synth.sweep(t, 330.0, 220.0, 0.35)
 	var nasal: float = 0.6 * Synth.saw(phase) + 0.4 * Synth.saw(phase * 2.0)
 	var shape: float = minf(t / 0.02, 1.0) * clampf((0.45 - t) / 0.15, 0.0, 1.0)
-	return 0.25 * nasal * shape
+	return 0.21 * nasal * shape
 
 
 ## Death: sad deflating squeak.

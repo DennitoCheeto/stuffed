@@ -29,6 +29,8 @@ extends Resource
 ## A new weapon this hero brings (Snowball Toss, Paw Swat): it joins the level-up cards for
 ## every hero once this hero is unlocked (spec 08 §3). Null = none.
 @export var unlocks_weapon: WeaponStats
+## The little sound this hero makes on every level-up (spec 10 §4.2, made in SfxBank).
+@export var level_up_sound: StringName = &"quack"
 
 @export_group("Slippery (Banane's passive)")
 ## Every dash drops a banana peel where it started (off for heroes without the passive).

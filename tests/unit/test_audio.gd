@@ -2,6 +2,7 @@ extends GutTest
 
 const POOL: UpgradePool = preload("res://data/upgrade_pool.tres")
 const WEAPONS_DIR: String = "res://data/weapons/"
+const ROSTER: HeroRoster = preload("res://data/heroes/hero_roster.tres")
 ## Sounds that warn of enemy danger: always louder than the player's own weapons (vision §6).
 const DANGER: Array[StringName] = [&"puff", &"spit", &"burst", &"elite", &"stomp", &"boss_banner"]
 
@@ -132,3 +133,76 @@ func test_trick_sounds_are_softer_than_enemy_danger() -> void:
 		quietest_danger = minf(quietest_danger, _loudness(sound))
 	for sound: StringName in [RunTricks.WHISTLE_SOUND, RunTricks.SPARE_SOUND]:
 		assert_lt(_loudness(sound), quietest_danger, "%s is softer than danger" % sound)
+
+
+## Spec 10 §4.2: every hero has their own level-up voice, softer than enemy danger.
+func test_every_hero_has_their_own_level_up_voice() -> void:
+	var quietest_danger: float = INF
+	for sound: StringName in DANGER:
+		quietest_danger = minf(quietest_danger, _loudness(sound))
+	var voices: Dictionary[StringName, StringName] = {}
+	for hero: HeroStats in ROSTER.heroes:
+		var voice: StringName = hero.level_up_sound
+		assert_true(SfxBank.LENGTHS.has(voice), "%s has a voice" % hero.id)
+		assert_false(voices.has(voice), "%s shares %s" % [hero.id, voice])
+		voices[voice] = hero.id
+		assert_lt(_loudness(voice), quietest_danger, "%s is softer than danger" % voice)
+	assert_eq(ROSTER.heroes[0].level_up_sound, &"quack", "Banane keeps the quack")
+
+
+## Spec 10 §4.2: the frequent sounds have the felt thump under them and vary more.
+func test_frequent_sounds_get_the_felt_thump_and_vary() -> void:
+	var frequent: Array[StringName] = [&"hit", &"pop", &"pickup", &"dash", &"coin", &"hurt"]
+	for stats: WeaponStats in _weapons():
+		if stats.evolved_from == &"":
+			frequent.append(stats.sound)
+	for sound: StringName in frequent:
+		assert_true(_varies(sound), "%s varies" % sound)
+	for sound: StringName in [&"hit", &"pop", &"pickup", &"dash", &"coin", &"hurt"]:
+		assert_true(SfxBank.FELT_THUMP.has(sound), "%s has the felt thump" % sound)
+		assert_gt(_low_share(sound), _low_share_without_thump(sound), "%s is warmer" % sound)
+
+
+func _varies(sound: StringName) -> bool:
+	return Sfx.RULES.varied.has(sound) and Sfx.RULES.volume_drop(sound) > 0.0
+
+
+## Share of the sound's energy that sits below ~200 Hz (a simple one-pole low-pass).
+func _low_share(sound: StringName) -> float:
+	return _low_share_of(SfxBank.make(sound))
+
+
+func _low_share_without_thump(sound: StringName) -> float:
+	var wav: AudioStreamWAV = SfxBank.make(sound)
+	var count: int = wav.data.size() / 2
+	var data: PackedByteArray = wav.data.duplicate()
+	var amount: float = SfxBank.FELT_THUMP[sound]
+	for i: int in count:
+		var t: float = float(i) / Synth.RATE
+		var value: float = data.decode_s16(i * 2) / 32000.0 - amount * SfxBank.felt_thump(t)
+		data.encode_s16(i * 2, int(clampf(value, -1.0, 1.0) * 32000.0))
+	var plain: AudioStreamWAV = AudioStreamWAV.new()
+	plain.data = data
+	plain.mix_rate = wav.mix_rate
+	return _low_share_of(plain)
+
+
+func _low_share_of(wav: AudioStreamWAV) -> float:
+	var smooth: float = 0.0
+	var low: float = 0.0
+	var all: float = 0.0
+	var k: float = 1.0 - exp(-TAU * 200.0 / wav.mix_rate)
+	for i: int in range(0, wav.data.size() - 1, 2):
+		var value: float = wav.data.decode_s16(i)
+		smooth += k * (value - smooth)
+		low += smooth * smooth
+		all += value * value
+	return low / maxf(all, 1.0)
+
+
+## Spec 10 §4.2: voice limits and a couple of starts per frame keep a crowd from stacking up.
+func test_voice_limits_live_in_data() -> void:
+	assert_gt(Sfx.max_voices(&"pop"), Sfx.RULES.starts_per_frame, "a crowd rolls over frames")
+	assert_lte(Sfx.max_voices(&"evolution"), 1)
+	assert_between(Sfx.RULES.starts_per_frame, 1, 3)
+	assert_lt(Sfx.RULES.pitch_range(&"pickup"), 0.06, "the XP chain steps stay clear")

@@ -281,7 +281,7 @@ func spawn_player(index: int, at: Vector2) -> Player:
 	player.hurt.connect(_on_player_hurt.bind(player))
 	unhurt.start(index, elapsed)
 	player.dashed.connect(func(_from: Vector2, _direction: Vector2) -> void: Sfx.play(&"dash"))
-	player.celebrated.connect(func() -> void: Sfx.play(&"quack"))
+	player.celebrated.connect(func() -> void: Sfx.play(player.stats.level_up_sound))
 	player.evolved.connect(_on_player_evolved.bind(player))
 	player.loadout_changed.connect(_note_loadout.bind(player))
 	actors.add_child(player)
