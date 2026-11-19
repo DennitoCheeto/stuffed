@@ -38,6 +38,7 @@ var _siege_news: PackedStringArray = []
 
 func _ready() -> void:
 	GameSettings.load_saved()
+	GameSettings.apply_screen()
 	load_town()
 	FeltAtlas.bake(self)
 	Sfx.attach(self)
@@ -291,15 +292,10 @@ func quit() -> void:
 
 
 func toggle_fullscreen() -> void:
-	var mode: DisplayServer.WindowMode = DisplayServer.window_get_mode()
-	var fullscreen: bool = (
-		mode == DisplayServer.WINDOW_MODE_FULLSCREEN
-		or mode == DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN
-	)
-	if fullscreen:
-		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
-	else:
-		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+	GameSettings.window_mode = GameSettings.toggled_mode(GameSettings.window_mode)
+	GameSettings.apply_screen()
+	GameSettings.save()
+	get_tree().call_group(SettingsPanel.GROUP, &"sync_screen")
 
 
 func _switch_to(screen: Node) -> void:

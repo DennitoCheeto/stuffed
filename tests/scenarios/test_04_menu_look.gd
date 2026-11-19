@@ -156,7 +156,13 @@ func test_ac49_settings_has_thread_sliders_and_felt_switches() -> void:
 	assert_true(page.is_open())
 	_assert_themed(page, "settings")
 	assert_eq(_count(page, ThreadSlider), 3, "three thread sliders")
+	page.show_tab(SettingsPanel.Tab.READABILITY)
 	assert_eq(_count(page, FeltSwitch), 2, "two felt switches")
+	_assert_themed(page, "settings (readability)")
+	page.show_tab(SettingsPanel.Tab.SCREEN)
+	_assert_themed(page, "settings (screen)")
+	page.show_tab(SettingsPanel.Tab.CONTROLS)
+	_assert_themed(page, "settings (controls)")
 
 
 func test_ac49_the_pause_menu_and_recipes_are_felt() -> void:
@@ -226,6 +232,7 @@ func test_the_felt_switch_flips_with_a_click_or_enter_and_slides_its_knob() -> v
 	var title: TitleScreen = main.current_screen as TitleScreen
 	title.open_settings()
 	await wait_process_frames(2)
+	title.settings.show_tab(SettingsPanel.Tab.READABILITY)
 	# Let the page finish dropping in, so the click lands where the switch rests.
 	await wait_seconds(UiFeel.STYLE.open_seconds + SETTLE)
 	var switch: FeltSwitch = title.settings.reduced_motion_check
@@ -244,6 +251,7 @@ func test_the_felt_switch_flips_with_a_click_or_enter_and_slides_its_knob() -> v
 	title.settings.close()
 	GameSettings.reduced_motion = true
 	title.open_settings()
+	title.settings.show_tab(SettingsPanel.Tab.READABILITY)
 	assert_true(switch.button_pressed, "opening shows the saved setting")
 	assert_eq(switch.slide, 1.0, "the knob is already on the right side")
 

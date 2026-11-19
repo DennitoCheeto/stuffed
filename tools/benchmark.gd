@@ -41,6 +41,10 @@ func _start() -> void:
 	SaveStore.path = BENCH_SAVE
 	SaveStore.delete_all()
 	GameSettings.path = BENCH_SETTINGS
+	# Main applies the saved screen options on boot: keep V-Sync off for honest fps.
+	GameSettings.reset()
+	GameSettings.vsync = false
+	GameSettings.save()
 	var main: Main = MAIN_SCENE.instantiate()
 	main.quit_enabled = false
 	root.add_child(main)
