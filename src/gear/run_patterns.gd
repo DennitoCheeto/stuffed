@@ -89,3 +89,11 @@ func _on_touched(envelope: PatternEnvelope, _player: Player) -> void:
 	Sfx.play(rules.pattern_sound)
 	# Saved right away: closing the game now still brings it home.
 	run.checkpoint_due.emit()
+
+
+## Puts this run's gear facts into `result` (spec 09 §10): the patterns found and what every
+## player wore (end screen tags, log `gear`). Here because run.gd is at gdlint's line limit.
+func fill_result(result: RunResult) -> void:
+	result.patterns_found = found.duplicate(true)
+	for player: Player in Players.all(run.get_tree()):
+		result.gear.append_array(player.gear.to_list(player.player_index))

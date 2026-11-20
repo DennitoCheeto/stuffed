@@ -75,3 +75,17 @@ func look_key() -> String:
 	for piece: GearDef in shown():
 		parts.append("%s:%d" % [piece.id, level_of(piece)])
 	return ",".join(parts)
+
+
+## The worn pieces as result entries for player `player` (end screen tags, run log):
+## {"player", "slot", "id", "name", "level"}, hidden pieces too (they still work).
+func to_list(player: int) -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for piece: GearDef in pieces:
+		var entry: Dictionary = {
+			"player": player, "slot": piece.slot_name(), "id": String(piece.id)
+		}
+		entry["name"] = piece.display_name
+		entry["level"] = level_of(piece)
+		result.append(entry)
+	return result

@@ -131,3 +131,21 @@ func test_a_night_siege_is_logged_as_a_siege_line() -> void:
 	assert_eq(int(entry["reward"]["coins"]), 150)
 	assert_eq(entry["time"], 97.3)
 	assert_eq(entries[1]["kind"], "run", "an expedition says so too")
+
+
+func test_ac103_the_gear_each_player_wore_is_logged_for_runs_and_sieges() -> void:
+	var result: RunResult = _result()
+	result.player_count = 3
+	result.gear = [
+		{"player": 0, "slot": "head", "id": "lookout_cap", "name": "Lookout Cap", "level": 2},
+		{"player": 0, "slot": "charm", "id": "jingle_bell", "name": "Jingle Bell", "level": 1},
+		{"player": 1, "slot": "body", "id": "raincoat", "name": "Raincoat", "level": 3},
+	]
+	assert_true(RunLog.append(result))
+	result.siege_number = 1
+	assert_true(RunLog.append(result))
+	var wanted: Array = [
+		{"head": "lookout_cap:2", "charm": "jingle_bell:1"}, {"body": "raincoat:3"}, {}
+	]
+	for entry: Dictionary in RunLog.read_all():
+		assert_eq(entry["gear"], wanted, "%s: one entry per player" % entry["kind"])

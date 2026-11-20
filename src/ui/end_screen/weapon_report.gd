@@ -4,6 +4,9 @@ extends RefCounted
 ## where, the Star of the run, and the short numbers ("12.3k", "1.23M").
 ## Rows are RunResult.weapons dictionaries (WeaponTallyEntry.to_dict).
 
+## A worn gear piece on the end screen (name, stitch level).
+const GEAR_TAG: String = "%s Lv %d"
+
 
 ## The weapon rows of player `player`, biggest damage first.
 static func rows_of(result: RunResult, player: int) -> Array[Dictionary]:
@@ -46,6 +49,15 @@ static func item_tags(result: RunResult, player: int) -> PackedStringArray:
 	for item: Dictionary in result.items:
 		if int(item.get("player", 0)) == player:
 			tags.append("%s %d" % [item["name"], int(item["level"])])
+	return tags
+
+
+## What player `player` wore (spec 09 §10), as "Lookout Cap Lv 2" tags, head first.
+static func gear_tags(result: RunResult, player: int) -> PackedStringArray:
+	var tags: PackedStringArray = []
+	for piece: Dictionary in result.gear:
+		if int(piece.get("player", 0)) == player:
+			tags.append(GEAR_TAG % [piece["name"], int(piece["level"])])
 	return tags
 
 

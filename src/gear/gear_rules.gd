@@ -129,3 +129,11 @@ func pattern_news(found: Array[GearDef]) -> PackedStringArray:
 	for piece: GearDef in found:
 		names.append(piece.display_name)
 	return PackedStringArray([patterns_banner, patterns_subtitle % ", ".join(names)])
+
+
+## Where `piece`'s pattern comes from: "Build the Watchtower to Lv 2" (`place` = the building's
+## name) or its `found_text` ("Big Ted drops this").
+func source_text(piece: GearDef, place: String) -> String:
+	if piece.source_kind != GearDef.Source.BUILDING:
+		return piece.found_text
+	return building_source_text % [place, piece.source_level]

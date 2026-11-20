@@ -19,6 +19,8 @@ func add(entry: ScrapbookEntry) -> ScrapbookEntry:
 
 
 func is_seen(entry: ScrapbookEntry, save: TownSave) -> bool:
+	if id == ScrapbookRules.GEAR:
+		return save.gear.has_pattern(entry.id)
 	return save.has_seen(id, entry.id)
 
 

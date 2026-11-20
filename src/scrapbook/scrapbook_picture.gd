@@ -8,6 +8,8 @@ const SILHOUETTE: Color = Color(0.16, 0.14, 0.2, 1.0)
 const MARK_COLOR: Color = Color("#d8d2e4")
 ## Share of the box the picture fills.
 const FILL: float = 0.86
+## Ink outline around a gear piece.
+const GEAR_OUTLINE: float = 3.0
 
 var entry: ScrapbookEntry
 var seen: bool = false
@@ -41,6 +43,7 @@ func show_entry(what: ScrapbookEntry, is_seen: bool) -> void:
 	if mark != null:
 		remove_child(mark)
 		mark.queue_free()
+		mark = null
 	art = Control.new()
 	art.set_anchors_preset(Control.PRESET_FULL_RECT)
 	art.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -100,6 +103,9 @@ func _build_art() -> void:
 		ScrapbookEntry.Picture.PLUSHIE:
 			art.draw.connect(_draw_plushie)
 			art.queue_redraw()
+		ScrapbookEntry.Picture.GEAR:
+			art.draw.connect(_draw_gear)
+			art.queue_redraw()
 
 
 func _draw_plushie() -> void:
@@ -109,6 +115,15 @@ func _draw_plushie() -> void:
 	var unit: float = box.y * FILL / 3.6 / maxf(who.height, 0.8)
 	var feet: Vector2 = Vector2(art.size.x / 2.0, (art.size.y + box.y * FILL) / 2.0)
 	PlushieLook.draw(art, who, feet, unit)
+
+
+func _draw_gear() -> void:
+	var side: float = minf(art.size.x, art.size.y)
+	if side <= 0.0:
+		side = custom_minimum_size.x
+	var middle: Vector2 = (art.size if art.size.x > 0.0 else custom_minimum_size) / 2.0
+	var piece: GearDef = entry.gear as GearDef
+	GearLook.draw(art, piece, 1, middle, side * FILL, piece.color, GEAR_OUTLINE)
 
 
 ## Scales the sprites under `_holder` so all of them fit the box (any zombie or pickup size).
