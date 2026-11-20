@@ -5,6 +5,8 @@ extends CharacterBody2D
 signal health_changed(current: float, maximum: float)
 signal hurt(amount: float)
 signal dashed(from_position: Vector2, direction: Vector2)
+## A dash ended where the hero stands now (the Propeller Cap thumps there).
+signal dash_landed(at: Vector2)
 signal died(player: Player)
 ## A level-up moment: Banane quacks with sunglasses on.
 signal celebrated
@@ -62,6 +64,10 @@ var invincible: bool = false
 var attack_speed: float = 1.0
 ## XP buttons closer than this fly to the hero (Magnet Pocket raises it).
 var pickup_range: float = 0.0
+## Lookout Cap: multiplies `pickup_range` while it is on (1 = off). Read `GearEffects.pickup_reach`.
+var pickup_factor: float = 1.0
+## Pin Cushion Hat: pins and buttons pierce this many more zombies (weapons read it).
+var extra_pierce: int = 0
 ## Level and XP in this run.
 var progress: LevelProgress
 ## Multiplies the hero's move speed (Quick Feet raises it).
@@ -142,6 +148,8 @@ func _ready() -> void:
 	shape.radius = stats.hitbox_radius
 	_hitbox.shape = shape
 	_add_passives()
+	if armed:
+		GearEffects.apply(self)
 	if starting_weapon == null:
 		starting_weapon = stats.starting_weapon
 	if armed and starting_weapon != null:
@@ -362,7 +370,7 @@ func weapons() -> Array[Weapon]:
 func try_dash() -> bool:
 	if not can_dash():
 		return false
-	_dash_left = stats.dash_distance
+	_dash_left = GearEffects.dash_distance(self)
 	_dash_direction = facing
 	_dash_cooldown_left = stats.dash_cooldown
 	dashed.emit(global_position, _dash_direction)
@@ -477,3 +485,4 @@ func _move_dash(delta: float) -> void:
 		_dash_left = 0.0
 	if not is_dashing():
 		velocity = Vector2.ZERO
+		dash_landed.emit(global_position)
