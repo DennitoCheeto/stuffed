@@ -31,6 +31,8 @@ var gear_material: ShaderMaterial = ShaderMaterial.new()
 var _key: String = ""
 var _side: float = SIDE
 var _shown: Array[GearDef] = []
+## Patch Vest: true while its patch is on (the vest shows the picture cell with the patch).
+var _patch_on: bool = true
 
 
 func _init() -> void:
@@ -61,14 +63,28 @@ func dress(gear: WornGear, side: float, place: Callable) -> bool:
 		sprite.name = "Gear_%s" % piece.slot_name()
 		sprite.texture = picture.get_texture()
 		sprite.region_enabled = true
-		sprite.region_rect = Rect2(
-			Vector2(i * _cell(), 0.0) * BAKE_SCALE, Vector2.ONE * _cell() * BAKE_SCALE
-		)
+		sprite.region_rect = _cell_rect(i)
 		sprite.scale = Vector2.ONE / BAKE_SCALE
 		sprite.material = gear_material
 		sprites[piece.slot_name()] = sprite
 		place.call(piece, sprite)
+	show_patch(_patch_on)
 	return true
+
+
+## Patch Vest: shows the vest with its patch on or off (the picture holds both, so this costs
+## no draws). Does nothing when no Patch Vest is shown.
+func show_patch(on: bool) -> void:
+	_patch_on = on
+	for i: int in _shown.size():
+		if GearLook.has_patch(_shown[i]):
+			var cell: int = i if on else _shown.size()
+			sprites[_shown[i].slot_name()].region_rect = _cell_rect(cell)
+
+
+## True while a shown Patch Vest wears its patch (tests).
+func shows_patch() -> bool:
+	return _patch_on
 
 
 ## The sprite showing what is worn in `slot` (null = nothing shown there).
@@ -95,6 +111,19 @@ func _cell() -> float:
 	return _side + PAD * 2.0
 
 
+## Cells in the picture: one per shown piece, plus the Patch Vest without its patch.
+func _cells() -> int:
+	for piece: GearDef in _shown:
+		if GearLook.has_patch(piece):
+			return _shown.size() + 1
+	return _shown.size()
+
+
+## Where cell `index` is in the picture (its pixels).
+func _cell_rect(index: int) -> Rect2:
+	return Rect2(Vector2(index * _cell(), 0.0) * BAKE_SCALE, Vector2.ONE * _cell() * BAKE_SCALE)
+
+
 func _clear() -> void:
 	for slot_name: String in sprites:
 		var old: Sprite2D = sprites[slot_name]
@@ -109,7 +138,7 @@ func _clear() -> void:
 func _bake() -> void:
 	picture = SubViewport.new()
 	picture.transparent_bg = true
-	picture.size = Vector2i((Vector2(_shown.size(), 1.0) * _cell() * BAKE_SCALE).ceil())
+	picture.size = Vector2i((Vector2(_cells(), 1.0) * _cell() * BAKE_SCALE).ceil())
 	picture.render_target_update_mode = SubViewport.UPDATE_ONCE
 	var painter: Node2D = Node2D.new()
 	painter.scale = Vector2.ONE * BAKE_SCALE
@@ -123,3 +152,7 @@ func _paint(canvas: Node2D) -> void:
 		var piece: GearDef = _shown[i]
 		var middle: Vector2 = Vector2(i * _cell() + _cell() / 2.0, _cell() / 2.0)
 		GearLook.draw(canvas, piece, worn.level_of(piece), middle, _side, piece.color, INNER_LINE)
+		if GearLook.has_patch(piece):
+			var spare: Vector2 = Vector2(_shown.size() * _cell() + _cell() / 2.0, _cell() / 2.0)
+			var level: int = worn.level_of(piece)
+			GearLook.draw(canvas, piece, level, spare, _side, piece.color, INNER_LINE, false)

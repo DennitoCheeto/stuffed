@@ -45,7 +45,8 @@ const SLOT_NAMES: PackedStringArray = ["head", "body", "charm"]
 @export var seconds: float = 0.0
 ## Wind-up Key = seconds between wind-ups.
 @export var every: float = 0.0
-## Propeller Cap = thump reach, Jingle Bell = shockwave reach (pixels).
+## Propeller Cap = thump reach, Raincoat = half the puddle's width, Jingle Bell = shockwave reach
+## (pixels).
 @export var radius: float = 0.0
 ## Picnic Apron = share of max health a snack heals, Lucky Button = XP of a golden button
 ## (times a normal one).
@@ -54,6 +55,9 @@ const SLOT_NAMES: PackedStringArray = ["head", "body", "charm"]
 @export var damage: float = 0.0
 ## A sound the effect plays (a name in SfxBank; empty = none), e.g. the Propeller Cap's thump.
 @export var sound: StringName = &""
+## The colour of what the effect puts in the world (Raincoat puddle, Patch Vest patch, Picnic
+## Apron napkin). Calm, never a danger colour.
+@export var effect_color: Color = Color.WHITE
 
 
 ## The name of its slot as saved ("head", "body", "charm").
