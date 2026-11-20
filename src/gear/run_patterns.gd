@@ -22,6 +22,14 @@ func _init(owner_run: Run, gear_rules: GearRules = GearRules.current()) -> void:
 	rules = gear_rules
 
 
+## Seeds the gear dice from the run's seed: elite pattern drops and the Lucky Button's golden
+## buttons (`run.pickups.golden_rng`), so a seed plays out the same.
+func seed_dice(seed_value: int) -> void:
+	rng.seed = seed_value * 29 + 17
+	if run.pickups != null:
+		run.pickups.golden_rng.seed = seed_value * 37 + 19
+
+
 ## True while `piece` can still drop: the town doesn't own it, this run didn't find it and no
 ## envelope with it is lying on the floor.
 func can_drop(piece: GearDef) -> bool:

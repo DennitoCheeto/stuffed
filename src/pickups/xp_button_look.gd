@@ -9,12 +9,17 @@ const KEYS: Array[StringName] = [&"xp/small", &"xp/medium", &"xp/big"]
 const RADII: PackedFloat32Array = [7.0, 9.0, 12.0]
 const COLORS: PackedColorArray = [Color("#4fc3f7"), Color("#b388ff"), Color("#ffb74d")]
 const HOLE_COLOR: Color = Color("#0b3b52")
+## Lucky Button (spec 09 §3): a golden button, worth `GearDef.factor` times its size's XP.
+const GOLDEN_KEY: StringName = &"xp/golden"
+const GOLDEN_RADIUS: float = 10.0
+const GOLDEN_COLOR: Color = Color("#ffd54f")
 
 
 static func make_parts() -> Dictionary[StringName, FeltPiece]:
 	var parts: Dictionary[StringName, FeltPiece] = {}
 	for size: int in KEYS.size():
 		parts[KEYS[size]] = _button(RADII[size] / DRAW_SCALE, COLORS[size])
+	parts[GOLDEN_KEY] = _button(GOLDEN_RADIUS / DRAW_SCALE, GOLDEN_COLOR)
 	return parts
 
 

@@ -69,6 +69,7 @@ func test_pickups_never_look_like_danger() -> void:
 	var colors: Array[Color] = []
 	for color: Color in XpButtonLook.COLORS:
 		colors.append(color)
+	colors.append(XpButtonLook.GOLDEN_COLOR)
 	colors.append_array([GiftBoxLook.BOX_COLOR, GiftBoxLook.LID_COLOR, GiftBoxLook.RIBBON_COLOR])
 	for color: Color in colors:
 		assert_false(UiColors.is_danger(color), color.to_html())
