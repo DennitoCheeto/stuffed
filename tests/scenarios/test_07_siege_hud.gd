@@ -47,7 +47,9 @@ func test_the_siege_hud_shows_the_fort_the_waves_and_the_hero() -> void:
 	assert_true(siege.hud.health_bar.is_visible_in_tree(), "the hero's usual bar")
 	siege.dev_menu.press(DevMenu.NEXT_WAVE)
 	await wait_physics_frames(2)
-	assert_eq(siege.wave_counter.text, "Wave 2 of 3")
+	# The label copies `shown_text()` in `_process`: on a slow machine two physics ticks can pass
+	# before the next process frame, so read the counter itself.
+	assert_eq(siege.wave_counter.shown_text(), "Wave 2 of 3")
 	var bar: Rect2 = siege.fort_bar.get_global_rect()
 	var counter: Rect2 = siege.wave_counter.get_global_rect()
 	assert_false(bar.intersects(counter), "side by side")
