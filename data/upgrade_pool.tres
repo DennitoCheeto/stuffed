@@ -255,7 +255,7 @@ weapon = &"sewing_pin_sniper"
 partner = &"sharp_scissors"
 evolved = ExtResource("16_volley")
 icon = &"volley"
-card_text = "A fan of piercing pins with no pierce limit."
+card_text = "A fan of piercing pins with no pierce limit; popped zombies fire more pins."
 
 [sub_resource type="Resource" id="Resource_evolve_bomb"]
 script = ExtResource("13_evolution")
@@ -263,7 +263,7 @@ weapon = &"yarn_cannon"
 partner = &"big_spool"
 evolved = ExtResource("17_bomb")
 icon = &"bomb"
-card_text = "The burst leaves sticky yarn that slows and hurts zombies."
+card_text = "The burst leaves sticky yarn that slows and hurts, then yanks zombies together and pops."
 
 [resource]
 script = ExtResource("1_pool")
