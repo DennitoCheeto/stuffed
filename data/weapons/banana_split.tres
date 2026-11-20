@@ -1,9 +1,10 @@
-[gd_resource type="Resource" script_class="WeaponStats" load_steps=7 format=3]
+[gd_resource type="Resource" script_class="WeaponStats" load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://src/weapons/weapon_stats.gd" id="1_stats"]
 [ext_resource type="Script" path="res://src/weapons/weapon_level.gd" id="2_level"]
 [ext_resource type="Script" path="res://src/weapons/shot_look.gd" id="4_look"]
 [ext_resource type="Script" path="res://src/weapons/banana_split.gd" id="3_behaviour"]
+[ext_resource type="Script" path="res://src/weapons/peel_trail.gd" id="5_trail"]
 
 [sub_resource type="Resource" id="Resource_level1"]
 script = ExtResource("2_level")
@@ -14,7 +15,7 @@ count = 2
 speed = 500.0
 pierce = 0
 spread_degrees = 25.0
-card_text = "On the way back each peel splits into three."
+card_text = "On the way back each peel splits into three; each leaves a slippery peel on a zombie it hits."
 
 [sub_resource type="Resource" id="Resource_look"]
 script = ExtResource("4_look")
@@ -25,6 +26,16 @@ trail_amount = 14
 trail_seconds = 0.4
 flash_color = Color(0.847, 1, 0.914, 0.55)
 flash_radius = 30.0
+
+[sub_resource type="Resource" id="Resource_trail"]
+script = ExtResource("5_trail")
+max_peels = 6
+lifetime = 5.0
+arm_seconds = 0.3
+stun = 1.0
+radius = 20.0
+size = 1.0
+alpha = 0.85
 
 [resource]
 script = ExtResource("1_stats")
@@ -38,4 +49,5 @@ knockback = 140.0
 hit_radius = 16.0
 evolved_from = &"peel_boomerang"
 shot_look = SubResource("Resource_look")
+peel_trail = SubResource("Resource_trail")
 levels = Array[ExtResource("2_level")]([SubResource("Resource_level1")])

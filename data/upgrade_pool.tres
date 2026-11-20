@@ -239,7 +239,7 @@ weapon = &"peel_boomerang"
 partner = &"quick_feet"
 evolved = ExtResource("14_split")
 icon = &"split"
-card_text = "On the way back the boomerang splits into three."
+card_text = "On the way back the boomerang splits into three, and the peels leave slippery peels behind."
 
 [sub_resource type="Resource" id="Resource_evolve_storm"]
 script = ExtResource("13_evolution")
@@ -247,7 +247,7 @@ weapon = &"orbiting_needles"
 partner = &"long_thread"
 evolved = ExtResource("15_storm")
 icon = &"storm"
-card_text = "A permanent storm of needles; every few seconds it flings them outward."
+card_text = "A permanent storm of needles; flung needles sew through zombies and yank them back in."
 
 [sub_resource type="Resource" id="Resource_evolve_volley"]
 script = ExtResource("13_evolution")

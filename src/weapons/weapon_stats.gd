@@ -37,6 +37,10 @@ extends Resource
 @export var pins: bool = false
 ## Evolved weapons: their own sting, played once per run at the evolution moment (spec 10 §3).
 @export var sting: StringName = &""
+## Banana Split only: the slippery peels its split peels leave (spec 10 §3; null = none).
+@export var peel_trail: PeelTrail
+## Sewing Storm only: the threads that yank hit zombies back in (spec 10 §3; null = none).
+@export var stitch_up: StitchUp
 ## Level 1 first.
 @export var levels: Array[WeaponLevel] = []
 

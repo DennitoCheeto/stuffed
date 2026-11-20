@@ -1,7 +1,8 @@
 class_name SplitPeelProjectile
 extends BoomerangProjectile
 ## A Banana Split peel: where it turns to fly back, two more peels split off to the sides. They
-## fly apart for a moment, then home in on the player too.
+## fly apart for a moment, then home in on the player too. On the way back each of the three
+## leaves a slippery peel at the first zombie it hits.
 
 ## How far the split-off peels fly to the side of the way back, in degrees.
 const SPLIT_DEGREES: float = 40.0
@@ -10,6 +11,8 @@ const SPLIT_TIME: float = 0.18
 
 ## True for the two peels that split off (they don't split again).
 var split_off: bool = false
+## True once this peel dropped its slippery peel (one per peel on the way back, spec 10 §3).
+var dropped_peel: bool = false
 
 var _apart_left: float = 0.0
 
@@ -17,7 +20,17 @@ var _apart_left: float = 0.0
 func reset() -> void:
 	super()
 	split_off = false
+	dropped_peel = false
 	_apart_left = 0.0
+
+
+## After the split each of the three peels drops a slippery peel at the first zombie it hits.
+func hurt(zombie: Zombie, amount: float, push: Vector2) -> void:
+	var at: Vector2 = zombie.global_position
+	super(zombie, amount, push)
+	if returning and not dropped_peel and weapon is BananaSplit:
+		dropped_peel = true
+		(weapon as BananaSplit).drop_peel(at)
 
 
 func advance(delta: float) -> bool:
