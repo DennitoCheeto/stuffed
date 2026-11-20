@@ -847,7 +847,7 @@ _Last updated: 2026-11-20 (M4.5-08 charm pieces: merged (PR #314); M4.5-09 co-op
   Tests: `test_10_evolution_moment.gd`.
 - Co-op gear, Gear tab, tags, log (M4.5-09, spec 09 §8, §10, AC-101/103): co-op rules were already in `GearBook`
   (`Wear.TAKEN`, table `note_for` = "Player N wears it"); each player opens the table with their own
-  `interact` (`table.opener`). Scrapbook page `ScrapbookRules.GEAR` (`_gear()`, last tab): seen = pattern found
+  `interact` (`table.opener`). Scrapbook page `ScrapbookRules.GEAR` (built by `ScrapbookBook.gear_page()`, `all_pages()` = rules pages + Gear: GearRules inside `ScrapbookRules` leaked "resources still in use" via TownSave; `ScrapbookEntry.gear` is typed `Resource` for the same reason): seen = pattern found
   (`ScrapbookPage.is_seen`, not `TownSave.seen`; dev "Fill scrapbook" skips it), `ScrapbookEntry.Picture.GEAR`
   drawn by `GearLook`, note = `GearRules.source_text(piece, building name)` (shown on unseen tiles too).
   `RunResult.gear` ({player, slot, id, name, level}; filled by `RunPatterns.fill_result` since `run.gd` is at 1000
