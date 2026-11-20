@@ -32,11 +32,11 @@ func _ids(page: ScrapbookPage) -> Array[String]:
 	return ids
 
 
-func test_ac46_five_pages_in_book_order() -> void:
+func test_ac46_six_pages_in_book_order() -> void:
 	var titles: Array[String] = []
-	for page: ScrapbookPage in RULES.pages():
+	for page: ScrapbookPage in ScrapbookBook.all_pages():
 		titles.append(page.title)
-	assert_eq(titles, ["Weapons", "Items", "Enemies", "Floor pickups", "Plushies"])
+	assert_eq(titles, ["Weapons", "Items", "Enemies", "Floor pickups", "Plushies", "Gear"])
 
 
 func test_ac46_weapons_page_has_every_weapon_then_every_evolution() -> void:

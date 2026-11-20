@@ -530,7 +530,7 @@ func make_result(ending: String) -> RunResult:
 	result.lowest_health_at_goal = lowest_health_at_goal
 	result.tricks = perks.trick_ids()
 	result.trick_moments = tricks.moments.duplicate(true)
-	result.patterns_found = patterns.found.duplicate(true)
+	patterns.fill_result(result)
 	for player: Player in Players.all(get_tree()):
 		for weapon: Weapon in player.weapons():
 			result.weapon_titles[String(weapon.stats.id)] = weapon.stats.run_title

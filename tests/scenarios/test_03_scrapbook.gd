@@ -103,7 +103,12 @@ func test_ac46_every_page_counts_what_was_found_and_q_e_turn_the_pages() -> void
 	for tab: Button in book.tabs:
 		counts.append(tab.text)
 	var expected: Array[String] = [
-		"Weapons 2 / 16", "Items 1 / 8", "Enemies 3 / 8", "Floor pickups 0 / 3", "Plushies 1 / 4"
+		"Weapons 2 / 16",
+		"Items 1 / 8",
+		"Enemies 3 / 8",
+		"Floor pickups 0 / 3",
+		"Plushies 1 / 4",
+		"Gear 0 / 9"
 	]
 	assert_eq(counts, expected)
 	await _press_key(KEY_E)

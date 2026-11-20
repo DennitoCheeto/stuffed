@@ -70,6 +70,9 @@ var tricks: PackedStringArray = []
 var trick_moments: Array[Dictionary] = []
 ## Sewing patterns found in this run (spec 09 §10): {"pattern": gear id, "time": run seconds}.
 var patterns_found: Array[Dictionary] = []
+## What every player wore (spec 09 §10, end screen tags + log): {"player": 0-based index, "slot":
+## "head" / "body" / "charm", "id", "name", "level": stitch level}.
+var gear: Array[Dictionary] = []
 ## Night siege only (spec 07 §6): which siege (1 = the first; 0 = an expedition), waves held of
 ## how many, and the buildings knocked down in the fight (ids).
 var siege_number: int = 0
@@ -113,3 +116,17 @@ func title() -> String:
 	if ending == "way_home":
 		return "Home safe!"
 	return "You gave up" if ending == "quit" else "Banane got stuffed"
+
+
+## The log's `gear` field: one entry per player index, slot -> "id:stitch level"
+## ({"head": "lookout_cap:2", ...}; empty slots left out).
+func gear_log() -> Array[Dictionary]:
+	var players: Array[Dictionary] = []
+	for i: int in player_count:
+		players.append({})
+	for piece: Dictionary in gear:
+		var who: int = int(piece.get("player", 0))
+		while who >= players.size():
+			players.append({})
+		players[who][String(piece["slot"])] = "%s:%d" % [piece["id"], int(piece["level"])]
+	return players

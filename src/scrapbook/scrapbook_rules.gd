@@ -10,6 +10,9 @@ const ITEMS: String = "items"
 const ENEMIES: String = "enemies"
 const FLOOR_PICKUPS: String = "floor_pickups"
 const PLUSHIES: String = "plushies"
+## Sewn-on gear (spec 09 §10): an entry counts as found once its pattern is. The page itself is
+## built by `ScrapbookBook.gear_page()`: GearRules here closes a script loop through TownSave.
+const GEAR: String = "gear"
 ## The Enemies page entry for elites (any zombie type can be one).
 const ELITE_ID: String = "elite"
 

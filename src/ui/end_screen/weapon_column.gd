@@ -2,7 +2,7 @@ class_name WeaponColumn
 extends VBoxContainer
 ## One player's weapons on the end screen (spec 04 §4.1, §4.4): the Star of the run as a taped-on
 ## photo with its sticker and numbers, then the other weapons as rows (they scroll when there are
-## many) and the items as fabric tags.
+## many) and the items and worn gear as fabric tags.
 
 const STAR_ICON: float = 84.0
 const STAR_PICTURE: Vector2 = Vector2(128, 100)
@@ -27,6 +27,8 @@ var star_line_label: Label
 var rows: Array[WeaponRow] = []
 ## Item tags ("Quick Feet 3").
 var item_tags: Array[FabricTag] = []
+## Worn gear tags ("Lookout Cap Lv 2", spec 09 §10), in the sticker teal.
+var gear_tags: Array[FabricTag] = []
 var scroll: ScrollContainer
 var empty_label: Label
 
@@ -67,6 +69,7 @@ func _init(result: RunResult, who: int, pool: UpgradePool, show_heading: bool) -
 		rows.append(shown)
 		list.add_child(shown)
 	_add_items(list, WeaponReport.item_tags(result, who))
+	_add_gear(list, WeaponReport.gear_tags(result, who))
 
 
 ## Every weapon this column lists, the star first (for tests).
@@ -139,16 +142,30 @@ func _star_block(result: RunResult, pool: UpgradePool, who: int) -> HBoxContaine
 
 
 func _add_items(list: VBoxContainer, tags: PackedStringArray) -> void:
+	item_tags.append_array(_add_tags(list, tags, UiColors.TAG, UiColors.INK))
+
+
+func _add_gear(list: VBoxContainer, tags: PackedStringArray) -> void:
+	var ink: Color = UiColors.STICKER_TEAL_INK
+	gear_tags.append_array(_add_tags(list, tags, UiColors.STICKER_TEAL, ink))
+
+
+## A wrapping row of fabric tags under the weapons (none for no tags).
+func _add_tags(
+	list: VBoxContainer, tags: PackedStringArray, fill: Color, ink: Color
+) -> Array[FabricTag]:
+	var added: Array[FabricTag] = []
 	if tags.is_empty():
-		return
+		return added
 	var flow: HFlowContainer = HFlowContainer.new()
 	flow.add_theme_constant_override(&"h_separation", 6)
 	flow.add_theme_constant_override(&"v_separation", 6)
 	list.add_child(flow)
 	for words: String in tags:
-		var tag: FabricTag = FabricTag.new(words, UiColors.TAG, UiColors.INK, TAG_SIZE)
-		item_tags.append(tag)
+		var tag: FabricTag = FabricTag.new(words, fill, ink, TAG_SIZE)
+		added.append(tag)
 		flow.add_child(tag)
+	return added
 
 
 ## The hero player `who` played this run (spec 08 §11), or "" if unknown (older results).

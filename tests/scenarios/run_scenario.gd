@@ -18,7 +18,8 @@ const CONTROLS: Array[String] = [
 	"interact",
 	"tricks",
 	"use_pocket",
-	"hide_gear"
+	"hide_gear",
+	"reroll"
 ]
 
 var main: Main

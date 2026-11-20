@@ -25,12 +25,15 @@ const TAB_COLOR: Color = UiColors.TAG
 const TAB_ON_COLOR: Color = UiColors.STICKER_TEAL
 const UNSEEN_TEXT: String = "Not found yet."
 ## How to fill each page (shown for an unseen entry).
+## Where each building's data lives (gear entries name the building their pattern comes from).
+const BUILDINGS: String = "res://data/town/buildings/%s.tres"
 const HOW_TO_FIND: Dictionary[String, String] = {
 	"weapons": "Take it on a level-up card, or evolve a weapon, to add it here.",
 	"items": "Take it on a level-up card to add it here.",
 	"enemies": "Meet it in a run to add it here.",
 	"floor_pickups": "Grab it in a run to add it here.",
 	"plushies": "Rescue them in a run to add them here.",
+	"gear": "Find its pattern to add it here.",
 }
 
 var save: TownSave = TownSave.new()
@@ -103,11 +106,43 @@ func is_open() -> bool:
 ## Opens the book on its first page with what `town_save` has seen.
 func open(town_save: TownSave) -> void:
 	save = town_save
-	pages = RULES.pages()
+	pages = all_pages()
 	_build_tabs()
 	visible = true
 	show_page(0)
 	motion.open([cover])
+
+
+## A building's shown name from its data file (`data/town/buildings/<id>.tres`).
+static func _building_name(id: String) -> String:
+	var path: String = BUILDINGS % id
+	if id.is_empty() or not ResourceLoader.exists(path):
+		return id
+	return (load(path) as BuildingDef).display_name
+
+
+## The Gear page (spec 09 §10): the 9 pieces with their effect, and where their pattern comes
+## from as the note ("Build the Watchtower to Lv 2", "Big Ted drops this").
+static func gear_page() -> ScrapbookPage:
+	var page: ScrapbookPage = ScrapbookPage.new(ScrapbookRules.GEAR, "Gear")
+	var rules: GearRules = GearRules.current()
+	for piece: GearDef in rules.pieces:
+		var entry: ScrapbookEntry = ScrapbookEntry.new(
+			String(piece.id), piece.display_name, piece.text
+		)
+		entry.picture = ScrapbookEntry.Picture.GEAR
+		entry.gear = piece
+		entry.note = rules.source_text(piece, _building_name(String(piece.source)))
+		page.add(entry)
+	return page
+
+
+## Every page in book order: the rules' pages, then Gear (built here: GearRules in
+## ScrapbookRules closes a script loop through TownSave).
+static func all_pages() -> Array[ScrapbookPage]:
+	var result: Array[ScrapbookPage] = RULES.pages()
+	result.append(gear_page())
+	return result
 
 
 func close() -> void:
@@ -176,7 +211,9 @@ func show_details(tile: ScrapbookTile) -> void:
 	else:
 		detail_name.text = ScrapbookTile.UNSEEN_NAME
 		detail_text.text = UNSEEN_TEXT
-		detail_note.text = HOW_TO_FIND.get(current_page().id, "")
+		var how: String = HOW_TO_FIND.get(current_page().id, "")
+		# A gear piece says where its pattern comes from even before it is found (spec 09 §10).
+		detail_note.text = shown.note if shown.gear != null else how
 
 
 ## An entry's note; a rescued plushie also says what it plays with as a hero (spec 08 §11):

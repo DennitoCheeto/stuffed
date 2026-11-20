@@ -87,6 +87,21 @@ func test_ac53_items_are_tags_per_player() -> void:
 	assert_eq(WeaponReport.item_tags(_result(), 1), PackedStringArray(["Big Spool 1"]))
 
 
+func test_ac103_worn_gear_is_tagged_per_player_with_its_stitch_level() -> void:
+	var result: RunResult = _result()
+	result.gear = [
+		{"player": 0, "slot": "head", "id": "lookout_cap", "name": "Lookout Cap", "level": 2},
+		{"player": 1, "slot": "charm", "id": "jingle_bell", "name": "Jingle Bell", "level": 3},
+	]
+	assert_eq(WeaponReport.gear_tags(result, 0), PackedStringArray(["Lookout Cap Lv 2"]))
+	assert_eq(WeaponReport.gear_tags(result, 1), PackedStringArray(["Jingle Bell Lv 3"]))
+	var column: WeaponColumn = WeaponColumn.new(result, 1, POOL, true)
+	add_child_autofree(column)
+	assert_eq(column.gear_tags.size(), 1)
+	assert_eq(column.gear_tags[0].label.text, "Jingle Bell Lv 3")
+	assert_eq(column.item_tags.size(), 1, "items keep their own tags")
+
+
 func test_ac57_one_column_per_player() -> void:
 	var result: RunResult = _result()
 	assert_eq(WeaponReport.player_count(result), 2, "player 2 has a row")

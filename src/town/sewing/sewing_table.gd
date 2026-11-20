@@ -192,10 +192,8 @@ func action_text(now: GearBook.Action, at: int) -> String:
 
 ## Where `piece`'s pattern comes from ("Build the Watchtower to Lv 2", "Big Ted drops this").
 func source_text(piece: GearDef) -> String:
-	if piece.source_kind != GearDef.Source.BUILDING:
-		return piece.found_text
 	var place: String = _building_names.get(String(piece.source), String(piece.source))
-	return _rules.building_source_text % [place, piece.source_level]
+	return _rules.source_text(piece, place)
 
 
 ## The sewing moment on `piece`'s tile (already paid for): the needle, then a pop and a puff.
