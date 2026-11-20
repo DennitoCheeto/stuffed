@@ -10,6 +10,9 @@ const UNLIMITED: int = 1_000_000
 
 ## Zombies hit so far.
 var hits: int = 0
+## How far it flies and how hard it hits (a chained pin flies shorter and hits softer).
+var reach: float = 0.0
+var damage: float = 0.0
 
 var _numbers: WeaponLevel
 var _direction: Vector2 = Vector2.RIGHT
@@ -32,6 +35,8 @@ func launch(from: Weapon, direction: Vector2) -> void:
 	weapon = from
 	_numbers = from.current()
 	_direction = direction
+	reach = _numbers.reach
+	damage = _numbers.damage
 	global_position = from.origin()
 	size_to(from.area_scale())
 	rotation = direction.angle()
@@ -54,7 +59,7 @@ func advance(delta: float) -> bool:
 			return false
 	global_position += _direction * step
 	_travelled += step
-	return _travelled < _numbers.reach
+	return _travelled < reach
 
 
 func _hit_zombies(point: Vector2) -> void:
@@ -65,7 +70,7 @@ func _hit_zombies(point: Vector2) -> void:
 			continue
 		_already_hit[id] = true
 		hits += 1
-		hurt(zombie, _numbers.damage, push)
+		hurt(zombie, damage, push)
 		if hits == BIG_HIT:
 			var run: Run = get_tree().get_first_node_in_group(Run.GROUP) as Run
 			if run != null:

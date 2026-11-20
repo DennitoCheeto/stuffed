@@ -1,9 +1,10 @@
-[gd_resource type="Resource" script_class="WeaponStats" load_steps=7 format=3]
+[gd_resource type="Resource" script_class="WeaponStats" load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://src/weapons/weapon_stats.gd" id="1_stats"]
 [ext_resource type="Script" path="res://src/weapons/weapon_level.gd" id="2_level"]
 [ext_resource type="Script" path="res://src/weapons/shot_look.gd" id="4_look"]
-[ext_resource type="Script" path="res://src/weapons/sewing_pin_sniper.gd" id="3_behaviour"]
+[ext_resource type="Script" path="res://src/weapons/pincushion_volley.gd" id="3_behaviour"]
+[ext_resource type="Script" path="res://src/weapons/chain_pins.gd" id="5_chain"]
 
 [sub_resource type="Resource" id="Resource_level1"]
 script = ExtResource("2_level")
@@ -14,7 +15,7 @@ count = 7
 speed = 1150.0
 pierce = -1
 spread_degrees = 9.0
-card_text = "A fan of 7 pins that pierce everything."
+card_text = "A fan of 7 pins that pierce everything; a zombie they pop fires 2 more pins."
 
 [sub_resource type="Resource" id="Resource_look"]
 script = ExtResource("4_look")
@@ -25,6 +26,14 @@ trail_amount = 10
 trail_seconds = 0.35
 flash_color = Color(0.902, 0.847, 1, 0.5)
 flash_radius = 24.0
+
+[sub_resource type="Resource" id="Resource_chain"]
+script = ExtResource("5_chain")
+count = 2
+spread_degrees = 70.0
+damage_share = 0.6
+reach_share = 0.45
+chains_per_pin = 3
 
 [resource]
 script = ExtResource("1_stats")
@@ -39,4 +48,5 @@ knockback = 90.0
 hit_radius = 7.0
 evolved_from = &"sewing_pin_sniper"
 shot_look = SubResource("Resource_look")
+chain_pins = SubResource("Resource_chain")
 levels = Array[ExtResource("2_level")]([SubResource("Resource_level1")])

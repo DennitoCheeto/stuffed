@@ -16,6 +16,11 @@ func attack() -> bool:
 	var spread: float = deg_to_rad(numbers.spread_degrees)
 	for i: int in numbers.count:
 		var offset: float = (i - (numbers.count - 1) / 2.0) * spread
-		var pin: PinProjectile = shots.spawn(PinProjectile) as PinProjectile
+		var pin: PinProjectile = shots.spawn(_pin_kind()) as PinProjectile
 		pin.launch(self, aim.rotated(offset))
 	return true
+
+
+## Which pin it fires (Pincushion Volley fires pins that chain).
+func _pin_kind() -> GDScript:
+	return PinProjectile

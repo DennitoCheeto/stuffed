@@ -41,6 +41,10 @@ extends Resource
 @export var peel_trail: PeelTrail
 ## Sewing Storm only: the threads that yank hit zombies back in (spec 10 §3; null = none).
 @export var stitch_up: StitchUp
+## Pincushion Volley only: pins fired from zombies its pins kill (spec 10 §3; null = none).
+@export var chain_pins: ChainPins
+## Yarn Bomb only: the web yanks its zombies together and pops (spec 10 §3; null = none).
+@export var yarn_tangle: YarnTangle
 ## Level 1 first.
 @export var levels: Array[WeaponLevel] = []
 
