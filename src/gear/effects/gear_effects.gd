@@ -8,6 +8,9 @@ extends RefCounted
 const PIN_CUSHION_HAT: StringName = &"pin_cushion_hat"
 const LOOKOUT_CAP: StringName = &"lookout_cap"
 const PROPELLER_CAP: StringName = &"propeller_cap"
+const RAINCOAT: StringName = &"raincoat"
+const PATCH_VEST: StringName = &"patch_vest"
+const PICNIC_APRON: StringName = &"picnic_apron"
 
 
 ## Puts the worn gear's effects on an armed hero (call once from the hero's `_ready`, before
@@ -21,6 +24,12 @@ static func apply(player: Player) -> void:
 		effects.append(LookoutCap.new())
 	if gear.has(PROPELLER_CAP):
 		effects.append(PropellerCap.new())
+	if gear.has(RAINCOAT):
+		effects.append(Raincoat.new())
+	if gear.has(PATCH_VEST):
+		effects.append(PatchVest.new())
+	if gear.has(PICNIC_APRON):
+		effects.append(PicnicApron.new())
 	for effect: Node in effects:
 		effect.name = (effect.get_script() as Script).get_global_name()
 		player.add_child(effect)

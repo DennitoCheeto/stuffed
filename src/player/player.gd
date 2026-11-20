@@ -25,6 +25,8 @@ signal pocket_changed
 ## Pocket Pickup: the player pressed their "use pocket" key with something in the pocket (it is
 ## already empty again; the run uses `kind`).
 signal pocket_used(kind: FloorPickupDef, double: bool)
+## Patch Vest: the patch caught a hit (it is gone until it grows back).
+signal patch_blocked
 
 const GROUP: StringName = &"players"
 ## Thick Felt never makes the hero take less than this share of a hit.
@@ -68,6 +70,8 @@ var pickup_range: float = 0.0
 var pickup_factor: float = 1.0
 ## Pin Cushion Hat: pins and buttons pierce this many more zombies (weapons read it).
 var extra_pierce: int = 0
+## Patch Vest: while true the next hit is caught whole (before the shield) and the patch is gone.
+var patch_up: bool = false
 ## Level and XP in this run.
 var progress: LevelProgress
 ## Multiplies the hero's move speed (Quick Feet raises it).
@@ -426,11 +430,17 @@ func has_trick(id: StringName) -> bool:
 	return tricks.has(String(id))
 
 
-## Damage from a zombie or a bullet (Thick Felt makes it smaller, the shield takes it first).
-## Ignored while dashing or right after another hit. A hit that would make the hero fall is
-## caught once by Spare Stuffing. Returns true if it hurt.
+## Damage from a zombie or a bullet (Thick Felt makes it smaller, a Patch Vest patch catches it
+## whole, then the shield takes it first). Ignored while dashing or right after another hit. A
+## hit that would make the hero fall is caught once by Spare Stuffing. Returns true if it hurt.
 func take_hit(amount: float, source: String) -> bool:
 	if is_dead() or is_invulnerable() or invincible:
+		return false
+	if patch_up:
+		patch_up = false
+		last_hit_by = source
+		_hurt_invulnerable_left = stats.hurt_invulnerability
+		patch_blocked.emit()
 		return false
 	amount *= damage_taken_multiplier
 	var blocked: float = minf(shield, amount)

@@ -11,10 +11,32 @@ const SEAM: Color = Color(1.0, 1.0, 1.0, 0.55)
 ## How much darker the buttons and tassel are, and how much lighter the pom-pom and pocket.
 const DARKER: float = 0.4
 const LIGHTER: float = 0.3
+## The Patch Vest's patch (spec 09 §3): where it sits and how big it is, in half-sides of the vest.
+const PATCH_VEST: StringName = &"patch_vest"
+const PATCH_OFFSET: Vector2 = Vector2(-0.18, -0.05)
+const PATCH_SIZE: float = 0.38
+const PATCH_TILT: float = -0.2
+
+
+## True for the piece that wears a felt patch (the Patch Vest).
+static func has_patch(piece: GearDef) -> bool:
+	return piece.id == PATCH_VEST
+
+
+## The Patch Vest's patch: a small tilted square on the vest (`u` = half the side), `shrink`
+## times its size around its own middle (its seam runs at 0.7).
+static func patch_shape(middle: Vector2, u: float, shrink: float = 1.0) -> PackedVector2Array:
+	var corners: PackedVector2Array = []
+	var center: Vector2 = middle + PATCH_OFFSET * u
+	var half: float = PATCH_SIZE * u / 2.0 * shrink
+	for corner: Vector2 in [Vector2(-1, -1), Vector2(1, -1), Vector2(1, 1), Vector2(-1, 1)]:
+		corners.append(center + (corner * half).rotated(PATCH_TILT))
+	return corners
 
 
 ## Draws `piece` at stitch level `level` (0 = just the shape, no seams: a silhouette) on `canvas`,
-## fitted in a square of `side` around `middle`, filled with `fill`.
+## fitted in a square of `side` around `middle`, filled with `fill`. The Patch Vest wears its
+## patch unless `patch` is false (the hero's vest after the patch caught a hit).
 static func draw(
 	canvas: CanvasItem,
 	piece: GearDef,
@@ -22,7 +44,8 @@ static func draw(
 	middle: Vector2,
 	side: float,
 	fill: Color,
-	outline_width: float
+	outline_width: float,
+	patch: bool = true
 ) -> void:
 	if side < 2.0:
 		return
@@ -37,6 +60,12 @@ static func draw(
 		if not dashes.is_empty():
 			canvas.draw_multiline(dashes, SEAM, seam_width)
 	var u: float = side / 2.0
+	if patch and has_patch(piece):
+		var corners: PackedVector2Array = patch_shape(middle, u)
+		_patch(canvas, corners, piece.effect_color, outline_width)
+		var inset: PackedVector2Array = patch_shape(middle, u, 0.7)
+		inset.append(inset[0])
+		canvas.draw_multiline(stitches(inset, dash, dash * 0.75), SEAM, seam_width)
 	match piece.slot:
 		GearDef.Slot.HEAD:
 			if level >= 3:
@@ -69,6 +98,8 @@ static func draw(
 ## Every colour `piece` is drawn with at stitch level `level` (readability tests).
 static func colors(piece: GearDef, level: int) -> Array[Color]:
 	var result: Array[Color] = [piece.color, OUTLINE, SEAM]
+	if has_patch(piece) and level >= 1:
+		result.append(piece.effect_color)
 	if level >= 2:
 		result.append(piece.color.darkened(DARKER))
 	if level >= 3:
