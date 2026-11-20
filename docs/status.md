@@ -886,5 +886,9 @@ _Last updated: 2026-11-20 (M4.5 all 10 tickets merged (M4.5-10 = PR #319); **nex
   `slams`, ring = `SlamRingProjectile` (hits at launch). These two evolutions have no `ShotLook` (thimble/whip
   shots don't `dress`), so the 1.5x first attack doesn't apply to them. Recipes of heroes not unlocked yet stay
   off the Recipes page: `TownPerks.locked_hero_weapons` → `pause_menu.set_recipes(pool, hidden)`.
+  Snow Day and its snowball must not reference each other (`SnowDay` ↔ `SnowDayProjectile` leaked
+  368 resources in the typecheck once the pool loaded it): the shared logic lives in static
+  `SnowmanProjectile.standing` / `build_for`. Check a new evolution with a scratch script that preloads
+  `upgrade_pool.tres` (`--check-only`), not just the new script.
   Tests: `test_10_snow_day_and_bear_slam.gd`. Perl one-liners with non-ASCII text ("Böbö") wrote Latin-1: use
   ASCII in perl replacements or the Edit tool.

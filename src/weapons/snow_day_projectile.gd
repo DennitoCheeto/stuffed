@@ -10,5 +10,4 @@ func _ball_part() -> StringName:
 
 func _land() -> void:
 	super()
-	if weapon is SnowDay:
-		(weapon as SnowDay).build_snowman(global_position)
+	SnowmanProjectile.build_for(weapon, global_position)

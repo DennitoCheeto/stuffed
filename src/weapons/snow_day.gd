@@ -10,21 +10,9 @@ func _shot_kind() -> GDScript:
 
 ## This hero's standing snowmen.
 func snowmen() -> Array[SnowmanProjectile]:
-	var result: Array[SnowmanProjectile] = []
-	var shots: ProjectileManager = projectiles()
-	if shots == null:
-		return result
-	for shot: Projectile in shots.fired_by(self):
-		if shot is SnowmanProjectile and (shot as SnowmanProjectile).is_standing():
-			result.append(shot as SnowmanProjectile)
-	return result
+	return SnowmanProjectile.standing(self)
 
 
 ## Builds a snowman at `at`, unless the most are already standing.
 func build_snowman(at: Vector2) -> void:
-	var rules: Snowmen = stats.snowmen
-	var shots: ProjectileManager = projectiles()
-	if rules == null or shots == null or snowmen().size() >= rules.max_snowmen:
-		return
-	var snowman: SnowmanProjectile = shots.spawn(SnowmanProjectile) as SnowmanProjectile
-	snowman.build(self, at)
+	SnowmanProjectile.build_for(self, at)

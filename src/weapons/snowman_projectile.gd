@@ -100,3 +100,25 @@ func _end_lure() -> void:
 	if lure != null:
 		lure.active = false
 		lure = null
+
+
+## The snowmen `weapon` (a Snow Day) has standing.
+static func standing(weapon: Weapon) -> Array[SnowmanProjectile]:
+	var result: Array[SnowmanProjectile] = []
+	var shots: ProjectileManager = weapon.projectiles()
+	if shots == null:
+		return result
+	for shot: Projectile in shots.fired_by(weapon):
+		if shot is SnowmanProjectile and (shot as SnowmanProjectile).is_standing():
+			result.append(shot as SnowmanProjectile)
+	return result
+
+
+## Builds a snowman for `weapon` at `at`, unless the most are already standing.
+static func build_for(weapon: Weapon, at: Vector2) -> void:
+	var rules: Snowmen = weapon.stats.snowmen
+	var shots: ProjectileManager = weapon.projectiles()
+	if rules == null or shots == null or standing(weapon).size() >= rules.max_snowmen:
+		return
+	var snowman: SnowmanProjectile = shots.spawn(SnowmanProjectile) as SnowmanProjectile
+	snowman.build(weapon, at)
