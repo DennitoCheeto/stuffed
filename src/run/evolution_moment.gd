@@ -70,7 +70,7 @@ func _slow_down() -> void:
 		_speed_before = Engine.time_scale
 	slowed = true
 	Engine.time_scale = _speed_before * RULES.slow_scale
-var timer: SceneTreeTimer = get_tree().create_timer(RULES.slow_seconds, true, false, true)
+	var timer: SceneTreeTimer = get_tree().create_timer(RULES.slow_seconds, true, false, true)
 	timer.timeout.connect(_speed_up)
 
 
