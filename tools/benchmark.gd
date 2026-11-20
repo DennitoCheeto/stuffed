@@ -7,6 +7,8 @@ extends SceneTree
 ## Add `-- --siege` for the night siege (spec 07 §11): every building at its top level firing, all
 ## plushies helping and `SIEGE_ZOMBIES` zombies around the fort, at dusk in the town.
 ## Add `-- --hero=pip` to play as that hero (spec 08 §13: compare draw calls with Banane's).
+## Add `-- --gear` to wear a Lv 3 Lookout Cap, Picnic Apron and Jingle Bell (spec 09 §12: compare
+## with the same run without gear; within ~5% fps, at most +3 draw calls).
 
 const MAIN_SCENE: PackedScene = preload("res://src/main/main.tscn")
 const SHAMBLER: EnemyStats = preload("res://data/enemies/shambler.tres")
@@ -21,6 +23,10 @@ const BENCH_SAVE: String = "user://benchmark_save.json"
 const BENCH_SETTINGS: String = "user://benchmark_settings.json"
 const LAYOUT: TownLayout = preload("res://data/town/pillow_fort.tres")
 const PLUSHIES: Array[String] = ["pip", "bobo", "bambam", "robbar"]
+## Head, Body, Charm worn with `--gear`: pieces whose effects keep drawing while the hero stands.
+const GEAR: Dictionary[String, String] = {
+	"head": "lookout_cap", "body": "picnic_apron", "charm": "jingle_bell"
+}
 
 var _run: Run
 var _sniper: Weapon
@@ -55,6 +61,9 @@ func _start() -> void:
 	if not hero.is_empty():
 		main.town.plushies[hero] = "in_town"
 		main.town.set_hero(0, hero)
+	var geared: bool = OS.get_cmdline_user_args().has("--gear")
+	if geared:
+		_dress(main)
 	(main.current_screen as TitleScreen).start_button.pressed.emit()
 	for i: int in 3:
 		await physics_frame
@@ -106,7 +115,7 @@ func _start() -> void:
 		(
 			"BENCHMARK %s zombies=%d shots=%d bullets=%d fps=%.1f draw_calls=%.0f process_ms=%.1f physics_ms=%.1f"
 			% [
-				"siege" if _siege else "bedroom",
+				("siege" if _siege else "bedroom") + (" gear" if geared else ""),
 				_run.enemies.alive_count(),
 				_run.projectiles.active.size() - _run.projectiles.hostile_count(),
 				_run.projectiles.hostile_count(),
@@ -149,6 +158,17 @@ func _ready_the_town(main: Main) -> void:
 	for id: String in PLUSHIES:
 		main.town.plushies[id] = "in_town"
 	main.town.siege_nights = 0
+
+
+## Gear mode: the Workshop at Lv 3 and player 1 wearing `GEAR`, every piece stitched to Lv 3.
+func _dress(main: Main) -> void:
+	main.town.building_levels["sewing_workshop"] = 3
+	main.town.revealed.append("sewing_workshop")
+	for slot: String in GEAR:
+		var id: String = GEAR[slot]
+		main.town.gear.add_pattern(id)
+		main.town.gear.stitches[id] = 3
+		main.town.gear.put_on(0, slot, id)
 
 
 ## The value of a `--name=value` argument ("" if not given).
