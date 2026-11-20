@@ -30,6 +30,9 @@ const GLITTER: StringName = &"shot/glitter"
 const SPARKLE: StringName = &"shot/sparkle"
 const SNOWBALL: StringName = &"shot/snowball"
 const PAW: StringName = &"shot/paw"
+const SNOW_DAY_BALL: StringName = &"shot/snow_day_ball"
+const SNOWMAN: StringName = &"shot/snowman"
+const BEAR_PAW: StringName = &"shot/bear_paw"
 const BULLET: StringName = &"bullet/stuffing"
 const HAZARD: StringName = &"bullet/cloud"
 ## On-screen radius of the stuffing ball part; bigger bullets scale it.
@@ -100,6 +103,17 @@ const PAW_CLAW_COLOR: Color = Color("#a99274")
 const SNOWBALL_RADIUS: float = 7.0
 const SNOWBALL_COLOR: Color = Color("#f6f9fd")
 const SNOWBALL_SHADE_COLOR: Color = Color("#c6d8ec")
+## Snow Day (spec 10 §3): a bigger icy snowball, and the snowman it builds (three snowballs, a
+## pale nose, soft eyes and a light blue scarf; nothing orange or red).
+const SNOW_DAY_RADIUS: float = 9.5
+const SNOW_DAY_SHADE_COLOR: Color = Color("#a8dff2")
+const SNOWMAN_HEIGHT: float = 52.0
+const SNOWMAN_NOSE_COLOR: Color = Color("#f0cfae")
+const SNOWMAN_EYE_COLOR: Color = Color("#5d5a6e")
+const SNOWMAN_SCARF_COLOR: Color = Color("#9fcdeb")
+## Bear Slam (spec 10 §3): a bigger honey-cream paw swipe.
+const BEAR_PAW_COLOR: Color = Color("#f2e2bd")
+const BEAR_PAW_CLAW_COLOR: Color = Color("#a49882")
 
 
 static func make_parts() -> Dictionary[StringName, FeltPiece]:
@@ -126,6 +140,9 @@ static func make_parts() -> Dictionary[StringName, FeltPiece]:
 		SPARKLE: _star(SPARKLE_RADIUS, 8),
 		SNOWBALL: _snowball(),
 		PAW: _paw(),
+		SNOW_DAY_BALL: _snowball(SNOW_DAY_RADIUS, SNOW_DAY_SHADE_COLOR),
+		SNOWMAN: _snowman(),
+		BEAR_PAW: _paw(BEAR_PAW_COLOR, BEAR_PAW_CLAW_COLOR),
 		BULLET: _bullet(),
 		HAZARD: _hazard(),
 	}
@@ -239,19 +256,45 @@ static func _thimble() -> FeltPiece:
 
 
 ## A lumpy snowball: a white ball, a blue shade on its lower side and a few lumps.
-static func _snowball() -> FeltPiece:
-	var radius: float = SNOWBALL_RADIUS * UNITS
+static func _snowball(
+	size: float = SNOWBALL_RADIUS, shade_color: Color = SNOWBALL_SHADE_COLOR
+) -> FeltPiece:
+	var radius: float = size * UNITS
 	var ball: FeltPiece = FeltPiece.new()
 	ball.polygon = FeltShapes.circle(Vector2.ZERO, radius, 14)
 	ball.color = SNOWBALL_COLOR
 	var shade: PackedVector2Array = FeltShapes.ellipse(
 		Vector2(radius * 0.15, radius * 0.4), Vector2(radius * 0.75, radius * 0.45)
 	)
-	ball.add_layer(shade, SNOWBALL_SHADE_COLOR)
+	ball.add_layer(shade, shade_color)
 	for lump: Vector2 in [Vector2(-0.45, -0.35), Vector2(0.3, -0.5), Vector2(-0.1, 0.05)]:
 		var dot: PackedVector2Array = FeltShapes.circle(lump * radius, radius * 0.18, 8)
-		ball.add_layer(dot, SNOWBALL_SHADE_COLOR.lightened(0.4))
+		ball.add_layer(dot, shade_color.lightened(0.4))
 	return ball
+
+
+## Snow Day's snowman, standing on the pivot (its feet): three stacked snowballs, a scarf, two
+## soft eyes and a pale nose; SNOWMAN_HEIGHT tall.
+static func _snowman() -> FeltPiece:
+	var unit: float = SNOWMAN_HEIGHT / 52.0 * UNITS
+	var man: FeltPiece = FeltPiece.new()
+	man.polygon = FeltShapes.circle(Vector2(0, -14) * unit, 14.0 * unit, 18)
+	man.color = SNOWBALL_COLOR
+	man.add_layer(FeltShapes.circle(Vector2(0, -33) * unit, 10.0 * unit, 16), SNOWBALL_COLOR)
+	man.add_layer(FeltShapes.circle(Vector2(0, -46) * unit, 7.0 * unit, 14), SNOWBALL_COLOR)
+	var shade: PackedVector2Array = FeltShapes.ellipse(Vector2(3, -8) * unit, Vector2(10, 5) * unit)
+	man.add_layer(shade, SNOW_DAY_SHADE_COLOR)
+	var scarf: PackedVector2Array = FeltShapes.points(
+		PackedFloat32Array([-9, -42, 9, -42, 9, -38, 6, -38, 7, -28, 3, -28, 2, -38, -9, -38])
+	)
+	man.add_layer(_scaled(scarf, unit), SNOWMAN_SCARF_COLOR)
+	for x: float in [-2.6, 2.6]:
+		man.add_layer(FeltShapes.circle(Vector2(x, -48) * unit, 1.3 * unit, 8), SNOWMAN_EYE_COLOR)
+	var nose: PackedVector2Array = FeltShapes.points(PackedFloat32Array([0, -46.5, 7, -45, 0, -44]))
+	man.add_layer(_scaled(nose, unit), SNOWMAN_NOSE_COLOR)
+	for y: float in [-30.0, -24.0, -17.0]:
+		man.add_layer(FeltShapes.circle(Vector2(0, y) * unit, 1.2 * unit, 8), SNOWMAN_EYE_COLOR)
+	return man
 
 
 ## A flat dark ellipse with a pale rim (readable on the dark floor); fills SHADOW_RADIUS across.
@@ -333,7 +376,7 @@ static func _whip() -> FeltPiece:
 
 
 ## A fat crescent around the pivot (like the whip's, thicker), with three claw marks across it.
-static func _paw() -> FeltPiece:
+static func _paw(color: Color = PAW_COLOR, claw_color: Color = PAW_CLAW_COLOR) -> FeltPiece:
 	var paw: FeltPiece = FeltPiece.new()
 	paw.soft = false
 	var radius: float = PAW_RADIUS * UNITS
@@ -348,7 +391,7 @@ static func _paw() -> FeltPiece:
 	inner.reverse()
 	outer.append_array(inner)
 	paw.polygon = outer
-	paw.color = PAW_COLOR
+	paw.color = color
 	for claw: float in [-0.3, 0.0, 0.3]:
 		var tip: Vector2 = Vector2.from_angle(claw * half)
 		var mark: PackedVector2Array = [
@@ -356,7 +399,7 @@ static func _paw() -> FeltPiece:
 			tip * radius * 0.97,
 			tip * radius * 0.68 - tip.orthogonal() * UNITS * 2.0,
 		]
-		paw.add_layer(mark, PAW_CLAW_COLOR)
+		paw.add_layer(mark, claw_color)
 	return paw
 
 

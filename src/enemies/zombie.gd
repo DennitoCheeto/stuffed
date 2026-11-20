@@ -30,6 +30,9 @@ var heading: Vector2 = Vector2.ZERO
 var detour: int = 0
 ## Seconds it can't move (banana peel).
 var stun_left: float = 0.0
+## Seconds it stays frozen in place by a bursting snowman (Snow Day, spec 10 §3): icy tint, no
+## walking, attacking or touching.
+var ice_left: float = 0.0
 ## Sticky yarn (Yarn Bomb): seconds it stays slowed, and by how much (0.5 = half speed).
 var slow_left: float = 0.0
 var slow_amount: float = 0.0
@@ -152,7 +155,12 @@ func current_speed() -> float:
 
 
 func is_stunned() -> bool:
-	return stun_left > 0.0
+	return stun_left > 0.0 or ice_left > 0.0
+
+
+## Frozen in place for `seconds` (a bursting snowman); the longest freeze wins.
+func freeze_for(seconds: float) -> void:
+	ice_left = maxf(ice_left, seconds)
 
 
 func is_winding_up() -> bool:
@@ -168,11 +176,12 @@ func windup_progress() -> float:
 
 ## Advances its timers and animation by one frame.
 func tick(delta: float) -> void:
-	if not frozen:
+	if not frozen and ice_left <= 0.0:
 		_time += delta
 	_since_hit += delta
-	puppet.chill(frozen, thaw_shake)
+	puppet.chill(frozen or ice_left > 0.0, thaw_shake if frozen else 0.0)
 	stun_left = maxf(stun_left - delta, 0.0)
+	ice_left = maxf(ice_left - delta, 0.0)
 	slow_left = maxf(slow_left - delta, 0.0)
 	if slow_left <= 0.0:
 		slow_amount = 0.0
@@ -183,5 +192,5 @@ func tick(delta: float) -> void:
 	elif attack != null:
 		puppet.puff(windup_progress())
 	if _stars != null:
-		_stars.visible = is_stunned()
+		_stars.visible = stun_left > 0.0
 		puppet.spin(stun_left)

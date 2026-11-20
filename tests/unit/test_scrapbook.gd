@@ -41,7 +41,7 @@ func test_ac46_six_pages_in_book_order() -> void:
 
 func test_ac46_weapons_page_has_every_weapon_then_every_evolution() -> void:
 	var page: ScrapbookPage = _page(ScrapbookRules.WEAPONS)
-	assert_eq(page.entries.size(), 16, "12 weapons + 4 evolutions")
+	assert_eq(page.entries.size(), 18, "12 weapons + 6 evolutions")
 	assert_eq(page.entries[0].id, "peel_boomerang")
 	assert_eq(page.entries[0].icon, &"boomerang")
 	assert_eq(page.entries[12].id, "banana_split", "evolutions come after the weapons")
@@ -83,12 +83,12 @@ func test_ac46_elites_and_bosses_are_drawn_bigger() -> void:
 func test_ac46_counts_follow_the_save() -> void:
 	var save: TownSave = TownSave.new()
 	var page: ScrapbookPage = _page(ScrapbookRules.WEAPONS)
-	assert_eq(page.count_text(save), "Weapons 0 / 16")
+	assert_eq(page.count_text(save), "Weapons 0 / 18")
 	save.mark_seen(ScrapbookRules.WEAPONS, "peel_boomerang")
 	save.mark_seen(ScrapbookRules.WEAPONS, "banana_split")
 	save.mark_seen(ScrapbookRules.WEAPONS, "peel_boomerang")
 	save.mark_seen(ScrapbookRules.ITEMS, "quick_feet")
-	assert_eq(page.count_text(save), "Weapons 2 / 16", "each entry counts once, per page")
+	assert_eq(page.count_text(save), "Weapons 2 / 18", "each entry counts once, per page")
 	assert_true(page.is_seen(page.find("banana_split"), save))
 	assert_false(page.is_seen(page.find("zipper_ray"), save))
 

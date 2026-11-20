@@ -6,6 +6,9 @@ extends RefCounted
 
 ## Weapons (upgrade pool ids) that never come up on level-up cards yet (Toy Box Armory).
 var locked_weapons: Array[StringName] = []
+## The ones of them that wait for their hero (spec 08 §3): their recipes stay off the Recipes page
+## too (spec 10 §3, AC-107).
+var locked_hero_weapons: Array[StringName] = []
 ## True once the player may choose Banane's starting weapon (Toy Box Armory Lv 3).
 var can_choose_start_weapon: bool = false
 ## The chosen starting weapon (an upgrade pool id; "" = the hero's own).
@@ -63,6 +66,7 @@ static func from_save(save: TownSave, layout: TownLayout) -> TownPerks:
 	for hero: HeroStats in HeroRoster.current().heroes:
 		if hero.unlocks_weapon != null and not HeroRoster.current().is_unlocked(hero, save):
 			perks.locked_weapons.append(hero.unlocks_weapon.id)
+			perks.locked_hero_weapons.append(hero.unlocks_weapon.id)
 	var chosen: StringName = StringName(save.start_weapon)
 	if perks.can_choose_start_weapon and not perks.locked_weapons.has(chosen):
 		perks.start_weapon = chosen

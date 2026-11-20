@@ -6,11 +6,11 @@ const BACK_COLOR: Color = Color("#2a2633")
 const RING_COLOR: Color = Color("#4a4358")
 ## Evolved weapons get a gold ring.
 const EVOLVED_RING_COLOR: Color = Color("#f2c230")
-const EVOLVED: Array[StringName] = [&"split", &"storm", &"volley", &"bomb"]
+const EVOLVED: Array[StringName] = [&"split", &"storm", &"volley", &"bomb", &"snow_day", &"slam"]
 
 ## Which icon to draw: boomerang, pin, needles, buttons, cloud, yarn, thimble, snowball, paw,
 ## cannon, whip, zipper, feet, stuffing, magnet, hands, scissors, thread, spool, felt, snack, dice,
-## arrow.
+## arrow; evolved: split, storm, volley, bomb, snow_day, slam.
 ## "" draws only the empty round back (an empty HUD slot).
 var icon: StringName = &"":
 	set(value):
@@ -84,6 +84,10 @@ func _draw() -> void:
 			_volley()
 		&"bomb":
 			_bomb()
+		&"snow_day":
+			_snow_day()
+		&"slam":
+			_slam()
 		&"dice":
 			_dice()
 		&"arrow":
@@ -278,3 +282,26 @@ func _bomb() -> void:
 	draw_circle(Vector2.ZERO, 17.0, Color("#e98aa8"))
 	for x: float in [-7.0, 0.0, 7.0]:
 		draw_arc(Vector2(x * 2.4, 0), 17.0, PI - 0.9, PI + 0.9, 10, Color("#b65a7c"), 2.5)
+
+
+## Snow Day: a little snowman with a light blue scarf.
+func _snow_day() -> void:
+	for ball: Vector3 in [Vector3(0, 14, 15), Vector3(0, -6, 11), Vector3(0, -21, 8)]:
+		draw_circle(Vector2(ball.x, ball.y), ball.z, Color("#f6f9fd"))
+	draw_arc(Vector2(0, 14), 15.0, 0.3, PI - 0.3, 14, Color("#a8dff2"), 4.0)
+	draw_rect(Rect2(-10, -15, 20, 5), Color("#9fcdeb"))
+	draw_rect(Rect2(4, -12, 5, 12), Color("#9fcdeb"))
+	for x: float in [-3.0, 3.0]:
+		draw_circle(Vector2(x, -23), 1.6, Color("#5d5a6e"))
+	draw_colored_polygon(
+		PackedVector2Array([Vector2(0, -21), Vector2(8, -19.5), Vector2(0, -18)]), Color("#f0cfae")
+	)
+
+
+## Bear Slam: a big paw over a ring on the floor.
+func _slam() -> void:
+	draw_arc(Vector2(0, 16), 26.0, 0.0, TAU, 32, Color("#f2e2bd"), 3.0)
+	draw_circle(Vector2(0, 4), 14.0, Color("#f2e2bd"))
+	for toe: Vector2 in [Vector2(-14, -12), Vector2(-5, -19), Vector2(5, -19), Vector2(14, -12)]:
+		draw_circle(toe, 6.0, Color("#f2e2bd"))
+	draw_circle(Vector2(0, 6), 7.0, Color("#a49882"))

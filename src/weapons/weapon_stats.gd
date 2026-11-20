@@ -45,6 +45,10 @@ extends Resource
 @export var chain_pins: ChainPins
 ## Yarn Bomb only: the web yanks its zombies together and pops (spec 10 §3; null = none).
 @export var yarn_tangle: YarnTangle
+## Snow Day only: the snowmen its snowballs build (spec 10 §3; null = none).
+@export var snowmen: Snowmen
+## Bear Slam only: the ground slam every few swats (spec 10 §3; null = none).
+@export var ground_slam: GroundSlam
 ## Level 1 first.
 @export var levels: Array[WeaponLevel] = []
 

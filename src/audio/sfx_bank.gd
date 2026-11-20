@@ -35,6 +35,10 @@ const LENGTHS: Dictionary[StringName, float] = {
 	&"storm": 0.5,
 	&"split": 0.4,
 	&"sticky": 0.4,
+	&"snow_day": 0.36,
+	&"bear_slam": 0.32,
+	&"snowman_burst": 0.45,
+	&"slam": 0.4,
 	# Moments.
 	&"elite": 0.7,
 	&"gift_open": 0.8,
@@ -78,6 +82,8 @@ const LENGTHS: Dictionary[StringName, float] = {
 	&"sting_storm": 0.9,
 	&"sting_volley": 0.8,
 	&"sting_bomb": 0.9,
+	&"sting_snow": 0.9,
+	&"sting_slam": 0.9,
 }
 
 ## The frequent sounds get a soft felt "thump" under their click (spec 10 §4.2): sound → how
@@ -102,6 +108,8 @@ const FELT_THUMP: Dictionary[StringName, float] = {
 	&"storm": 0.12,
 	&"volley": 0.14,
 	&"sticky": 0.12,
+	&"snow_day": 0.1,
+	&"bear_slam": 0.14,
 }
 
 
@@ -175,6 +183,10 @@ static func _weapon_or_moment(sound: StringName) -> Callable:
 		&"storm": _storm,
 		&"split": _split,
 		&"sticky": _sticky,
+		&"snow_day": _snow_day,
+		&"bear_slam": _bear_slam,
+		&"snowman_burst": _snowman_burst,
+		&"slam": _slam,
 		&"elite": _elite,
 		&"gift_open": _gift_open,
 		&"evolution": _evolution,
@@ -210,6 +222,8 @@ static func _weapon_or_moment(sound: StringName) -> Callable:
 		&"sting_storm": _sting_storm,
 		&"sting_volley": _sting_volley,
 		&"sting_bomb": _sting_bomb,
+		&"sting_snow": _sting_snow,
+		&"sting_slam": _sting_slam,
 	}
 	return voices[sound]
 
@@ -828,3 +842,50 @@ static func _sting_bomb(t: float) -> float:
 	if t >= 0.2:
 		notes = _bells(t - 0.2, PackedFloat32Array([72.0, 79.0, 84.0]), 0.13, 5.0)
 	return 0.3 * boom + 0.13 * notes
+
+
+## Snow Day (evolved): a packed snowball "thump" with an icy tinkle on top.
+static func _snow_day(t: float) -> float:
+	var packed: float = Synth.sine(Synth.sweep(t, 300.0, 110.0, 0.25))
+	var thump: float = Synth.noise(t) * packed * exp(-9.0 * t)
+	var tinkle: float = _bells(t, PackedFloat32Array([96.0, 100.0]), 0.06, 16.0)
+	return 0.28 * thump + 0.07 * tinkle
+
+
+## Bear Slam (evolved): a fuller, heavier "fwump" than Paw Swat.
+static func _bear_slam(t: float) -> float:
+	var swing: float = Synth.noise(t) * sin(PI * minf(t / 0.12, 1.0)) * exp(-8.0 * t)
+	var thud: float = Synth.sine(Synth.sweep(t, 130.0, 60.0, 0.22)) * exp(-9.0 * t)
+	return 0.13 * swing + 0.28 * thud
+
+
+## A snowman bursts: a soft crunch of snow and a glassy freeze.
+static func _snowman_burst(t: float) -> float:
+	var crunch: float = Synth.noise(t) * exp(-11.0 * t) * (0.6 + 0.4 * Synth.square(t * 45.0))
+	var ice: float = _bells(t, PackedFloat32Array([91.0, 98.0]), 0.05, 10.0)
+	return 0.14 * crunch + 0.06 * ice
+
+
+## Bear Slam's ground slam: a low soft boom and a puff of dust.
+static func _slam(t: float) -> float:
+	var boom: float = Synth.sine(Synth.sweep(t, 120.0, 45.0, 0.3)) * exp(-7.0 * t)
+	var dust: float = Synth.noise(t) * exp(-14.0 * t)
+	return 0.3 * boom + 0.07 * dust
+
+
+## Snow Day: snowflake chimes falling down, then a soft "poof".
+static func _sting_snow(t: float) -> float:
+	var flakes: float = _bells(t, PackedFloat32Array([98.0, 95.0, 93.0, 90.0, 86.0]), 0.08, 6.0)
+	var poof: float = 0.0
+	if t >= 0.45:
+		poof = Synth.noise(t) * exp(-9.0 * (t - 0.45))
+	return 0.11 * flakes + 0.06 * poof
+
+
+## Bear Slam: a big soft boom and two warm notes.
+static func _sting_slam(t: float) -> float:
+	var boom: float = Synth.sine(Synth.sweep(t, 110.0, 40.0, 0.4)) * exp(-5.0 * t)
+	var notes: float = 0.0
+	if t >= 0.2:
+		notes = _bells(t - 0.2, PackedFloat32Array([67.0, 72.0, 79.0]), 0.12, 4.5)
+	return 0.3 * boom + 0.12 * notes

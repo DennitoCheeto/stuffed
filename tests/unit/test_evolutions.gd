@@ -4,12 +4,15 @@ extends GutTest
 
 const POOL: UpgradePool = preload("res://data/upgrade_pool.tres")
 const RULES: GiftBoxRules = preload("res://data/gift_box_rules.tres")
-## Spec 02 §5: evolved weapon id → [weapon, partner item].
+## Spec 02 §5 (+ spec 10 §3): evolved weapon id → [weapon, partner item].
 const RECIPES: Dictionary[StringName, Array] = {
 	&"banana_split": [&"peel_boomerang", &"quick_feet"],
 	&"sewing_storm": [&"orbiting_needles", &"long_thread"],
 	&"pincushion_volley": [&"sewing_pin_sniper", &"sharp_scissors"],
 	&"yarn_bomb": [&"yarn_cannon", &"big_spool"],
+	# Spec 10 §3: the heroes' weapons evolve too.
+	&"snow_day": [&"snowball_toss", &"thick_felt"],
+	&"bear_slam": [&"paw_swat", &"extra_stuffing"],
 }
 
 
@@ -23,8 +26,8 @@ func _evolution(evolved_id: StringName) -> EvolutionDef:
 	return POOL.evolution_into(evolved_id)
 
 
-func test_ac7_the_four_recipes_of_the_spec() -> void:
-	assert_eq(POOL.evolutions.size(), 4)
+func test_ac7_the_six_recipes_of_the_specs() -> void:
+	assert_eq(POOL.evolutions.size(), 6)
 	for evolved_id: StringName in RECIPES:
 		var evolution: EvolutionDef = _evolution(evolved_id)
 		assert_not_null(evolution, String(evolved_id))
