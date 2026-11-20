@@ -883,8 +883,8 @@ _Last updated: 2026-11-20 (M4.5 all 10 tickets merged (M4.5-10 = PR #319); **nex
   `SnowmanProjectile` (pooled, `lure`, `burst`, `froze`). Lures: `EnemyManager.lures` (`ZombieLure`: zombies
   within `reach` walk to it instead of a hero; bosses and siege goals ignore/win over it). Per-zombie freeze:
   `zombie.freeze_for(seconds)` / `ice_left` (counts as stunned, ice tint, no touch damage). `BearSlam.swats` /
-  `slams`, ring = `SlamRingProjectile` (hits at launch). These two evolutions have no `ShotLook` (thimble/whip
-  shots don't `dress`), so the 1.5x first attack doesn't apply to them. Recipes of heroes not unlocked yet stay
+  `slams`, ring = `SlamRingProjectile` (hits at launch). Every evolution needs a `ShotLook` (`test_evolved_looks`):
+  Bear Slam's paw calls `dress`; Snow Day's ball only takes the look's part size in `_place` (the ring stays). Recipes of heroes not unlocked yet stay
   off the Recipes page: `TownPerks.locked_hero_weapons` → `pause_menu.set_recipes(pool, hidden)`.
   Snow Day and its snowball must not reference each other (`SnowDay` ↔ `SnowDayProjectile` leaked
   368 resources in the typecheck once the pool loaded it): the shared logic lives in static
