@@ -35,6 +35,8 @@ extends Resource
 ## Pins and buttons (Sewing Pin Sniper, Pincushion Volley, Button Shotgun): the Pin Cushion Hat
 ## (spec 09 §3) makes their shots pierce more zombies.
 @export var pins: bool = false
+## Evolved weapons: their own sting, played once per run at the evolution moment (spec 10 §3).
+@export var sting: StringName = &""
 ## Level 1 first.
 @export var levels: Array[WeaponLevel] = []
 

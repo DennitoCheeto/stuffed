@@ -17,6 +17,9 @@ const TANK: EnemyStats = preload("res://data/enemies/tank.tres")
 const ENEMY_TYPES: Array[EnemyStats] = [SHAMBLER, RUNNER, SPITTER, BLOATER, TANK]
 const MAX_EVERYTHING: String = "Max everything"
 const REFILL: String = "Refill rerolls/skips/banishes"
+## Picks the first evolution player 1 can still get, readies it and opens its gift box at once
+## (spec 10 §10).
+const EVOLVE_NOW: String = "Evolve now"
 ## Night siege shortcuts (spec 07 §10), only in a siege.
 const NEXT_WAVE: String = "Next wave"
 const WIN_SIEGE: String = "Win siege"
@@ -190,7 +193,7 @@ func _build() -> void:
 			labels.append("Ready: %s" % evolution.display_name())
 			actions.append(_ready_to_evolve.bind(evolution))
 		_row(column, labels, actions)
-	_row(column, ["Kill all"], [_kill_all])
+	_row(column, [EVOLVE_NOW, "Kill all"], [_evolve_now, _kill_all])
 	var late: float = run.rules.goal_seconds - 30.0
 	var jump_label: String = "Jump to %s" % TimeFormat.clock(late)
 	_row(column, ["+30 s", jump_label], [_skip_time.bind(30.0), _jump_to.bind(late)])
@@ -371,6 +374,11 @@ func _drop_gift_box() -> void:
 ## Gives player 1 the weapon of `evolution` at its top level and its partner item, and drops a
 ## gift box next to them: walk onto it to evolve.
 func _ready_to_evolve(evolution: EvolutionDef) -> void:
+	_make_ready(evolution)
+	_drop_gift_box()
+
+
+func _make_ready(evolution: EvolutionDef) -> void:
 	var player: Player = _player()
 	var pool: UpgradePool = run.upgrade_pool
 	var base: UpgradeDef = pool.find(evolution.weapon)
@@ -381,7 +389,25 @@ func _ready_to_evolve(evolution: EvolutionDef) -> void:
 	if not player.item_levels.has(evolution.partner):
 		player.apply_upgrade(UpgradeOffer.new(pool.find(evolution.partner), 1))
 	player.loadout_changed.emit()
-	_drop_gift_box()
+
+
+## The first evolution player 1 doesn't have yet, preferring one whose weapon they hold; it is
+## readied and its gift box dropped right on them, so the moment plays at once.
+func _evolve_now() -> void:
+	var player: Player = _player()
+	var chosen: EvolutionDef = null
+	for evolution: EvolutionDef in run.upgrade_pool.evolutions:
+		if player.weapon(evolution.evolved.id) != null:
+			continue
+		var held: bool = player.weapon(evolution.weapon) != null
+		if chosen == null or held:
+			chosen = evolution
+		if held:
+			break
+	if chosen == null:
+		return
+	_make_ready(chosen)
+	run.drop_gift_box(player.global_position)
 
 
 func _hurt_fort() -> void:

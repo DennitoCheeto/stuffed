@@ -206,3 +206,13 @@ func test_voice_limits_live_in_data() -> void:
 	assert_lte(Sfx.max_voices(&"evolution"), 1)
 	assert_between(Sfx.RULES.starts_per_frame, 1, 3)
 	assert_lt(Sfx.RULES.pitch_range(&"pickup"), 0.06, "the XP chain steps stay clear")
+
+
+## Spec 10 §3: every evolved weapon has its own sting.
+func test_every_evolution_has_its_own_sting() -> void:
+	var stings: Array[StringName] = []
+	for evolution: EvolutionDef in POOL.evolutions:
+		var sting: StringName = evolution.evolved.sting
+		assert_true(SfxBank.LENGTHS.has(sting), "%s has a sting" % evolution.evolved.id)
+		assert_false(stings.has(sting), "%s shares %s" % [evolution.evolved.id, sting])
+		stings.append(sting)

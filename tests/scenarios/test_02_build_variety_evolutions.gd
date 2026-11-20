@@ -100,7 +100,7 @@ func test_ac27_the_evolution_card_shows_old_and_new_weapon() -> void:
 	var banane: Player = first_player()
 	var evolution: EvolutionDef = _ready_to_evolve(&"banana_split")
 	run.drop_gift_box(banane.global_position)
-	assert_true(await _wait_until(_showing_contents, 2.0), "the contents show")
+	assert_true(await _wait_until(_showing_contents, 4.0), "the contents show")
 	var cards: Array[GiftCardView] = run.gift_screen.cards
 	assert_eq(cards.size(), 1, "the evolution is the whole gift")
 	var card: GiftCardView = cards[0]

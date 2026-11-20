@@ -30,6 +30,7 @@ flash_radius = 24.0
 script = ExtResource("1_stats")
 sound = &"volley"
 pins = true
+sting = &"sting_volley"
 id = &"pincushion_volley"
 display_name = "Pincushion Volley"
 run_title = "Pincushion Pro"

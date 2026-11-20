@@ -7,6 +7,8 @@ extends Sprite2D
 ## Evolved weapons dress their shots in their own look (`dress`): another felt part, bigger, a
 ## glitter trail, and a sparkle pop on every hit (`hurt`).
 
+const MOMENT: EvolutionMomentRules = preload("res://data/ui/evolution_moment.tres")
+
 ## The weapon that fired it (null for enemy bullets). Its shots vanish if the weapon goes away.
 var weapon: Weapon
 var manager: ProjectileManager
@@ -18,6 +20,7 @@ var trail: CPUParticles2D
 var _look_scale: Vector2 = Vector2.ZERO
 var _plain_region: Rect2 = Rect2()
 var _plain_offset: Vector2 = Vector2.ZERO
+var _boost_tween: Tween
 
 
 ## Enemy bullets are drawn above everything and hurt players instead of zombies.
@@ -28,6 +31,9 @@ func is_hostile() -> bool:
 ## Called each time the shot is taken from the pool: forget everything from its last flight.
 func reset() -> void:
 	weapon = null
+	if _boost_tween != null:
+		_boost_tween.kill()
+		_boost_tween = null
 	rotation = 0.0
 	if look != null:
 		region_rect = _plain_region
@@ -58,6 +64,17 @@ func dress(from: Weapon) -> void:
 	FeltAtlas.swap_part(self, own.part)
 	scale *= own.size
 	_start_trail()
+	if from.attack_boost > 1.0:
+		_boost(from.attack_boost)
+
+
+## The first attack after an evolution (spec 10 §3): drawn `factor` times bigger, easing back.
+func _boost(factor: float) -> void:
+	var normal: Vector2 = scale
+	scale = normal * factor
+	var seconds: float = MOMENT.big_attack_seconds
+	_boost_tween = create_tween()
+	_boost_tween.tween_property(self, ^"scale", normal, seconds).set_ease(Tween.EASE_OUT)
 
 
 ## Hurts `zombie` like `EnemyManager.damage`; an evolved shot also leaves a sparkle pop there
