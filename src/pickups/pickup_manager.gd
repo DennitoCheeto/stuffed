@@ -15,6 +15,10 @@ const COLLECT_DISTANCE: float = 12.0
 @export var rules: XpRules
 
 var buttons: Array[XpButton] = []
+## Lucky Button rolls (spec 09 §3; seeded by the run).
+var golden_rng: RandomNumberGenerator = RandomNumberGenerator.new()
+## Golden buttons dropped in this run (tests).
+var golden_dropped: int = 0
 
 var _time: float = 0.0
 var _last_pickup_time: float = -INF
@@ -30,6 +34,10 @@ func drop(size: EnemyStats.XpSize, at: Vector2) -> XpButton:
 		return oldest
 	var button: XpButton = XpButton.new()
 	button.setup(size, value)
+	var lucky: Vector2 = GearEffects.golden_odds(get_tree())
+	if lucky.x > 0.0 and golden_rng.randf() < lucky.x:
+		button.make_golden(lucky.y)
+		golden_dropped += 1
 	button.position = at
 	add_child(button)
 	buttons.append(button)

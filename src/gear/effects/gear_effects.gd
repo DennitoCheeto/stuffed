@@ -11,6 +11,9 @@ const PROPELLER_CAP: StringName = &"propeller_cap"
 const RAINCOAT: StringName = &"raincoat"
 const PATCH_VEST: StringName = &"patch_vest"
 const PICNIC_APRON: StringName = &"picnic_apron"
+const JINGLE_BELL: StringName = &"jingle_bell"
+const LUCKY_BUTTON: StringName = &"lucky_button"
+const WIND_UP_KEY: StringName = &"wind_up_key"
 
 
 ## Puts the worn gear's effects on an armed hero (call once from the hero's `_ready`, before
@@ -30,6 +33,10 @@ static func apply(player: Player) -> void:
 		effects.append(PatchVest.new())
 	if gear.has(PICNIC_APRON):
 		effects.append(PicnicApron.new())
+	if gear.has(JINGLE_BELL):
+		effects.append(JingleBell.new())
+	if gear.has(WIND_UP_KEY):
+		effects.append(WindUpKey.new())
 	for effect: Node in effects:
 		effect.name = (effect.get_script() as Script).get_global_name()
 		player.add_child(effect)
@@ -44,3 +51,16 @@ static func dash_distance(player: Player) -> float:
 ## XP buttons closer than this fly to `player` (the Lookout Cap grows it while standing still).
 static func pickup_reach(player: Player) -> float:
 	return player.pickup_range * player.pickup_factor
+
+
+## Lucky Button: the chance a new XP button drops golden (x) and how many times its XP it is
+## worth (y). The luckiest living hero wearing one counts (Vector2.ZERO = nobody).
+static func golden_odds(tree: SceneTree) -> Vector2:
+	var best: Vector2 = Vector2.ZERO
+	for player: Player in Players.all(tree):
+		if not player.armed or player.is_dead() or not player.gear.has(LUCKY_BUTTON):
+			continue
+		var chance: float = player.gear.amount_of(LUCKY_BUTTON)
+		if chance > best.x:
+			best = Vector2(chance, player.gear.find_piece(LUCKY_BUTTON).factor)
+	return best

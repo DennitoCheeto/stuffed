@@ -18,8 +18,9 @@ const PLUSHIES: StringName = &"plushies"
 ## Hero passives that hit (spec 08 §3): Böbö's shoulder charge, Robbar's belly slide.
 const BEAR_HUG: StringName = &"bear_hug"
 const BELLY_SLIDE: StringName = &"belly_slide"
-## Gear that hits (spec 09 §3): the Propeller Cap's landing thump.
+## Gear that hits (spec 09 §3): the Propeller Cap's landing thump, the Jingle Bell's shockwave.
 const PROPELLER_CAP: StringName = &"propeller_cap"
+const JINGLE_BELL: StringName = &"jingle_bell"
 ## Anything else (developer menu "kill all", a shot whose weapon just evolved away).
 const OTHER: StringName = &"other"
 const NAMES: Dictionary[StringName, String] = {
@@ -32,6 +33,7 @@ const NAMES: Dictionary[StringName, String] = {
 	BEAR_HUG: "Bear Hug",
 	BELLY_SLIDE: "Belly Slide",
 	PROPELLER_CAP: "Propeller Cap",
+	JINGLE_BELL: "Jingle Bell",
 	OTHER: "Other",
 }
 

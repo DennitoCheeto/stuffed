@@ -41,6 +41,7 @@ levels = Array[ExtResource("2_level")]([SubResource("Resource_level_1"), SubReso
 seconds = 4.0
 every = 20.0
 radius = 0.0
+sound = &"zip"
 factor = 0.0
 color = Color(0.718, 0.706, 0.8, 1)
 found_text = "The Sock Puppet King drops this"
