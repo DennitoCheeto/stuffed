@@ -137,11 +137,11 @@ func test_ac7_banana_split_peels_split_into_three_on_the_way_back() -> void:
 	var count: int = split.current().count
 	assert_eq(run.projectiles.fired_by(split).size(), count, "thrown like a boomerang")
 	var split_up: bool = await _wait_until(
-		func() -> bool: return run.projectiles.fired_by(split).size() == count * 3, 2.0
+		func() -> bool: return _shots(split, SplitPeelProjectile).size() == count * 3, 2.0
 	)
 	assert_true(split_up, "each peel became three")
 	var returning: int = 0
-	for peel: Projectile in run.projectiles.fired_by(split):
+	for peel: Projectile in _shots(split, SplitPeelProjectile):
 		if (peel as SplitPeelProjectile).returning:
 			returning += 1
 	assert_eq(returning, count * 3, "all of them fly back")
