@@ -167,7 +167,7 @@ func _ready() -> void:
 	tricks = RunTricks.new(self)
 	tricks.rng.seed = seed_value * 23 + 13
 	patterns = RunPatterns.new(self)
-	patterns.rng.seed = seed_value * 29 + 17
+	patterns.seed_dice(seed_value)
 	rescue_plan = rescue_rules.plan(run_number, rescued_before, rescue_rng)
 	floor_pickup_drops = FloorPickupDrops.new(
 		floor_pickup_rules, pickup_rng, perks.pickup_gap_cut, perks.first_pickup_at

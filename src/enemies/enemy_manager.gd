@@ -10,6 +10,8 @@ extends Node
 ## A zombie (or boss) was added to the run.
 signal zombie_added(zombie: Zombie)
 signal zombie_killed(zombie: Zombie)
+## A hero's weapon killed `zombie` (the Jingle Bell counts these; gear, turrets and pickups don't).
+signal killed_by(weapon: Weapon, zombie: Zombie)
 ## A zombie took damage (damage numbers, hit sound).
 signal zombie_hit(zombie: Zombie, amount: float)
 ## A ranged zombie starts puffing up (a shot is coming).
@@ -148,6 +150,8 @@ func damage(zombie: Zombie, amount: float, push: Vector2 = Vector2.ZERO, by: Wea
 	var dealt: float = clampf(amount, 0.0, maxf(zombie.health, 0.0))
 	var died: bool = _hurt(zombie, amount, push)
 	tally.add_hit(by, dealt, died)
+	if died and by != null and is_instance_valid(by) and by.player != null:
+		killed_by.emit(by, zombie)
 	return died
 
 
