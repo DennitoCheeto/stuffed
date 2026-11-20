@@ -111,6 +111,24 @@ func test_prices_sewing_cheaper_than_stitching_and_all_about_ten_k() -> void:
 	assert_between(GearBook.total_cost(RULES)["coins"], 9000, 11000, "spec 09 §5")
 
 
+## Spec 09 §5 (same rule as tricks): each sewing / stitch step costs less than the Workshop
+## level after the one that opens it.
+func test_prices_each_stitch_level_is_cheaper_than_the_next_workshop_level() -> void:
+	var workshop: BuildingDef = LAYOUT.spot(RULES.workshop).building
+	var checked: int = 0
+	for piece: GearDef in RULES.pieces:
+		var save: TownSave = TownSave.new()
+		for at: int in range(1, 4):
+			var opens_at: int = GearBook.workshop_level_needed(save, piece, RULES)
+			if opens_at < workshop.levels.size():
+				var next: BuildingLevel = workshop.levels[opens_at]
+				var text: String = "%s Lv %d < Workshop Lv %d" % [piece.id, at, opens_at + 1]
+				assert_lt(piece.level(at).coins, next.coins, text)
+				checked += 1
+			save.gear.stitches[String(piece.id)] = at
+	assert_gt(checked, 9, "Lv 1 and Lv 2 steps all have a next Workshop level")
+
+
 func test_sewing_needs_the_pattern_and_a_workshop() -> void:
 	var save: TownSave = TownSave.new()
 	var cap: GearDef = _piece("lookout_cap")

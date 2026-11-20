@@ -1,8 +1,8 @@
 extends RefCounted
 ## Readability sweeps (AC-73, AC-83): every colour a node and its children carry: tints, Color
 ## variables, theme colour overrides, their style boxes, plushie looks, felt sketches
-## (`BuildingSketch.colors()`) and the Color constants of their scripts. Tests check them against
-## UiColors.is_danger.
+## (`BuildingSketch.colors()`), gear pieces and the Color constants of their scripts. Tests check
+## them against UiColors.is_danger.
 
 
 static func colors_of(root: Object) -> Array[Color]:
@@ -24,7 +24,7 @@ static func _add_properties(object: Object, found: Array[Color]) -> void:
 		var value: Variant = object.get(String(property["name"]))
 		if value is BuildingSketch:
 			found.append_array((value as BuildingSketch).colors())
-		elif value is StyleBox or value is PlushieDef:
+		elif value is StyleBox or value is PlushieDef or value is GearDef:
 			_add_properties(value as Object, found)
 		else:
 			_add_value(value, found)
