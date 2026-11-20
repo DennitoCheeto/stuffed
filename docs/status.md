@@ -726,7 +726,7 @@ _Last updated: 2026-11-20 (M6-06 evolution moment (#288): PR open; M4.5 side: M4
   `patterns_found`). `PatternEnvelope` frees itself on touch (tests count envelopes on `run.floor_items`). Found ids go
   into `RunHaul.patterns`, banked whole by `TownSave.bank`; owned ones are `TownPerks.patterns`. Off in the siege
   (`patterns.enabled`). Texts/numbers in `gear_rules.tres` ("Patterns"). Run dev menu `DevMenu.DROP_PATTERN`.
-  `run.gd` is at 998 lines (limit 1000): new run logic goes into helpers. Local "saved" flakes came from the
+  `run.gd` is at 1000 lines (the limit, after M6-06): new run logic goes into helpers. Local "saved" flakes came from the
   M6 worktree testing at the same time (see "Parallel worktrees").
 - Sewing Workshop (M4.5-03, spec 09 §5, AC-97): 7th `TownSpot` (`sewing_workshop`, top middle above the fort),
   `data/town/buildings/sewing_workshop.tres` (prices, `siege_health`, no turret/ring), look `WorkshopLook`.
@@ -815,5 +815,5 @@ _Last updated: 2026-11-20 (M6-06 evolution moment (#288): PR open; M4.5 side: M4
   `has_played(id)`): `Engine.time_scale` slow motion (skipped with Reduced motion), `EvolutionPulse` ring on the
   hero (`WorldLayers.OWN_SHOTS`), `WeaponStats.sting` (`sting_*` in `SfxBank`), `weapon.boost_next_attack(1.5)` →
   `Projectile.dress` draws the shot big and tweens it back (`big_attack_seconds`, so Sewing Storm's lasting orbit
-  isn't stuck big). Run dev menu `DevMenu.EVOLVE_NOW`. Fit check: 30 screens ("evolution reveal").
+  isn't stuck big). Run dev menu `DevMenu.EVOLVE_NOW`. Fit check: 31 screens ("evolution reveal").
   Tests: `test_10_evolution_moment.gd`.

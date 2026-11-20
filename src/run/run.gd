@@ -826,10 +826,8 @@ func _on_plushie_freed(player: Player) -> void:
 
 
 func _on_player_evolved(new_weapon: Weapon, player: Player) -> void:
-	var entry: Dictionary = {
-		"weapon": new_weapon.stats.display_name, "time": elapsed, "player": player.player_index
-	}
-	evolution_log.append(entry)
+	var who: int = player.player_index
+	evolution_log.append({"weapon": new_weapon.stats.display_name, "time": elapsed, "player": who})
 	enemies.tally.evolve(new_weapon)
 	evolution_moment.evolved(new_weapon)
 
