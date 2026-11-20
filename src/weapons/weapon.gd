@@ -18,6 +18,8 @@ var player: Player
 var mount_range: float = 0.0
 ## Turrets only: its row in the weapon tally (`WeaponTally.ARMORY` ...).
 var tally_source: StringName = &""
+## The next attack is drawn this much bigger (the first one after an evolution, spec 10 §3).
+var attack_boost: float = 1.0
 
 var _cooldown_left: float = FIRST_ATTACK_DELAY
 var _current: WeaponLevel
@@ -117,6 +119,7 @@ func _physics_process(delta: float) -> void:
 		_cooldown_left = RETRY_DELAY
 		return
 	if attack():
+		attack_boost = 1.0
 		_cooldown_left = current().cooldown
 		if stats.sound != &"" and _sound_wait <= 0.0:
 			Sfx.play(stats.sound, stats.sound_pitch)
@@ -124,6 +127,11 @@ func _physics_process(delta: float) -> void:
 		fired.emit()
 	else:
 		_cooldown_left = RETRY_DELAY
+
+
+## Draws the next attack `factor` times bigger (it eases back to normal size).
+func boost_next_attack(factor: float) -> void:
+	attack_boost = factor
 
 
 ## One attack. Returns false if there was nothing to attack (then it tries again soon).

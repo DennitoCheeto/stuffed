@@ -9,6 +9,8 @@ var evolution: EvolutionDef
 ## The name and icon of the weapon it evolves from.
 var evolution_from: String = ""
 var evolution_from_icon: StringName = &""
+## The icon of the item it was sewn together with (the sewing reveal, spec 10 §3).
+var evolution_partner_icon: StringName = &""
 ## In the order they are given (the same upgrade can come twice: Lv 2 → 3, then Lv 3 → 4).
 var level_ups: Array[UpgradeOffer] = []
 ## Share of max health healed (0 = no heal).

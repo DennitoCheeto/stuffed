@@ -139,7 +139,7 @@ func _visit_all(window: Vector2i) -> void:
 	await _frames()
 	await _visit_run(main.current_screen as Run)
 	await _visit_siege()
-	assert_eq(checked.size(), 30, "every screen checked: %s" % [checked])
+	assert_eq(checked.size(), 31, "every screen checked: %s" % [checked])
 
 
 func _visit_run(run: Run) -> void:
@@ -178,6 +178,11 @@ func _visit_run(run: Run) -> void:
 	run.gift_screen.open(_six_level_ups(), run.gift_box_rules)
 	await _wait_until(_gift_shown.bind(run))
 	await _check("gift box (6 cards)")
+	run.gift_screen.close()
+	await _frames()
+	run.gift_screen.open(_evolution_gift(run), run.gift_box_rules)
+	await _wait_until(_reveal_done.bind(run))
+	await _check("evolution reveal")
 	run.gift_screen.close()
 	await _frames()
 	run.freeze(&"goal")
@@ -277,6 +282,21 @@ func _wait_until(done: Callable) -> void:
 
 func _gift_shown(run: Run) -> bool:
 	return run.gift_screen.showing_contents
+
+
+func _reveal_done(run: Run) -> bool:
+	return run.gift_screen.revealing and run.gift_screen.reveal.is_done()
+
+
+## An evolution gift (the sewing reveal, spec 10 §3).
+func _evolution_gift(run: Run) -> GiftContents:
+	var gift: GiftContents = GiftContents.new()
+	gift.evolution = run.upgrade_pool.evolutions[0]
+	var base: UpgradeDef = run.upgrade_pool.find(gift.evolution.weapon)
+	gift.evolution_from = base.display_name
+	gift.evolution_from_icon = base.icon
+	gift.evolution_partner_icon = run.upgrade_pool.find(gift.evolution.partner).icon
+	return gift
 
 
 ## The `count` upgrades with the longest names as level-up cards (the first one shiny).

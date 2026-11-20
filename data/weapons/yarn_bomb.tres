@@ -31,6 +31,7 @@ flash_radius = 30.0
 [resource]
 script = ExtResource("1_stats")
 sound = &"sticky"
+sting = &"sting_bomb"
 id = &"yarn_bomb"
 display_name = "Yarn Bomb"
 run_title = "Yarn Bomber"

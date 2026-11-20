@@ -32,6 +32,8 @@ extends Resource
 ## At least this many seconds between two of its sounds (0 = every attack). For weapons that
 ## attack very often, like the Stuffing Cloud, so they don't get tiring.
 @export var sound_gap: float = 0.0
+## Evolved weapons: their own sting, played once per run at the evolution moment (spec 10 §3).
+@export var sting: StringName = &""
 ## Level 1 first.
 @export var levels: Array[WeaponLevel] = []
 

@@ -30,6 +30,7 @@ flash_radius = 24.0
 [resource]
 script = ExtResource("1_stats")
 sound = &"storm"
+sting = &"sting_storm"
 id = &"sewing_storm"
 display_name = "Sewing Storm"
 run_title = "Storm Stitcher"

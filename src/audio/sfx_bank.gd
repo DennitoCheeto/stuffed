@@ -73,6 +73,11 @@ const LENGTHS: Dictionary[StringName, float] = {
 	&"grumble": 0.5,
 	&"trill": 0.45,
 	&"bark": 0.45,
+	# Evolution stings (spec 10 §3): one per evolved weapon, played once per run after the moment.
+	&"sting_split": 0.8,
+	&"sting_storm": 0.9,
+	&"sting_volley": 0.8,
+	&"sting_bomb": 0.9,
 }
 
 ## The frequent sounds get a soft felt "thump" under their click (spec 10 §4.2): sound → how
@@ -201,6 +206,10 @@ static func _weapon_or_moment(sound: StringName) -> Callable:
 		&"grumble": _grumble,
 		&"trill": _trill,
 		&"bark": _bark,
+		&"sting_split": _sting_split,
+		&"sting_storm": _sting_storm,
+		&"sting_volley": _sting_volley,
+		&"sting_bomb": _sting_bomb,
 	}
 	return voices[sound]
 
@@ -770,3 +779,52 @@ static func _pop_up(t: float) -> float:
 	var fluff: float = Synth.noise(t) * exp(-18.0 * t)
 	var spring: float = Synth.sine(Synth.sweep(t, 180.0, 520.0, 0.3)) * Synth.pluck(t, 0.02, 7.0)
 	return 0.05 * fluff + 0.14 * spring
+
+
+## A little rising arpeggio of bells (the shared shape of every evolution sting).
+static func _bells(t: float, notes: PackedFloat32Array, gap: float, decay: float) -> float:
+	var value: float = 0.0
+	for i: int in notes.size():
+		var start: float = i * gap
+		if t >= start:
+			var local: float = t - start
+			var hz: float = Synth.midi_hz(notes[i])
+			var bell: float = Synth.sine(hz * local) + 0.3 * Synth.sine(hz * 2.0 * local)
+			value += bell * exp(-decay * local)
+	return value
+
+
+## Banana Split: a cheeky slide whistle up, then two bright bells.
+static func _sting_split(t: float) -> float:
+	var slide: float = Synth.sine(Synth.sweep(t, 500.0, 1300.0, 0.25))
+	slide *= clampf((0.3 - t) / 0.1, 0.0, 1.0)
+	var bells: float = 0.0
+	if t >= 0.25:
+		bells = _bells(t - 0.25, PackedFloat32Array([84.0, 91.0]), 0.12, 6.0)
+	return 0.16 * slide + 0.14 * bells
+
+
+## Sewing Storm: a whirl of air with a fast glassy run going up.
+static func _sting_storm(t: float) -> float:
+	var whirl: float = Synth.noise(t) * (0.5 + 0.5 * sin(TAU * 14.0 * t))
+	whirl *= sin(PI * minf(t / 0.9, 1.0))
+	var climb: float = _bells(t, PackedFloat32Array([81.0, 84.0, 88.0, 93.0, 96.0]), 0.07, 7.0)
+	return 0.08 * whirl + 0.1 * climb
+
+
+## Pincushion Volley: three quick "tings" and a chord.
+static func _sting_volley(t: float) -> float:
+	var tings: float = _bells(t, PackedFloat32Array([88.0, 88.0, 88.0]), 0.09, 18.0)
+	var chord: float = 0.0
+	if t >= 0.3:
+		chord = _bells(t - 0.3, PackedFloat32Array([79.0, 83.0, 86.0]), 0.0, 4.0)
+	return 0.12 * tings + 0.09 * chord
+
+
+## Yarn Bomb: a soft low "boomf", then a bouncy rising pair of notes.
+static func _sting_bomb(t: float) -> float:
+	var boom: float = Synth.sine(Synth.sweep(t, 160.0, 50.0, 0.3)) * exp(-7.0 * t)
+	var notes: float = 0.0
+	if t >= 0.2:
+		notes = _bells(t - 0.2, PackedFloat32Array([72.0, 79.0, 84.0]), 0.13, 5.0)
+	return 0.3 * boom + 0.13 * notes
