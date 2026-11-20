@@ -29,6 +29,20 @@ func level_of(piece: GearDef) -> int:
 	return levels.get(piece.id, 0)
 
 
+## The piece `id` as worn (null = not worn).
+func find_piece(id: StringName) -> GearDef:
+	for worn: GearDef in pieces:
+		if worn.id == id:
+			return worn
+	return null
+
+
+## The number of piece `id` at its worn stitch level (0 = not worn).
+func amount_of(id: StringName) -> float:
+	var worn: GearDef = find_piece(id)
+	return worn.amount(level_of(worn)) if worn != null else 0.0
+
+
 ## The piece on in `slot` (null = nothing).
 func in_slot(slot: GearDef.Slot) -> GearDef:
 	for piece: GearDef in pieces:

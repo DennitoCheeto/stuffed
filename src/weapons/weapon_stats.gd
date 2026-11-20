@@ -32,6 +32,9 @@ extends Resource
 ## At least this many seconds between two of its sounds (0 = every attack). For weapons that
 ## attack very often, like the Stuffing Cloud, so they don't get tiring.
 @export var sound_gap: float = 0.0
+## Pins and buttons (Sewing Pin Sniper, Pincushion Volley, Button Shotgun): the Pin Cushion Hat
+## (spec 09 §3) makes their shots pierce more zombies.
+@export var pins: bool = false
 ## Evolved weapons: their own sting, played once per run at the evolution moment (spec 10 §3).
 @export var sting: StringName = &""
 ## Level 1 first.

@@ -152,4 +152,7 @@ func _with_bonuses(base: WeaponLevel) -> WeaponLevel:
 	numbers.reach *= player.range_multiplier
 	numbers.duration *= player.range_multiplier
 	numbers.area *= player.area_multiplier
+	# Pin Cushion Hat (spec 09 §3); a pierce below 0 already goes through everything.
+	if stats.pins and numbers.pierce >= 0:
+		numbers.pierce += player.extra_pierce
 	return numbers

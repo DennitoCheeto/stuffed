@@ -50,6 +50,10 @@ const SLOT_NAMES: PackedStringArray = ["head", "body", "charm"]
 ## Picnic Apron = share of max health a snack heals, Lucky Button = XP of a golden button
 ## (times a normal one).
 @export var factor: float = 0.0
+## Propeller Cap = damage of the landing thump.
+@export var damage: float = 0.0
+## A sound the effect plays (a name in SfxBank; empty = none), e.g. the Propeller Cap's thump.
+@export var sound: StringName = &""
 
 
 ## The name of its slot as saved ("head", "body", "charm").

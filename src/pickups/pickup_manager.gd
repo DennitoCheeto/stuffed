@@ -88,7 +88,7 @@ func _player_in_range(point: Vector2, players: Array[Player]) -> Player:
 	var best_distance: float = INF
 	for player: Player in players:
 		var distance: float = player.global_position.distance_to(point)
-		if distance <= player.pickup_range and distance < best_distance:
+		if distance <= GearEffects.pickup_reach(player) and distance < best_distance:
 			best = player
 			best_distance = distance
 	return best

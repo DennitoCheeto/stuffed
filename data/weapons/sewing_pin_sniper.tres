@@ -62,6 +62,7 @@ card_text = "Fires 2 pins in a narrow spread."
 [resource]
 script = ExtResource("1_stats")
 sound = &"pin"
+pins = true
 id = &"sewing_pin_sniper"
 display_name = "Sewing-Pin Sniper"
 run_title = "Pin-Point Pro"

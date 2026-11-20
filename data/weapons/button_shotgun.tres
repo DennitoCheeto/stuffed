@@ -67,6 +67,7 @@ card_text = "7 buttons, and fires every 1.5 → 1.2 seconds."
 [resource]
 script = ExtResource("1_stats")
 sound = &"buttons"
+pins = true
 id = &"button_shotgun"
 display_name = "Button Shotgun"
 run_title = "Button Blaster"
