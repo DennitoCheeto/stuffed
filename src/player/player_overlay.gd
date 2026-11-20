@@ -21,6 +21,7 @@ const INK: Color = UiColors.HUD_OUTLINE
 const POCKET_SIZE: float = 14.0
 
 var _player: Player
+var _warning: LowHealthWarning
 var _pocket_key: StringName = &""
 var _pocket_texture: AtlasTexture
 
@@ -61,12 +62,34 @@ func _draw_health_bar() -> void:
 	var bar: Rect2 = Rect2(top_left, HEALTH_BAR_SIZE)
 	if _player.shield > 0.0 and _player.max_shield > 0.0:
 		_draw_shield(bar)
-	if _player.has_spare_stuffing():
-		var heart_at: Vector2 = Vector2(bar.position.x - HEART_SIZE, bar.get_center().y)
-		FeltDraw.fill(self, SpareHeartPatch.heart_points(heart_at, HEART_SIZE / 2.0 + 1.0), INK)
-		FeltDraw.fill(self, SpareHeartPatch.heart_points(heart_at, HEART_SIZE / 2.0), HEART_COLOR)
+	if _player.has_spare_stuffing() or _is_low():
+		_draw_heart(bar)
 	if _player.pocket != null:
 		_draw_pocket(bar)
+
+
+func _is_low() -> bool:
+	if _warning == null:
+		_warning = LowHealthWarning.of(_player)
+	return _warning != null and _warning.active
+
+
+## The little heart left of the small bar: Spare Stuffing still there, or low health (then it
+## pulses on each heartbeat, spec 10 §7).
+func _draw_heart(bar: Rect2) -> void:
+	var half: float = HEART_SIZE / 2.0
+	var color: Color = HEART_COLOR
+	if _is_low():
+		half *= _warning.heart_scale()
+		color = _warning.heart_color(HEART_COLOR)
+	var heart_at: Vector2 = Vector2(bar.position.x - HEART_SIZE, bar.get_center().y)
+	FeltDraw.fill(self, SpareHeartPatch.heart_points(heart_at, half + 1.0), INK)
+	FeltDraw.fill(self, SpareHeartPatch.heart_points(heart_at, half), color)
+
+
+## True while the small bar's heart is up for low health (for tests).
+func shows_low_heart() -> bool:
+	return _is_low()
 
 
 ## Pocket Pickup: the carried toy, small, right of the small bar on a dark felt dot.

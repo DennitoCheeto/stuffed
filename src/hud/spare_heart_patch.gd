@@ -1,8 +1,9 @@
 class_name SpareHeartPatch
 extends Control
-## Spare Stuffing on the HUD (spec 06 §3.1): a small felt heart patch next to the health bar while
-## the hero can still pop back up. It hides once the trick is used. Rose like the health bar,
-## never the danger red of enemies (AC-73).
+## The hero's heart patch next to the health bar. It shows while the hero can still pop back up
+## (Spare Stuffing, spec 06 §3.1) and while their health is low (spec 10 §7, AC-115): then it
+## pulses on every heartbeat of their `LowHealthWarning`. Rose like the health bar, lighter on a
+## beat, never the danger red of enemies (AC-73).
 
 const SIZE: Vector2 = Vector2(34.0, 32.0)
 const FILL: Color = UiColors.HEALTH
@@ -14,6 +15,7 @@ const STITCH_INSET: float = 0.72
 const POINTS: int = 40
 
 var _player: Player
+var _warning: LowHealthWarning
 
 
 func _init() -> void:
@@ -24,7 +26,7 @@ func _init() -> void:
 	visible = false
 
 
-## Shows the patch while `player` has Spare Stuffing left.
+## Shows the patch while `player` has Spare Stuffing left or low health.
 func follow(player: Player) -> void:
 	_player = player
 	player.popped_back_up.connect(refresh)
@@ -32,15 +34,44 @@ func follow(player: Player) -> void:
 
 
 func refresh() -> void:
-	visible = _player != null and _player.has_spare_stuffing()
+	if _player == null or not is_instance_valid(_player):
+		visible = false
+		return
+	if _warning == null:
+		_warning = LowHealthWarning.of(_player)
+	visible = _player.has_spare_stuffing() or shows_low_health()
+
+
+## True while the patch is up for low health (it pulses then).
+func shows_low_health() -> bool:
+	return _warning != null and _warning.active
+
+
+func _process(_delta: float) -> void:
+	var was_low: bool = visible and shows_low_health()
+	refresh()
+	if shows_low_health() or was_low:
+		queue_redraw()
+
+
+## How big the heart is drawn now (1 = normal; bigger on a heartbeat).
+func pulse_scale() -> float:
+	return _warning.heart_scale() if shows_low_health() else 1.0
+
+
+func fill_color() -> Color:
+	return _warning.heart_color(FILL) if shows_low_health() else FILL
 
 
 func _draw() -> void:
 	var center: Vector2 = SIZE / 2.0
+	var grow: float = pulse_scale()
+	draw_set_transform(center * (1.0 - grow), 0.0, Vector2.ONE * grow)
 	var outer: PackedVector2Array = heart_points(center, SIZE.x / 2.0 + INK_WIDTH)
 	FeltDraw.fill(self, outer, INK)
-	FeltDraw.fill(self, heart_points(center, SIZE.x / 2.0), FILL)
+	FeltDraw.fill(self, heart_points(center, SIZE.x / 2.0), fill_color())
 	draw_heart_stitches(self, center, SIZE.x / 2.0 * STITCH_INSET, STITCH, 1.5)
+	draw_set_transform(Vector2.ZERO)
 
 
 ## A heart of half-width `half` around `center` (the point at the bottom).

@@ -153,6 +153,10 @@ func _ready() -> void:
 	_hitbox.shape = shape
 	_add_passives()
 	if armed:
+		var warning: LowHealthWarning = LowHealthWarning.new()
+		warning.name = "LowHealthWarning"
+		add_child(warning)
+		warning.setup(self)
 		GearEffects.apply(self)
 	if starting_weapon == null:
 		starting_weapon = stats.starting_weapon
