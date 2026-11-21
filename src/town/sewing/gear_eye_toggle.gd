@@ -25,6 +25,10 @@ func _init(slot_index: int, words: String = "", says_state: bool = false) -> voi
 	name = "Eye_%s" % ("all" if slot < 0 else GearDef.SLOT_NAMES[slot])
 	caption.visible = false
 	grows_on_hover = false
+	# The Button keeps its words in `text` (tooltip, tests) but is drawn by the face: without
+	# clipping, Godot sizes the button to that invisible text and the whole column jumped when
+	# "Show on hero" became "Hidden" (#325).
+	clip_text = true
 	box.radius = 16.0
 	box.pad(10, 6)
 	var row: HBoxContainer = HBoxContainer.new()
@@ -51,6 +55,20 @@ func show_hidden(on: bool, words: String) -> void:
 	if _says_state:
 		label.text = words
 	eye.queue_redraw()
+
+
+## Keeps the state words as wide as the widest of `choices` ("Hide all" / "Show all"), so the
+## toggle never changes size when it flips (#325).
+func fit_words(choices: PackedStringArray) -> void:
+	var font: Font = label.get_theme_font(&"font")
+	var font_size: int = label.get_theme_font_size(&"font_size")
+	var widest: float = 0.0
+	for words: String in choices:
+		widest = maxf(
+			widest, font.get_string_size(words, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+		)
+	label.custom_minimum_size.x = ceilf(widest)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
 
 func _draw_eye() -> void:

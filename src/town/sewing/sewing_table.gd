@@ -44,6 +44,8 @@ var hint_label: Label
 var upgrade_button: SewnButton = SewnButton.new("")
 var upgrade_cost: HBoxContainer = HBoxContainer.new()
 var motion: ScreenMotion = ScreenMotion.new()
+## The sewn X in the top right corner: closes it with the mouse (#325).
+var close_button: CloseStitch
 
 var _rules: GearRules = GearRules.current()
 var _save: TownSave
@@ -68,6 +70,7 @@ func _init() -> void:
 	var column: VBoxContainer = VBoxContainer.new()
 	column.add_theme_constant_override(&"separation", 12)
 	panel.content.add_child(column)
+	close_button = panel.add_close(close)
 	title = HandTitle.new(_rules.table_title, 56)
 	column.add_child(title)
 	level_tag.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
@@ -86,6 +89,7 @@ func _init() -> void:
 	left.add_child(_slot_box)
 	hide_all_toggle.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	hide_all_toggle.pressed.connect(_on_eye_pressed.bind(hide_all_toggle))
+	hide_all_toggle.fit_words(PackedStringArray([_rules.hide_all_text, _rules.show_all_text]))
 	left.add_child(hide_all_toggle)
 	_rows.add_theme_constant_override(&"separation", 10)
 	body.add_child(_rows)

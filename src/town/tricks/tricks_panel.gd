@@ -34,6 +34,8 @@ var hint_label: Label
 var level_tag: FabricTag = FabricTag.new("", UiColors.TAG, UiColors.INK, 20)
 var strip: PanelContainer = PanelContainer.new()
 var motion: ScreenMotion = ScreenMotion.new()
+## The sewn X in the top right corner: closes it with the mouse (#325).
+var close_button: CloseStitch
 
 var _row: HBoxContainer = HBoxContainer.new()
 var _thread: ThreadLine = ThreadLine.new()
@@ -55,6 +57,7 @@ func _init() -> void:
 	var column: VBoxContainer = VBoxContainer.new()
 	column.add_theme_constant_override(&"separation", 14)
 	panel.content.add_child(column)
+	close_button = panel.add_close(close)
 	column.add_child(title)
 	level_tag.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	column.add_child(level_tag)

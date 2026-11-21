@@ -55,6 +55,8 @@ var detail_note: Label
 var cloth: MenuCloth = MenuCloth.new(0.94)
 var cover: FeltPanel = FeltPanel.new(-0.8)
 var motion: ScreenMotion = ScreenMotion.new()
+## The sewn X in the top right corner: closes it with the mouse (#325).
+var close_button: CloseStitch
 
 var _tab_row: HBoxContainer
 var _grid: GridContainer
@@ -75,6 +77,7 @@ func _init() -> void:
 	var column: VBoxContainer = VBoxContainer.new()
 	column.add_theme_constant_override(&"separation", 16)
 	cover.content.add_child(column)
+	close_button = cover.add_close(close)
 	column.add_child(HandTitle.new("Scrapbook", 60))
 	_tab_row = HBoxContainer.new()
 	_tab_row.alignment = BoxContainer.ALIGNMENT_CENTER
