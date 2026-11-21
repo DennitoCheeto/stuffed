@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-11-21 (PO played the big batch, first feedback in "Playtest notes (big batch)"; milestone **Playtest fixes (Nov 2026)**, issues #323-#333; next: fix the bugs #323-#330 one per PR, look board for #331; P-22 … P-37 answers still open. M6: M6-09 merged (PR #320), M6-12 low-health warning merged (PR #322), M6-10 hints (PR #344), M6-11 town hints (PR #347) merged, M6-13 MVP check: PR open = last M6 ticket; then the M6 playtest P-38 … P-41)_
+_Last updated: 2026-11-21 (PO played the big batch, first feedback in "Playtest notes (big batch)"; milestone **Playtest fixes (Nov 2026)**; fixed: #324 (PR #335), #325 (#343), #326 music (#345), #327 boss slips (#346), #328 Raincoat puddle (#349), #329 Stuffing Cloud (#348), #330 dash display (#350); next: #323, then the second player's #336-#342 one per PR, look board for #331; P-22 … P-37 answers still open. M6: M6-09 merged (PR #320), M6-12 low-health warning merged (PR #322), M6-10 hints (PR #344), M6-11 town hints (PR #347) merged, M6-13 MVP check: PR open = last M6 ticket; then the M6 playtest P-38 … P-41)_
 
 ## Where we are
 
@@ -110,6 +110,18 @@ _Last updated: 2026-11-21 (PO played the big batch, first feedback in "Playtest 
   most likely "Hide all" on: confirm). #332 loadout view in the **pause menu and in town** (short spec addendum).
   #333 **every weapon gets an evolution** (6 more: Bouncy Yarn Ball, Button Shotgun, Stuffing Cloud, Thimble
   Mortar, Thread Whip, Zipper Ray): own spec later.
+- Second player (PO's GF, 2026-11-21), same milestone: #336 Space on the gift screen also dashes, #337 "New
+  pattern" banner too short, #338 Banane's sewing-table photo grey/blurry, #339 Banane's head can't be hit,
+  #340 floor toy drop + elite arrival need a short text ("A toy appeared!"), #341 Banana Split peel = real
+  banana, #342 gift box opening stiff. Extra hint `evolution_how` on #292: **PO OK** (add to spec 10 §6 via a
+  small spec PR). #339 hitbox: **PO picked A** (keep the
+  small area, make it clearly visible; maybe together with the dash display #330).
+- Fixes 2026-11-21 (tell the PO what to re-check): #326 no double start was found in code; the King's
+  death stacked boss → run → endless crossfades plus a loud goal stinger. Now the boss track fades to
+  silence (`MusicPlayer.SILENCE`), the fanfare plays alone, stingers duck the music (`stinger_duck`).
+  If the PO still hears two tracks, ask exactly when. #327 bosses: `BossDef.stun_guard_seconds` (4 s) +
+  no stun mid-pattern (all stuns). #329 cloud area 120-160 (was 55-85), damage 4 at Lv 1-2: a clear
+  buff, tune `area` down if too strong (not under ~115). #330 HUD `DashPatch` + pip under each hero's bar.
 
 ## Playtest notes (M3.5, 2026-10-24, first look)
 
@@ -940,3 +952,9 @@ _Last updated: 2026-11-21 (PO played the big batch, first feedback in "Playtest 
   2026-11-21 on the PO's PC (other Godot running, fps noisy): pre-M6 main with its 4 evolutions 275 draw calls,
   now with 6: 286-287 (+12, AC ✅); plain run 160 both. Worst frame ~230 ms in Claude's sessions (~6 fps on this
   machine for every build): the 16 ms rule is judged by the PO's own play / 10-minute run (P-38 … P-41).
+- Playtest fixes (2026-11-21): merge PRs with `gh pr merge <n> --squash` only (adding `--delete-branch`
+  was blocked by the permission check). `Zombie.stun` ignores bosses mid-pattern / in `stun_guard_left`:
+  tests that stun a boss twice reset `stun_guard_left`. Music "silence" = `play_track(MusicPlayer.SILENCE)`;
+  `audible_decks()` for tests. A headless run with Stuffing Cloud levels up on its kills: disable
+  `run.pickups` processing in probes. Look checks of a whole run: scratch `extends SceneTree` that sets
+  `SaveStore.path` / `GameSettings.path` first (like `tools/benchmark.gd`) so the real save stays untouched.
