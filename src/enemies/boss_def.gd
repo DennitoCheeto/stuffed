@@ -24,6 +24,9 @@ extends Resource
 @export var pattern_gap_seconds: float = 2.5
 ## It only starts a pattern when its target is at most this far away (not from off-screen).
 @export var pattern_range: float = 520.0
+## After a stun (banana peel, Bear Slam) it can't be stunned again for this long (counted from
+## when the stun ends), and never while it is in the middle of a pattern (#327).
+@export var stun_guard_seconds: float = 4.0
 
 
 ## A fresh brain for one boss on the field.

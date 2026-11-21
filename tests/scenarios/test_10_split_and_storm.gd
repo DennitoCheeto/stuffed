@@ -110,6 +110,40 @@ func test_ac105_at_most_six_peels_lie_on_the_floor() -> void:
 	assert_true(split.floor_peels().is_empty(), "nobody stepped on them: gone after a while")
 
 
+## #327: a boss slips at most once per stun guard, and never in the middle of an attack.
+func test_327_a_boss_slips_at_most_once_per_guard_and_never_mid_attack() -> void:
+	await _quiet_run()
+	var split: BananaSplit = await _evolve(&"banana_split") as BananaSplit
+	split.process_mode = Node.PROCESS_MODE_DISABLED  # only the peels we drop
+	var king_def: BossDef = run.spawner.schedule.boss
+	var at: Vector2 = first_player().global_position + Vector2(300, 0)
+	var king: Zombie = run.enemies.spawn_boss(king_def, at)
+	king.health = TOUGH
+	king.move_speed = 0.0
+	king.brain.pattern_cooldown = 999.0
+	assert_true(await _slips_on_a_peel(split, king), "the first peel trips him")
+	await _wait_until(_not_stunned.bind(king), SPLIT.peel_trail.stun + 0.5)
+	assert_false(await _slips_on_a_peel(split, king), "no second slip during the guard")
+	assert_gt(king.stun_guard_left, 0.0, "the guard runs after the stun")
+	king.stun_guard_left = 0.0
+	king.brain.pattern_cooldown = 0.0
+	assert_true(await _wait_until(king.brain.is_busy, 2.0), "he starts an attack")
+	assert_false(await _slips_on_a_peel(split, king), "no slip in the middle of an attack")
+	king.brain.calm_down()
+	king.brain.pattern_cooldown = 999.0
+	assert_true(await _slips_on_a_peel(split, king), "after the guard he can slip again")
+
+
+## Drops an armed peel under `zombie` and says whether it got stunned.
+func _slips_on_a_peel(split: BananaSplit, zombie: Zombie) -> bool:
+	split.drop_peel(zombie.global_position)
+	return await _wait_until(zombie.is_stunned, SPLIT.peel_trail.arm_seconds + 0.4)
+
+
+func _not_stunned(zombie: Zombie) -> bool:
+	return not zombie.is_stunned()
+
+
 func _sewing(storm: SewingStorm) -> bool:
 	for needle: StormNeedleProjectile in storm.needles():
 		if needle.is_sewing():
