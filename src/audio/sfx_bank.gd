@@ -72,6 +72,8 @@ const LENGTHS: Dictionary[StringName, float] = {
 	# Building tricks (spec 06 §7): soft, never close to enemy danger.
 	&"whistle": 0.3,
 	&"pop_up": 0.45,
+	# Low-health warning (spec 10 §7): a soft "lub-dub", quieter than enemy danger.
+	&"heartbeat": 0.5,
 	# Hero level-up voices (spec 10 §4.2); Banane keeps the quack.
 	&"squeak": 0.3,
 	&"grumble": 0.5,
@@ -214,6 +216,7 @@ static func _weapon_or_moment(sound: StringName) -> Callable:
 		&"star": _star,
 		&"whistle": _whistle,
 		&"pop_up": _pop_up,
+		&"heartbeat": _heartbeat,
 		&"squeak": _squeak,
 		&"grumble": _grumble,
 		&"trill": _trill,
@@ -793,6 +796,19 @@ static func _pop_up(t: float) -> float:
 	var fluff: float = Synth.noise(t) * exp(-18.0 * t)
 	var spring: float = Synth.sine(Synth.sweep(t, 180.0, 520.0, 0.3)) * Synth.pluck(t, 0.02, 7.0)
 	return 0.05 * fluff + 0.14 * spring
+
+
+static func _heart_thump(t: float) -> float:
+	if t < 0.0:
+		return 0.0
+	var phase: float = Synth.sweep(t, 110.0, 55.0, 0.12)
+	var body: float = Synth.sine(phase) + 0.35 * Synth.sine(phase * 2.0)
+	return body * Synth.pluck(t, 0.008, 20.0)
+
+
+## Low health (spec 10 §7): a soft, muffled "lub-dub" heartbeat; the second beat is quieter.
+static func _heartbeat(t: float) -> float:
+	return 0.17 * _heart_thump(t) + 0.11 * _heart_thump(t - 0.2)
 
 
 ## A little rising arpeggio of bells (the shared shape of every evolution sting).

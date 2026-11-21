@@ -216,3 +216,14 @@ func test_every_evolution_has_its_own_sting() -> void:
 		assert_true(SfxBank.LENGTHS.has(sting), "%s has a sting" % evolution.evolved.id)
 		assert_false(stings.has(sting), "%s shares %s" % [evolution.evolved.id, sting])
 		stings.append(sting)
+
+
+## Spec 10 §7: the low-health heartbeat is soft, quieter than enemy danger, and not silent.
+func test_the_heartbeat_is_softer_than_enemy_danger() -> void:
+	var quietest_danger: float = INF
+	for sound: StringName in DANGER:
+		quietest_danger = minf(quietest_danger, _loudness(sound))
+	var heartbeat: StringName = LowHealthWarning.RULES.sound
+	assert_true(SfxBank.LENGTHS.has(heartbeat), "the heartbeat is made in code")
+	assert_gt(_loudness(heartbeat), 0.0)
+	assert_lt(_loudness(heartbeat), quietest_danger, "softer than danger")
