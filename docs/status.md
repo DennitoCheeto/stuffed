@@ -921,6 +921,6 @@ _Last updated: 2026-11-21 (PO played the big batch, first feedback in "Playtest 
   `Main.start_run` via `RunHints.attach(run, town)`, found with `RunHints.of(run)`; polls the run, never called by
   it; new notes wait while the run is frozen, the level-up note pushes an older note aside). Log field `hints`
   (`RunResult.hints`, set in `Main.show_end`). "Show hints again" → `Main.forget_hints` (HINT_KEEPERS group).
-  Town dev menu `RESET_HINTS`. Fit check 33 screens. Wide tilted pieces fail the fit check's "sticks out of its
+  Town dev menu `RESET_HINTS`. Fit check 35 screens. Wide tilted pieces fail the fit check's "sticks out of its
   box": notes tilt less the wider they are (`tilt_width`). Runs without Main (unit-ish scenario setups) have no
   hints. Tests: `test_hints.gd`, `test_10_hints.gd`.

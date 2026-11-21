@@ -141,7 +141,7 @@ func _visit_all(window: Vector2i) -> void:
 	await _frames()
 	await _visit_run(main.current_screen as Run)
 	await _visit_siege()
-	assert_eq(checked.size(), 33, "every screen checked: %s" % [checked])
+	assert_eq(checked.size(), 35, "every screen checked: %s" % [checked])
 
 
 func _visit_run(run: Run) -> void:
