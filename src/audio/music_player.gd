@@ -10,12 +10,14 @@ extends Node
 const GROUP: StringName = &"music"
 const RULES: MusicRules = preload("res://data/audio/music/music_rules.tres")
 const MUFFLE_EFFECT: int = 0
+## The "track" that fades every track out.
+const SILENCE: StringName = &"silence"
 
 ## Rendered clips per track / stinger id, shared by every MusicPlayer.
 static var _clips: Dictionary[StringName, Array] = {}
 static var _jobs: Dictionary[StringName, MusicJob] = {}
 
-## The place's track id (&"" = none yet).
+## The place's track id (&"" = none yet, `SILENCE` = faded out).
 var track: StringName = &""
 ## True while a track is on (its clips may still be rendering for a moment after the boot).
 var playing: bool:
@@ -30,6 +32,8 @@ var fading_out: Array[MusicDeck] = []
 ## Every stinger asked for, in order (for tests).
 var stingers_played: Array[StringName] = []
 var stinger_player: AudioStreamPlayer = AudioStreamPlayer.new()
+## The track's share of its loudness: `MusicRules.stinger_duck` while a stinger plays, else 1.
+var duck: float = 1.0
 
 
 ## Starts rendering every track and stinger (the title first).
@@ -77,8 +81,15 @@ func _ready() -> void:
 
 
 ## Changes to `track_name`'s music with a crossfade (keeps playing if already on it).
+## `SILENCE` fades the music out (after the King only the goal stinger plays, #326).
 func play_track(track_name: StringName) -> void:
-	if track_name == track and deck != null:
+	if track_name == track and (deck != null or track_name == SILENCE):
+		return
+	if track_name == SILENCE:
+		track = SILENCE
+		if deck != null:
+			fading_out.append(deck)
+		deck = null
 		return
 	var next: MusicTrack = RULES.track(track_name)
 	if next == null:
@@ -114,15 +125,30 @@ func _process(delta: float) -> void:
 	_start_when_ready()
 	var fade_step: float = delta / maxf(RULES.crossfade_seconds, 0.01)
 	var layer_step: float = delta / maxf(RULES.layer_fade_seconds, 0.01)
+	var duck_to: float = RULES.stinger_duck if stinger_player.playing else 1.0
+	duck = move_toward(duck, duck_to, delta / maxf(RULES.duck_seconds, 0.01))
+	var loudness: float = RULES.loudness * duck
 	if deck != null and deck.is_started():
 		deck.fade = minf(deck.fade + fade_step, 1.0)
-		deck.update(intensity, layer_step, RULES.loudness)
+		deck.update(intensity, layer_step, loudness)
 	for old: MusicDeck in fading_out.duplicate():
 		old.fade = maxf(old.fade - fade_step, 0.0)
-		old.update(intensity, 0.0, RULES.loudness)
+		old.update(intensity, 0.0, loudness)
 		if old.fade <= 0.0:
 			fading_out.erase(old)
 			old.queue_free()
+
+
+## The tracks that can be heard right now (more than one only during a crossfade).
+func audible_decks() -> Array[MusicDeck]:
+	var heard: Array[MusicDeck] = []
+	var all: Array[MusicDeck] = fading_out.duplicate()
+	if deck != null:
+		all.append(deck)
+	for one: MusicDeck in all:
+		if one.is_started() and one.fade > 0.0:
+			heard.append(one)
+	return heard
 
 
 func _start_when_ready() -> void:

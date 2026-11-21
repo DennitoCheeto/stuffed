@@ -189,7 +189,7 @@ func test_ac18_beating_him_pops_all_drops_a_big_box_and_offers_the_choice() -> v
 	assert_eq(boxes.size(), 1, "he drops a gift box")
 	assert_true(boxes[0].big, "a big one")
 	assert_almost_eq(boxes[0].position, died_at, Vector2.ONE)
-	assert_eq(main.music.track, &"run", "the boss music stops")
+	assert_eq(main.music.track, MusicPlayer.SILENCE, "the boss music stops")
 	await wait_seconds(Run.POP_CHAIN_TIME + 0.2)
 	assert_eq(run.enemies.alive_count(), 0, "all zombies pop")
 	var opened: bool = await _wait_until(run.gift_screen.is_open, Run.CELEBRATION_TIME + 1.0)
