@@ -924,3 +924,10 @@ _Last updated: 2026-11-21 (PO played the big batch, first feedback in "Playtest 
   Town dev menu `RESET_HINTS`. Fit check 35 screens. Wide tilted pieces fail the fit check's "sticks out of its
   box": notes tilt less the wider they are (`tilt_width`). Runs without Main (unit-ish scenario setups) have no
   hints. Tests: `test_hints.gd`, `test_10_hints.gd`.
+- Town hints (M6-11, spec 10 §6, AC-113): `TownHints` (extends `HintBoard`, attached by `Main.show_town` via
+  `TownHints.attach(town, save)`, `TownHints.of(town)`): town, can_build, tricks, siege_warning, wardrobe, sewing.
+  Notes wait while a banner shows or the town settles, and hide (clock stopped) while a menu / tricks panel /
+  sewing table / hero picker is open. The `siege` hint lives in `RunHints._watch_siege` (Main attaches RunHints to
+  the siege too; done at wave 2; siege log has `hints`). The tricks panel keeps its own in-panel first-time line.
+  `HintBoard.show_now(id)` shows a note at once (fit check "town (hint note)", 36 screens). Test:
+  `test_10_town_hints.gd`.

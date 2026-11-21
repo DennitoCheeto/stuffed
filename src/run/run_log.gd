@@ -64,6 +64,7 @@ static func siege_entry(result: RunResult) -> Dictionary:
 		"fort_health_left": snappedf(result.fort_health_left, 0.1),
 		"knocked_down": Array(result.knocked_down),
 		"damaged": Array(result.damaged),
+		"hints": Array(result.hints),
 		"reward": result.materials_kept.duplicate(),
 		"time": snappedf(result.survived_seconds, 0.1),
 		"level": result.level,

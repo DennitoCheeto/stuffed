@@ -84,6 +84,7 @@ func show_town() -> void:
 	pillow_fort.quit_requested.connect(quit)
 	pillow_fort.changed.connect(save_now)
 	pillow_fort.reset_requested.connect(_reset_town)
+	TownHints.attach(pillow_fort, town)
 	_switch_to(pillow_fort)
 
 
@@ -126,6 +127,7 @@ func start_siege() -> void:
 	siege.music_requested.connect(_play_music)
 	town.unfinished_run = {}
 	SaveStore.write(town)
+	RunHints.attach(siege, town)
 	_play_music(&"siege")
 	_switch_to(siege)
 
@@ -149,6 +151,9 @@ func _end_siege(result: RunResult) -> void:
 		town.damage(damaged)
 	result.damaged = damaged
 	SIEGE_RULES.siege_ended(town, won)
+	var hints: RunHints = RunHints.of(current_screen)
+	if hints != null:
+		result.hints = hints.shown
 	SaveStore.write(town)
 	RunLog.append(result)
 	if won:

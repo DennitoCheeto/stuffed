@@ -6,6 +6,9 @@ const SAVE: String = "user://test_hints_save.json"
 const RUN_HINTS: PackedStringArray = [
 	"move", "xp", "level_up", "gift_box", "floor_pickup", "evolution_ready", "boss", "way_home"
 ]
+const TOWN_HINTS: PackedStringArray = [
+	"town", "can_build", "tricks", "siege_warning", "siege", "wardrobe", "sewing"
+]
 
 var _hints_were_on: bool = true
 
@@ -23,8 +26,10 @@ func after_each() -> void:
 	SaveStore.path = SaveStore.DEFAULT_PATH
 
 
-func test_every_run_hint_has_a_text_and_no_written_out_key() -> void:
-	for id: String in RUN_HINTS:
+func test_every_hint_has_a_text_and_no_written_out_key() -> void:
+	var ids: PackedStringArray = RUN_HINTS + TOWN_HINTS
+	assert_eq(RULES.hints.size(), ids.size(), "every hint of spec 10 §6 is listed")
+	for id: String in ids:
 		var hint: HintDef = RULES.find(id)
 		assert_not_null(hint, id)
 		if hint == null:
