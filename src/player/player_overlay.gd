@@ -1,6 +1,7 @@
 extends Node2D
 ## Readability helpers drawn over the hero (vision §6.1): the real hitbox as a small soft dot,
-## the dash cooldown ring around it, and a small health bar under the feet.
+## the dash cooldown ring around it, and a small health bar under the feet with the dash pip
+## below it (#330): it fills while the dash recharges and lights up with a pop when it is ready.
 
 const HITBOX_DOT_COLOR: Color = Color(1.0, 1.0, 1.0, 0.75)
 const HITBOX_DOT_EDGE: Color = Color(0.1, 0.09, 0.12, 0.5)
@@ -19,19 +20,39 @@ const HEART_COLOR: Color = UiColors.HEALTH
 const INK: Color = UiColors.HUD_OUTLINE
 ## Pocket Pickup's carried toy right of the small bar.
 const POCKET_SIZE: float = 14.0
+## The dash pip under the small bar.
+const DASH_PIP_SIZE: Vector2 = Vector2(22.0, 4.0)
+const DASH_PIP_GAP: float = 3.0
+const DASH_PIP_READY: Color = UiColors.HUD_TEXT
+const DASH_PIP_WAITING: Color = Color(0.66, 0.6, 0.8, 0.7)
+const DASH_POP_SECONDS: float = 0.3
+const DASH_POP_GROW: float = 0.6
 
 var _player: Player
 var _warning: LowHealthWarning
 var _pocket_key: StringName = &""
 var _pocket_texture: AtlasTexture
+var _dash_was_ready: bool = true
+var _dash_pop_left: float = 0.0
 
 
 func _ready() -> void:
 	_player = get_parent() as Player
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	if _player != null:
+		var ready_now: bool = _player.dash_ready_ratio() >= 1.0
+		if ready_now and not _dash_was_ready:
+			_dash_pop_left = DASH_POP_SECONDS
+		_dash_was_ready = ready_now
+	_dash_pop_left = maxf(_dash_pop_left - delta, 0.0)
 	queue_redraw()
+
+
+## True while the dash pip pops (the dash just got ready; for tests).
+func is_dash_popping() -> bool:
+	return _dash_pop_left > 0.0
 
 
 func _draw() -> void:
@@ -66,6 +87,22 @@ func _draw_health_bar() -> void:
 		_draw_heart(bar)
 	if _player.pocket != null:
 		_draw_pocket(bar)
+	_draw_dash_pip(bar)
+
+
+## The dash pip centred under the small bar: a light fill growing while the dash recharges, bright
+## (and briefly bigger) when it is ready.
+func _draw_dash_pip(bar: Rect2) -> void:
+	var grow: float = 1.0 + DASH_POP_GROW * sin(PI * _dash_pop_left / DASH_POP_SECONDS)
+	var pip_size: Vector2 = DASH_PIP_SIZE * grow
+	var top: float = bar.end.y + DASH_PIP_GAP + (DASH_PIP_SIZE.y - pip_size.y) / 2.0
+	var pip: Rect2 = Rect2(Vector2(-pip_size.x / 2.0, top), pip_size)
+	draw_rect(pip.grow(1.0), HEALTH_BACK_COLOR)
+	var ratio: float = clampf(_player.dash_ready_ratio(), 0.0, 1.0)
+	if ratio >= 1.0:
+		draw_rect(pip, DASH_PIP_READY)
+	elif ratio > 0.0:
+		draw_rect(Rect2(pip.position, Vector2(pip.size.x * ratio, pip.size.y)), DASH_PIP_WAITING)
 
 
 func _is_low() -> bool:
