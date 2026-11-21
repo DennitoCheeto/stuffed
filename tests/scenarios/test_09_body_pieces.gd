@@ -79,6 +79,38 @@ func test_ac99_raincoat_dash_leaves_a_puddle_that_slows_and_fizzles() -> void:
 	assert_true(coat.puddles().is_empty(), "dried up after 3 s")
 
 
+## #328: the puddle is drawn as a felt puddle: it spreads and fades in, its edge wobbles (not a
+## flat capsule), and it fades out at the end.
+func test_328_the_puddle_spreads_in_with_a_wobbly_edge() -> void:
+	_wear(RAINCOAT, 1)
+	await _quiet_run()
+	var hero: Player = first_player()
+	disarm(hero)
+	var coat: Raincoat = hero.get_node("Raincoat") as Raincoat
+	await tap_action("p1_dash")
+	for i: int in 60:
+		if not coat.puddles().is_empty():
+			break
+		await wait_physics_frames(1)
+	var puddle: RaincoatPuddle = coat.puddles()[0]
+	assert_lt(puddle.drawn_radius(), puddle.radius, "it spreads in")
+	assert_lt(puddle.modulate.a, 1.0, "and fades in")
+	await wait_seconds(RaincoatPuddle.SPREAD_SECONDS + 0.2)
+	assert_almost_eq(puddle.drawn_radius(), puddle.radius, 0.01, "then has its full size")
+	assert_almost_eq(puddle.modulate.a, 1.0, 0.01)
+	var nearest: float = INF
+	var farthest: float = 0.0
+	for point: Vector2 in puddle.outline():
+		var on_path: Vector2 = Geometry2D.get_closest_point_to_segment(
+			point, puddle.from, puddle.to
+		)
+		nearest = minf(nearest, point.distance_to(on_path))
+		farthest = maxf(farthest, point.distance_to(on_path))
+	assert_gt(farthest - nearest, puddle.radius * 0.15, "a wobbly edge, not a flat capsule")
+	await wait_seconds(RAINCOAT.seconds - RaincoatPuddle.FADE_SECONDS)
+	assert_lt(puddle.modulate.a, 1.0, "it fades out at the end")
+
+
 func test_ac99_raincoat_slow_at_each_level() -> void:
 	var run: Run = await _quiet_run()
 	var spot: Vector2 = first_player().global_position + Vector2(0.0, 300.0)
