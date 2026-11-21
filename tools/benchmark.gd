@@ -9,10 +9,13 @@ extends SceneTree
 ## Add `-- --hero=pip` to play as that hero (spec 08 §13: compare draw calls with Banane's).
 ## Add `-- --gear` to wear a Lv 3 Lookout Cap, Picnic Apron and Jingle Bell (spec 09 §12: compare
 ## with the same run without gear; within ~5% fps, at most +3 draw calls).
+## Add `-- --evolutions` to carry all evolved weapons at once (spec 10 §11: at most +15 draw calls
+## compared to `main` before M6, no frame over 16 ms). Every mode prints its worst frame time.
 
 const MAIN_SCENE: PackedScene = preload("res://src/main/main.tscn")
 const SHAMBLER: EnemyStats = preload("res://data/enemies/shambler.tres")
 const SNIPER: WeaponStats = preload("res://data/weapons/sewing_pin_sniper.tres")
+const POOL: UpgradePool = preload("res://data/upgrade_pool.tres")
 const ZOMBIES: int = 500
 const SIEGE_ZOMBIES: int = 300
 const SHOTS: int = 600
@@ -50,6 +53,8 @@ func _start() -> void:
 	# Main applies the saved screen options on boot: keep V-Sync off for honest fps.
 	GameSettings.reset()
 	GameSettings.vsync = false
+	# First-time hint notes would only add a note to the picture.
+	GameSettings.hints = false
 	GameSettings.save()
 	var main: Main = MAIN_SCENE.instantiate()
 	main.quit_enabled = false
@@ -62,6 +67,7 @@ func _start() -> void:
 		main.town.plushies[hero] = "in_town"
 		main.town.set_hero(0, hero)
 	var geared: bool = OS.get_cmdline_user_args().has("--gear")
+	var evolved: bool = OS.get_cmdline_user_args().has("--evolutions")
 	if geared:
 		_dress(main)
 	(main.current_screen as TitleScreen).start_button.pressed.emit()
@@ -90,6 +96,9 @@ func _start() -> void:
 	for i: int in 4:
 		boomerang.level_up()
 		_sniper.level_up()
+	if evolved:
+		for evolution: EvolutionDef in POOL.evolutions:
+			banane.add_weapon(evolution.evolved)
 	physics_frame.connect(_top_up)
 	if _siege:
 		# Only once the crowd is in: a siege with no waves and nobody left is won at once.
@@ -102,8 +111,13 @@ func _start() -> void:
 	var process_ms: float = 0.0
 	var physics_ms: float = 0.0
 	var samples: int = 0
+	var worst_ms: float = 0.0
+	var last: int = Time.get_ticks_usec()
 	while Time.get_ticks_usec() - start < SECONDS * 1_000_000.0:
 		await process_frame
+		var now: int = Time.get_ticks_usec()
+		worst_ms = maxf(worst_ms, (now - last) / 1000.0)
+		last = now
 		draw_calls += Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)
 		process_ms += Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0
 		physics_ms += Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0
@@ -111,11 +125,13 @@ func _start() -> void:
 	_save_shot()
 	var seconds: float = (Time.get_ticks_usec() - start) / 1_000_000.0
 	var fps: float = (Engine.get_frames_drawn() - frames_before) / seconds
+	var mode: String = "siege" if _siege else "bedroom"
+	mode += (" gear" if geared else "") + (" evolutions" if evolved else "")
 	print(
 		(
 			"BENCHMARK %s zombies=%d shots=%d bullets=%d fps=%.1f draw_calls=%.0f process_ms=%.1f physics_ms=%.1f"
 			% [
-				("siege" if _siege else "bedroom") + (" gear" if geared else ""),
+				mode,
 				_run.enemies.alive_count(),
 				_run.projectiles.active.size() - _run.projectiles.hostile_count(),
 				_run.projectiles.hostile_count(),
@@ -126,6 +142,7 @@ func _start() -> void:
 			]
 		)
 	)
+	print("BENCHMARK worst_frame_ms=%.1f" % worst_ms)
 	quit()
 
 

@@ -931,3 +931,12 @@ _Last updated: 2026-11-21 (PO played the big batch, first feedback in "Playtest 
   the siege too; done at wave 2; siege log has `hints`). The tricks panel keeps its own in-panel first-time line.
   `HintBoard.show_now(id)` shows a note at once (fit check "town (hint note)", 36 screens). Test:
   `test_10_town_hints.gd`.
+- MVP check (M6-13, spec 10 §11-12, AC-116): `tests/unit/test_mvp_content.gd` (≥ 3 heroes, ≥ 10 weapons, ≥ 3
+  evolutions with both halves on the cards, Bedroom + King, ≥ 6 buildings with 3 levels, ≥ 8 gear pieces, siege
+  waves + a boss). `test_10_m6_readability.gd` sweeps every evolved weapon's behaviour sub-resources + the
+  evolution moment (no danger colour, quieter than the zombie ink on every floor incl. dusk), the low-health rose
+  at every pulse, and a live run with all 6 evolutions, a hint note and low health. Benchmark
+  `tools/benchmark.gd -- --evolutions` (all evolved weapons; hints off; also prints `worst_frame_ms`).
+  2026-11-21 on the PO's PC (other Godot running, fps noisy): pre-M6 main with its 4 evolutions 275 draw calls,
+  now with 6: 286-287 (+12, AC ✅); plain run 160 both. Worst frame ~230 ms in Claude's sessions (~6 fps on this
+  machine for every build): the 16 ms rule is judged by the PO's own play / 10-minute run (P-38 … P-41).
