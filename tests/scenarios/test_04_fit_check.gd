@@ -141,7 +141,7 @@ func _visit_all(window: Vector2i) -> void:
 	await _frames()
 	await _visit_run(main.current_screen as Run)
 	await _visit_siege()
-	assert_eq(checked.size(), 33, "every screen checked: %s" % [checked])
+	assert_eq(checked.size(), 35, "every screen checked: %s" % [checked])
 
 
 func _visit_run(run: Run) -> void:
@@ -154,6 +154,9 @@ func _visit_run(run: Run) -> void:
 	run.hud.show_boss(boss)
 	run.hud.show_banner(boss.display_name, "The biggest sock of them all", 5.0)
 	await _check("run (HUD, boss bar, banner)")
+	# The first-time move note (spec 10 §6, AC-114).
+	await _wait_until(_hint_shown.bind(run, "move"))
+	await _check("run (hint note)")
 	run.pause()
 	await _check("pause menu")
 	run.pause_menu.show_settings()
@@ -167,6 +170,8 @@ func _visit_run(run: Run) -> void:
 	await _wait_until(run.level_up_screen.is_open)
 	await wait_seconds(LevelUpScreen.MOMENT_TIME + 0.1)
 	await _check("level-up")
+	await _wait_until(_hint_shown.bind(run, "level_up"))
+	await _check("level-up (hint note)")
 	run.level_up_screen.show_offers(_longest_offers(4, true))
 	await _check("level-up (4 cards, shiny)")
 	run.level_up_screen.picked.emit(run.level_up_screen.offers[0])
@@ -280,6 +285,10 @@ func _wait_until(done: Callable) -> void:
 		left -= 1
 		await wait_process_frames(1)
 	assert_true(done.call(), "waited for the screen")
+
+
+func _hint_shown(run: Run, id: String) -> bool:
+	return RunHints.of(run).is_showing(id)
 
 
 func _gift_shown(run: Run) -> bool:

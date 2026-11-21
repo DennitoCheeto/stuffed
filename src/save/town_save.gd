@@ -9,8 +9,11 @@ extends RefCounted
 ## (older saves have none). Version 5: the night siege countdown, sieges and damaged buildings
 ## (older saves get no warning until the countdown starts as usual). Version 6: the hero each
 ## player plays (spec 08; older saves play Banane). Version 7: sewn-on gear (spec 09: patterns,
-## sewn pieces, what each player wears and hides; older saves have none).
-const VERSION: int = 7
+## sewn pieces, what each player wears and hides; older saves have none). Version 8:
+## first-time hints seen (spec 10 §9; older saves with a town know the basic hints).
+const VERSION: int = 8
+## The hint list: its `basics` are marked seen in older saves with a town.
+const HINT_RULES: HintRules = preload("res://data/ui/hints.tres")
 ## Plushie ids of the placeholder plushies (version 1) -> the real plushies that replaced them.
 const OLD_PLUSHIE_IDS: Dictionary[String, String] = {
 	"kitty": "pip",
@@ -50,6 +53,10 @@ var start_weapon: String = ""
 var heroes: PackedStringArray = []
 ## Sewing patterns found, pieces sewn and what each player wears (spec 09).
 var gear: TownGear = TownGear.new()
+## First-time hints done (HintDef.id, spec 10 §6) and hints that went away once by themselves
+## (they show one more time; see HintBook).
+var hints_seen: PackedStringArray = []
+var hints_once: PackedStringArray = []
 ## The haul of a run that was still going when last saved (RunHaul.to_dict(); empty = none).
 var unfinished_run: Dictionary = {}
 
@@ -269,6 +276,8 @@ func to_dict() -> Dictionary:
 		"sieges_played": sieges_played,
 		"sieges_won": sieges_won,
 		"damaged": Array(damaged),
+		"hints_seen": Array(hints_seen),
+		"hints_once": Array(hints_once),
 		"unfinished_run": unfinished_run.duplicate(true),
 	}
 	gear.write_to(data)
@@ -318,6 +327,10 @@ static func from_dict(data: Dictionary) -> TownSave:
 	if broken is Array:
 		save.damaged = PackedStringArray(broken as Array)
 	save.gear = TownGear.read_from(data)
+	save.hints_seen = _strings(data, "hints_seen")
+	save.hints_once = _strings(data, "hints_once")
+	if version < 8 and (save.runs_started > 0 or save.rebuilt_count() > 0):
+		HintBook.knows_basics(save, HINT_RULES.basics)
 	var unfinished: Variant = data.get("unfinished_run", {})
 	if unfinished is Dictionary:
 		var saved: Dictionary = unfinished as Dictionary
@@ -337,3 +350,11 @@ static func _dict(data: Dictionary, field: String) -> PackedStringArray:
 		for key: Variant in value as Dictionary:
 			keys.append(str(key))
 	return keys
+
+
+## A list-of-strings field (empty if it's missing or not a list).
+static func _strings(data: Dictionary, field: String) -> PackedStringArray:
+	var value: Variant = data.get(field, [])
+	if value is Array:
+		return PackedStringArray(value as Array)
+	return PackedStringArray()

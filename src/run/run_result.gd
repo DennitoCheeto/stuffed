@@ -70,6 +70,8 @@ var tricks: PackedStringArray = []
 var trick_moments: Array[Dictionary] = []
 ## Sewing patterns found in this run (spec 09 §10): {"pattern": gear id, "time": run seconds}.
 var patterns_found: Array[Dictionary] = []
+## First-time hints shown in this run (HintDef.id, spec 10 §10).
+var hints: PackedStringArray = []
 ## What every player wore (spec 09 §10, end screen tags + log): {"player": 0-based index, "slot":
 ## "head" / "body" / "charm", "id", "name", "level": stitch level}.
 var gear: Array[Dictionary] = []

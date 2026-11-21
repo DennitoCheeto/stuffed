@@ -37,6 +37,7 @@ var _siege_news: PackedStringArray = []
 
 
 func _ready() -> void:
+	add_to_group(SettingsPanel.HINT_KEEPERS)
 	GameSettings.load_saved()
 	GameSettings.apply_screen()
 	load_town()
@@ -106,6 +107,7 @@ func start_run(seed_value: int = 0) -> void:
 	run.rescued_before = PackedStringArray(town.plushies.keys())
 	town.unfinished_run = run.haul.to_dict()
 	SaveStore.write(town)
+	RunHints.attach(run, town)
 	_play_music(&"run")
 	_switch_to(run)
 
@@ -195,6 +197,9 @@ func show_end(result: RunResult) -> void:
 	SIEGE_RULES.night_passed(town)
 	var kept: Dictionary[String, int] = _bank_run(share, bonus)
 	result.materials_kept = kept
+	var hints: RunHints = RunHints.of(current_screen)
+	if hints != null:
+		result.hints = hints.shown
 	RunLog.append(result)
 	Crosshair.stop()
 	_play_music(&"town")
@@ -306,3 +311,9 @@ func _switch_to(screen: Node) -> void:
 		remove_child(current_screen)
 	current_screen = screen
 	add_child(screen)
+
+
+## Settings → "Show hints again" (spec 10 §6): every first-time hint shows again.
+func forget_hints() -> void:
+	HintBook.forget(town)
+	SaveStore.write(town)
