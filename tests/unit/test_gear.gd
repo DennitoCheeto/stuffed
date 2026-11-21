@@ -249,7 +249,7 @@ func test_ac102_gear_survives_save_and_reload() -> void:
 	assert_true(SaveStore.write(save))
 	var loaded: TownSave = SaveStore.read()
 	assert_eq(loaded.to_dict(), save.to_dict(), "same town after reloading")
-	assert_eq(int(loaded.to_dict()["version"]), 7)
+	assert_eq(int(loaded.to_dict()["version"]), TownSave.VERSION)
 	assert_true(loaded.gear.has_pattern("raincoat"))
 	assert_false(loaded.gear.has_pattern("propeller_cap"))
 	assert_eq(loaded.gear.stitch_level("lookout_cap"), 2)

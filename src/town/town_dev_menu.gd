@@ -26,6 +26,7 @@ const GIVE_PATTERNS: String = "Give all patterns"
 const SEW_ALL: String = "Sew all"
 const MAX_STITCHES: String = "Max all stitches"
 const CLEAR_GEAR: String = "Clear gear"
+const RESET_HINTS: String = "Reset hints"
 const RESET: String = "Reset town"
 const RESET_SURE: String = "Really reset?"
 ## The Scrapbook's pages and entries (to fill it).
@@ -93,7 +94,7 @@ func _build() -> void:
 	_row(column, [UNLOCK_HEROES, NEXT_HERO], [unlock_all_heroes, next_hero])
 	_row(column, [GIVE_PATTERNS, SEW_ALL], [give_all_patterns, sew_all])
 	_row(column, [MAX_STITCHES, CLEAR_GEAR], [max_all_stitches, clear_gear])
-	_row(column, [RESET], [_ask_reset])
+	_row(column, [RESET_HINTS, RESET], [reset_hints, _ask_reset])
 
 
 func _row(parent: Control, labels: Array[String], actions: Array[Callable]) -> void:
@@ -246,6 +247,12 @@ func max_all_stitches() -> void:
 ## No patterns, no sewn pieces, nothing worn or hidden.
 func clear_gear() -> void:
 	town.save.gear.clear()
+	_saved()
+
+
+## Every first-time hint shows again (spec 10 §10).
+func reset_hints() -> void:
+	HintBook.forget(town.save)
 	_saved()
 
 
