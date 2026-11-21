@@ -30,6 +30,8 @@ var heading: Vector2 = Vector2.ZERO
 var detour: int = 0
 ## Seconds it can't move (banana peel).
 var stun_left: float = 0.0
+## Bosses only: seconds until a stun works on it again.
+var stun_guard_left: float = 0.0
 ## Seconds it stays frozen in place by a bursting snowman (Snow Day, spec 10 §3): icy tint, no
 ## walking, attacking or touching.
 var ice_left: float = 0.0
@@ -133,8 +135,13 @@ func xp_button() -> EnemyStats.XpSize:
 	return elite.xp_button if elite != null else stats.xp_button
 
 
-## Can't move for `seconds` (slipped on a banana peel): it spins and sees stars.
+## Can't move for `seconds` (slipped on a banana peel): it spins and sees stars. A boss shrugs it
+## off in the middle of a pattern and during its stun guard (`BossDef.stun_guard_seconds`, #327).
 func stun(seconds: float) -> void:
+	if boss != null:
+		if stun_guard_left > 0.0 or (brain != null and brain.is_busy()):
+			return
+		stun_guard_left = seconds + boss.stun_guard_seconds
 	stun_left = maxf(stun_left, seconds)
 	if _stars == null:
 		_stars = StunStars.new()
@@ -181,6 +188,7 @@ func tick(delta: float) -> void:
 	_since_hit += delta
 	puppet.chill(frozen or ice_left > 0.0, thaw_shake if frozen else 0.0)
 	stun_left = maxf(stun_left - delta, 0.0)
+	stun_guard_left = maxf(stun_guard_left - delta, 0.0)
 	ice_left = maxf(ice_left - delta, 0.0)
 	slow_left = maxf(slow_left - delta, 0.0)
 	if slow_left <= 0.0:

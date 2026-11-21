@@ -48,4 +48,5 @@ banner_seconds = 2.5
 spawn_rate_scale = 0.4
 first_pattern_delay = 2.0
 pattern_gap_seconds = 2.5
+stun_guard_seconds = 4.0
 pattern_range = 520.0
