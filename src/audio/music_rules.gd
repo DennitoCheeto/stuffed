@@ -15,6 +15,11 @@ extends Resource
 ## The whole music's loudness (before the Music slider).
 @export_range(0.0, 1.0) var loudness: float = 0.5
 @export_range(0.0, 1.0) var stinger_loudness: float = 0.6
+## While a stinger plays the track drops to this share of its loudness (#326: a stinger over a
+## full track sounded like two songs at once) ...
+@export_range(0.0, 1.0) var stinger_duck: float = 0.35
+## ... sliding down and back up over this long.
+@export var duck_seconds: float = 0.15
 ## Run: the second layer level (drums) joins after this many seconds ...
 @export var run_drums_seconds: float = 120.0
 ## ... or as soon as this many zombies are on screen.

@@ -469,7 +469,7 @@ func _reach_goal() -> void:
 	lowest_health_at_goal = _lowest_health()
 	boss_fight = false
 	close_way_home()
-	music_requested.emit(&"run")
+	music_requested.emit(MusicPlayer.SILENCE)  # the goal stinger plays alone (#326)
 	_at_goal = true
 	spawner.active = false
 	enemies.calm = true

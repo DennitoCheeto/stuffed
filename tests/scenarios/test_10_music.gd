@@ -9,6 +9,10 @@ const SHAMBLER: EnemyStats = preload("res://data/enemies/shambler.tres")
 ## Rendering every track takes a few seconds after the first boot (on worker threads).
 const RENDER_WAIT: float = 30.0
 
+var _overlaps: int = 0
+var _most_heard: int = 0
+var _lowest_duck: float = 1.0
+
 
 func _all_ready() -> bool:
 	for track: MusicTrack in RULES.tracks + RULES.stingers:
@@ -162,3 +166,47 @@ func test_ac108_a_lost_siege_plays_its_stinger() -> void:
 	for i: int in 4:
 		siege.dev_menu.press(DevMenu.HURT_FORT)
 	assert_true(await wait_until(_stinger.bind(&"siege_lost"), 15.0), "the siege lost stinger")
+
+
+## #326: one track at a time through the King fight. Outside a crossfade exactly one track is
+## heard. Beating the King fades the boss track out (no extra switch back to the run track),
+## so the goal stinger plays alone; stingers duck the music; Keep going starts endless.
+func test_326_the_king_fight_never_plays_two_tracks_at_once() -> void:
+	_overlaps = 0
+	_most_heard = 0
+	_lowest_duck = 1.0
+	var run: Run = await _quiet_run()
+	first_player().invincible = true
+	await wait_until(_crossfade_done, 3.0)
+	var king: Zombie = run.spawner.spawn_boss(run.spawner.schedule.boss)
+	await _watch_for(2.0)
+	assert_eq(main.music.track, &"boss", "the boss track")
+	assert_eq(main.music.audible_decks().size(), 1, "only the boss track after the crossfade")
+	run.enemies.damage(king, king.max_health * 10.0)
+	await _watch_for(0.5)
+	assert_true(_stinger(&"goal"), "the goal stinger plays")
+	assert_eq(main.music.track, MusicPlayer.SILENCE, "the boss track fades out")
+	assert_lt(_lowest_duck, 1.0, "the stinger ducks the music")
+	await _watch_for(RULES.crossfade_seconds)
+	assert_eq(main.music.audible_decks().size(), 0, "the goal stinger plays alone")
+	await wait_for_goal_screen(run)
+	assert_eq(main.music.track, MusicPlayer.SILENCE, "no track comes back on the goal screen")
+	run.goal_screen.endless_button.pressed.emit()
+	await _watch_for(2.0)
+	assert_eq(main.music.track, &"endless", "Keep going crossfades to endless")
+	assert_eq(main.music.audible_decks().size(), 1, "only endless after the crossfade")
+	assert_eq(_overlaps, 0, "never two tracks outside a crossfade")
+	assert_lt(_most_heard, 3, "never more than one crossfade at a time")
+
+
+## Watches the music every frame for `seconds`: counts moments where the current track plays
+## fully while another one can still be heard.
+func _watch_for(seconds: float) -> void:
+	for i: int in roundi(seconds * FPS):
+		var music: MusicPlayer = main.music
+		var heard: int = music.audible_decks().size()
+		_most_heard = maxi(_most_heard, heard)
+		_lowest_duck = minf(_lowest_duck, music.duck)
+		if music.deck != null and music.deck.fade >= 1.0 and heard > 1:
+			_overlaps += 1
+		await wait_physics_frames(1)
