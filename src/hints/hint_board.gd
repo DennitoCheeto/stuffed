@@ -35,9 +35,17 @@ func _init() -> void:
 func try_show(id: String) -> bool:
 	if save == null or note != null or shown.has(id) or not HintBook.is_due(save, id):
 		return false
+	return show_now(id)
+
+
+## Shows hint `id` right away, seen or not, in place of any note showing (tests, fit check).
+func show_now(id: String) -> bool:
 	var hint: HintDef = RULES.find(id)
 	if hint == null:
 		return false
+	if note != null:
+		remove_child(note)
+		note.queue_free()
 	note = HintNote.new(hint, RULES.font_size, RULES.tilt_degrees)
 	note.fade = 0.0
 	add_child(note)

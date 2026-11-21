@@ -98,6 +98,9 @@ func _visit_all(window: Vector2i) -> void:
 	await _card_at_bottom(town, "town card (bottom, maxed)")
 	_town_moments(town)
 	await _check("town (toast, banner, prompt)")
+	# The longest town note (spec 10 §6, AC-114).
+	TownHints.of(town).show_now("sewing")
+	await _check("town (hint note)")
 	town.open_menu()
 	await _check("town menu")
 	town.menu.show_settings()
@@ -141,7 +144,7 @@ func _visit_all(window: Vector2i) -> void:
 	await _frames()
 	await _visit_run(main.current_screen as Run)
 	await _visit_siege()
-	assert_eq(checked.size(), 35, "every screen checked: %s" % [checked])
+	assert_eq(checked.size(), 36, "every screen checked: %s" % [checked])
 
 
 func _visit_run(run: Run) -> void:

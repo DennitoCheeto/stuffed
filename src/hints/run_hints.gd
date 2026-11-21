@@ -43,6 +43,7 @@ func _watch() -> void:
 	var player: Player = _first_player()
 	if player == null:
 		return
+	_watch_siege()
 	_watch_move(player)
 	_watch_level_up()
 	_offer("xp", not run.pickups.buttons.is_empty())
@@ -53,6 +54,17 @@ func _watch() -> void:
 	_watch_evolution(player)
 	_watch_boss()
 	_watch_way_home()
+
+
+## The night siege's goal (spec 10 §6): done once the second wave comes.
+func _watch_siege() -> void:
+	var siege: Siege = run as Siege
+	if siege == null:
+		return
+	if _offer("siege", true):
+		return
+	if is_showing("siege") and siege.waves != null and siege.waves.wave >= 1:
+		finish("siege")
 
 
 func _watch_move(player: Player) -> void:

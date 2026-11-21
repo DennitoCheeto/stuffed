@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="HintRules" load_steps=11 format=3]
+[gd_resource type="Resource" script_class="HintRules" load_steps=18 format=3]
 
 [ext_resource type="Script" path="res://src/hints/hint_rules.gd" id="1_rules"]
 [ext_resource type="Script" path="res://src/hints/hint_def.gd" id="2_def"]
@@ -52,7 +52,49 @@ id = "way_home"
 text = "Stand in the portal to go home with everything"
 place = 1
 
+[sub_resource type="Resource" id="Hint_town"]
+script = ExtResource("2_def")
+id = "town"
+text = "Walk to a ruin and press {interact} to build"
+place = 1
+
+[sub_resource type="Resource" id="Hint_can_build"]
+script = ExtResource("2_def")
+id = "can_build"
+text = "You have enough: press {interact} at the building"
+place = 1
+
+[sub_resource type="Resource" id="Hint_tricks"]
+script = ExtResource("2_def")
+id = "tricks"
+text = "{tricks} at a built building opens its tricks: they work in every run"
+place = 1
+
+[sub_resource type="Resource" id="Hint_siege_warning"]
+script = ExtResource("2_def")
+id = "siege_warning"
+text = "The moon counts down: when it's full, defend the fort"
+place = 1
+
+[sub_resource type="Resource" id="Hint_siege"]
+script = ExtResource("2_def")
+id = "siege"
+text = "Keep the fort standing until the last wave"
+place = 1
+
+[sub_resource type="Resource" id="Hint_wardrobe"]
+script = ExtResource("2_def")
+id = "wardrobe"
+text = "Swap heroes at the Wardrobe: {interact}"
+place = 1
+
+[sub_resource type="Resource" id="Hint_sewing"]
+script = ExtResource("2_def")
+id = "sewing"
+text = "Sew the patterns you find into gear at the Sewing Workshop: {interact}"
+place = 1
+
 [resource]
 script = ExtResource("1_rules")
-hints = Array[ExtResource("2_def")]([SubResource("Hint_move"), SubResource("Hint_xp"), SubResource("Hint_level_up"), SubResource("Hint_gift_box"), SubResource("Hint_floor_pickup"), SubResource("Hint_evolution_ready"), SubResource("Hint_boss"), SubResource("Hint_way_home")])
+hints = Array[ExtResource("2_def")]([SubResource("Hint_move"), SubResource("Hint_xp"), SubResource("Hint_level_up"), SubResource("Hint_gift_box"), SubResource("Hint_floor_pickup"), SubResource("Hint_evolution_ready"), SubResource("Hint_boss"), SubResource("Hint_way_home"), SubResource("Hint_town"), SubResource("Hint_can_build"), SubResource("Hint_tricks"), SubResource("Hint_siege_warning"), SubResource("Hint_siege"), SubResource("Hint_wardrobe"), SubResource("Hint_sewing")])
 basics = PackedStringArray("move", "xp", "level_up", "gift_box", "floor_pickup", "evolution_ready", "boss", "way_home", "town", "can_build")
