@@ -92,8 +92,10 @@ func _visit_all(window: Vector2i) -> void:
 	title.start_button.pressed.emit()
 	await _frames()
 	var town: Town = main.current_screen as Town
+	await _card_at_bottom(town, "town card (bottom ruin)")
 	await _max_the_town(town)
 	await _check("town")
+	await _card_at_bottom(town, "town card (bottom, maxed)")
 	_town_moments(town)
 	await _check("town (toast, banner, prompt)")
 	town.open_menu()
@@ -139,7 +141,7 @@ func _visit_all(window: Vector2i) -> void:
 	await _frames()
 	await _visit_run(main.current_screen as Run)
 	await _visit_siege()
-	assert_eq(checked.size(), 31, "every screen checked: %s" % [checked])
+	assert_eq(checked.size(), 33, "every screen checked: %s" % [checked])
 
 
 func _visit_run(run: Run) -> void:
@@ -350,6 +352,19 @@ func _visit_sewing_table(town: Town) -> void:
 	town.sewing.table.close()
 	workshop.level = built
 	town.save.building_levels["sewing_workshop"] = built
+
+
+## #324: Banane stands above the Party Shop (the lowest building) with the camera at the town's
+## bottom edge; the info card must still be whole on screen.
+func _card_at_bottom(town: Town, screen: String) -> void:
+	var rect: Rect2 = town.buildings[&"party_shop"].spot.rect
+	var hero: Player = Players.all(town.get_tree())[0]
+	hero.global_position = Vector2(rect.get_center().x, rect.position.y - 40)
+	town.camera.snap_to_players()
+	await _check(screen)
+	assert_true(town.card.visible, "the card shows at the Party Shop")
+	assert_true(ScreenFit.world_fits(town.card, view.get_visible_rect()), "%s on screen" % screen)
+	_check_world_labels([town.card])
 
 
 ## The town's moments at once with long words: Banane at a building (card and prompt), the

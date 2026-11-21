@@ -13,6 +13,8 @@ const GAP: float = 18.0
 const SIGN_HEIGHT: float = 64.0
 ## Resting tilt in degrees and how small it starts when it pops in.
 const TILT: float = -1.5
+## Space the card keeps from the edge of the screen.
+const SCREEN_MARGIN: float = 24.0
 ## Room for the hand-written name next to the level tag.
 const TITLE_WIDTH: float = 230.0
 const POP_FROM: float = 0.9
@@ -78,8 +80,12 @@ func _init() -> void:
 
 
 ## Shows the card for `target` with the town's jars in `save`, above the building or (when the
-## player stands above it) below its sign, with an extra `note` line if there is one.
-func show_for(target: TownBuilding, save: TownSave, above: bool, note: String = "") -> void:
+## player stands above it) below its sign, with an extra `note` line if there is one. `view` is
+## the part of the town on screen (same coordinates as the card): the card takes the other side
+## when its side doesn't fit and always stays inside it (#324). An empty `view` = no limit.
+func show_for(
+	target: TownBuilding, save: TownSave, above: bool, note: String = "", view: Rect2 = Rect2()
+) -> void:
 	var moved: bool = building != target or not visible
 	building = target
 	var def: BuildingDef = target.building
@@ -107,15 +113,31 @@ func show_for(target: TownBuilding, save: TownSave, above: bool, note: String = 
 	tricks_label.visible = not tricks_label.text.is_empty()
 	visible = true
 	reset_size()
-	var rect: Rect2 = target.spot.rect
-	var top: float = rect.position.y - size.y - GAP
-	if not above:
-		top = rect.end.y + SIGN_HEIGHT
-	position = Vector2(rect.get_center().x - size.x / 2.0, top)
+	position = place(target.spot.rect, size, above, view)
 	pivot_offset = size / 2.0
 	rotation = deg_to_rad(TILT)
 	if moved:
 		_pop_in()
+
+
+## Where a card of `card_size` goes for a building at `rect`: above it (or below its sign when
+## `above` is false), on the other side when that one doesn't fit into `view`, then pushed inside
+## `view` minus [constant SCREEN_MARGIN].
+static func place(rect: Rect2, card_size: Vector2, above: bool, view: Rect2) -> Vector2:
+	var over: float = rect.position.y - card_size.y - GAP
+	var under: float = rect.end.y + SIGN_HEIGHT
+	var spot: Vector2 = Vector2(rect.get_center().x - card_size.x / 2.0, over if above else under)
+	if view.size.x <= 0.0 or view.size.y <= 0.0:
+		return spot
+	var room: Rect2 = view.grow(-SCREEN_MARGIN)
+	var fits_over: bool = over >= room.position.y
+	var fits_under: bool = under + card_size.y <= room.end.y
+	if above and not fits_over and fits_under:
+		spot.y = under
+	elif not above and not fits_under and fits_over:
+		spot.y = over
+	var far: Vector2 = (room.end - card_size).max(room.position)
+	return spot.clamp(room.position, far)
 
 
 func hide_card() -> void:
