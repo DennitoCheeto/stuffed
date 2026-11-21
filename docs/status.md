@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-11-20 (M4.5 all 10 tickets merged (M4.5-10 = PR #319); **next: the PO plays the big acceptance batch P-22 … P-37 (M3.6, M3.7, M4, M5, M4.5) with the "latest" build**; M6 side: M6-09 Snow Day + Bear Slam (#291): PR #320 open)_
+_Last updated: 2026-11-21 (PO played the big batch, first feedback in "Playtest notes (big batch)"; milestone **Playtest fixes (Nov 2026)**, issues #323-#333; next: fix the bugs #323-#330 one per PR, look board for #331; P-22 … P-37 answers still open. M6: M6-09 merged (PR #320), next M6-10)_
 
 ## Where we are
 
@@ -96,6 +96,20 @@ _Last updated: 2026-11-20 (M4.5 all 10 tickets merged (M4.5-10 = PR #319); **nex
 - PO idea (2026-10-24, "idk"): **walk into the buildings** (interiors). Park it; ask again when the town visual
   pass or the siege is specced.
 - Economy (M3-05/PR #113): cheapest rebuild 200 coins, all 6 at level 3 ≈ 17k coins.
+
+## Playtest notes (big batch, 2026-11-21, first round)
+
+- Free-form feedback + screenshots, no P-22 … P-37 yes/no yet (ask again after the fixes).
+- Liked: Banana Split evolution "really cool", sewing table "really nice!!!".
+- Bugs, milestone "Playtest fixes (Nov 2026)": #323 XP buttons look like rug buttons, #324 town card off the
+  bottom of the screen, #325 sewing table changes size on "Hide all" + panels need a close X, #326 two music
+  tracks at once (King fight?), #327 Banana Split near-perma-slips bosses + odd slip-in-attack animation,
+  #328 Raincoat puddle looks odd, #329 Stuffing Cloud too short (Piggy's death cloud always hits you),
+  #330 dash readiness invisible (one dash, 1.5 s cooldown; only a thin ring today).
+- PO decisions: #331 gear "glued on top" → **look board first**, then redraw ("not visible in a run" was
+  most likely "Hide all" on: confirm). #332 loadout view in the **pause menu and in town** (short spec addendum).
+  #333 **every weapon gets an evolution** (6 more: Bouncy Yarn Ball, Button Shotgun, Stuffing Cloud, Thimble
+  Mortar, Thread Whip, Zipper Ray): own spec later.
 
 ## Playtest notes (M3.5, 2026-10-24, first look)
 
