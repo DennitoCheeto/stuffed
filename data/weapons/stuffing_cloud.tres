@@ -6,26 +6,26 @@
 
 [sub_resource type="Resource" id="Resource_level1"]
 script = ExtResource("2_level")
-damage = 3.0
+damage = 4.0
 cooldown = 0.4
 reach = 0.0
 count = 1
 speed = 0.0
 pierce = 0
-area = 55.0
+area = 120.0
 duration = 0.0
 spread_degrees = 0.0
 card_text = "A soft cloud around you hurts every zombie inside it, 2–3 times a second."
 
 [sub_resource type="Resource" id="Resource_level2"]
 script = ExtResource("2_level")
-damage = 3.0
+damage = 4.0
 cooldown = 0.4
 reach = 0.0
 count = 1
 speed = 0.0
 pierce = 0
-area = 70.0
+area = 140.0
 duration = 0.0
 spread_degrees = 0.0
 card_text = "Bigger cloud."
@@ -38,10 +38,10 @@ reach = 0.0
 count = 1
 speed = 0.0
 pierce = 0
-area = 70.0
+area = 140.0
 duration = 0.0
 spread_degrees = 0.0
-card_text = "Damage 3 → 5."
+card_text = "Damage 4 → 5."
 
 [sub_resource type="Resource" id="Resource_level4"]
 script = ExtResource("2_level")
@@ -51,7 +51,7 @@ reach = 0.0
 count = 1
 speed = 0.0
 pierce = 0
-area = 70.0
+area = 140.0
 duration = 0.0
 spread_degrees = 0.0
 card_text = "Puffs faster: every 0.4 → 0.3 seconds."
@@ -64,7 +64,7 @@ reach = 0.0
 count = 1
 speed = 0.0
 pierce = 0
-area = 85.0
+area = 160.0
 duration = 0.0
 spread_degrees = 0.0
 card_text = "Even bigger cloud, and damage 5 → 6."

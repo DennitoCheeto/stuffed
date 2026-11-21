@@ -8,10 +8,12 @@ const POOL: UpgradePool = preload("res://data/upgrade_pool.tres")
 const CLOUD: WeaponStats = preload("res://data/weapons/stuffing_cloud.tres")
 const YARN: WeaponStats = preload("res://data/weapons/bouncy_yarn_ball.tres")
 const MORTAR: WeaponStats = preload("res://data/weapons/thimble_mortar.tres")
+const BLOATER: EnemyStats = preload("res://data/enemies/bloater.tres")
 ## Far outside the 1920 × 1080 view around Banane, but still in the arena.
 const OFF_SCREEN: Vector2 = Vector2(2600, 0)
 
 var run: Run
+var _piggy_distance: float = INF
 
 
 ## A run without spawning or the boomerang, where only `id` is on the cards; picks it.
@@ -78,7 +80,7 @@ func test_ac2_cloud_level_2_is_bigger() -> void:
 	var cloud_weapon: Weapon = await _run_with_card(&"stuffing_cloud")
 	await wait_until(func() -> bool: return not _shots(cloud_weapon).is_empty(), 2.0)
 	var cloud: CloudProjectile = _shots(cloud_weapon)[0] as CloudProjectile
-	var small: float = cloud.scale.x
+	var small: float = cloud.radius()
 	# Just outside the level-1 cloud, inside the level-2 one.
 	var edge: Zombie = _dummy(Vector2(CLOUD.at_level(1).area + SHAMBLER.radius + 6.0, 0))
 	await wait_seconds(0.6)
@@ -86,7 +88,29 @@ func test_ac2_cloud_level_2_is_bigger() -> void:
 	_level_up(&"stuffing_cloud", 2)
 	await wait_seconds(0.6)
 	assert_true(_hurt(edge), "level 2 does")
-	assert_gt(cloud.scale.x, small * 1.12, "and the cloud looks bigger")
+	assert_gt(cloud.radius(), small * 1.12, "and the cloud looks bigger")
+
+
+## #329: a Piggy walking into the level-1 cloud dies before it is close enough for its own
+## death cloud to reach the hero.
+func test_329_a_piggy_the_cloud_kills_bursts_out_of_reach() -> void:
+	var cloud_weapon: Weapon = await _run_with_card(&"stuffing_cloud")
+	assert_not_null(cloud_weapon)
+	run.pickups.process_mode = Node.PROCESS_MODE_DISABLED  # no level-up in the middle
+	var banane: Player = first_player()
+	var piggy: Zombie = run.enemies.spawn(BLOATER, banane.global_position + Vector2(260, 0))
+	var health: float = banane.health
+	_piggy_distance = INF
+	for i: int in roundi(8.0 * FPS):
+		if not is_instance_valid(piggy) or piggy.dead:
+			break
+		_piggy_distance = piggy.global_position.distance_to(banane.global_position)
+		await wait_physics_frames(1)
+	assert_lt(_piggy_distance, INF, "the cloud killed it")
+	var reach: float = BLOATER.death_cloud.radius + banane.stats.hitbox_radius
+	assert_gt(_piggy_distance, reach, "it burst outside its cloud's reach of the hero")
+	await wait_seconds(0.8)
+	assert_eq(banane.health, health, "the hero isn't hurt by the Piggy's cloud")
 
 
 func test_ac1_yarn_ball_bounces_between_zombies() -> void:
