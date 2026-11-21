@@ -11,6 +11,8 @@ const BUTTON_WIDTH: float = 360.0
 
 ## The evolutions to list on the Recipes page (the run sets it).
 var upgrade_pool: UpgradePool
+## Recipes of these weapons stay off the Recipes page (heroes not unlocked yet, AC-107).
+var hidden_weapons: Array[StringName] = []
 ## Damage numbers, reduced menu animations and volumes (spec 04 §6.2).
 var settings: SettingsPanel = SettingsPanel.new()
 var cloth: MenuCloth = MenuCloth.new(0.82, 0.35)
@@ -96,7 +98,7 @@ func _on_settings_closed() -> void:
 func show_recipes() -> void:
 	panel.visible = false
 	recipes_page.visible = true
-	recipes_page.show_recipes(upgrade_pool)
+	recipes_page.show_recipes(upgrade_pool, hidden_weapons)
 
 
 func _show_main() -> void:
@@ -108,3 +110,9 @@ func _show_main() -> void:
 		recipes_button.grab_focus()
 	else:
 		resume_button.grab_focus()
+
+
+## What the Recipes page lists: `pool`'s evolutions, except those of `hidden` weapons.
+func set_recipes(pool: UpgradePool, hidden: Array[StringName]) -> void:
+	upgrade_pool = pool
+	hidden_weapons = hidden.duplicate()

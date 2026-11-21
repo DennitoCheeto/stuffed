@@ -38,12 +38,15 @@ func _init() -> void:
 	column.add_child(back_button)
 
 
-## Fills the rows from `pool`'s evolutions, showing the names of the ones seen so far.
-func show_recipes(pool: UpgradePool) -> void:
+## Fills the rows from `pool`'s evolutions (not those of `hidden` weapons: their hero isn't
+## unlocked yet), showing the names of the ones seen so far.
+func show_recipes(pool: UpgradePool, hidden: Array[StringName] = []) -> void:
 	for row: RecipeRow in rows:
 		row.queue_free()
 	rows.clear()
 	for evolution: EvolutionDef in pool.evolutions:
+		if hidden.has(evolution.weapon):
+			continue
 		var row: RecipeRow = RecipeRow.new()
 		_list.add_child(row)
 		row.show_recipe(evolution, pool, RecipeBook.is_seen(evolution.evolved.id))

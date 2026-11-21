@@ -205,7 +205,7 @@ func _ready() -> void:
 	goal_screen.endless_chosen.connect(_on_endless_chosen)
 	pause_menu.resumed.connect(unfreeze.bind(&"pause"))
 	pause_menu.quit_requested.connect(_on_quit_requested)
-	pause_menu.upgrade_pool = upgrade_pool
+	pause_menu.set_recipes(upgrade_pool, perks.locked_hero_weapons)
 	pickup_arrows.floor_items = floor_items
 	hud.add_child(pickup_arrows)
 	vignette = RoomVignette.new(arena.room)

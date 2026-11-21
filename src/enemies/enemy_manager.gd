@@ -57,6 +57,9 @@ var play_rect: Rect2 = Rect2()
 ## The night siege (spec 07): the fort and buildings zombies walk to and knock at when no hero
 ## draws them (null in a run).
 var siege: SiegeTargets
+## Things that draw nearby zombies to them instead of the heroes (Snow Day snowmen); bosses
+## ignore them.
+var lures: Array[ZombieLure] = []
 var max_alive: int = 500
 ## Endless mode makes zombies tougher by raising these.
 var health_scale: float = 1.0
@@ -251,6 +254,7 @@ func _physics_process(delta: float) -> void:
 	_grid.clear()
 	for zombie: Zombie in zombies:
 		_grid.insert(zombie, zombie.position)
+	_drop_old_lures()
 	var frozen: bool = is_frozen()
 	var shake: float = thaw_shake()
 	for zombie: Zombie in zombies:
@@ -284,7 +288,9 @@ func _take_turn(zombie: Zombie, players: Array[Player], delta: float) -> void:
 		_move_boss(zombie, target, goal, delta)
 	else:
 		_move(zombie, target, goal, delta)
-	if zombie.brain == null or not zombie.brain.is_airborne():
+	# A zombie frozen by a snowman (Snow Day) can't hurt by touch.
+	var grounded: bool = zombie.brain == null or not zombie.brain.is_airborne()
+	if grounded and zombie.ice_left <= 0.0:
 		_touch_players(zombie, players)
 		if siege != null:
 			siege.touch(zombie, delta)
@@ -345,7 +351,14 @@ func _alive_players() -> Array[Player]:
 
 func _move(zombie: Zombie, target: Player, goal: SiegeTarget, delta: float) -> void:
 	# In the siege a goal (the fort or a building, see SiegeTargets) wins over a hero.
-	var walk: Vector2 = goal.walk(zombie) if goal != null else _walk(zombie, target)
+	var lure: ZombieLure = _lure_for(zombie) if goal == null else null
+	var walk: Vector2
+	if goal != null:
+		walk = goal.walk(zombie)
+	elif lure != null:
+		walk = lure.walk(zombie)
+	else:
+		walk = _walk(zombie, target)
 	walk = _around_furniture(zombie, walk)
 	zombie.heading = walk.normalized()
 	var step: Vector2 = (walk + zombie.knockback) * delta + _separation(zombie)
@@ -459,7 +472,7 @@ func _may_burst() -> bool:
 ## Where a zombie wants to go: straight at its target, or (ranged zombies) to a spot at their
 ## keep distance. A ranged zombie stands still while it winds up.
 func _walk(zombie: Zombie, target: Player) -> Vector2:
-	if target == null or zombie.stun_left > 0.0:
+	if target == null or zombie.is_stunned():
 		return Vector2.ZERO
 	var toward: Vector2 = zombie.position.direction_to(target.global_position)
 	toward *= zombie.current_speed()
@@ -550,3 +563,23 @@ func _burst_into_cloud(zombie: Zombie) -> void:
 	var source: String = zombie.display_name
 	cloud.launch(zombie.position, cloud_stats.radius, cloud_stats.duration, damage_amount, source)
 	zombie_burst.emit(zombie, cloud)
+
+
+## The closest lure that draws `zombie` (null = none).
+func _lure_for(zombie: Zombie) -> ZombieLure:
+	var best: ZombieLure = null
+	var best_distance: float = INF
+	for lure: ZombieLure in lures:
+		if not lure.pulls(zombie):
+			continue
+		var distance: float = zombie.position.distance_squared_to(lure.at)
+		if distance < best_distance:
+			best = lure
+			best_distance = distance
+	return best
+
+
+func _drop_old_lures() -> void:
+	for i: int in range(lures.size() - 1, -1, -1):
+		if not lures[i].active:
+			lures.remove_at(i)

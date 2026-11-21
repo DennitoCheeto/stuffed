@@ -1,0 +1,61 @@
+[gd_resource type="Resource" script_class="WeaponStats" load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://src/weapons/weapon_stats.gd" id="1_stats"]
+[ext_resource type="Script" path="res://src/weapons/weapon_level.gd" id="2_level"]
+[ext_resource type="Script" path="res://src/weapons/shot_look.gd" id="5_look"]
+[ext_resource type="Script" path="res://src/weapons/snow_day.gd" id="3_behaviour"]
+[ext_resource type="Script" path="res://src/weapons/snowmen.gd" id="4_snowmen"]
+
+[sub_resource type="Resource" id="Resource_level1"]
+script = ExtResource("2_level")
+damage = 16.0
+cooldown = 1.2
+reach = 0.0
+count = 3
+speed = 440.0
+pierce = 0
+area = 72.0
+duration = 0.0
+spread_degrees = 0.0
+card_text = "Big icy snowballs; each landing builds a snowman that draws zombies in, then bursts and freezes them."
+
+[sub_resource type="Resource" id="Resource_snowmen"]
+script = ExtResource("4_snowmen")
+max_snowmen = 3
+lifetime = 4.0
+lure_reach = 220.0
+stand_off = 18.0
+burst_radius = 95.0
+burst_damage = 20.0
+freeze_seconds = 1.5
+boss_freeze_share = 0.3
+build_seconds = 0.25
+wobble_seconds = 0.5
+burst_pitch = 1.0
+
+[sub_resource type="Resource" id="Resource_look"]
+script = ExtResource("5_look")
+part = &"shot/snow_day_ball"
+size = 1.35
+trail_color = Color(0.78, 0.93, 1, 0.5)
+trail_amount = 10
+trail_seconds = 0.35
+flash_color = Color(0.88, 0.97, 1, 0.5)
+flash_radius = 26.0
+
+[resource]
+script = ExtResource("1_stats")
+sound = &"snow_day"
+sting = &"sting_snow"
+id = &"snow_day"
+display_name = "Snow Day"
+run_title = "Snowman Builder"
+behaviour = ExtResource("3_behaviour")
+knockback = 50.0
+hit_radius = 0.0
+shot_look = SubResource("Resource_look")
+evolved_from = &"snowball_toss"
+slow = 0.5
+slow_seconds = 1.5
+snowmen = SubResource("Resource_snowmen")
+levels = Array[ExtResource("2_level")]([SubResource("Resource_level1")])
