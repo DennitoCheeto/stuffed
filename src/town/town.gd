@@ -727,7 +727,12 @@ func _is_open(spot: TownSpot) -> bool:
 
 func _show_card(building: TownBuilding, player: Player) -> void:
 	var above: bool = player.global_position.y > building.spot.rect.get_center().y
-	card.show_for(building, save, above, _note_for(building))
+	card.show_for(building, save, above, _note_for(building), _view_rect())
+
+
+## The part of the town on screen, in the town's own coordinates.
+func _view_rect() -> Rect2:
+	return get_global_transform_with_canvas().affine_inverse() * get_viewport_rect()
 
 
 func _build_walls() -> void:

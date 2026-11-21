@@ -78,6 +78,13 @@ static func _check(control: Control, screen: Rect2, box: Control, found: PackedS
 		found.append("%s is cut off" % name)
 
 
+## True if a control in the game world (e.g. the town's info card) is whole on `screen`, half a
+## margin away from its edge (its tilt may stick out a few px).
+static func world_fits(control: Control, screen: Rect2) -> bool:
+	var rect: Rect2 = control.get_global_transform_with_canvas() * Rect2(Vector2.ZERO, control.size)
+	return screen.grow(-MARGIN / 2.0 + SLACK).encloses(rect)
+
+
 ## True if some of the label's text can't be seen (trimmed, clipped or lines hidden).
 static func is_cut_off(label: Label) -> bool:
 	if label.text.strip_edges().is_empty():
