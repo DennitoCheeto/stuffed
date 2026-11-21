@@ -46,7 +46,9 @@ var shield_outline: ShieldOutline
 var spare_heart: SpareHeartPatch
 ## Party Shop: the pocket for a carried floor pickup (Pocket Pickup).
 var pocket: PocketPatch
-## The small trick pieces right of the health bar (heart patch, pocket), side by side.
+## The dash, first in the row: when it is ready again (#330).
+var dash: DashPatch
+## The small pieces right of the health bar (dash, heart patch, pocket), side by side.
 var trick_row: HBoxContainer
 
 var _player: Player
@@ -76,6 +78,8 @@ func _ready() -> void:
 	trick_row.add_theme_constant_override("separation", int(HEART_GAP))
 	trick_row.position = Vector2(health_bar.offset_right + HEART_GAP, health_bar.offset_top)
 	add_child(trick_row)
+	dash = DashPatch.new()
+	trick_row.add_child(dash)
 	spare_heart = SpareHeartPatch.new()
 	trick_row.add_child(spare_heart)
 	pocket = PocketPatch.new()
@@ -146,6 +150,7 @@ func follow_player(player: Player, upgrade_pool: UpgradePool) -> void:
 	shield_outline.follow(player)
 	spare_heart.follow(player)
 	pocket.follow(player)
+	dash.follow(player)
 	show_health(player.health, player.max_health)
 	player.progress.xp_changed.connect(show_xp)
 	show_xp(player.progress.xp, player.progress.xp_needed(), player.progress.level)
