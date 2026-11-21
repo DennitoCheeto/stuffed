@@ -33,6 +33,8 @@ var cloth: MenuCloth = MenuCloth.new(0.92)
 var panel: FeltPanel = FeltPanel.new(-1.0)
 var title: HandTitle
 var motion: ScreenMotion = ScreenMotion.new()
+## The sewn X in the top right corner: closes it with the mouse (#325).
+var close_button: CloseStitch
 ## Looks up each hero's starting weapon card (icon, name).
 var pool: UpgradePool
 ## The gear toggles under the heroes (spec 09 §6, AC-100b): one eye per slot and "Hide all".
@@ -66,6 +68,7 @@ func _init() -> void:
 	var box: VBoxContainer = VBoxContainer.new()
 	box.add_theme_constant_override(&"separation", 14)
 	panel.content.add_child(box)
+	close_button = panel.add_close(close)
 	title = HandTitle.new(_rules.picker_title, 58)
 	box.add_child(title)
 	var hint: Label = UiFonts.label(_rules.picker_hint, 24, UiColors.INK_SOFT)
@@ -273,6 +276,9 @@ func _build_gear_row(box: VBoxContainer) -> void:
 		gear_row.add_child(eye)
 		eye_toggles.append(eye)
 	hide_all_toggle.pressed.connect(_on_eye_pressed.bind(hide_all_toggle))
+	hide_all_toggle.fit_words(
+		PackedStringArray([_gear_rules.hide_all_text, _gear_rules.show_all_text])
+	)
 	gear_row.add_child(hide_all_toggle)
 	box.add_child(gear_row)
 

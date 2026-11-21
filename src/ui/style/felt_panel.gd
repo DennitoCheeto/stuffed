@@ -18,6 +18,14 @@ func _init(degrees: float = 0.0) -> void:
 	tilt = degrees
 
 
+## Adds a sewn X in the top right corner that calls `on_close` when clicked (#325).
+func add_close(on_close: Callable) -> CloseStitch:
+	var stitch: CloseStitch = CloseStitch.new()
+	stitch.pressed.connect(on_close)
+	content.add_child(stitch)
+	return stitch
+
+
 ## Adds a tape strip on the top edge (`at` = share of the width).
 func add_tape(at: float, degrees: float, color: Color = UiColors.TAPE_GOLD) -> FeltPanel:
 	box.add_tape(at, degrees, color)

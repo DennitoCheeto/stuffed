@@ -27,6 +27,8 @@ var cloth: MenuCloth = MenuCloth.new(0.92)
 var panel: FeltPanel = FeltPanel.new(-1.0)
 var title: HandTitle = HandTitle.new("Starting weapon", 58)
 var motion: ScreenMotion = ScreenMotion.new()
+## The sewn X in the top right corner: closes it with the mouse (#325).
+var close_button: CloseStitch
 
 var _grid: GridContainer
 
@@ -46,6 +48,7 @@ func _init() -> void:
 	var box: VBoxContainer = VBoxContainer.new()
 	box.add_theme_constant_override(&"separation", 14)
 	panel.content.add_child(box)
+	close_button = panel.add_close(close)
 	box.add_child(title)
 	var hint: Label = UiFonts.label(
 		"Every hero starts the next run with it.   Esc: close", 24, UiColors.INK_SOFT
