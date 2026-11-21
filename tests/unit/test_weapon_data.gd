@@ -10,6 +10,7 @@ const MORTAR: WeaponStats = preload("res://data/weapons/thimble_mortar.tres")
 const CANNON: WeaponStats = preload("res://data/weapons/yarn_cannon.tres")
 const WHIP: WeaponStats = preload("res://data/weapons/thread_whip.tres")
 const RAY: WeaponStats = preload("res://data/weapons/zipper_ray.tres")
+const BLOATER: EnemyStats = preload("res://data/enemies/bloater.tres")
 
 
 func test_boomerang_has_five_levels_with_card_text() -> void:
@@ -112,12 +113,18 @@ func test_ac2_cloud_levels_add_what_their_cards_say() -> void:
 	assert_gt(CLOUD.at_level(1).area, 0.0, "the cloud has a size")
 	assert_lt(CLOUD.at_level(1).cooldown, 0.5, "it hurts a few times a second")
 	assert_gt(CLOUD.at_level(2).area, CLOUD.at_level(1).area, "L2: bigger cloud")
-	assert_eq(CLOUD.at_level(3).damage, 5.0, "L3: damage 3 → 5")
+	assert_eq(CLOUD.at_level(3).damage, 5.0, "L3: damage 4 → 5")
 	assert_eq(CLOUD.at_level(4).cooldown, 0.3, "L4: puffs every 0.3 seconds")
 	assert_gt(CLOUD.at_level(5).area, CLOUD.at_level(4).area, "L5: even bigger")
 	assert_eq(CLOUD.at_level(5).damage, 6.0, "L5: damage 5 → 6")
-	assert_string_contains(CLOUD.at_level(3).card_text, "3 → 5")
+	assert_string_contains(CLOUD.at_level(3).card_text, "4 → 5")
 	assert_string_contains(CLOUD.at_level(4).card_text, "0.4 → 0.3")
+	# #329: clearly bigger than a Piggy's death cloud (plus a hero), so a Piggy the cloud
+	# kills bursts out of reach.
+	var piggy_reach: float = BLOATER.death_cloud.radius + 12.0
+	for level: int in range(1, CLOUD.levels.size() + 1):
+		var area: float = CLOUD.at_level(level).area
+		assert_gt(area, piggy_reach + 20.0, "L%d is clearly bigger" % level)
 
 
 func test_ac2_yarn_levels_add_what_their_cards_say() -> void:
