@@ -29,6 +29,9 @@ func _effect_colors() -> Array[Color]:
 		colors.append(piece.color)
 		if piece.effect_color.a > 0.0:
 			colors.append(piece.effect_color)
+		if piece.id == &"raincoat":
+			# The puddle's rim, pool, ripples and glint (#328).
+			colors.append_array(RaincoatPuddle.look_colors(piece.effect_color))
 	return colors
 
 
