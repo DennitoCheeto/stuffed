@@ -142,3 +142,17 @@ func wait_for_goal_screen(current: Run) -> void:
 			current.gift_screen.close()
 		await wait_physics_frames(1)
 	await wait_seconds(GoalScreen.INPUT_DELAY + 0.1)
+
+
+## Felt pieces under `root` whose soft edges were drawn for a clearly different size than they
+## are shown at now (#338: a blurry, washed-out Banane on a photo that popped in from tiny).
+func blurry_felt_pieces(root: Node) -> Array[String]:
+	var blurry: Array[String] = []
+	for node: Node in root.find_children("*", "FeltPiece", true, false):
+		var piece: FeltPiece = node as FeltPiece
+		if piece.polygon.is_empty() or not piece.is_visible_in_tree():
+			continue
+		var shown: float = absf(piece.get_global_transform().get_scale().y)
+		if absf(shown / maxf(piece.drawn_scale, 0.0001) - 1.0) > 0.1:
+			blurry.append("%s drawn %.3f, shown %.3f" % [piece.name, piece.drawn_scale, shown])
+	return blurry

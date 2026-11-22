@@ -95,6 +95,7 @@ func flash() -> float:
 
 
 func _process(delta: float) -> void:
+	_origin.keep_edges_sharp()
 	if _player == null and walker == null:
 		return
 	_time += delta
