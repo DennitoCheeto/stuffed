@@ -26,11 +26,25 @@ jobs:
       - run: gdlint src tests
       - run: gdformat --check src tests
 
+  # Typecheck, unit tests and the two scenario halves run side by side (one job took 30+ min).
+  # Times on main (2026-11-22): typecheck ~9 min, unit ~1 min, scenarios ~11 + ~10 min.
   test:
-    name: Typecheck and tests
+    name: ${{ matrix.name }}
     # A hung test run (e.g. the engine not exiting) fails fast instead of blocking for hours.
-    timeout-minutes: 35
+    timeout-minutes: 25
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Typecheck
+            run: tools/check.sh
+          - name: Unit tests
+            run: tools/test.sh --shard=unit
+          - name: Scenario tests 00-04
+            run: tools/test.sh --shard=scenarios-1
+          - name: Scenario tests 05+
+            run: tools/test.sh --shard=scenarios-2
     steps:
       - uses: actions/checkout@v4
       - name: Cache Godot
@@ -46,15 +60,13 @@ jobs:
           curl -sSL -o godot.zip "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
           unzip -q godot.zip && rm godot.zip
           mv "Godot_v${GODOT_VERSION}-stable_linux.x86_64" godot && chmod +x godot
-      - name: Typecheck (every script, untyped code is an error)
-        run: tools/check.sh
-      - name: Unit and scenario tests
-        run: tools/test.sh
+      - name: ${{ matrix.name }}
+        run: ${{ matrix.run }}
       - name: Upload test report
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results
+          name: test-results-${{ strategy.job-index }}
           path: test-results/
 
   build-windows:

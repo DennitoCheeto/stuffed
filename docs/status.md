@@ -195,7 +195,10 @@ _Last updated: 2026-11-22 (milestone **Playtest fixes (Nov 2026)**: #323 rug but
 - Headless has no mouse position: `PlayerInput` remembers mouse-motion events. Tests convert world → canvas →
   window coordinates (`get_canvas_transform()`, then `get_screen_transform()`) before sending mouse motion.
 - Don't touch DisplayServer/Input (e.g. the cursor) in `_exit_tree` of long-lived nodes: the Linux test run hung
-  at exit once (PR #29). The CI test job now times out after 35 minutes (12 → 20 on 2026-10-24; → 35 on 2026-11-18 when 991 tests took 19.5 min). If it keeps growing, split the job (unit vs scenarios).
+  at exit once (PR #29). CI tests run as 4 parallel jobs (2026-11-22, one job had reached 30 min): Typecheck, Unit tests,
+  Scenario tests 00-04, Scenario tests 05+ (`tools/test.sh --shard=unit|scenarios-1|scenarios-2`; the shard
+  writes its own `test-results/shard.gutconfig.json`), 25 min timeout each. New scenario files go to shard 2:
+  if it outgrows shard 1, move the split in `tools/test.sh`.
 - Enemies: types are `EnemyStats` .tres + a look (`ZombieLook.for_look`, parts merged in `all_parts`). Ranged:
   `EnemyStats.attack` (`SpitAttack`, wind-up/puff in `EnemyManager._attack`). Burst on death:
   `EnemyStats.death_cloud` (`EnemyCloud`, hostile, pooled). Schedule = `SpawnSchedule.entries` (`SpawnEntry`);
