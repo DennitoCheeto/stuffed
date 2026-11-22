@@ -24,7 +24,7 @@ static var _current: GearRules
 @export var patterns_banner: String = "New patterns!"
 @export var patterns_subtitle: String = "%s: sew them at the Sewing Workshop"
 ## Seconds the banner stays in a run.
-@export var pattern_banner_seconds: float = 2.6
+@export var pattern_banner_seconds: float = 4.5
 ## Sound when a pattern is found.
 @export var pattern_sound: StringName = &"page"
 ## A pattern envelope opens when a hero comes this close (pixels, plus the hero's hitbox).

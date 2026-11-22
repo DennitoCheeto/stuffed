@@ -83,6 +83,18 @@ func test_ac95_an_old_save_gets_the_patterns_of_buildings_already_at_level_2() -
 	assert_string_contains(town.banner_subtitle.text, "Lookout Cap, Picnic Apron")
 
 
+## #337: the "New pattern" banner went away before the player could read it.
+func test_the_pattern_banner_stays_long_enough_to_read() -> void:
+	await _quiet_run()
+	run.patterns.drop(_rules().find("propeller_cap"), first_player().global_position)
+	await wait_physics_frames(3)
+	assert_eq(run.hud.banner_title.text, "New pattern: Propeller Cap!")
+	await wait_seconds(4.0)
+	assert_true(run.hud.banner.visible, "still up after 4 s")
+	await wait_seconds(1.0)
+	assert_false(run.hud.banner.visible, "gone after 5 s")
+
+
 func test_ac96_big_ted_drops_his_pattern_and_it_is_kept_after_giving_up() -> void:
 	await _quiet_run()
 	var ted: Zombie = run.spawner.spawn_boss(run.spawner.schedule.mini_boss)

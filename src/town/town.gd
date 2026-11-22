@@ -31,7 +31,7 @@ const PROMPT_COLOR: Color = UiColors.INK
 const AFTER_BUILD_SECONDS: float = 1.0
 ## Seconds after arriving before buildings unlocked during the run are revealed.
 const ARRIVAL_REVEAL_SECONDS: float = 0.8
-const BANNER_SECONDS: float = 2.6
+const BANNER_SECONDS: float = 4.0
 const BANNER_FADE: float = 0.5
 
 @export var layout: TownLayout
