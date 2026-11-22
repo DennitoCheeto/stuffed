@@ -205,6 +205,39 @@ func test_ac26_space_e_and_continue_click_close_it() -> void:
 		assert_false(run.is_frozen())
 
 
+## #336: Space is both "continue" and the dash key. Closing the gift box with it must not
+## also make the hero dash; a later press dashes as usual.
+func test_space_closing_the_box_does_not_dash() -> void:
+	await _open_box()
+	var banane: Player = first_player()
+	assert_true(await _wait_until(_showing_contents, 2.0))
+	await wait_seconds(run.gift_box_rules.confirm_delay + 0.1)
+	var start: Vector2 = banane.global_position
+	var dashed: Array[bool] = []
+	await _press_physical_key(KEY_SPACE, dashed)
+	assert_false(run.gift_screen.is_open(), "Space closes the box")
+	assert_false(dashed.has(true), "the hero does not dash")
+	assert_true(banane.can_dash(), "no dash cooldown started")
+	assert_almost_eq(banane.global_position.distance_to(start), 0.0, 1.0, "the hero stays put")
+	await wait_physics_frames(5)
+	await _press_physical_key(KEY_SPACE, dashed)
+	assert_true(dashed.has(true), "a press after the box dashes")
+
+
+## A real Space press (key and its place on the keyboard: the dash action is bound by place),
+## noting in `dashed` each frame whether the hero is dashing.
+func _press_physical_key(key: Key, dashed: Array[bool]) -> void:
+	for down: bool in [true, false]:
+		var event: InputEventKey = InputEventKey.new()
+		event.keycode = key
+		event.physical_keycode = key
+		event.pressed = down
+		sender.send_event(event)
+		for frame: int in 3:
+			await wait_physics_frames(1)
+			dashed.append(first_player().is_dashing())
+
+
 func test_ac27_a_card_per_level_up_with_icon_name_and_level() -> void:
 	await _quiet_run()
 	var banane: Player = first_player()

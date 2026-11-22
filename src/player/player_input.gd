@@ -5,15 +5,39 @@ extends RefCounted
 
 ## Player 1 aims with the mouse.
 const MOUSE_PLAYER: int = 0
+## Physics frames after a pause in which key presses are ignored (#336).
+const QUIET_FRAMES: int = 2
+## Only pauses longer than this count (frames): a hit-stop (~4 frames) must never eat a dash,
+## no screen (level-up, gift box, pause) closes this fast.
+const PAUSE_FRAMES: int = 15
 
 var player_index: int = 0
 ## Last mouse position on screen (viewport coordinates), if this player uses the mouse.
 var pointer_position: Vector2 = Vector2.ZERO
 var has_pointer: bool = false
 
+var _last_tick: int = -1
+var _quiet_until: int = -1
+
 
 func _init(index: int) -> void:
 	player_index = index
+
+
+## Called once per physics frame by the hero. When the hero was not ticked for a while (the run
+## was frozen for a level-up, gift box or pause), the key that closed that screen must not also
+## count as a press in the game (Space confirming a gift box made the hero dash, #336), so
+## presses are ignored for the first QUIET_FRAMES frames back.
+func tick() -> void:
+	var frame: int = Engine.get_physics_frames()
+	if _last_tick >= 0 and frame - _last_tick > PAUSE_FRAMES:
+		_quiet_until = frame + QUIET_FRAMES - 1
+	_last_tick = frame
+
+
+## True while presses are ignored after a pause.
+func is_quiet() -> bool:
+	return Engine.get_physics_frames() <= _quiet_until
 
 
 ## The input action name for this player, e.g. action("dash") -> "p1_dash".
@@ -38,6 +62,8 @@ func move_vector() -> Vector2:
 
 func is_just_pressed(action_name: String) -> bool:
 	var full_name: StringName = action(action_name)
+	if is_quiet():
+		return false
 	return InputMap.has_action(full_name) and Input.is_action_just_pressed(full_name)
 
 
