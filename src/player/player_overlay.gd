@@ -1,10 +1,19 @@
 extends Node2D
-## Readability helpers drawn over the hero (vision §6.1): the real hitbox as a small soft dot,
+## Readability helpers drawn over the hero (vision §6.1): the real hit area as a ringed spot,
 ## the dash cooldown ring around it, and a small health bar under the feet with the dash pip
 ## below it (#330): it fills while the dash recharges and lights up with a pop when it is ready.
 
-const HITBOX_DOT_COLOR: Color = Color(1.0, 1.0, 1.0, 0.75)
-const HITBOX_DOT_EDGE: Color = Color(0.1, 0.09, 0.12, 0.5)
+## The hit spot (#339, option A): zombies only hurt the hero when they touch this circle, so it
+## is drawn at exactly the hit radius: a soft light disc, a crisp light ring on its edge with a
+## dark outline (reads on every hero and floor) and a small dot in the middle. Never danger red.
+const HIT_FILL: Color = Color(1.0, 1.0, 1.0, 0.3)
+const HIT_RING: Color = Color(1.0, 1.0, 1.0, 0.95)
+const HIT_RING_WIDTH: float = 2.0
+const HIT_EDGE: Color = Color(0.1, 0.09, 0.12, 0.75)
+const HIT_EDGE_WIDTH: float = 4.0
+const HIT_DOT_RADIUS: float = 2.5
+## The dash cooldown ring sits just outside the hit spot.
+const DASH_RING_GAP: float = 4.0
 const DASH_RING_COLOR: Color = Color(1.0, 1.0, 1.0, 0.6)
 const HEALTH_BACK_COLOR: Color = Color(0.1, 0.09, 0.12, 0.8)
 const HEALTH_FILL_COLOR: Color = Color("#7bd88f")
@@ -63,13 +72,22 @@ func _draw() -> void:
 
 
 func _draw_hitbox_and_dash_ring() -> void:
-	var radius: float = _player.stats.hitbox_radius
-	draw_circle(Vector2.ZERO, radius * 0.35 + 1.0, HITBOX_DOT_EDGE)
-	draw_circle(Vector2.ZERO, radius * 0.35, HITBOX_DOT_COLOR)
+	var radius: float = hit_ring_radius()
+	draw_circle(Vector2.ZERO, radius, HIT_FILL)
+	draw_arc(Vector2.ZERO, radius, 0.0, TAU, 32, HIT_EDGE, HIT_EDGE_WIDTH, true)
+	draw_arc(Vector2.ZERO, radius, 0.0, TAU, 32, HIT_RING, HIT_RING_WIDTH, true)
+	draw_circle(Vector2.ZERO, HIT_DOT_RADIUS + 1.0, HIT_EDGE)
+	draw_circle(Vector2.ZERO, HIT_DOT_RADIUS, HIT_RING)
 	var ratio: float = _player.dash_ready_ratio()
 	if ratio < 1.0:
 		var start: float = -PI / 2.0
-		draw_arc(Vector2.ZERO, radius * 0.75, start, start + TAU * ratio, 24, DASH_RING_COLOR, 2.0)
+		var dash: float = radius + DASH_RING_GAP
+		draw_arc(Vector2.ZERO, dash, start, start + TAU * ratio, 24, DASH_RING_COLOR, 2.0)
+
+
+## The radius the hit spot is drawn at: the hero's real hit radius (zombies touching it hurt).
+func hit_ring_radius() -> float:
+	return _player.stats.hitbox_radius if _player != null else 0.0
 
 
 func _draw_health_bar() -> void:
