@@ -65,6 +65,22 @@ func test_own_shots_are_quieter_than_the_zombies_on_every_floor() -> void:
 			assert_lt(gap, danger_gap, "%s on %s" % [name, floor_color.to_html()])
 
 
+func test_xp_buttons_shine_so_they_read_as_pickups() -> void:
+	# #323: the rug's flat sewn buttons have no shine; every XP button has one on its rim, clear
+	# of the four holes.
+	var parts: Dictionary[StringName, FeltPiece] = XpButtonLook.make_parts()
+	for key: StringName in parts:
+		var part: FeltPiece = parts[key]
+		assert_has(part._layer_colors, XpButtonLook.SHINE_COLOR, "%s shines" % key)
+		part.free()
+	var radius: float = 30.0
+	var hole_reach: float = Vector2(1, 1).length() * radius * 0.33 + radius * 0.2
+	for point: Vector2 in XpButtonLook.shine(radius):
+		assert_gt(point.length(), hole_reach, "clear of the holes")
+		assert_lt(point.length(), radius, "inside the rim")
+		assert_lt(point.y, 0.0, "on the top side")
+
+
 func test_pickups_never_look_like_danger() -> void:
 	var colors: Array[Color] = []
 	for color: Color in XpButtonLook.COLORS:
