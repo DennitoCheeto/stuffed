@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-11-22 (milestone **Playtest fixes (Nov 2026)**: #336 Space no longer dashes after the gift box (PR #355), #337 longer banners (PR #356), CI split into 4 parallel jobs (PR #354, longest ~11 min); earlier: #323 (PR #353), #324 (PR #335), #325 (#343), #326 music (#345), #327 boss slips (#346), #328 Raincoat puddle (#349), #329 Stuffing Cloud (#348), #330 dash display (#350); next: the second player's #338-#342 one per PR, look board for #331; P-22 … P-37 answers still open. **M6 done**: all 13 tickets merged (M6-13 = PR #351), worktree `Game-m6` removed 2026-11-22; M6 playtest P-38 … P-41 waits for the PO)_
+_Last updated: 2026-11-22 (milestone **Playtest fixes (Nov 2026)**: #338 Banane photo sharp (PR #358), #339 hit area ring (PR #359), #336 Space no longer dashes after the gift box (PR #355), #337 longer banners (PR #356), CI split into 4 parallel jobs (PR #354, longest ~11 min); earlier: #323 (PR #353), #324 (PR #335), #325 (#343), #326 music (#345), #327 boss slips (#346), #328 Raincoat puddle (#349), #329 Stuffing Cloud (#348), #330 dash display (#350); next: #340-#342 one per PR, look board for #331; P-22 … P-37 answers still open. **M6 done**: all 13 tickets merged (M6-13 = PR #351), worktree `Game-m6` removed 2026-11-22; M6 playtest P-38 … P-41 waits for the PO)_
 
 ## Where we are
 
@@ -971,3 +971,9 @@ _Last updated: 2026-11-22 (milestone **Playtest fixes (Nov 2026)**: #336 Space n
   Scenario tests that close a screen and then press a play key must wait a few frames first.
 - Banner times (#337): two-line banners ≥ 4 s (pattern 4.5 in `gear_rules.tres`, rescue / Way Home 4.0,
   town `Town.BANNER_SECONDS` 4.0), floor pickups 2.5.
+- Puppet photos (#338): `FeltPiece` soft edges are drawn for the on-screen scale (`drawn_scale`); a
+  puppet shown inside a panel that pops in from tiny must call `keep_edges_sharp()` (Banane's puppet
+  does it every frame) or it stays blurry. Scenario helper `blurry_felt_pieces(root)`.
+- Hit spot (#339, PO option A): `player_overlay.gd` draws the real hit radius as a ring
+  (`hit_ring_radius()` = `HeroStats.hitbox_radius`); dash ring just outside (`DASH_RING_GAP`).
+  If the PO still finds it odd, grow `hitbox_radius` in the hero `.tres` (data only).
