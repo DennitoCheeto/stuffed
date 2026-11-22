@@ -25,7 +25,9 @@ func _init(who: HeroStats, is_locked: bool) -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if hero.plushie == null:
 		puppet = BananePuppet.new()
-		puppet.process_mode = Node.PROCESS_MODE_DISABLED
+		# Always: the town is frozen while the picker / sewing table is open, and the puppet
+		# must still redraw its soft edges once the photo has popped in (#338).
+		puppet.process_mode = Node.PROCESS_MODE_ALWAYS
 		add_child(puppet)
 	else:
 		var look: PlushieDef = _silhouette(hero.plushie) if locked else hero.plushie.calmed()

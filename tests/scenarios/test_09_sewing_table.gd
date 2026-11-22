@@ -215,3 +215,12 @@ func test_ac98_the_tables_button_upgrades_the_workshop() -> void:
 	assert_eq(_tile(&"jingle_bell").action, GearBook.Action.SEW, "the Charm slot is open now")
 	assert_eq(table.slot_text(GearDef.Slot.CHARM), _rules().empty_slot)
 	table.close()
+
+
+func test_338_banane_on_the_photo_is_sharp_once_the_table_has_opened() -> void:
+	await _town_with(1, PackedStringArray(["lookout_cap"]))
+	var table: SewingTable = await _open_table()
+	await wait_seconds(UiFeel.STYLE.open_seconds + 0.5)
+	assert_not_null(table.photo.puppet, "Banane's felt puppet is on the photo")
+	assert_eq(blurry_felt_pieces(table.photo.puppet), [] as Array[String], "drawn for its size")
+	table.close()

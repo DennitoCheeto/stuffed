@@ -17,6 +17,8 @@ var soft: bool = true
 ## Dark edge around every shape, in concept units (0 = none). Makes enemies stand out.
 var outline_width: float = 0.0
 var outline_color: Color = Color("#1d1a24")
+## The on-screen scale the soft edges were last drawn for (-1 = not drawn yet).
+var drawn_scale: float = -1.0
 
 var _layers: Array[PackedVector2Array] = []
 var _layer_colors: PackedColorArray = []
@@ -84,7 +86,28 @@ func bounds() -> Rect2:
 	return box.grow(outline_width + 6.0)
 
 
+## Redraws this piece and all pieces under it when it is now shown more than `tolerance` bigger or
+## smaller than when its soft edges were drawn (#338: a photo drawn while its panel popped in
+## from tiny kept a huge blurry edge). Returns true when it redrew.
+func keep_edges_sharp(tolerance: float = 0.1) -> bool:
+	var shown: float = absf(get_global_transform().get_scale().y)
+	if drawn_scale < 0.0 or shown <= 0.0:
+		return false
+	if drawn_scale > 0.0 and absf(shown / drawn_scale - 1.0) <= tolerance:
+		return false
+	_redraw_all(self)
+	return true
+
+
+static func _redraw_all(node: Node) -> void:
+	if node is FeltPiece:
+		(node as FeltPiece).queue_redraw()
+	for child: Node in node.get_children():
+		_redraw_all(child)
+
+
 func _draw() -> void:
+	drawn_scale = absf(get_global_transform().get_scale().y)
 	if outline_width > 0.0:
 		_draw_outline(polygon)
 		for layer: PackedVector2Array in _layers:
