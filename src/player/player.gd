@@ -189,6 +189,7 @@ func _add_passives() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	_controls.tick()
 	_dash_cooldown_left = maxf(_dash_cooldown_left - delta, 0.0)
 	_hurt_invulnerable_left = maxf(_hurt_invulnerable_left - delta, 0.0)
 	_speed_boost_left = maxf(_speed_boost_left - delta, 0.0)
