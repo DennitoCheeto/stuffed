@@ -24,6 +24,10 @@ static var _current: WorldPalette
 @export var rug_border: Color = Color.WHITE
 ## Hand-stitched seams between rug patches.
 @export var rug_seams: Array[Color] = []
+## The rug's sewn-in buttons (#323): flat, calm, rug-coloured, so they never look like XP
+## buttons (never blue, purple, orange or gold), and the cross-stitch that holds them.
+@export var rug_buttons: Array[Color] = []
+@export var rug_button_thread: Color = Color.WHITE
 ## Toy-block walls around the room.
 @export var wall_blocks: Array[Color] = []
 ## The top wall above the floor (spec 05 §4.1): wallpaper, its soft stripes (drawn at

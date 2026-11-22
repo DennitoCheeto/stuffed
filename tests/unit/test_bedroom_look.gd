@@ -5,6 +5,8 @@ extends GutTest
 
 const ARENA_SCENE: PackedScene = preload("res://src/arena/arena.tscn")
 const ROOM: BedroomRoom = preload("res://data/arena/bedroom_room.tres")
+## How far (RGB distance) a floor colour must stay from every XP button colour (#323).
+const XP_LOOKALIKE_GAP: float = 0.25
 ## Pieces every floorboard tile shows.
 const BOARD_PARTS: Array[StringName] = [&"floorboards", &"wood_grain", &"knots", &"nails"]
 ## Pieces each layer must show, in `BedroomLook.Layer` order.
@@ -147,3 +149,24 @@ func test_the_vignette_is_clear_in_the_middle_and_soft_at_the_edges() -> void:
 	assert_between(edge, 0.05, 0.6, "only a little at the edge middles")
 	assert_eq(vignette.shade.mouse_filter, Control.MOUSE_FILTER_IGNORE, "never catches clicks")
 	assert_lt(WorldPalette.current().vignette.a, 0.4, "see-through")
+
+
+func test_no_floor_decoration_looks_like_an_xp_button() -> void:
+	# #323: the rug's sewn buttons were taken for XP buttons. Nothing on the boards or the rug
+	# (where runs start and most buttons lie) may share an XP button's colour. The crayon corner
+	# keeps its crayon colours: long crayon shapes, not round buttons.
+	var sketches: Array[BuildingSketch] = arena.board_tiles()
+	var layers: Array[BuildingSketch] = arena.look_layers()
+	sketches.append(layers[BedroomLook.Layer.RUG])
+	sketches.append(layers[BedroomLook.Layer.DETAILS])
+	var xp: Array[Color] = []
+	for color: Color in XpButtonLook.COLORS:
+		xp.append(color)
+	xp.append(XpButtonLook.GOLDEN_COLOR)
+	for sketch: BuildingSketch in sketches:
+		for color: Color in sketch.colors():
+			for button: Color in xp:
+				var gap: float = Vector3(color.r, color.g, color.b).distance_to(
+					Vector3(button.r, button.g, button.b)
+				)
+				assert_gt(gap, XP_LOOKALIKE_GAP, "%s vs %s" % [color.to_html(), button.to_html()])

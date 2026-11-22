@@ -292,12 +292,15 @@ static func _nails(sketch: BuildingSketch, rect: Rect2, size: Vector2, color: Co
 		sketch.dot(Vector2(right, rect.end.y - NAIL_INSET), NAIL_RADIUS, color)
 
 
+## A button sewn flat into the rug (#323): no ink outline, calm rug colours and a cross-stitch
+## instead of four holes, so it never reads as an XP button lying on the rug.
 static func _button(sketch: BuildingSketch, at: Vector2, r: float, index: int) -> void:
 	var palette: WorldPalette = WorldPalette.current()
-	sketch.disc(&"rug_buttons", at, r, WorldPalette.pick(palette.buttons, index))
-	var hole: float = r * 0.32
-	for offset: Vector2 in [Vector2(-1, -1), Vector2(1, -1), Vector2(-1, 1), Vector2(1, 1)]:
-		sketch.dot(at + offset * hole, r * 0.13, palette.button_hole)
+	sketch.dot(at, r, WorldPalette.pick(palette.rug_buttons, index))
+	var arm: float = r * 0.45
+	sketch.line([at + Vector2(-arm, -arm), at + Vector2(arm, arm)], palette.rug_button_thread, 2.5)
+	sketch.line([at + Vector2(arm, -arm), at + Vector2(-arm, arm)], palette.rug_button_thread, 2.5)
+	sketch.mark(&"rug_buttons")
 
 
 static func _block(sketch: BuildingSketch, rect: Rect2, index: int) -> void:
