@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-11-22 (milestone **Playtest fixes (Nov 2026)**: #323 rug buttons vs XP buttons fixed; earlier: #324 (PR #335), #325 (#343), #326 music (#345), #327 boss slips (#346), #328 Raincoat puddle (#349), #329 Stuffing Cloud (#348), #330 dash display (#350); next: the second player's #336-#342 one per PR, look board for #331; P-22 … P-37 answers still open. **M6 done**: all 13 tickets merged (M6-13 = PR #351), worktree `Game-m6` removed 2026-11-22; M6 playtest P-38 … P-41 waits for the PO)_
+_Last updated: 2026-11-22 (milestone **Playtest fixes (Nov 2026)**: #336 Space no longer dashes after the gift box (PR #355), #337 longer banners (PR #356), CI split into 4 parallel jobs (PR #354, longest ~11 min); earlier: #323 (PR #353), #324 (PR #335), #325 (#343), #326 music (#345), #327 boss slips (#346), #328 Raincoat puddle (#349), #329 Stuffing Cloud (#348), #330 dash display (#350); next: the second player's #338-#342 one per PR, look board for #331; P-22 … P-37 answers still open. **M6 done**: all 13 tickets merged (M6-13 = PR #351), worktree `Game-m6` removed 2026-11-22; M6 playtest P-38 … P-41 waits for the PO)_
 
 ## Where we are
 
@@ -965,3 +965,9 @@ _Last updated: 2026-11-22 (milestone **Playtest fixes (Nov 2026)**: #323 rug but
   `palette.rug_buttons`; XP buttons have a white rim shine (`XpButtonLook.SHINE_*`). `test_bedroom_look`
   fails if any board/rug colour comes within `XP_LOOKALIKE_GAP` (RGB) of an XP colour; the crayon corner
   is left out on purpose (long crayon shapes).
+- Keys after a screen (#336): `PlayerInput.tick()` (first thing in `Player._physics_process`) ignores
+  `is_just_pressed` for `QUIET_FRAMES` (2) physics frames after the hero wasn't ticked for more than
+  `PAUSE_FRAMES` (15; hit-stop is ~4), so the key that closed a gift box / level-up / pause never dashes.
+  Scenario tests that close a screen and then press a play key must wait a few frames first.
+- Banner times (#337): two-line banners ≥ 4 s (pattern 4.5 in `gear_rules.tres`, rescue / Way Home 4.0,
+  town `Town.BANNER_SECONDS` 4.0), floor pickups 2.5.
