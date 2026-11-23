@@ -44,8 +44,6 @@ var body: Node2D
 var shadow: Node2D
 ## The frame shown right now (0 = standing still).
 var frame: int = 0
-## The sewn-on gear on the hero (spec 09 §7): its sprites hang on `body`.
-var gear_view: HeroGear
 
 var _hero: HeroStats
 var _player: Player
@@ -78,8 +76,6 @@ func _ready() -> void:
 		_player.hurt.connect(_on_hurt)
 		_player.celebrated.connect(_on_celebrated)
 		_player.died.connect(_on_died)
-		_player.gear_changed.connect(dress)
-		dress()
 
 
 func _process(delta: float) -> void:
@@ -240,7 +236,6 @@ func _apply() -> void:
 	body.scale = Vector2(_side, 1.0) * squash
 	sprite.region_rect = _frame_rect(frame)
 	_material.set_shader_parameter("flash", _flash)
-	gear_view.set_flash(_flash)
 	var air: float = clampf(-lift.y / CHEER_JUMP, 0.0, 1.0)
 	shadow.scale = Vector2.ONE * (1.0 - 0.35 * air)
 
@@ -307,8 +302,6 @@ func _build() -> void:
 	sprite.scale = Vector2.ONE / BAKE_SCALE
 	sprite.material = _material
 	body.add_child(sprite)
-	gear_view = HeroGear.new()
-	add_child(gear_view)
 
 
 ## Draws every frame once into the picture: rest, the walk at each stride, the waves.
@@ -333,15 +326,3 @@ func _paint_frame(canvas: Node2D, index: int, wave: float, pose: PlushiePose) ->
 func _draw_shadow() -> void:
 	var u: float = unit()
 	shadow.draw_colored_polygon(PlushieLook.ellipse(Vector2.ZERO, u * 1.1, u * 0.3), SHADOW_COLOR)
-
-
-## Draws what the hero wears (again, after the town changed it).
-func dress() -> void:
-	if _player != null:
-		gear_view.dress(_player.gear, HeroGear.SIDE * _hero.gear_scale, _hang)
-
-
-## A piece moves with the whole body (hop, waddle, squash, lean), drawn over the plushie.
-func _hang(piece: GearDef, gear_sprite: Sprite2D) -> void:
-	body.add_child(gear_sprite)
-	gear_sprite.position = _hero.gear_anchor(piece.slot)

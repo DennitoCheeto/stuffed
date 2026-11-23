@@ -1,6 +1,6 @@
 extends "res://tests/scenarios/run_scenario.gd"
-## Scenario (#325, PO playtest 2026-11-21): the sewing table keeps its size when gear is hidden
-## ("Hide all" or one slot's eye), and so does the hero picker's gear row. Every town panel
+## Scenario (#325, PO playtest 2026-11-21): the sewing table keeps its size when what you wear
+## changes (a slot's piece picture comes or goes; the hide toggles are gone since #331). Every town panel
 ## (sewing table, Tricks, hero picker, Armory picker, Scrapbook) has a sewn X in its top right
 ## corner that closes it with a mouse click; Esc still works.
 
@@ -82,30 +82,15 @@ func _top_item(item: CanvasItem) -> CanvasItem:
 	return top
 
 
-func test_hide_all_keeps_the_table_size() -> void:
+func test_taking_a_piece_off_keeps_the_table_size() -> void:
 	var table: SewingTable = await _open_table()
 	var before: Vector2 = table.panel.content.size
-	await _press(table.hide_all_toggle)
-	assert_true(table.hide_all_toggle.hidden_now, "Hide all is on")
-	assert_eq(table.panel.content.size, before, "the table keeps its size after Hide all")
-	await _press(table.hide_all_toggle)
-	assert_eq(table.panel.content.size, before, "and after Show all")
-	await _press(table.eye_toggles[GearDef.Slot.HEAD])
-	assert_true(table.eye_toggles[GearDef.Slot.HEAD].hidden_now, "the cap is hidden")
-	assert_eq(table.panel.content.size, before, "and after hiding one slot")
-
-
-func test_hide_all_keeps_the_picker_gear_row_size() -> void:
-	town.wardrobe.open(0)
+	assert_eq(table.slot_pictures[GearDef.Slot.HEAD].get_child_count(), 1, "the cap's picture")
+	assert_true(town.sewing.take_off(GearDef.Slot.HEAD, 0))
+	table.refresh()
 	await wait_process_frames(3)
-	var picker: HeroPicker = town.wardrobe.picker
-	assert_true(picker.gear_row.visible, "the gear row shows while gear is worn")
-	var before: Vector2 = picker.gear_row.get_combined_minimum_size()
-	await _press(picker.hide_all_toggle)
-	assert_true(picker.hide_all_toggle.hidden_now, "Hide all is on")
-	assert_eq(picker.gear_row.get_combined_minimum_size(), before, "the gear row keeps its size")
-	await _press(picker.eye_toggles[GearDef.Slot.HEAD])
-	assert_eq(picker.gear_row.get_combined_minimum_size(), before, "also after one slot's eye")
+	assert_eq(table.slot_pictures[GearDef.Slot.HEAD].get_child_count(), 0, "an empty slot")
+	assert_eq(table.panel.content.size, before, "the table keeps its size")
 
 
 ## `close_button` sits in the top right corner of `panel` and a click on it closes the screen.

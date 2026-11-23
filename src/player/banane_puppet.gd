@@ -46,8 +46,6 @@ var state: State = State.IDLE
 ## Set when Banane lives in town while another hero is played (spec 08 §5): the town plushie
 ## walking him around.
 var walker: TownPlushie
-## The sewn-on gear Banane wears (spec 09 §7): the cap hangs on his head, the rest on his body.
-var gear_view: HeroGear
 
 var _player: Player
 var _time: float = 0.0
@@ -84,8 +82,6 @@ func _ready() -> void:
 		_player.hurt.connect(_on_hurt)
 		_player.celebrated.connect(_on_celebrated)
 		_player.died.connect(_on_died)
-		_player.gear_changed.connect(dress)
-		dress()
 
 
 ## How white the hit flash is right now (0 = none; softer with Flashes off).
@@ -221,7 +217,6 @@ func _apply(pose: Pose) -> void:
 	_head.rotation_degrees = pose.head_tilt
 	_eye.scale = Vector2(1.0, pose.eye_open)
 	_material.set_shader_parameter("flash", pose.flash)
-	gear_view.set_flash(pose.flash)
 	var air: float = clampf(-pose.lift.y / 40.0, 0.0, 1.0)
 	_shadow.scale = Vector2.ONE * (1.0 - 0.35 * air)
 	_lower_beak.rotation_degrees = pose.beak
@@ -309,8 +304,6 @@ func _build() -> void:
 	_quack_label.add_theme_constant_override("outline_size", 6)
 	_quack_label.visible = false
 	add_child(_quack_label)
-	gear_view = HeroGear.new()
-	add_child(gear_view)
 
 
 func _build_head() -> void:
@@ -366,22 +359,6 @@ func _svg(numbers: Array) -> PackedVector2Array:
 
 func _points(numbers: Array) -> PackedVector2Array:
 	return FeltShapes.points(PackedFloat32Array(numbers))
-
-
-## Draws what the hero wears (again, after the town changed it).
-func dress() -> void:
-	if _player != null:
-		gear_view.dress(_player.gear, HeroGear.SIDE * _player.stats.gear_scale, _hang)
-
-
-## The cap moves with the head (tilt), the vest and charm with the body (waddle, squash, lean).
-## Anchors are hero pixels from the feet; the puppet draws in concept units.
-func _hang(piece: GearDef, gear_sprite: Sprite2D) -> void:
-	var joint: FeltPiece = _head if piece.slot == GearDef.Slot.HEAD else _root
-	joint.add_child(gear_sprite)
-	var at: Vector2 = HeroMarker.FEET + _player.stats.gear_anchor(piece.slot)
-	gear_sprite.position = ANCHOR + at / DRAW_SCALE - joint.pivot
-	gear_sprite.scale /= DRAW_SCALE
 
 
 ## Shows Banane standing still without a hero or walker (the hero picker's photo).

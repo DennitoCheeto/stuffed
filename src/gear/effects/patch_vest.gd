@@ -1,9 +1,8 @@
 class_name PatchVest
 extends Node
 ## Patch Vest (spec 09 §3, AC-99): a felt patch on the vest catches one hit whole (before the
-## Snack Bar shield), then grows back after `amount` seconds (per stitch level). The vest on the
-## hero shows the patch while it is there (`HeroGear.show_patch`: both looks are in the baked
-## picture, so it costs no draws). Hidden gear still works, there is just nothing to see.
+## Snack Bar shield), then grows back after `amount` seconds (per stitch level). Gear isn't drawn
+## on the hero (#331): a small patch icon under the hero's health bar shows it (`ready_share`).
 
 var player: Player
 var piece: GearDef
@@ -25,6 +24,14 @@ func regrow_left() -> float:
 	return _regrow_left
 
 
+## How far the patch is back: 1 while it is there, 0 right after it caught a hit (the icon).
+func ready_share() -> float:
+	if player.patch_up:
+		return 1.0
+	var total: float = piece.amount(player.gear.level_of(piece))
+	return clampf(1.0 - _regrow_left / total, 0.0, 1.0) if total > 0.0 else 0.0
+
+
 func _on_patch_blocked() -> void:
 	blocks += 1
 	_regrow_left = piece.amount(player.gear.level_of(piece))
@@ -37,7 +44,3 @@ func _process(delta: float) -> void:
 		_regrow_left = maxf(_regrow_left - delta, 0.0)
 		if _regrow_left <= 0.0:
 			player.patch_up = true
-	var puppet: Node = player.get_node_or_null(^"Puppet")
-	var view: HeroGear = puppet.get(&"gear_view") as HeroGear if puppet != null else null
-	if view != null and view.shows_patch() != player.patch_up:
-		view.show_patch(player.patch_up)

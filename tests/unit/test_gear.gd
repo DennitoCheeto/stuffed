@@ -221,30 +221,14 @@ func test_a_locked_slot_cant_be_worn_but_a_damaged_workshop_still_lets_you_wear(
 	assert_true(GearBook.wear(save, bell, 0, RULES), "spec 09 §5: wearing still works")
 
 
-func test_hiding_is_per_player_and_slot() -> void:
-	var gear: TownGear = TownGear.new()
-	gear.set_hidden(1, "head", true)
-	assert_true(gear.is_hidden(1, "head"))
-	assert_false(gear.is_hidden(0, "head"), "player 1 isn't touched")
-	assert_false(gear.is_hidden(1, "body"))
-	gear.set_hidden(1, "head", true)
-	assert_eq(gear.hidden[1].size(), 1, "no doubles")
-	gear.set_all_hidden(0, true)
-	for slot: String in GearDef.SLOT_NAMES:
-		assert_true(gear.is_hidden(0, slot))
-	gear.set_all_hidden(0, false)
-	assert_false(gear.is_hidden(0, "charm"))
-	gear.set_hidden(1, "head", false)
-	assert_false(gear.is_hidden(1, "head"))
-
-
 func test_ac102_gear_survives_save_and_reload() -> void:
 	var save: TownSave = _town(3)
 	GearBook.sew(save, _piece("lookout_cap"), 0, RULES)
 	GearBook.sew(save, _piece("lookout_cap"), 0, RULES)
 	GearBook.sew(save, _piece("raincoat"), 1, RULES)
 	GearBook.sew(save, _piece("wind_up_key"), 1, RULES)
-	save.gear.set_hidden(1, "charm", true)
+	save.gear.hidden.append(PackedStringArray())
+	save.gear.hidden.append(PackedStringArray(["charm"]))
 	save.gear.patterns.remove_at(save.gear.patterns.find("propeller_cap"))
 	assert_true(SaveStore.write(save))
 	var loaded: TownSave = SaveStore.read()
@@ -259,8 +243,9 @@ func test_ac102_gear_survives_save_and_reload() -> void:
 	assert_eq(loaded.gear.worn_in(1, "body"), "raincoat")
 	assert_eq(loaded.gear.worn_in(1, "charm"), "wind_up_key")
 	assert_eq(loaded.gear.worn_in(0, "body"), "")
-	assert_true(loaded.gear.is_hidden(1, "charm"))
-	assert_false(loaded.gear.is_hidden(0, "charm"))
+	assert_eq(
+		loaded.gear.hidden[1], PackedStringArray(["charm"]), "old hidden slots are kept (#331)"
+	)
 
 
 func test_ac102_a_v6_save_loads_with_no_gear() -> void:
@@ -277,7 +262,7 @@ func test_ac102_a_v6_save_loads_with_no_gear() -> void:
 	assert_eq(loaded.gear.patterns.size(), 0)
 	assert_eq(loaded.gear.stitches.size(), 0)
 	assert_eq(loaded.gear.worn_in(0, "head"), "")
-	assert_false(loaded.gear.is_hidden(0, "head"))
+	assert_eq(loaded.gear.hidden.size(), 0)
 	assert_eq(loaded.to_dict()["version"], TownSave.VERSION, "written back as v7")
 
 
@@ -293,4 +278,5 @@ func test_broken_gear_fields_load_empty() -> void:
 	assert_eq(loaded.gear.stitch_level("raincoat"), 2)
 	assert_eq(loaded.gear.worn_in(0, "head"), "")
 	assert_eq(loaded.gear.worn_in(1, "head"), "lookout_cap")
-	assert_false(loaded.gear.is_hidden(0, "head"))
+	assert_eq(loaded.gear.hidden.size(), 1, "a broken entry loads empty")
+	assert_eq(loaded.gear.hidden[0].size(), 0)

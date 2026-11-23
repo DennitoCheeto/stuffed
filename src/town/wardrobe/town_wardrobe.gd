@@ -36,7 +36,6 @@ func _ready() -> void:
 	visible = is_shown()
 	town.add_child(picker)
 	picker.chosen.connect(swap)
-	picker.hide_requested.connect(_on_hide_requested)
 	picker.closed.connect(func() -> void: town.process_mode = Node.PROCESS_MODE_INHERIT)
 
 
@@ -226,9 +225,3 @@ func _player(slot: int) -> Player:
 		if player.player_index == slot:
 			return player
 	return null
-
-
-## The picking player hides or shows their gear (saved at once; the hero in town follows).
-func _on_hide_requested(slot: int, on: bool) -> void:
-	town.sewing.set_hidden(slot, on, picker.slot)
-	picker.show_gear()

@@ -1,10 +1,9 @@
 extends GutTest
-## What a player wears (spec 09 §7, §8, AC-100, AC-100b, AC-104): WornGear reads a player slot's
-## pieces, stitch levels and hidden slots from the save; hidden pieces stay worn but aren't
-## drawn; GearLook draws each piece without danger colours.
+## What a player wears (spec 09 §7, §8, AC-100, AC-104): WornGear reads a player slot's pieces and
+## stitch levels from the save (old hidden slots don't matter any more, #331); GearLook draws each
+## piece's own picture, without danger colours and with one more detail per stitch level.
 
 const RULES: GearRules = preload("res://data/gear/gear_rules.tres")
-const HEROES: HeroRoster = preload("res://data/heroes/hero_roster.tres")
 
 
 func _save_wearing(player: int, ids: Array[String], level: int) -> TownSave:
@@ -27,28 +26,12 @@ func test_reads_what_a_player_slot_wears() -> void:
 	assert_eq(WornGear.of(save, 0, RULES).pieces.size(), 0, "player 1 wears nothing")
 
 
-func test_hidden_pieces_stay_worn_but_are_not_shown() -> void:
+func test_slots_hidden_in_an_old_save_are_still_worn() -> void:
 	var save: TownSave = _save_wearing(0, ["lookout_cap", "patch_vest", "jingle_bell"], 1)
-	save.gear.set_hidden(0, "body", true)
+	save.gear.hidden.append(PackedStringArray(["body"]))
 	var worn: WornGear = WornGear.of(save, 0, RULES)
-	assert_true(worn.has(&"patch_vest"), "still worn: its effect works")
-	assert_true(worn.is_hidden(GearDef.Slot.BODY))
-	assert_eq(worn.shown().size(), 2)
-	assert_false(worn.shown().has(RULES.find("patch_vest")))
-	assert_false(save.gear.slot_hidden(0, -1), "not every slot is hidden")
-	save.gear.set_all_hidden(0, true)
-	assert_true(save.gear.slot_hidden(0, -1))
-	assert_eq(WornGear.of(save, 0, RULES).shown().size(), 0)
-
-
-func test_the_look_key_changes_with_level_and_hiding() -> void:
-	var save: TownSave = _save_wearing(0, ["lookout_cap"], 1)
-	var first: String = WornGear.of(save, 0, RULES).look_key()
-	save.gear.stitches["lookout_cap"] = 3
-	var stitched: String = WornGear.of(save, 0, RULES).look_key()
-	assert_ne(stitched, first, "a stitch level shows")
-	save.gear.set_hidden(0, "head", true)
-	assert_eq(WornGear.of(save, 0, RULES).look_key(), "", "hidden = nothing drawn")
+	assert_eq(worn.pieces.size(), 3, "hiding is gone (#331): every worn piece counts")
+	assert_true(worn.has(&"patch_vest"))
 
 
 func test_no_gear_colour_is_a_danger_colour() -> void:
@@ -58,14 +41,12 @@ func test_no_gear_colour_is_a_danger_colour() -> void:
 				assert_false(UiColors.is_danger(color), "%s Lv %d %s" % [piece.id, level, color])
 
 
-func test_every_hero_has_gear_anchors_inside_its_puppet() -> void:
-	for hero: HeroStats in HEROES.heroes:
-		var tall: float = 80.0 if hero.plushie == null else hero.puppet_height
-		for slot: int in 3:
-			var at: Vector2 = hero.gear_anchor(slot)
-			assert_between(-at.y, 0.0, tall, "%s slot %d height" % [hero.id, slot])
-			assert_lt(absf(at.x), tall * 0.5, "%s slot %d side" % [hero.id, slot])
-		assert_gt(hero.gear_scale, 0.0)
+func test_each_stitch_level_adds_a_detail() -> void:
+	for piece: GearDef in RULES.pieces:
+		var lv1: int = GearLook.colors(piece, 1).size()
+		var lv2: int = GearLook.colors(piece, 2).size()
+		assert_gt(lv2, lv1, "%s Lv 2 adds a darker detail" % piece.id)
+		assert_gt(GearLook.colors(piece, 3).size(), lv2, "%s Lv 3 adds a lighter one" % piece.id)
 
 
 func test_stitches_dash_an_open_line() -> void:

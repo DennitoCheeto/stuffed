@@ -103,14 +103,13 @@ func test_ac101_ac103_a_coop_run_wears_tags_and_logs_each_players_gear() -> void
 	_sewn("pin_cushion_hat", 3)
 	main.town.gear.put_on(0, "head", "lookout_cap")
 	main.town.gear.put_on(0, "charm", "jingle_bell")
-	main.town.gear.set_hidden(0, "charm", true)
 	main.town.gear.put_on(1, "head", "pin_cushion_hat")
 	main.player_count = 2
 	add_controls(1)
 	var run: Run = await start_run()
 	run.rescue_plan = null
 	assert_eq(_player(0).gear.level_of(_rules().find("lookout_cap")), 2)
-	assert_true(_player(0).gear.has(&"jingle_bell"), "a hidden piece is still worn")
+	assert_true(_player(0).gear.has(&"jingle_bell"))
 	assert_eq(_player(1).gear.level_of(_rules().find("pin_cushion_hat")), 3)
 	assert_false(_player(1).gear.has(&"lookout_cap"))
 	run.pause()

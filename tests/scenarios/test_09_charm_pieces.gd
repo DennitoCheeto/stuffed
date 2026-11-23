@@ -159,13 +159,13 @@ func test_ac99_wind_up_key_fires_faster_for_four_seconds_and_spins() -> void:
 	assert_true(key.is_wound_up())
 	assert_almost_eq(hero.attack_speed, normal + 0.4, 0.001, "40% faster at Lv 1")
 	assert_true(Sfx.history.has(WIND_UP_KEY.sound))
-	var view: HeroGear = hero.get_node("Puppet").get(&"gear_view") as HeroGear
-	var charm: Sprite2D = view.sprite(GearDef.Slot.CHARM)
-	assert_ne(charm.rotation, 0.0, "the key spins on the hero's back")
+	assert_eq(hero.get_node("Overlay").call(&"key_icon"), key, "the key icon under the bar (#331)")
+	assert_ne(key.spin, 0.0, "the key icon spins")
 	await wait_seconds(WIND_UP_KEY.seconds)
 	assert_false(key.is_wound_up(), "4 s later it has run down")
 	assert_almost_eq(hero.attack_speed, normal, 0.001, "back to normal")
-	assert_eq(charm.rotation, 0.0, "the key stops")
+	await wait_physics_frames(2)
+	assert_eq(key.spin, 0.0, "the key icon stops")
 	assert_almost_eq(key.next_in(), WIND_UP_KEY.every, 0.5, "the next wind-up is 20 s away")
 	assert_gt(run.elapsed, WIND_UP_KEY.seconds)
 

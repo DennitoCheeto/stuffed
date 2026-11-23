@@ -2,6 +2,8 @@ extends Node2D
 ## Readability helpers drawn over the hero (vision §6.1): the real hit area as a ringed spot,
 ## the dash cooldown ring around it, and a small health bar under the feet with the dash pip
 ## below it (#330): it fills while the dash recharges and lights up with a pop when it is ready.
+## Beside the dash pip: the Patch Vest's patch (fills back up while it grows back) and the
+## Wind-up Key (spins while wound up), since gear isn't drawn on the hero (spec 09 §7, #331).
 
 ## The hit spot (#339, option A): zombies only hurt the hero when they touch this circle, so it
 ## is drawn at exactly the hit radius: a soft light disc, a crisp light ring on its edge with a
@@ -36,6 +38,11 @@ const DASH_PIP_READY: Color = UiColors.HUD_TEXT
 const DASH_PIP_WAITING: Color = Color(0.66, 0.6, 0.8, 0.7)
 const DASH_POP_SECONDS: float = 0.3
 const DASH_POP_GROW: float = 0.6
+## The gear icons beside the dash pip (Patch Vest left, Wind-up Key right).
+const GEAR_ICON_SIZE: float = 9.0
+const GEAR_ICON_GAP: float = 4.0
+## How faint an icon is while it waits (patch growing back, key not wound up).
+const GEAR_ICON_WAITING: float = 0.45
 
 var _player: Player
 var _warning: LowHealthWarning
@@ -106,6 +113,7 @@ func _draw_health_bar() -> void:
 	if _player.pocket != null:
 		_draw_pocket(bar)
 	_draw_dash_pip(bar)
+	_draw_gear_icons(bar)
 
 
 ## The dash pip centred under the small bar: a light fill growing while the dash recharges, bright
@@ -121,6 +129,63 @@ func _draw_dash_pip(bar: Rect2) -> void:
 		draw_rect(pip, DASH_PIP_READY)
 	elif ratio > 0.0:
 		draw_rect(Rect2(pip.position, Vector2(pip.size.x * ratio, pip.size.y)), DASH_PIP_WAITING)
+
+
+## The Patch Vest and Wind-up Key icons beside the dash pip (only while that piece is worn).
+func _draw_gear_icons(bar: Rect2) -> void:
+	var y: float = bar.end.y + DASH_PIP_GAP + DASH_PIP_SIZE.y / 2.0
+	var side: float = DASH_PIP_SIZE.x / 2.0 + GEAR_ICON_GAP + GEAR_ICON_SIZE / 2.0
+	var vest: PatchVest = patch_icon()
+	if vest != null:
+		_draw_patch_icon(Vector2(-side, y), vest)
+	var key: WindUpKey = key_icon()
+	if key != null:
+		_draw_key_icon(Vector2(side, y), key)
+
+
+## The Patch Vest effect whose icon is shown (null = not worn; for tests too).
+func patch_icon() -> PatchVest:
+	return _player.get_node_or_null(^"PatchVest") as PatchVest if _player != null else null
+
+
+## The Wind-up Key effect whose icon is shown (null = not worn; for tests too).
+func key_icon() -> WindUpKey:
+	return _player.get_node_or_null(^"WindUpKey") as WindUpKey if _player != null else null
+
+
+## A small tilted felt patch: full while the patch is there, growing back from the middle after
+## it caught a hit (faint until it is back).
+func _draw_patch_icon(center: Vector2, vest: PatchVest) -> void:
+	var half: float = GEAR_ICON_SIZE / 2.0
+	var share: float = vest.ready_share()
+	var outline: PackedVector2Array = GearLook.patch_shape(center, half)
+	outline.append(outline[0])
+	if share < 1.0:
+		draw_polyline(outline, INK, 1.5, true)
+	else:
+		FeltDraw.fill(self, GearLook.patch_shape(center, half + 1.0), INK)
+	var color: Color = vest.piece.effect_color
+	if share < 1.0:
+		color.a = GEAR_ICON_WAITING
+	if share > 0.0:
+		FeltDraw.fill(self, GearLook.patch_shape(center, half * share), color)
+
+
+## A small wind-up key (shaft and two-loop bow), turning while wound up, faint while it waits.
+func _draw_key_icon(center: Vector2, key: WindUpKey) -> void:
+	var color: Color = key.piece.color
+	if not key.is_wound_up():
+		color.a = GEAR_ICON_WAITING
+	draw_set_transform(center, key.spin)
+	var half: float = GEAR_ICON_SIZE / 2.0
+	var shaft: Vector2 = Vector2(0.0, half * 0.9)
+	draw_line(Vector2(0.0, -half * 0.1), shaft, INK, 3.0)
+	draw_line(Vector2(0.0, -half * 0.1), shaft, color, 1.5)
+	for x: float in [-1.0, 1.0]:
+		var loop: Vector2 = Vector2(x * half * 0.45, -half * 0.45)
+		draw_circle(loop, half * 0.42 + 1.0, INK)
+		draw_circle(loop, half * 0.42, color)
+	draw_set_transform(Vector2.ZERO)
 
 
 func _is_low() -> bool:
