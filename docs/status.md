@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-11-22 (milestone **Playtest fixes (Nov 2026)**: #338 Banane photo sharp (PR #358), #339 hit area ring (PR #359), #336 Space no longer dashes after the gift box (PR #355), #337 longer banners (PR #356), CI split into 4 parallel jobs (PR #354, longest ~11 min); earlier: #323 (PR #353), #324 (PR #335), #325 (#343), #326 music (#345), #327 boss slips (#346), #328 Raincoat puddle (#349), #329 Stuffing Cloud (#348), #330 dash display (#350); next: #340-#342 one per PR, look board for #331; P-22 … P-37 answers still open. **M6 done**: all 13 tickets merged (M6-13 = PR #351), worktree `Game-m6` removed 2026-11-22; M6 playtest P-38 … P-41 waits for the PO)_
+_Last updated: 2026-11-23 (milestone **Playtest fixes (Nov 2026)**: #340 toy / elite callouts (PR #361), #341 real banana peels (PR #362), #342 smoother gift box (PR #363); earlier 2026-11-22: #338 Banane photo sharp (PR #358), #339 hit area ring (PR #359), #336 Space no longer dashes after the gift box (PR #355), #337 longer banners (PR #356), CI split into 4 parallel jobs (PR #354, longest ~11 min); earlier: #323 (PR #353), #324 (PR #335), #325 (#343), #326 music (#345), #327 boss slips (#346), #328 Raincoat puddle (#349), #329 Stuffing Cloud (#348), #330 dash display (#350); next: look board for #331, then #332 loadout view (spec addendum), #333 evolutions spec; P-22 … P-37 answers still open. **M6 done**: all 13 tickets merged (M6-13 = PR #351), worktree `Game-m6` removed 2026-11-22; M6 playtest P-38 … P-41 waits for the PO)_
 
 ## Where we are
 
@@ -122,6 +122,8 @@ _Last updated: 2026-11-22 (milestone **Playtest fixes (Nov 2026)**: #338 Banane 
   If the PO still hears two tracks, ask exactly when. #327 bosses: `BossDef.stun_guard_seconds` (4 s) +
   no stun mid-pattern (all stuns). #329 cloud area 120-160 (was 55-85), damage 4 at Lv 1-2: a clear
   buff, tune `area` down if too strong (not under ~115). #330 HUD `DashPatch` + pip under each hero's bar.
+- Fixes 2026-11-23 (PO to re-check): #340 "A toy appeared!" / "A big one is here!" + short elite
+  arrow, #341 bananas + classic floor peel, #342 box squash/pop, cards fly out of the box.
 
 ## Playtest notes (M3.5, 2026-10-24, first look)
 
@@ -977,3 +979,16 @@ _Last updated: 2026-11-22 (milestone **Playtest fixes (Nov 2026)**: #338 Banane 
 - Hit spot (#339, PO option A): `player_overlay.gd` draws the real hit radius as a ring
   (`hit_ring_radius()` = `HeroStats.hitbox_radius`); dash ring just outside (`DASH_RING_GAP`).
   If the PO still finds it odd, grow `hitbox_radius` in the hero `.tres` (data only).
+- Arrival callouts (#340): `hud.callout` (`ArrivalCallout`, one small line under the boss bar's
+  place, `shown_text()`); `RunArrivals` (node "Arrivals" in `run.tscn`, only listens, so `run.gd`
+  stays at 1000 lines) shows it on `spawner.elite_spawned` and on a `FloorPickup` entering
+  `floor_items`. New elites off screen get `pickup_arrows.watch_arrival(elite, seconds)` (skipped
+  with the Spyglass). Texts/times in `run_rules.tres` ("Arrival callouts").
+- Banana looks (#341): `ProjectileLook._banana` (PEEL pale, SPLIT_PEEL ripe yellow) and
+  `FLOOR_PEEL` (opened peel, `FloorPeelProjectile`). Every colour constant in `ProjectileLook` is
+  swept by `test_clarity_ladder`. Test: `test_banana_look.gd`.
+- Gift box opening (#342): numbers in `gift_box_rules.tres` ("Opening feel"); `GiftBoxArt.squash`,
+  lid uses `GiftBoxScreen.ease_out_back`, box shrinks in the last `box_out_share`. Cards come in
+  with `ScreenMotion.flow_out(parts, offsets, ...)` using `Wobbly.drift` (offsets from
+  `GiftBoxScreen.card_start_offsets`). Time to the cards is still `opening_seconds`.
+  Test: `test_10_gift_box_opening.gd`.
