@@ -135,28 +135,27 @@ func test_ac99_patch_vest_catches_one_hit_then_grows_back() -> void:
 	hero.add_shield(10.0)
 	var vest: PatchVest = hero.get_node("PatchVest") as PatchVest
 	await wait_physics_frames(2)
-	var view: HeroGear = hero.get_node("Puppet").get(&"gear_view") as HeroGear
-	var vest_sprite: Sprite2D = view.sprite(GearDef.Slot.BODY)
-	assert_not_null(vest_sprite, "the vest is shown")
-	var with_patch: Rect2 = vest_sprite.region_rect
-	assert_true(view.shows_patch(), "with its patch")
+	var overlay: Node = hero.get_node("Overlay")
+	assert_eq(overlay.call(&"patch_icon"), vest, "the patch icon shows under the bar (#331)")
+	assert_eq(vest.ready_share(), 1.0, "full: the patch is there")
 	var full: float = hero.health
 	Sfx.history.clear()
 	assert_false(hero.take_hit(20.0, "Zombie"), "the patch caught it")
 	await wait_physics_frames(2)
 	assert_eq(hero.health, full, "no damage")
 	assert_eq(hero.shield, 10.0, "the patch blocks before the shield")
-	assert_false(view.shows_patch(), "the patch is gone")
-	assert_ne(vest_sprite.region_rect, with_patch, "the vest without the patch")
+	assert_almost_eq(vest.ready_share(), 0.0, 0.05, "the icon empties: the patch is gone")
 	assert_true(Sfx.history.has(PATCH_VEST.sound))
 	assert_almost_eq(vest.regrow_left(), PATCH_VEST.amount(3), 0.1, "back in 12 s at Lv 3")
 	await wait_seconds(hero.stats.hurt_invulnerability + 0.1)
 	assert_true(hero.take_hit(20.0, "Zombie"), "the next hit goes to the shield and health")
 	assert_eq(hero.shield, 0.0)
+	vest.set(&"_regrow_left", PATCH_VEST.amount(3) / 2.0)
+	assert_almost_eq(vest.ready_share(), 0.5, 0.05, "the icon fills back up")
 	vest.set(&"_regrow_left", 0.2)
 	await wait_seconds(0.5)
 	assert_true(hero.patch_up, "grown back")
-	assert_eq(vest_sprite.region_rect, with_patch, "and shows again")
+	assert_eq(vest.ready_share(), 1.0, "and the icon is full again")
 	assert_eq(vest.blocks, 1)
 
 

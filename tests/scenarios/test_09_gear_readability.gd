@@ -1,15 +1,16 @@
 extends "res://tests/scenarios/run_scenario.gd"
 ## Scenario (spec 09 §12, AC-104): no gear visual (the pieces at every stitch level, the Raincoat
 ## puddle, the Propeller Cap thump, the Jingle Bell shockwave, golden buttons, the apron snack,
-## the Lookout ring, the spinning key) uses a danger colour, and on every floor (dusk too) the
-## zombies' ink outline keeps the strongest contrast. The +3 draw call limit is checked in
-## `test_09_gear_on_hero.gd`, the sewing table in the fit check, real-GPU fps with
-## `tools/benchmark.gd -- --gear`.
+## the Lookout ring, the patch and key icons under the bar) uses a danger colour, and on every
+## floor (dusk too) the zombies' ink outline keeps the strongest contrast. "No draw calls for the
+## pieces" is checked in `test_09_gear_in_menus.gd`, the sewing table in the fit check, real-GPU
+## fps with `tools/benchmark.gd -- --gear`.
 
 const PLAYER_SCENE: PackedScene = preload("res://src/player/player.tscn")
 const RULES: GearRules = preload("res://data/gear/gear_rules.tres")
 const PALETTE: WorldPalette = preload("res://data/art/world_palette.tres")
 const ColorSweep: GDScript = preload("res://tests/scenarios/color_sweep.gd")
+const OVERLAY: GDScript = preload("res://src/player/player_overlay.gd")
 const TOP_LEVEL: int = 3
 
 
@@ -75,15 +76,31 @@ func _show_effects(hero: Player) -> void:
 
 
 ## The colours of what the gear adds to `hero`: its effect nodes (with their puddles, snacks and
-## rings) and the worn pieces' sprites. The hero's own puppet is swept in test_08.
+## rings) and the patch / key icons under its bar (gear isn't drawn on the hero, #331). The hero's
+## own puppet is swept in test_08.
 func _gear_colors(hero: Player) -> Array[Color]:
 	var colors: Array[Color] = []
 	for child: Node in hero.get_children():
 		var script: Script = child.get_script() as Script
 		if script != null and script.resource_path.begins_with("res://src/gear/"):
 			colors.append_array(ColorSweep.colors_of(child))
-	var puppet: Node = hero.get_node("Puppet")
-	colors.append_array(ColorSweep.colors_of(puppet.get("gear_view") as Node))
+	colors.append_array(_icon_colors(hero))
+	return colors
+
+
+## The Patch Vest and Wind-up Key icons under `hero`'s bar: ready and waiting (faint).
+func _icon_colors(hero: Player) -> Array[Color]:
+	var colors: Array[Color] = []
+	var vest: PatchVest = hero.get_node_or_null("PatchVest") as PatchVest
+	var key: WindUpKey = hero.get_node_or_null("WindUpKey") as WindUpKey
+	var shown: Array[Color] = []
+	if vest != null:
+		shown.append(vest.piece.effect_color)
+	if key != null:
+		shown.append(key.piece.color)
+	for color: Color in shown:
+		colors.append(color)
+		colors.append(Color(color, OVERLAY.GEAR_ICON_WAITING))
 	return colors
 
 

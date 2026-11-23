@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-11-23 (#331 gear look board up, waiting for the PO pick: https://claude.ai/artifact/KGHfZ9X67nPRGL8TfTX7uP (A fitted felt = recommended, B sewn into the plush, C big toy props; all 9 pieces get own shapes); milestone **Playtest fixes (Nov 2026)**: #340 toy / elite callouts (PR #361), #341 real banana peels (PR #362), #342 smoother gift box (PR #363); earlier 2026-11-22: #338 Banane photo sharp (PR #358), #339 hit area ring (PR #359), #336 Space no longer dashes after the gift box (PR #355), #337 longer banners (PR #356), CI split into 4 parallel jobs (PR #354, longest ~11 min); earlier: #323 (PR #353), #324 (PR #335), #325 (#343), #326 music (#345), #327 boss slips (#346), #328 Raincoat puddle (#349), #329 Stuffing Cloud (#348), #330 dash display (#350); next: look board for #331, then #332 loadout view (spec addendum), #333 evolutions spec; P-22 … P-37 answers still open. **M6 done**: all 13 tickets merged (M6-13 = PR #351), worktree `Game-m6` removed 2026-11-22; M6 playtest P-38 … P-41 waits for the PO)_
+_Last updated: 2026-11-23 (#331 gear off the heroes: PO picked option C after two look rounds on the real puppets; spec 09 change PR #366 merged by the PO, ticket 11 = PR for #331; milestone **Playtest fixes (Nov 2026)**: #340 toy / elite callouts (PR #361), #341 real banana peels (PR #362), #342 smoother gift box (PR #363); earlier 2026-11-22: #338 Banane photo sharp (PR #358), #339 hit area ring (PR #359), #336 Space no longer dashes after the gift box (PR #355), #337 longer banners (PR #356), CI split into 4 parallel jobs (PR #354, longest ~11 min); earlier: #323 (PR #353), #324 (PR #335), #325 (#343), #326 music (#345), #327 boss slips (#346), #328 Raincoat puddle (#349), #329 Stuffing Cloud (#348), #330 dash display (#350); next: #332 loadout view (spec addendum), #333 evolutions spec; P-22 … P-37 answers still open. **M6 done**: all 13 tickets merged (M6-13 = PR #351), worktree `Game-m6` removed 2026-11-22; M6 playtest P-38 … P-41 waits for the PO)_
 
 ## Where we are
 
@@ -106,8 +106,8 @@ _Last updated: 2026-11-23 (#331 gear look board up, waiting for the PO pick: htt
   tracks at once (King fight?), #327 Banana Split near-perma-slips bosses + odd slip-in-attack animation,
   #328 Raincoat puddle looks odd, #329 Stuffing Cloud too short (Piggy's death cloud always hits you),
   #330 dash readiness invisible (one dash, 1.5 s cooldown; only a thin ring today).
-- PO decisions: #331 gear "glued on top" → **look board first**, then redraw ("not visible in a run" was
-  most likely "Hide all" on: confirm). #332 loadout view in the **pause menu and in town** (short spec addendum).
+- PO decisions: #331 gear "glued on top" → look board → **option C: no gear on the heroes** (2026-11-23,
+  spec 09 §7 changed, PR #366). "Not visible in a run" was most likely "Hide all" (now gone). #332 loadout view in the **pause menu and in town** (short spec addendum).
   #333 **every weapon gets an evolution** (6 more: Bouncy Yarn Ball, Button Shotgun, Stuffing Cloud, Thimble
   Mortar, Thread Whip, Zipper Ray): own spec later.
 - Second player (PO's GF, 2026-11-21), same milestone: #336 Space on the gift screen also dashes, #337 "New
@@ -817,22 +817,19 @@ _Last updated: 2026-11-23 (#331 gear look board up, waiting for the PO pick: htt
   helpers below the ones they call. (2) A `SewnButton` subclass holding both a `GearDef` and a `GearRules` leaks
   `FeltDraw`/`StyleBoxFelt` (also on `main`): `GearTile` is a pure view that gets its numbers and texts from
   `SewingTable`. Bisect with leave-one-out scratch scripts in `src/zz_tmp/` (delete them afterwards).
-- Gear on the hero (M4.5-05, spec 09 §6-7, AC-100/100b): what a player wears is a `WornGear` (`WornGear.of(save,
-  slot)`: `pieces`, `levels`, `hidden`, `shown()`, `has(id)`); `Player.gear` (set before adding the hero:
-  `Town.spawn_player`, `Run.spawn_player` via `TownPerks.gear(index)`), `player.wear_gear(worn)` →
-  `gear_changed`. **Gear effects (M4.5-06…08) read `player.gear.has(id)` / `level_of(piece)`, never the
-  save** (hidden pieces still work). Looks: `GearLook.draw` (shapes + one detail per stitch level; also the
-  sewing table's `GearPicture`). Puppets own `gear_view` (`HeroGear`: shown pieces baked once into one
-  SubViewport, one sprite per slot with the hero outline shader, `sprite(slot)`, `flash()`); plushie heroes
-  hang the sprites on `body`, Banane the cap on his head joint and the rest on `_root`. Anchors =
-  `HeroStats.head_anchor` / `body_anchor` / `charm_anchor` (pixels from the feet, facing right) +
-  `gear_scale`. `town.refresh()` → `sewing.dress_players()` re-dresses every hero (rebakes only if the
-  look changed). Photos: `HeroPhoto.wear(worn)` (drawn, not baked). Hiding: `TownSewing.set_hidden(slot, on,
-  by)` (-1 = all), `TownGear.slot_hidden`; eye toggles `GearEyeToggle` on the table (`eye_toggles`,
-  `hide_all_toggle`) and the picker (`gear_row`, only while something is worn); key `hide_gear` (H, in
-  `KeyBindings.ACTIONS`). Effect moments on a piece (spinning key ...) should use `gear_view.sprite(slot)`
-  and do nothing when it is null (hidden). The end screen has no hero photo: gear shows there as tags
-  (M4.5-09). Tests: `test_worn_gear.gd`, `test_09_gear_on_hero.gd`.
+- Gear off the heroes (#331, spec 09 §7 changed 2026-11-23, PO option C): gear is **not drawn on any hero
+  or hero photo** (two redraw rounds on the real puppets looked "glued on" / "amateurish"; look board
+  https://claude.ai/artifact/KGHfZ9X67nPRGL8TfTX7uP). `HeroGear`, `gear_view`, the gear anchors, the hide
+  toggles (`GearEyeToggle`) and the `hide_gear` key are gone. What a player wears is a `WornGear`
+  (`WornGear.of(save, slot)`: `pieces`, `levels`, `has(id)`, `level_of`); `Player.gear` (set before adding the hero,
+  or `player.wear_gear(worn)`). **Gear effects read `player.gear`, never the save.** `TownGear.hidden` is
+  still loaded/saved (old saves) but unused. Each piece has its own picture: `GearLook.draw` (tile layout
+  `GearFit.tile`; shapes per piece id, Lv 2 adds a darker detail, Lv 3 a lighter one), shown by `GearPicture` on
+  the table tiles, beside each slot (`table.slot_pictures[slot]`) and under each unlocked photo on the Wardrobe
+  picker (`picker.gear_rows[hero_id]`). Patch Vest / Wind-up Key state = icons under each hero's own bar
+  (`player_overlay.gd`: `patch_icon()`, `key_icon()`; `PatchVest.ready_share()`, `WindUpKey.spin`). Tests:
+  `test_worn_gear.gd`, `test_09_gear_in_menus.gd`. Drawing gear *into* the plushie sheet was prototyped
+  (`PlushieLook.draw` clothes hook): looked like paint at hero size; don't retry without real art.
 - Never `git checkout <file>` to undo a deliberate test break while the branch has uncommitted work in that
   file: break and restore with the Edit tool.
 - Typecheck trap (M4.5-05): a unit test calling `HeroRoster.current()` next to a preloaded `gear_rules.tres`
@@ -853,8 +850,7 @@ _Last updated: 2026-11-23 (#331 gear look board up, waiting for the PO pick: htt
   `ProjectileManager.pop_enemy_bullets_where(callable)`), `PatchVest` (`Player.patch_up` is checked first in
   `take_hit`, before the shield; `patch_blocked` signal), `PicnicApron` (`ApronSnack` on the floor, eaten only by a
   hurt hero, max `MAX_SNACKS`). New `GearDef.effect_color` (puddle, patch, napkin). The patch is part of the vest
-  look: `GearLook.draw(..., patch)`; `HeroGear` bakes a spare patch-less vest cell and `show_patch(on)` swaps the
-  sprite region (a separate patch node broke AC-104's 3-draw limit). `FeltDraw.dashes` can loop forever on some
+  look on its picture; in a run the patch icon under the bar shows it (#331). `FeltDraw.dashes` can loop forever on some
   dash/gap lengths (float `fmod`; a test run grew to 19 GB): use `GearLook.stitches` on an open path instead.
   Test: `test_09_body_pieces.gd`.
 - Charm pieces (M4.5-08, spec 09 §3, AC-99): `JingleBell` counts `EnemyManager.killed_by(weapon, zombie)` (only
@@ -862,7 +858,7 @@ _Last updated: 2026-11-23 (#331 gear look board up, waiting for the PO pick: htt
   Lucky Button: `GearEffects.golden_odds(tree)` (luckiest living wearer) rolled in `PickupManager.drop` with
   `pickups.golden_rng` (seeded by `RunPatterns.seed_dice`, since `run.gd` is at exactly 1000 lines);
   `XpButton.make_golden(factor)` / `golden`, part `XpButtonLook.GOLDEN_KEY`. `WindUpKey` adds to
-  `player.attack_speed` while wound up and spins `gear_view.sprite(CHARM)`. Test: `test_09_charm_pieces.gd`.
+  `player.attack_speed` while wound up and spins its icon under the bar (`spin`). Test: `test_09_charm_pieces.gd`.
   **Never use `gh pr merge --auto`**: `main` has no branch protection, so it merges at once, even with tests
   still pending (#313 went in that way, 2026-11-20). Wait for all checks green, then `gh pr merge --squash`.
 - Evolution moment (M6-06, spec 10 §3, §10, AC-106): numbers in `data/ui/evolution_moment.tres`
@@ -903,11 +899,12 @@ _Last updated: 2026-11-23 (#331 gear look board up, waiting for the PO pick: htt
 - Gear readability + cost (M4.5-10, spec 09 §12, AC-104): `test_09_gear_readability.gd` checks every piece colour
   (`GearLook.colors` per stitch level), effect colours (`GearDef.color` for rings/key, `effect_color` for puddle,
   patch, napkin, `ApronSnack.COOKIE`/`CRUMBS`, `XpButtonLook.GOLDEN_COLOR` above `UiColors.DANGER_HUE_LOW`) and a
-  live sweep of the gear nodes only (`src/gear/` children + `gear_view`; Banane's own puppet has danger oranges and
+  live sweep of the gear nodes only (`src/gear/` children + the bar icons; Banane's own puppet has danger oranges and
   is swept in test_08). `color_sweep.gd` now reads into `GearDef`s. A new gear effect colour goes into
   `_effect_colors()`. Price rule (each step < the Workshop level after the one that opens it) in `test_gear.gd`.
   Benchmark `tools/benchmark.gd -- --gear` (Lv 3 Lookout Cap, Picnic Apron, Jingle Bell): 2026-11-20 160 → 165
-  draw calls (3 piece sprites + Lookout ring + snacks), fps within noise (~9-10 both).
+  draw calls (3 piece sprites + Lookout ring + snacks), fps within noise (~9-10 both). Since #331 the pieces
+  cost no draws (only the two icons in the overlay's own draw).
 - Snow Day + Bear Slam (M6-09, spec 10 §3, AC-105/107): evolutions 5 and 6 (`snow_day.tres`, `bear_slam.tres`,
   icons `snow_day` / `slam`, sounds `snow_day` / `bear_slam` / `snowman_burst` / `slam` + stings). Numbers in
   `WeaponStats.snowmen` (`Snowmen`) and `ground_slam` (`GroundSlam`). `SnowDay.build_snowman(at)` / `snowmen()`;

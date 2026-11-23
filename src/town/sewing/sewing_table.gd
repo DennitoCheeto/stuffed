@@ -1,24 +1,24 @@
 class_name SewingTable
 extends CanvasLayer
-## The sewing table at the Sewing Workshop (spec 09 §6, AC-98): left a photo of your hero with
-## its 3 slots (what you wear in each), right the 9 pieces as tiles, one row per slot. Click a
-## tile or press E on it for its main action (Sew / Stitch / Wear / Take off), R takes the
-## piece off, Esc closes. Below: the Workshop's own upgrade (E at a built Workshop opens the
-## table, so its upgrade lives here). Same look family as the Tricks panel and the hero picker.
-## Keeps working while the town waits.
+## The sewing table at the Sewing Workshop (spec 09 §6, AC-98): left a photo of your hero and its
+## 3 slots (a picture and the name of what you wear in each; gear isn't drawn on the hero, #331),
+## right the 9 pieces as tiles, one row per slot. Click a tile or press E on it for its main
+## action (Sew / Stitch / Wear / Take off), R takes the piece off, Esc closes. Below: the
+## Workshop's own upgrade (E at a built Workshop opens the table, so its upgrade lives here).
+## Same look family as the Tricks panel and the hero picker. Keeps working while the town waits.
 
 ## The player wants `piece`'s main action.
 signal act_requested(piece: GearDef)
 ## The player wants to take off what they wear in `slot`.
 signal take_off_requested(slot: GearDef.Slot)
-## The player wants to hide (`on`) or show gear slot `slot` on their hero (-1 = every slot).
-signal hide_requested(slot: int, on: bool)
 ## The player wants to upgrade the Workshop.
 signal upgrade_requested
 signal closed
 
 const PHOTO_SIZE: Vector2 = Vector2(230, 190)
 const SLOT_TAG_WIDTH: float = 92.0
+## The picture of the piece worn in each slot, beside its tag.
+const SLOT_PICTURE_SIZE: Vector2 = Vector2(46, 46)
 ## The piece on each slot beside its tag (it wraps onto two lines when long).
 const LABEL_WIDTH: float = 150.0
 
@@ -30,10 +30,9 @@ var opener: int = 0
 var tiles: Dictionary[StringName, GearTile] = {}
 ## One line per slot under the hero photo: what's on (or "nothing on").
 var slot_labels: Array[Label] = []
-## The eye toggle beside each slot (show on hero / hidden) and "Hide all" under them (AC-100b).
-var eye_toggles: Array[GearEyeToggle] = []
-var hide_all_toggle: GearEyeToggle = GearEyeToggle.new(-1, "", true)
-## The hero on the photo, wearing what the player at the table wears.
+## Beside each slot's tag: the picture of the piece worn there (empty while nothing is on).
+var slot_pictures: Array[Control] = []
+## The hero on the photo (plain: gear isn't drawn on the hero, #331).
 var photo: HeroPhoto
 var cloth: MenuCloth = MenuCloth.new(0.92)
 var panel: FeltPanel = FeltPanel.new(-1.0)
@@ -87,10 +86,6 @@ func _init() -> void:
 	left.add_child(photo_frame)
 	_slot_box.add_theme_constant_override(&"separation", 8)
 	left.add_child(_slot_box)
-	hide_all_toggle.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	hide_all_toggle.pressed.connect(_on_eye_pressed.bind(hide_all_toggle))
-	hide_all_toggle.fit_words(PackedStringArray([_rules.hide_all_text, _rules.show_all_text]))
-	left.add_child(hide_all_toggle)
 	_rows.add_theme_constant_override(&"separation", 10)
 	body.add_child(_rows)
 	var bottom: HBoxContainer = HBoxContainer.new()
@@ -146,10 +141,8 @@ func refresh() -> void:
 		_show_tile(tiles[id])
 	for slot: int in slot_labels.size():
 		slot_labels[slot].text = slot_text(slot as GearDef.Slot)
-		_show_eye(eye_toggles[slot])
-	_show_eye(hide_all_toggle)
-	photo.wear(WornGear.of(_save, opener, _rules))
-	var hint: String = "      ".join([_rules.table_hint, _rules.hide_hint, _rules.table_close_hint])
+		_show_slot_picture(slot as GearDef.Slot)
+	var hint: String = "      ".join([_rules.table_hint, _rules.table_close_hint])
 	hint_label.text = KeyBindings.fill(hint, opener)
 	_show_upgrade()
 
@@ -243,12 +236,6 @@ func _unhandled_input(event: InputEvent) -> void:
 			_on_tile_pressed(tile)
 		elif upgrade_button.has_focus():
 			_on_upgrade_pressed()
-		elif get_viewport().gui_get_focus_owner() is GearEyeToggle:
-			_on_eye_pressed(_eye_for(null))
-		return
-	if event.is_action_pressed(KeyBindings.action_name("hide_gear", opener)):
-		get_viewport().set_input_as_handled()
-		_on_eye_pressed(_eye_for(tile))
 		return
 	if event.is_action_pressed(KeyBindings.action_name("reroll", opener)):
 		get_viewport().set_input_as_handled()
@@ -269,12 +256,13 @@ func _build_rows() -> void:
 		var label: Label = UiFonts.label("", 19, UiColors.INK, UiFonts.heading())
 		label.custom_minimum_size = Vector2(LABEL_WIDTH, 0.0)
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		var holder: Control = Control.new()
+		holder.custom_minimum_size = SLOT_PICTURE_SIZE
+		holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		holder.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		line.add_child(holder)
+		slot_pictures.append(holder)
 		line.add_child(label)
-		var eye: GearEyeToggle = GearEyeToggle.new(slot)
-		eye.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		eye.pressed.connect(_on_eye_pressed.bind(eye))
-		line.add_child(eye)
-		eye_toggles.append(eye)
 		_slot_box.add_child(line)
 		slot_labels.append(label)
 		var row: HBoxContainer = HBoxContainer.new()
@@ -372,23 +360,16 @@ func _show_tile(tile: GearTile) -> void:
 	tile.show_state(_save, now, action_text(now, at), works, worn, priced, note_for(piece))
 
 
-## The eye toggle the hide key flips: the focused tile's slot, a focused toggle, else "Hide all".
-func _eye_for(tile: GearTile) -> GearEyeToggle:
-	if tile != null:
-		return eye_toggles[tile.piece.slot]
-	var owner_view: Viewport = get_viewport()
-	var focused: GearEyeToggle = owner_view.gui_get_focus_owner() as GearEyeToggle
-	return focused if focused != null else hide_all_toggle
-
-
-## Shows whether the player at the table hides `eye`'s slot (or every slot).
-func _show_eye(eye: GearEyeToggle) -> void:
-	var on: bool = _save.gear.slot_hidden(opener, eye.slot)
-	if eye.slot < 0:
-		eye.show_hidden(on, _rules.show_all_text if on else _rules.hide_all_text)
-	else:
-		eye.show_hidden(on, _rules.hidden_text if on else _rules.shown_text)
-
-
-func _on_eye_pressed(eye: GearEyeToggle) -> void:
-	hide_requested.emit(eye.slot, not eye.hidden_now)
+## Shows the picture of the piece the player at the table wears in `slot` (none when empty).
+func _show_slot_picture(slot: GearDef.Slot) -> void:
+	var holder: Control = slot_pictures[slot]
+	for old: Node in holder.get_children():
+		holder.remove_child(old)
+		old.queue_free()
+	var piece: GearDef = _rules.find(_save.gear.worn_in(opener, GearDef.SLOT_NAMES[slot]))
+	if piece == null:
+		return
+	var picture: GearPicture = GearPicture.new(piece, false)
+	picture.level = _save.gear.stitch_level(String(piece.id))
+	picture.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	holder.add_child(picture)

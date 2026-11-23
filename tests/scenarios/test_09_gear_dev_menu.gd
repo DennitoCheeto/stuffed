@@ -40,14 +40,12 @@ func test_ac102_gear_comes_back_after_reopening_the_game() -> void:
 	main.town.building_levels[String(_rules().workshop)] = 2
 	assert_true(GearBook.wear(main.town, _rules().find("lookout_cap"), 0))
 	assert_true(GearBook.wear(main.town, _rules().find("jingle_bell"), 0))
-	main.town.gear.set_hidden(0, "charm", true)
 	main.save_now()
 	var before: Dictionary = main.town.to_dict()
 	main.load_town()
 	assert_eq(main.town.to_dict(), before, "same town after loading it again")
 	assert_eq(main.town.gear.worn_in(0, "head"), "lookout_cap")
 	assert_eq(main.town.gear.worn_in(0, "charm"), "jingle_bell")
-	assert_true(main.town.gear.is_hidden(0, "charm"))
 	assert_eq(main.town.gear.stitch_level("wind_up_key"), 3)
 
 

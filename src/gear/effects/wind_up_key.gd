@@ -2,8 +2,8 @@ class_name WindUpKey
 extends Node
 ## Wind-up Key (spec 09 §3, AC-99): every `GearDef.every` seconds the key winds up and the hero's
 ## weapons fire `amount` faster (per stitch level, added to `Player.attack_speed`) for
-## `GearDef.seconds`. While it lasts the key spins on the hero's back (the charm sprite turns;
-## hidden gear still works, there is just nothing to see).
+## `GearDef.seconds`. Gear isn't drawn on the hero (#331): a small key icon under the hero's health
+## bar spins while it lasts (`spin`).
 
 ## How fast the key spins while wound up (turns per second).
 const SPIN_TURNS: float = 2.0
@@ -12,6 +12,8 @@ var player: Player
 var piece: GearDef
 ## Wind-ups in this run (tests).
 var wind_ups: int = 0
+## The key icon's turn (radians; spins while wound up, back to 0 after).
+var spin: float = 0.0
 
 var _next_in: float = 0.0
 var _left: float = 0.0
@@ -63,13 +65,4 @@ func _physics_process(delta: float) -> void:
 
 
 func _process(delta: float) -> void:
-	var key: Sprite2D = _charm_sprite()
-	if key == null:
-		return
-	key.rotation = key.rotation + TAU * SPIN_TURNS * delta if is_wound_up() else 0.0
-
-
-func _charm_sprite() -> Sprite2D:
-	var puppet: Node = player.get_node_or_null(^"Puppet")
-	var view: HeroGear = puppet.get(&"gear_view") as HeroGear if puppet != null else null
-	return view.sprite(GearDef.Slot.CHARM) if view != null else null
+	spin = fmod(spin + TAU * SPIN_TURNS * delta, TAU) if is_wound_up() else 0.0

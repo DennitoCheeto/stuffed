@@ -115,22 +115,3 @@ extends Resource
 ## Banane only: how he lives in town while someone else is played (a PlushieDef with the
 ## BANANE shape: his hero puppet walks around). Plushie heroes use `plushie`.
 @export var town_member: PlushieDef
-
-@export_group("Gear (spec 09 §7)")
-## Where the middle of each piece of sewn-on gear sits, in pixels from the hero's feet (facing
-## right, up is negative): the cap on the head, the vest on the belly, the charm at the side.
-@export var head_anchor: Vector2 = Vector2(0.0, -66.0)
-@export var body_anchor: Vector2 = Vector2(0.0, -26.0)
-@export var charm_anchor: Vector2 = Vector2(-21.0, -24.0)
-## How big the pieces are on this hero (1 = HeroGear.SIDE pixels).
-@export var gear_scale: float = 1.0
-
-
-## The anchor of gear slot `slot` (a `GearDef.Slot`: 0 head, 1 body, 2 charm).
-func gear_anchor(slot: int) -> Vector2:
-	match slot:
-		0:
-			return head_anchor
-		1:
-			return body_anchor
-	return charm_anchor

@@ -64,17 +64,6 @@ static var _current: GearRules
 ## How big the felt puff is when a piece is sewn (a building's rebuild puff is 1).
 @export var sewing_puff: float = 0.45
 
-@export_group("Hiding gear")
-## The eye toggles (spec 09 §6, AC-100b): one per slot, and one for every slot.
-@export var shown_text: String = "Show on hero"
-@export var hidden_text: String = "Hidden"
-@export var hide_all_text: String = "Hide all"
-@export var show_all_text: String = "Show all"
-## Above the toggles on the Wardrobe's hero picker.
-@export var picker_gear_title: String = "Gear on your hero:"
-## Which key hides (keys filled in by `KeyBindings.fill`).
-@export var hide_hint: String = "{hide_gear}: hide on hero"
-
 
 static func current() -> GearRules:
 	if _current == null:

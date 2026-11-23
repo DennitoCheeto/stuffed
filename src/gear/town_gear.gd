@@ -1,8 +1,8 @@
 class_name TownGear
 extends RefCounted
 ## The town's sewn-on gear in the save (spec 09 §8, §9): what the town owns (patterns found,
-## pieces sewn and their stitch levels, shared by everyone) and what each player slot wears and
-## hides. Part of `TownSave` (`save.gear`); the rules for changing it are in `GearBook`.
+## pieces sewn and their stitch levels, shared by everyone) and what each player slot wears.
+## Part of `TownSave` (`save.gear`); the rules for changing it are in `GearBook`.
 
 ## Gear ids whose sewing pattern was found, in the order they were found.
 var patterns: PackedStringArray = []
@@ -10,7 +10,8 @@ var patterns: PackedStringArray = []
 var stitches: Dictionary[String, int] = {}
 ## Per player slot (0 = player 1): slot name ("head", "body", "charm") -> gear id worn there.
 var worn: Array[Dictionary] = []
-## Per player slot: slot names whose piece isn't drawn on the hero (it still works).
+## Per player slot: slot names that were hidden on the hero before #331 removed gear from the
+## heroes. Not used any more; still loaded and saved so an older save loses nothing.
 var hidden: Array[PackedStringArray] = []
 
 
@@ -60,39 +61,6 @@ func put_on(player: int, slot: String, id: String) -> void:
 func take_off(player: int, slot: String) -> void:
 	if player < worn.size():
 		worn[player].erase(slot)
-
-
-func is_hidden(player: int, slot: String) -> bool:
-	return player >= 0 and player < hidden.size() and hidden[player].has(slot)
-
-
-## True when player `player` hides gear slot `slot` (a `GearDef.Slot`; -1 = every slot hidden).
-func slot_hidden(player: int, slot: int) -> bool:
-	if slot >= 0:
-		return is_hidden(player, GearDef.SLOT_NAMES[slot])
-	for slot_name: String in GearDef.SLOT_NAMES:
-		if not is_hidden(player, slot_name):
-			return false
-	return true
-
-
-## Hides (or shows again) what player `player` wears in `slot`.
-func set_hidden(player: int, slot: String, on: bool) -> void:
-	while hidden.size() <= player:
-		hidden.append(PackedStringArray())
-	var slots: PackedStringArray = hidden[player]
-	var at: int = slots.find(slot)
-	if on and at < 0:
-		slots.append(slot)
-	elif not on and at >= 0:
-		slots.remove_at(at)
-	hidden[player] = slots
-
-
-## "Hide all" / "Show all" for player `player`.
-func set_all_hidden(player: int, on: bool) -> void:
-	for slot: String in GearDef.SLOT_NAMES:
-		set_hidden(player, slot, on)
 
 
 ## Nothing owned, worn or hidden.

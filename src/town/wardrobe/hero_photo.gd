@@ -2,6 +2,7 @@ class_name HeroPhoto
 extends Control
 ## A hero standing in the hero picker's photo (spec 08 §5): a plushie hero drawn like in the game
 ## (calmed colours), Banane as his felt puppet. A hero not rescued yet is a dark felt silhouette.
+## Gear is not drawn on the hero (spec 09 §7, #331).
 
 ## Locked heroes are drawn in this colour (the look times it: a dark shape, no details).
 const SILHOUETTE: Color = Color(0.2, 0.18, 0.26, 1.0)
@@ -13,10 +14,6 @@ var hero: HeroStats
 var locked: bool = false
 ## Banane's puppet (null for plushie heroes).
 var puppet: BananePuppet
-## What the hero wears in the photo (spec 09 §7): drawn over it at the hero's gear anchors.
-var worn: WornGear = WornGear.new()
-## Draws the gear over the hero (a child, so it is drawn after the hero).
-var gear_layer: Control = Control.new()
 
 
 func _init(who: HeroStats, is_locked: bool) -> void:
@@ -36,10 +33,6 @@ func _init(who: HeroStats, is_locked: bool) -> void:
 		if locked:
 			photo.modulate = SILHOUETTE
 		add_child(photo)
-	gear_layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	gear_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	gear_layer.draw.connect(_draw_gear)
-	add_child(gear_layer)
 
 
 ## True when the hero shows as a silhouette (tests).
@@ -70,36 +63,3 @@ func _place_puppet() -> void:
 	var grow: float = size.y * BANANE_FILL / BANANE_HEIGHT
 	puppet.scale = Vector2.ONE * grow
 	puppet.position = Vector2(size.x / 2.0, size.y * 0.92 - HeroMarker.FEET.y * grow)
-
-
-## Puts `gear` on the hero in the photo (hidden slots aren't drawn; locked heroes wear nothing).
-func wear(gear: WornGear) -> void:
-	worn = gear
-	gear_layer.queue_redraw()
-
-
-## The pieces drawn on the photo (tests).
-func shown_gear() -> Array[GearDef]:
-	return [] as Array[GearDef] if locked else worn.shown()
-
-
-## Where a piece in `slot` sits in the photo: the hero's feet stand at 92% of the height and the
-## hero fills 80% of it (like the plushie photos and Banane's puppet here).
-func gear_point(slot: int) -> Vector2:
-	return _feet() + hero.gear_anchor(slot) * _grow()
-
-
-func _grow() -> float:
-	var tall: float = BANANE_HEIGHT if hero.plushie == null else hero.puppet_height
-	return size.y * BANANE_FILL / tall
-
-
-func _feet() -> Vector2:
-	return Vector2(size.x / 2.0, size.y * 0.92)
-
-
-func _draw_gear() -> void:
-	var side: float = HeroGear.SIDE * hero.gear_scale * _grow()
-	for piece: GearDef in shown_gear():
-		var at: Vector2 = gear_point(piece.slot)
-		GearLook.draw(gear_layer, piece, worn.level_of(piece), at, side, piece.color, 1.5)
