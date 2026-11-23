@@ -22,6 +22,16 @@ extends Resource
 ## ... and the soft ring grows to the radius over this many seconds.
 @export var spare_shockwave_seconds: float = 0.5
 
+@export_group("Arrival callouts (#340)")
+## The small line under the timer when a floor toy drops ...
+@export var toy_callout: String = "A toy appeared!"
+## ... and when an elite (mini-boss) arrives.
+@export var elite_callout: String = "A big one is here!"
+## How long the line stays up.
+@export var callout_seconds: float = 3.0
+## A new elite off screen gets an edge arrow for this many seconds.
+@export var elite_arrow_seconds: float = 5.0
+
 @export_group("Endless (after the goal)")
 ## Every endless minute: new zombies get this much more health (0.15 = +15%) ...
 @export var endless_health_growth_per_minute: float = 0.15
