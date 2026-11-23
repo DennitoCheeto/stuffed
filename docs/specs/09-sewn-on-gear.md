@@ -1,18 +1,23 @@
 # 09 — Sewn-on gear (equipment)
 
-Status: **DRAFT** (spec PR, waiting for the PO).
+Status: approved 2026-11-19 (PR #270). **Change 2026-11-23 (#331, PO decision "C")**: gear is no longer drawn on
+the heroes. After the playtest the pieces looked "glued on", and two redraw rounds on the real puppets (fitted
+pieces, then pieces painted into the hero) still looked "amateurish, like someone used paint" at hero size. The PO
+picked: **no gear on the hero at all**; you see it in the menus and through its effects. Changed: §1, §2, §3
+(Patch Vest, Wind-up Key), §6 (hide toggles removed), §7, §9, §12, §13 (AC-100, AC-100b, AC-104, P-36), §14,
+§16. Older text was kept only where it still holds.
 Milestone: **M4.5 — Equipment** (after M5 Plushie heroes, PO order 2026-11-18).
 Based on: vision §5 ("Equipment, sewn onto the plushie"), §6.3 (sideways unlocks), §6.9 (reveal when needed),
 §7 ("Equipment progression"), §8.1 (pieces are separate felt shapes), §11 (MVP needs 8 pieces of equipment).
 
 ## 1. Goal
 
-One question: **do I already know which piece I want to sew next, and do I see it on my hero?**
+One question: **do I already know which piece I want to sew next, and do I feel it in my runs?**
 
 After this spec:
 
 - there are **9 pieces of gear**, 3 per slot: **Head**, **Body**, **Charm**,
-- every piece **shows on the hero** and has **one clear effect that changes how you play** (not just a number),
+- every piece **shows in the menus** (sewing table, Wardrobe, end screen; not on the hero itself, #331) and has **one clear effect that changes how you play** (not just a number),
 - you get a piece's **sewing pattern** either for sure from a building (plannable) or as a surprise from a boss or
   an elite (a find),
 - you **sew** the piece and **stitch** it stronger (3 stitch levels) at a new town building, the **Sewing Workshop**,
@@ -32,10 +37,10 @@ gacha"), more than 9 pieces, Workshop tricks, gear evolutions.
    every pattern you own, plus silhouettes for the ones you haven't found ("Build the Party Shop to Lv 2",
    "Big Ted drops this").
 4. You **sew** the Lookout Cap (it costs materials, a short sewing animation, then it's yours) and it goes onto your
-   hero at once: Banane now wears a little felt cap in the town.
+   hero at once: the sewing table shows it in Banane's Head slot.
 5. In the next run the cap does its thing. Later you come back and **stitch** it to Lv 2 and Lv 3 (stronger effect,
-   one more visible stitch row on the piece).
-6. Swap to Pip at the Wardrobe: she wears the same cap.
+   one more visible stitch row on the piece's picture).
+6. Swap to Pip at the Wardrobe: she wears the same cap (the picker shows it next to her photo).
 7. The Scrapbook gets a **Gear** tab; the end screen shows what you wore.
 
 ## 3. The 9 pieces (first numbers, tuned in the playtest; all in `data/gear/<id>.tres`)
@@ -48,11 +53,11 @@ Each piece has 3 stitch levels; the numbers below are Lv 1 → Lv 3.
 | Head | **Lookout Cap** | Watchtower Lv 2 | Stand still for 1 s and your pickup range grows to **×1.6 / ×1.8 / ×2.2** until you move. Stop-and-collect rhythm. |
 | Head | **Propeller Cap** | Big Ted (first time beaten) | Your dash goes **30 / 40 / 50%** farther and lands with a **thump** that hurts zombies around you (~60 px). |
 | Body | **Raincoat** | Elites (25% chance, until found) | Your dash leaves a **puddle** for 3 s: zombies in it are **30 / 40 / 50%** slower, enemy bullets that fly into it fizzle out. |
-| Body | **Patch Vest** | Plush Hospital Lv 2 | A felt patch blocks one hit, then grows back after **20 / 16 / 12 s**. The patch is visible on the vest (there or gone). |
+| Body | **Patch Vest** | Plush Hospital Lv 2 | A felt patch blocks one hit, then grows back after **20 / 16 / 12 s**. A small patch icon under your health bar shows whether the patch is there or gone. |
 | Body | **Picnic Apron** | Snack Bar Lv 2 | Every **60 / 50 / 40 s** you drop a snack behind you; picking it up heals **15%** (co-op partners can take it too). |
 | Charm | **Jingle Bell** | Party Shop Lv 2 | Every **30 / 25 / 20** kills the bell rings out a shockwave (~120 px) that pushes zombies back and hurts them a little. |
 | Charm | **Lucky Button** | Lucky Jar Lv 2 | **4 / 6 / 8%** of XP buttons drop as golden buttons worth **×5 XP**. Worth a detour. |
-| Charm | **Wind-up Key** | Sock Puppet King (first time beaten) | Every 20 s the key winds up and your weapons fire **40 / 55 / 70%** faster for **4 s**; the key spins on your back while it lasts. |
+| Charm | **Wind-up Key** | Sock Puppet King (first time beaten) | Every 20 s the key winds up and your weapons fire **40 / 55 / 70%** faster for **4 s**; a small key icon spins under your health bar while it lasts. |
 
 Rules:
 
@@ -101,26 +106,28 @@ Rules:
   Workshop Lv 2"**.
 - Sewing a piece **puts it on** if that slot is empty. Wearing another piece of the same slot swaps it (free,
   any time). Taking off is free.
-- **Hide (PO request 2026-11-19):** each slot on the hero photo has a small eye toggle **"Show on hero" / "Hidden"**
-  (key **H** on the selected slot). A hidden piece still works fully (effect, stitch level, end screen tag), it just
-  isn't drawn on the hero, for players who want the plain plushie look. A **"Hide all"** toggle sits under the
-  photo. The same toggles are on the Wardrobe's hero picker, so you can change it where you pick your hero too.
+- ~~Hide toggles~~ (removed 2026-11-23, #331): gear is not drawn on the hero, so there is nothing to hide.
+- The hero photo on the table shows the plain hero; the three slots sit next to it as framed piece pictures.
 - Keys: arrows / mouse, E or click = the main action on the tile, **R** = take off, Esc closes. Short sewing moment
   (needle bobs, stitches appear, pop) like the build moment.
 - The town tag "Can sew!" shows on the Workshop when you can afford something new (like "Can build!").
 
-## 7. Gear on the hero (visible)
+## 7. Where you see your gear (changed 2026-11-23, #331)
 
-- Each piece is a small felt shape (baked once, like the buddy and hero puppets), drawn **on top of the puppet** at
-  an anchor the hero's data defines: `head_anchor`, `body_anchor`, `charm_anchor` (+ scale per hero), so the cap
-  sits on Banane's head and on Böbö's ears.
-- It moves with the puppet (bob, waddle tilt, hop, squash, dash stretch, hit flash) and shows in the town, the
-  Bedroom, the siege, the Wardrobe photos and the end screen photo.
-- Each stitch level adds a visible detail (an extra stitch row / a button / a tassel).
-- Effect moments are visible too: the patch disappears and grows back, the key spins, the bell swings when it rings.
-- Gear colours are calm (no danger colours) and stay inside the hero's outline/contrast rules (#172).
-- A **hidden** slot (§6) draws nothing on the hero and shows no effect moment on the piece (no swinging bell, no
-  spinning key); the effect itself (shockwave, faster firing, ...) still shows in the world as normal.
+- Gear is **not drawn on the hero puppets** (town, Bedroom, siege) or on the hero photos. The heroes keep their own
+  plain look.
+- You see what a hero wears as **piece pictures**: in the three slots of the sewing table, in a row of three small
+  pictures under the hero's photo on the Wardrobe picker, and as item tags on the end screen (§10). The pause-menu /
+  town loadout view (#332) shows them too once it is built.
+- Each piece has **its own picture** (cap with a visor, propeller cap, pin cushion with pins, vest with a patch,
+  raincoat with toggles, gingham apron, bell, four-hole button, wind-up key), and each stitch level adds a visible
+  detail to it.
+- Effects show **in the world** as before (Lookout ring, propeller thump, puddle, snacks, bell shockwave, golden
+  buttons). Two pieces have a state you need to see in a run: the **Patch Vest** (patch ready or growing back) and the
+  **Wind-up Key** (wound up). Each gets a **small icon under the hero's own health bar** (next to the dash marker,
+  #330): the patch icon is full while the patch is there and fills back up while it grows back; the key icon spins
+  while wound up. Co-op: each hero's icons sit under their own bar.
+- Gear colours stay calm (no danger colours).
 
 ## 8. Co-op (hard rule 11)
 
@@ -132,7 +139,8 @@ Rules:
 ## 9. Save (hard rule 10)
 
 - `TownSave` v7: `patterns` (ids found), `gear` (id → stitch level, 0 = not sewn), `worn` per player slot
-  (`{"head": id, "body": id, "charm": id}`), `hidden` per player slot (slot names that are hidden). Older saves load with nothing, then get the patterns of buildings
+  (`{"head": id, "body": id, "charm": id}`), `hidden` per player slot (no longer used since #331: still loaded
+  and saved so nothing is lost, no save version bump). Older saves load with nothing, then get the patterns of buildings
   already at Lv 2 (§4).
 - Tests save, reload and compare all three; another loads a v6 save.
 
@@ -151,8 +159,8 @@ Rules:
 
 - New effects (puddle, thump, shockwave, golden buttons, snack, spinning key) are quiet: no danger colours, less
   contrast than zombies, in the colour sweeps (`color_sweep.gd`). Golden buttons must stay below the danger hue.
-- A hero wearing 3 pieces costs at most **+3 draw calls** over the same hero without gear; the benchmark with full
-  gear stays within ~5% of today.
+- A hero wearing 3 pieces costs **no extra draw calls** for the pieces themselves (only the two small icons and the
+  effects); the benchmark with full gear stays within ~5% of today.
 - The sewing table fits every window size of the fit check.
 
 ## 13. Acceptance criteria
@@ -166,18 +174,21 @@ Rules:
 - **AC-98** The sewing table sews, stitches, wears, swaps and takes off pieces, takes the right materials, and
   shows locked tiles with where their pattern comes from.
 - **AC-99** Each of the 9 pieces does what §3 says at each stitch level (one scenario per piece).
-- **AC-100** Worn pieces show on every hero at that hero's anchors, move with the puppet, show their stitch level,
-  and stay on after a Wardrobe swap.
-- **AC-100b** Each slot can be hidden (and "Hide all") on the sewing table and the Wardrobe picker: a hidden piece
-  is not drawn on the hero but its effect still works; the choice is saved per player.
+- **AC-100** (changed 2026-11-23, #331) No gear is drawn on any hero puppet or hero photo. The sewing table slots,
+  the Wardrobe picker (three small pictures under each photo) and the end screen show the worn pieces with their own
+  picture and stitch level, and the pieces stay worn after a Wardrobe swap.
+- **AC-100b** (changed 2026-11-23, #331) The Patch Vest and Wind-up Key show their state as a small icon under the
+  wearer's health bar (patch there / growing back; key spinning while wound up), per hero in co-op. The old hide
+  toggles are gone; older saves with hidden slots still load.
 - **AC-101** In co-op each player wears their own pieces; a piece can't be worn by two players at once.
 - **AC-102** Patterns, sewn pieces, stitch levels and worn gear survive closing and reopening (save, reload, compare);
   a v6 save loads.
 - **AC-103** Scrapbook Gear tab, end screen tags and the run log `gear` field show the right pieces.
-- **AC-104** No gear visual uses a danger colour; zombies stay the strongest contrast; +3 draw calls at most per
-  fully geared hero; the sewing table passes the fit check.
+- **AC-104** No gear visual uses a danger colour; zombies stay the strongest contrast; worn pieces add no draw calls
+  to a hero (only the two icons); the sewing table passes the fit check.
 - **P-35** (playtest) After a few runs I know which piece I want next and what to build or beat to get it.
-- **P-36** I can see my gear on my hero and it feels like *my* plushie.
+- **P-36** (changed 2026-11-23) I always know what my hero wears (table, Wardrobe, end screen) and I can feel it in
+  the run.
 - **P-37** At least one piece changes how I play (where I stand, when I dash, which weapons I pick).
 
 ## 14. Open questions (my proposal in bold; approving the spec means "yes" to all)
@@ -190,8 +201,7 @@ Rules:
 4. Gear is **owned by the town, worn per player**, one copy of each piece (co-op: no piece twice).
 5. Patterns found in a run are **kept even when the run is lost** (like rescues).
 6. **No plain stat bonuses** on pieces for now (effects only); add small ones later if the playtest wants more power.
-7. Hiding gear (PO request 2026-11-19): **per slot + "Hide all", saved per player, on the sewing table and the
-   Wardrobe picker**; hidden pieces keep working.
+7. ~~Hiding gear~~ (removed 2026-11-23, #331: gear is not drawn on the hero).
 
 ## 15. Not in this spec
 
@@ -212,3 +222,9 @@ hero, Workshop tricks, idle production, gear evolutions, set bonuses.
 8. Charm pieces: Jingle Bell, Lucky Button, Wind-up Key — AC-99
 9. Co-op wearing, Scrapbook Gear tab, end screen tags, run log — AC-101, AC-103
 10. Readability + performance + prices check — AC-104
+
+Added 2026-11-23 (#331):
+
+11. Gear off the heroes: remove the pieces from the puppets and photos, remove the hide toggles, each piece's own
+    picture (with stitch details) on the table / picker / Scrapbook, three small pictures under the Wardrobe photo,
+    Patch Vest and Wind-up Key icons under the hero bar — AC-100, AC-100b, AC-104
