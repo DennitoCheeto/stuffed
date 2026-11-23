@@ -26,6 +26,26 @@ extends Resource
 ## ... and this far from any furniture.
 @export var treasure_stand_radius: float = 70.0
 
+@export_group("Opening feel (#342)")
+## Before the lid pops the box squashes down this much (0.12 = 12% flatter) as it gathers
+## itself, while it rocks this many times a second, gently at first, then harder.
+@export var wind_up_squash: float = 0.12
+@export var shake_per_second: float = 5.0
+## The lid flies off over this share of the opening, easing out with a small overshoot.
+@export var lid_share: float = 0.25
+## When the lid pops the box stretches up this much and springs back (this many bounces a
+## second, settling at this damping).
+@export var pop_stretch: float = 0.2
+@export var pop_spring_per_second: float = 6.0
+@export var pop_damping: float = 7.0
+## In this last share of the opening the box shrinks and fades away ...
+@export var box_out_share: float = 0.2
+## ... and the cards fly out of it to their places: each over this many seconds, one after the
+## other, starting this small.
+@export var card_flow_seconds: float = 0.4
+@export var card_flow_stagger: float = 0.07
+@export var card_flow_grow: float = 0.3
+
 
 ## What a box holds for a player whose upgrades are at `levels` (id → level): an evolution if a
 ## weapon is ready to evolve; otherwise 1-3 level-ups of weapons or items they already have

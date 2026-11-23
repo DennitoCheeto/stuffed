@@ -40,6 +40,33 @@ func open(parts: Array[Wobbly], turn: bool = true) -> void:
 		_tween.tween_property(part, "fade", 1.0, style.open_seconds * 0.4).set_delay(delay)
 
 
+## Flies `parts` out from somewhere else to their places (#342: gift cards out of the box), with
+## the "ui_open" whoosh: each starts `offsets[i]` px away at `grow_from` size, then flies home
+## and grows with a small overshoot over `seconds`, one `stagger` after the other.
+func flow_out(
+	parts: Array[Wobbly], offsets: Array[Vector2], seconds: float, stagger: float, grow_from: float
+) -> void:
+	finish()
+	Sfx.play(&"ui_open")
+	if UiFeel.reduced() or not is_inside_tree():
+		for part: Wobbly in parts:
+			part.rest()
+		return
+	_tween = create_tween().set_parallel()
+	_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	for index: int in parts.size():
+		var part: Wobbly = parts[index]
+		part.drift = offsets[index]
+		part.grow = grow_from
+		part.fade = 0.0
+		var delay: float = index * stagger
+		var fly: PropertyTweener = _tween.tween_property(part, "drift", Vector2.ZERO, seconds)
+		fly.set_delay(delay).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		var grow: PropertyTweener = _tween.tween_property(part, "grow", 1.0, seconds)
+		grow.set_delay(delay).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		_tween.tween_property(part, "fade", 1.0, seconds * 0.3).set_delay(delay)
+
+
 ## Slides `parts` down and fades them out quickly, then calls `done`.
 func close(parts: Array[Wobbly], done: Callable = Callable()) -> void:
 	finish()

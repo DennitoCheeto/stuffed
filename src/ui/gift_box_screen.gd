@@ -31,6 +31,11 @@ const CARD_TILTS: Array[float] = [-2.0, 1.5, -1.0, 2.0, -1.5]
 ## with the Lucky Gift trick holds up to 6), the cards get narrower.
 const ROW_WIDTH: float = 1800.0
 const CARD_GAP: int = 24
+## The card row's middle (from the screen middle) and half its height.
+const ROW_MIDDLE_Y: float = -30.0
+const ROW_HALF_HEIGHT: float = 200.0
+## At the very end of the opening the box shrinks by this share as it fades (#342).
+const BOX_OUT_SHRINK: float = 0.6
 const CONFETTI_COLORS: PackedColorArray = [
 	Color("#f2b52e"), Color("#4fc3f7"), Color("#f08a3c"), Color("#b388ff"), Color("#7bd88f")
 ]
@@ -77,6 +82,7 @@ var confetti: CPUParticles2D
 var reveal: EvolutionReveal = EvolutionReveal.new(MOMENT)
 
 var _gift: GiftContents
+var _rules: GiftBoxRules
 var _hold_left: float = 0.0
 
 
@@ -94,6 +100,7 @@ func is_open() -> bool:
 ## Starts the moment for `gift` (its cards show once the opening is over).
 func open(gift: GiftContents, rules: GiftBoxRules) -> void:
 	_gift = gift
+	_rules = rules
 	opening_seconds = rules.opening_seconds
 	skip_delay = rules.skip_delay
 	confirm_delay = rules.confirm_delay
@@ -117,6 +124,9 @@ func open(gift: GiftContents, rules: GiftBoxRules) -> void:
 	art.visible = true
 	art.lid_open = 0.0
 	art.wobble = 0.0
+	art.squash = 0.0
+	art.scale = Vector2.ONE
+	art.modulate.a = 1.0
 	visible = true
 
 
@@ -159,19 +169,59 @@ func _process(delta: float) -> void:
 		return
 	var share: float = time / maxf(opening_seconds, 0.001)
 	if share < LID_POP_AT:
-		# The box shakes harder and harder before it opens.
-		var build_up: float = share / LID_POP_AT
-		art.wobble = build_up * sin(time * TAU * 7.0)
+		_wind_up(share / LID_POP_AT)
 	else:
-		art.wobble = 0.0
-		art.lid_open = minf((share - LID_POP_AT) / 0.15, 1.0)
 		if not lid_popped:
 			_pop_lid()
+		_after_pop(share)
 	if time >= opening_seconds:
 		if evolution:
 			_start_reveal()
 		else:
 			_show_contents()
+
+
+## Before the lid pops (`build_up` 0..1): the box rocks gently, then harder, and squashes down
+## as it gathers itself (#342). Reduced motion keeps only the rocking.
+func _wind_up(build_up: float) -> void:
+	art.wobble = build_up * build_up * sin(time * TAU * _rules.shake_per_second)
+	art.squash = 0.0 if UiFeel.reduced() else _rules.wind_up_squash * smoothstep(0.0, 1.0, build_up)
+
+
+## After the lid popped (`share` of the opening): the lid eases off with a small overshoot, the
+## box stretches up and springs back, and at the end it shrinks away so the cards can fly out.
+func _after_pop(share: float) -> void:
+	art.wobble = 0.0
+	var lid: float = clampf((share - LID_POP_AT) / maxf(_rules.lid_share, 0.001), 0.0, 1.0)
+	if UiFeel.reduced():
+		art.lid_open = lid
+		return
+	art.lid_open = ease_out_back(lid)
+	var since: float = time - LID_POP_AT * opening_seconds
+	var spring: float = cos(TAU * _rules.pop_spring_per_second * since)
+	art.squash = -_rules.pop_stretch * exp(-_rules.pop_damping * since) * spring
+	var out_from: float = 1.0 - _rules.box_out_share
+	var out: float = clampf((share - out_from) / maxf(_rules.box_out_share, 0.001), 0.0, 1.0)
+	art.scale = Vector2.ONE * (1.0 - BOX_OUT_SHRINK * out * out)
+	art.modulate.a = 1.0 - out
+
+
+## 0..1 eased out with a small overshoot past 1 near the end (the lid flies a bit too far).
+static func ease_out_back(t: float) -> float:
+	var back: float = 1.70158
+	var u: float = t - 1.0
+	return 1.0 + (back + 1.0) * u * u * u + back * u * u
+
+
+## Where each of `count` cards `width` wide starts, from its place in the row: at `from` (from
+## the screen middle), so the cards fly out of the box (#342).
+static func card_start_offsets(count: int, width: float, from: Vector2) -> Array[Vector2]:
+	var offsets: Array[Vector2] = []
+	var row: float = count * width + (count - 1) * CARD_GAP
+	for index: int in count:
+		var x: float = -row / 2.0 + width / 2.0 + index * (width + CARD_GAP)
+		offsets.append(from - Vector2(x, ROW_MIDDLE_Y))
+	return offsets
 
 
 func _input(event: InputEvent) -> void:
@@ -246,7 +296,16 @@ func _show_contents() -> void:
 	card_row.visible = true
 	continue_button.disabled = true
 	continue_button.visible = true
-	motion.open(parts)
+	# Out of the box (an evolution's cards come out of the sewing reveal in the middle).
+	var from: Vector2 = Vector2.ZERO if evolution else box_middle()
+	var offsets: Array[Vector2] = card_start_offsets(shown.size(), width, from)
+	var seconds: float = _rules.card_flow_seconds
+	motion.flow_out(parts, offsets, seconds, _rules.card_flow_stagger, _rules.card_flow_grow)
+
+
+## The middle of the big box, from the screen middle.
+static func box_middle() -> Vector2:
+	return Vector2(ART_OFFSET_X, 0.0) + GiftBoxArt.middle()
 
 
 func _build() -> void:
@@ -274,8 +333,8 @@ func _build() -> void:
 	card_row.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 	card_row.offset_left = -ROW_WIDTH / 2.0
 	card_row.offset_right = ROW_WIDTH / 2.0
-	card_row.offset_top = -230.0
-	card_row.offset_bottom = 170.0
+	card_row.offset_top = ROW_MIDDLE_Y - ROW_HALF_HEIGHT
+	card_row.offset_bottom = ROW_MIDDLE_Y + ROW_HALF_HEIGHT
 	card_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	card_row.add_theme_constant_override("separation", CARD_GAP)
 	card_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
