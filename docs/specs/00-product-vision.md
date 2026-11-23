@@ -157,7 +157,7 @@ Each hero is one of the girlfriend's real stuffed animals. More will be added as
 ### 8.1 Art and sound pipeline (no purchases)
 
 - **Art style: "felt cut-out".** Every character, enemy, building and effect is built from simple shapes in code, with a felt texture shader (fuzzy grain, slightly wobbly edges), stitched outlines and button eyes. Proof of concept: [`docs/art/felt-style-concept.html`](../art/felt-style-concept.html) shows Banane, a zombie teddy and a readability test scene, all drawn in code without a single image file.
-- **Why it fits:** it matches the plushie theme, stays readable with hundreds of enemies, stays consistent (every piece is made the same way), and costs nothing. Equipment pieces are separate shapes sewn onto the hero, so wearing a hat is just one more shape.
+- **Why it fits:** it matches the plushie theme, stays readable with hundreds of enemies, stays consistent (every piece is made the same way), and costs nothing. Equipment pieces were planned as separate shapes sewn onto the hero; since 2026-11-23 (#331, spec 09 §7) they are shown as piece pictures in the menus instead, because at hero size they looked glued on.
 - **Depth: "B — Soft"** (product owner decision, 2026-10-21): rounded edges lit from the top-left, contact shadow on the floor, seams slightly pressed in. Not flat, not glossy. See the comparison in the concept page.
 - **Animation: puppet-style ("cut-out") animation, all in code.** Every plushie is built from separate pieces (feet, body, head, flaps/arms, beak/eyes) that move independently. Demo: [`docs/art/animation-concept.html`](../art/animation-concept.html).
   - *Walk:* the body waddles and bobs, feet step one after another, floppy parts swing a moment later than the body (this delay is what makes them feel soft).
@@ -188,7 +188,7 @@ Each hero is one of the girlfriend's real stuffed animals. More will be added as
 - **M2 — Build variety:** 8–10 weapons, evolutions, passive items, gift box, reroll/skip/banish, all enemy types including spitters, elites, mini-boss + boss, one complete area.
 - **M3 — Town:** pillow fort town, materials, 5–6 buildings, unlock heroes/weapons, rescued plushies, collection book, autosave.
 - **M4 — Night siege:** wave defense in the town, buildings fight along, repair.
-- **M4.5 — Equipment:** Sewing Workshop, 3 slots, ~8 pieces that show on the hero, sewing patterns as drops, stitch upgrades.
+- **M4.5 — Equipment:** Sewing Workshop, 3 slots, ~8 pieces (shown in the menus, not on the hero: #331), sewing patterns as drops, stitch upgrades.
 - **M5 — The plushie heroes:** 3–4 heroes based on the real stuffed animals, each with their own playstyle.
 - **M6 — Look & feel:** final art direction, effects, sound, readability options → **MVP done**.
 - **M7 — Local co-op:** a second player joins on the same PC; shared town, shared invasions.
