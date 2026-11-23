@@ -204,7 +204,7 @@ func _floors() -> Array[Color]:
 	return colors
 
 
-## Peels on the floor wear ProjectileLook.SPLIT_PEEL_COLOR (swept by test_clarity_ladder).
+## Floor peels wear ProjectileLook.FLOOR_PEEL (colours swept by test_clarity_ladder).
 func test_spec10_11_the_thread_is_calm_and_quieter_than_the_zombies() -> void:
 	var thread: Color = STORM.stitch_up.thread_color
 	assert_false(UiColors.is_danger(thread), "no danger colour")
