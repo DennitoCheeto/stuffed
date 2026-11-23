@@ -35,6 +35,10 @@ var threats: EnemyManager
 var fort: SiegeTarget
 ## Seconds the fort arrow still shows after the last hit (0 = not under attack).
 var fort_alarm: float = 0.0
+## Elites that just arrived (#340) and the seconds their arrow still shows. Without the
+## Spyglass, a new elite off screen gets a pink arrow for a few seconds.
+var arrivals: Array = []
+var arrival_left: PackedFloat32Array = []
 ## Each arrow's tip (screen pixels), the direction it points, its colour (the portal's is soft
 ## blue) and its size (1 = normal), rebuilt every frame.
 var points: PackedVector2Array = []
@@ -67,6 +71,7 @@ func _process(delta: float) -> void:
 			_point_at(to_screen * (child as Node2D).global_position, view, color, 1.0)
 	if threats != null:
 		_point_at_threats(view, to_screen)
+	_point_at_arrivals(view, to_screen, delta)
 	fort_alarm = maxf(fort_alarm - delta, 0.0)
 	if fort != null and fort_alarm > 0.0:
 		_point_at_fort(view, to_screen)
@@ -90,6 +95,26 @@ func _point_at_fort(view: Rect2, to_screen: Transform2D) -> void:
 	var on_screen: Rect2 = to_screen * fort.rect
 	if not view.intersects(on_screen):
 		_point_at(on_screen.get_center(), view, FORT_COLOR, FORT_SCALE)
+
+
+## Points to `elite` for `seconds` while it is off screen (it just arrived, #340). The Spyglass
+## already points to every elite, so then this adds nothing.
+func watch_arrival(elite: Zombie, seconds: float) -> void:
+	if threats != null or seconds <= 0.0:
+		return
+	arrivals.append(elite)
+	arrival_left.append(seconds)
+
+
+func _point_at_arrivals(view: Rect2, to_screen: Transform2D, delta: float) -> void:
+	for i: int in range(arrivals.size() - 1, -1, -1):
+		arrival_left[i] -= delta
+		var item: Variant = arrivals[i]
+		if arrival_left[i] <= 0.0 or not is_instance_valid(item) or (item as Zombie).dead:
+			arrivals.remove_at(i)
+			arrival_left.remove_at(i)
+			continue
+		_point_at(to_screen * (item as Zombie).global_position, view, THREAT_COLOR, 1.0)
 
 
 ## Spyglass: an arrow for every living elite and boss off screen.

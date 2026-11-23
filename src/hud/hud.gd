@@ -40,6 +40,8 @@ var banner_subtitle: Label
 var jars: RunJars
 ## The small banner naming a building trick the first time it fires (spec 06).
 var trick_banner: TrickBanner
+## The small line when a floor toy drops or an elite arrives (#340).
+var callout: ArrivalCallout
 ## Snack Bar tricks: the shield outline around the health bar (Second Helping) and the heart
 ## patch next to it (Spare Stuffing).
 var shield_outline: ShieldOutline
@@ -70,6 +72,8 @@ func _ready() -> void:
 	_build_banner()
 	trick_banner = TrickBanner.new()
 	add_child(trick_banner)
+	callout = ArrivalCallout.new()
+	add_child(callout)
 	shield_outline = ShieldOutline.new()
 	health_bar.add_child(shield_outline)
 	trick_row = HBoxContainer.new()
