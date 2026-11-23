@@ -15,7 +15,7 @@ var _trail: PeelTrail
 
 
 func _init() -> void:
-	ProjectileLook.apply(self, ProjectileLook.SPLIT_PEEL)
+	ProjectileLook.apply(self, ProjectileLook.FLOOR_PEEL)
 
 
 func reset() -> void:

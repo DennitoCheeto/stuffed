@@ -23,6 +23,7 @@ const BURST: StringName = &"shot/burst"
 const WHIP: StringName = &"shot/whip"
 const ZIPPER: StringName = &"shot/zipper"
 const SPLIT_PEEL: StringName = &"shot/split_peel"
+const FLOOR_PEEL: StringName = &"shot/floor_peel"
 const VOLLEY_PIN: StringName = &"shot/volley_pin"
 const STORM_NEEDLE: StringName = &"shot/storm_needle"
 const BOMB_BALL: StringName = &"shot/bomb_ball"
@@ -39,9 +40,18 @@ const HAZARD: StringName = &"bullet/cloud"
 const BULLET_RADIUS: float = 8.0
 ## On-screen radius the bloater cloud is drawn at; bigger clouds scale it.
 const HAZARD_RADIUS: float = 40.0
-## The peel is drawn a little bigger than its outline numbers.
+## The peel is a real little banana (#341), drawn a little bigger than its outline numbers: half
+## its length, its thickness in the middle and how much it curves, in on-screen pixels.
 const PEEL_SIZE: float = 1.3
+const BANANA_HALF_LENGTH: float = 15.0
+const BANANA_THICKNESS: float = 5.0
+const BANANA_CURVE: float = 6.0
 const PEEL_COLOR: Color = Color("#efe3a0")
+## The banana's ridge (a slightly deeper yellow), its stem and its dark tip: soft olive browns,
+## never the enemies' danger orange (vision §6).
+const PEEL_RIDGE_COLOR: Color = Color("#d9cc84")
+const PEEL_STEM_COLOR: Color = Color("#8a8058")
+const PEEL_TIP_COLOR: Color = Color("#5f5844")
 const PIN_LENGTH: float = 30.0
 const PIN_SHAFT_COLOR: Color = Color("#d9d6e3")
 const PIN_HEAD_COLOR: Color = Color("#7e9ad8")
@@ -80,7 +90,13 @@ const ZIPPER_LENGTH: float = 400.0
 const ZIPPER_COLOR: Color = Color("#8fc4d9")
 const ZIPPER_TEETH_COLOR: Color = Color("#dfeef4")
 ## Evolved weapons' shots (spec 02 §20): their own soft colours, never enemy red/orange.
-const SPLIT_PEEL_COLOR: Color = Color("#a8ecc8")
+## Banana Split (#341): a ripe lemon-yellow banana in the air (its trail stays mint), and an
+## opened peel with three floppy flaps on the floor, pale inside.
+const SPLIT_PEEL_COLOR: Color = Color("#f2e872")
+const SPLIT_RIDGE_COLOR: Color = Color("#d8cc52")
+const FLOOR_PEEL_INSIDE_COLOR: Color = Color("#f7f1cf")
+const FLOOR_PEEL_FLAP_LENGTH: float = 13.0
+const FLOOR_PEEL_FLAP_WIDTH: float = 7.0
 const VOLLEY_SHAFT_COLOR: Color = Color("#efe9ff")
 const VOLLEY_HEAD_COLOR: Color = Color("#b48cf0")
 const STORM_NEEDLE_COLOR: Color = Color("#a8dcff")
@@ -118,7 +134,7 @@ const BEAR_PAW_CLAW_COLOR: Color = Color("#a49882")
 
 static func make_parts() -> Dictionary[StringName, FeltPiece]:
 	return {
-		PEEL: _peel(),
+		PEEL: _banana(),
 		PIN: _pin(),
 		NEEDLE: _needle(),
 		BUTTON: _button(),
@@ -132,7 +148,8 @@ static func make_parts() -> Dictionary[StringName, FeltPiece]:
 		BURST: _burst(),
 		WHIP: _whip(),
 		ZIPPER: _zipper(),
-		SPLIT_PEEL: _peel(SPLIT_PEEL_COLOR),
+		SPLIT_PEEL: _banana(SPLIT_PEEL_COLOR, SPLIT_RIDGE_COLOR),
+		FLOOR_PEEL: _floor_peel(),
 		VOLLEY_PIN: _pin(VOLLEY_SHAFT_COLOR, VOLLEY_HEAD_COLOR),
 		STORM_NEEDLE: _needle(STORM_NEEDLE_COLOR, STORM_EYE_COLOR),
 		BOMB_BALL: _yarn(BOMB_COLOR, BOMB_STRAND_COLOR),
@@ -161,14 +178,84 @@ static func _scaled(points: PackedVector2Array, factor: float) -> PackedVector2A
 	return result
 
 
-static func _peel(color: Color = PEEL_COLOR) -> FeltPiece:
-	var peel: FeltPiece = FeltPiece.new()
-	var outline: PackedVector2Array = FeltShapes.svg_path(
-		PackedFloat32Array([-14, 6, -8, -10, 8, -10, 14, 6, 6, -2, -6, -2, -14, 6])
+## A curved banana around the pivot (a smile shape: ends up), thick in the middle and tapering to
+## both ends, with a deeper ridge along its back, a stem at the right end and a dark tip at the
+## left.
+static func _banana(color: Color = PEEL_COLOR, ridge_color: Color = PEEL_RIDGE_COLOR) -> FeltPiece:
+	var banana: FeltPiece = FeltPiece.new()
+	var unit: float = PEEL_SIZE * UNITS
+	var top: PackedVector2Array = []
+	var bottom: PackedVector2Array = []
+	var ridge: PackedVector2Array = []
+	var steps: int = 16
+	for i: int in steps + 1:
+		var x: float = lerpf(-1.0, 1.0, float(i) / steps)
+		var middle: float = BANANA_CURVE * (0.5 - x * x)
+		var half: float = BANANA_THICKNESS * pow(maxf(1.0 - x * x, 0.0), 0.6) + 0.6
+		var along: float = x * BANANA_HALF_LENGTH
+		top.append(Vector2(along, middle - half) * unit)
+		bottom.append(Vector2(along, middle + half) * unit)
+		if absf(x) < 0.8:
+			ridge.append(Vector2(along, middle + half * 0.35) * unit)
+	bottom.reverse()
+	top.append_array(bottom)
+	banana.polygon = top
+	banana.color = color
+	banana.add_line(ridge, ridge_color, 1.6 * unit)
+	var right: Vector2 = Vector2(BANANA_HALF_LENGTH, BANANA_CURVE * -0.5)
+	var stem: PackedVector2Array = FeltShapes.points(
+		PackedFloat32Array([-1.5, -1.6, 3.5, -3.4, 4.2, -1.2, -0.5, 1.4])
 	)
-	peel.polygon = _scaled(outline, PEEL_SIZE * UNITS)
-	peel.color = color
+	banana.add_layer(_scaled(FeltShapes.shifted(stem, right), unit), PEEL_STEM_COLOR)
+	var left: Vector2 = Vector2(-BANANA_HALF_LENGTH, BANANA_CURVE * -0.5)
+	banana.add_layer(FeltShapes.circle(left * unit, 1.4 * unit, 10), PEEL_TIP_COLOR)
+	return banana
+
+
+## The classic cartoon banana peel lying on the floor: a short stub standing up with its stem on
+## top and three wide flaps flopping down and out from it, each pale inside with a dark tip.
+static func _floor_peel() -> FeltPiece:
+	var peel: FeltPiece = FeltPiece.new()
+	var unit: float = PEEL_SIZE * UNITS
+	peel.polygon = _scaled(FeltShapes.ellipse(Vector2(0.0, -3.5), Vector2(3.6, 6.0), 18), unit)
+	peel.color = SPLIT_PEEL_COLOR
+	for angle: float in [160.0, 90.0, 20.0]:
+		var flap: PackedVector2Array = _flap(FLOOR_PEEL_FLAP_WIDTH)
+		var inside: PackedVector2Array = _flap(FLOOR_PEEL_FLAP_WIDTH * 0.45, 0.78)
+		peel.add_layer(
+			_scaled(FeltShapes.rotated(flap, Vector2.ZERO, angle), unit), SPLIT_PEEL_COLOR
+		)
+		var inner: PackedVector2Array = FeltShapes.rotated(inside, Vector2.ZERO, angle)
+		peel.add_layer(_scaled(inner, unit), FLOOR_PEEL_INSIDE_COLOR)
+		var tip: Vector2 = Vector2.from_angle(deg_to_rad(angle)) * FLOOR_PEEL_FLAP_LENGTH
+		peel.add_layer(FeltShapes.circle(tip * unit, 1.3 * unit, 10), PEEL_TIP_COLOR)
+	peel.add_layer(
+		_scaled(FeltShapes.ellipse(Vector2(0.0, -2.5), Vector2(3.2, 4.6), 16), unit),
+		SPLIT_PEEL_COLOR
+	)
+	var stem: PackedVector2Array = FeltShapes.points(
+		PackedFloat32Array([-1.2, -8.5, 1.2, -8.5, 1.6, -11.5, -0.6, -11.8])
+	)
+	peel.add_layer(_scaled(stem, unit), PEEL_STEM_COLOR)
 	return peel
+
+
+## One peel flap along +x from the middle: widest near its root, tapering to a round tip that
+## curls a little to the side. `reach` shortens it (the pale inside).
+static func _flap(width: float, reach: float = 1.0) -> PackedVector2Array:
+	var left: PackedVector2Array = []
+	var right: PackedVector2Array = []
+	var steps: int = 10
+	for i: int in steps + 1:
+		var t: float = float(i) / steps
+		var x: float = t * FLOOR_PEEL_FLAP_LENGTH * reach
+		var half: float = width * 0.5 * sin(PI * (0.15 + 0.85 * t)) + 0.4
+		var curl: float = 2.0 * t * t
+		left.append(Vector2(x, curl - half))
+		right.append(Vector2(x, curl + half))
+	right.reverse()
+	left.append_array(right)
+	return left
 
 
 ## Points along +x: the tip at the pivot, the round head at the back.
