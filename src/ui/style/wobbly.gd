@@ -29,6 +29,11 @@ var fade: float = 1.0:
 	set(value):
 		fade = value
 		_place()
+## Extra offset in px (a card flying out of the gift box to its place, #342).
+var drift: Vector2 = Vector2.ZERO:
+	set(value):
+		drift = value
+		_place()
 
 
 func set_body(part: Control) -> void:
@@ -53,6 +58,7 @@ func rest() -> void:
 	grow = 1.0
 	spin = 0.0
 	fade = 1.0
+	drift = Vector2.ZERO
 
 
 func _place() -> void:
@@ -60,7 +66,7 @@ func _place() -> void:
 		return
 	body.size = size
 	body.pivot_offset = size / 2.0
-	body.position = Vector2(0, -lift)
+	body.position = Vector2(0, -lift) + drift
 	body.scale = Vector2.ONE * grow
 	body.rotation = deg_to_rad(tilt + spin)
 	body.modulate.a = fade
