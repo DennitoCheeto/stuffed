@@ -1,8 +1,9 @@
 class_name PauseMenu
 extends CanvasLayer
 ## The Esc menu (spec 04 §6.2): a taped felt patch on the dimmed cloth with Resume (the gold
-## button), Settings (the shared SettingsPanel), Recipes and Give up (back home with half the
-## haul). Keeps running while the run is frozen. Built in code (pause_menu.tscn is only the root).
+## button), Loadout (spec 04b), Settings (the shared SettingsPanel), Recipes and Give up (back
+## home with half the haul). Keeps running while the run is frozen. Built in code
+## (pause_menu.tscn is only the root).
 
 signal resumed
 signal quit_requested
@@ -19,10 +20,12 @@ var cloth: MenuCloth = MenuCloth.new(0.82, 0.35)
 var panel: FeltPanel = FeltPanel.new(1.5)
 var heading: HandTitle = HandTitle.new("Paused", 64, UiColors.PURPLE, -3.0)
 var resume_button: SewnButton = SewnButton.new("Resume", true, 32)
+var loadout_button: SewnButton = SewnButton.new(LoadoutPage.TEXTS.button)
 var settings_button: SewnButton = SewnButton.new("Settings")
 var recipes_button: SewnButton = SewnButton.new("Recipes")
 var quit_button: SewnButton = SewnButton.new("Give up")
 var recipes_page: RecipesPage = RecipesPage.new()
+var loadout_page: LoadoutPage = LoadoutPage.new()
 var motion: ScreenMotion = ScreenMotion.new()
 
 
@@ -41,16 +44,23 @@ func _ready() -> void:
 	column.add_child(heading)
 	# Buttons fill the column: it sets their width.
 	column.custom_minimum_size.x = BUTTON_WIDTH
-	for button: SewnButton in [resume_button, settings_button, recipes_button, quit_button]:
+	var buttons: Array[SewnButton] = [
+		resume_button, loadout_button, settings_button, recipes_button, quit_button
+	]
+	for button: SewnButton in buttons:
 		column.add_child(button)
 	recipes_page.visible = false
 	add_child(recipes_page)
 	recipes_page.back_pressed.connect(_show_main)
+	loadout_page.visible = false
+	add_child(loadout_page)
+	loadout_page.back_pressed.connect(_show_main)
 	add_child(settings)
 	settings.closed.connect(_on_settings_closed)
 	resume_button.pressed.connect(close)
 	settings_button.pressed.connect(show_settings)
 	recipes_button.pressed.connect(show_recipes)
+	loadout_button.pressed.connect(show_loadout)
 	quit_button.pressed.connect(quit_requested.emit)
 
 
@@ -76,7 +86,7 @@ func close() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not visible or recipes_page.visible or settings.visible:
+	if not visible or recipes_page.visible or loadout_page.visible or settings.visible:
 		return
 	if event.is_action_pressed(&"pause"):
 		get_viewport().set_input_as_handled()
@@ -94,6 +104,13 @@ func _on_settings_closed() -> void:
 	settings_button.grab_focus()
 
 
+## Shows the Loadout page (every hero in this run) instead of the menu.
+func show_loadout() -> void:
+	panel.visible = false
+	loadout_page.visible = true
+	loadout_page.show_loadout(Players.all(get_tree()), upgrade_pool, hidden_weapons)
+
+
 ## Shows the Recipes page instead of the menu.
 func show_recipes() -> void:
 	panel.visible = false
@@ -103,11 +120,15 @@ func show_recipes() -> void:
 
 func _show_main() -> void:
 	var from_recipes: bool = recipes_page.visible
+	var from_loadout: bool = loadout_page.visible
 	recipes_page.visible = false
+	loadout_page.visible = false
 	settings.visible = false
 	panel.visible = true
 	if from_recipes:
 		recipes_button.grab_focus()
+	elif from_loadout:
+		loadout_button.grab_focus()
 	else:
 		resume_button.grab_focus()
 

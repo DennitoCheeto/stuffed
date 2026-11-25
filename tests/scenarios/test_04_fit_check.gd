@@ -144,7 +144,7 @@ func _visit_all(window: Vector2i) -> void:
 	await _frames()
 	await _visit_run(main.current_screen as Run)
 	await _visit_siege()
-	assert_eq(checked.size(), 36, "every screen checked: %s" % [checked])
+	assert_eq(checked.size(), 37, "every screen checked: %s" % [checked])
 
 
 func _visit_run(run: Run) -> void:
@@ -167,6 +167,9 @@ func _visit_run(run: Run) -> void:
 	run.pause_menu.settings.close()
 	run.pause_menu.show_recipes()
 	await _check("recipes")
+	# Two heroes with every weapon and item slot full (spec 04b §4, AC-119).
+	run.pause_menu.show_loadout()
+	await _check("loadout (2 players, full)")
 	run.pause_menu.close()
 	var hero: Player = Players.all(run.get_tree())[0]
 	hero.add_xp(hero.progress.xp_needed() - hero.progress.xp)
