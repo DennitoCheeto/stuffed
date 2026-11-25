@@ -43,6 +43,9 @@ const GEAR_ICON_SIZE: float = 9.0
 const GEAR_ICON_GAP: float = 4.0
 ## How faint an icon is while it waits (patch growing back, key not wound up).
 const GEAR_ICON_WAITING: float = 0.45
+## The regrowing patch is only filled from this half size on (a sliver can't be triangulated on
+## Linux: "Invalid polygon data").
+const PATCH_MIN_HALF: float = 0.5
 
 var _player: Player
 var _warning: LowHealthWarning
@@ -167,8 +170,15 @@ func _draw_patch_icon(center: Vector2, vest: PatchVest) -> void:
 	var color: Color = vest.piece.effect_color
 	if share < 1.0:
 		color.a = GEAR_ICON_WAITING
-	if share > 0.0:
-		FeltDraw.fill(self, GearLook.patch_shape(center, half * share), color)
+	var fill_half: float = patch_fill_half(share)
+	if fill_half > 0.0:
+		FeltDraw.fill(self, GearLook.patch_shape(center, fill_half), color)
+
+
+## Half size of the filled patch at `share` regrown (0 = nothing filled yet: too small to draw).
+static func patch_fill_half(share: float) -> float:
+	var half: float = GEAR_ICON_SIZE / 2.0 * share
+	return half if half >= PATCH_MIN_HALF else 0.0
 
 
 ## A small wind-up key (shaft and two-loop bow), turning while wound up, faint while it waits.
