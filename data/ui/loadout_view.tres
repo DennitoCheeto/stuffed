@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="LoadoutTexts" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/ui/loadout/loadout_texts.gd" id="1_texts"]
+
+[resource]
+script = ExtResource("1_texts")
+button = "Loadout"
+title = "Your loadout"
+heading = "Player %d · %s"
+weapons_heading = "Weapons"
+items_heading = "Items"
+gear_heading = "Gear"
+level = "Lv %d / %d"
+maxed = "MAX"
+evolved = "Evolved"
+evolve_hint = "→ %s with %s"
+unseen = "?"
+ready = "Ready! Find a gift box"
+gear_line = "%s Lv %d"
+no_gear = "Nothing worn"
