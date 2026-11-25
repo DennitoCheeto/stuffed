@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-11-25 (#332 loadout view: spec 04b drafted, spec PR #368 waits for the PO (AC-117 … AC-119, P-42; 2 tickets after approval); earlier 2026-11-23: #331 gear off the heroes: PO picked option C after two look rounds on the real puppets; spec 09 change PR #366 merged by the PO, ticket 11 = PR for #331; milestone **Playtest fixes (Nov 2026)**: #340 toy / elite callouts (PR #361), #341 real banana peels (PR #362), #342 smoother gift box (PR #363); earlier 2026-11-22: #338 Banane photo sharp (PR #358), #339 hit area ring (PR #359), #336 Space no longer dashes after the gift box (PR #355), #337 longer banners (PR #356), CI split into 4 parallel jobs (PR #354, longest ~11 min); earlier: #323 (PR #353), #324 (PR #335), #325 (#343), #326 music (#345), #327 boss slips (#346), #328 Raincoat puddle (#349), #329 Stuffing Cloud (#348), #330 dash display (#350); next: PO approves spec PR #368, then build the 2 loadout tickets; #333 evolutions spec; P-22 … P-37 answers still open. **M6 done**: all 13 tickets merged (M6-13 = PR #351), worktree `Game-m6` removed 2026-11-22; M6 playtest P-38 … P-41 waits for the PO)_
+_Last updated: 2026-11-25 (#332 loadout view: spec 04b approved (PO merged PR #368, yes to both open questions); tickets #372 run page: merged (PR #374), #373 town page (corkboard by the door + Esc menu button): next; flaky Patch Vest icon fixed (#370, PR #371); earlier 2026-11-23: #331 gear off the heroes: PO picked option C after two look rounds on the real puppets; spec 09 change PR #366 merged by the PO, ticket 11 = PR for #331; milestone **Playtest fixes (Nov 2026)**: #340 toy / elite callouts (PR #361), #341 real banana peels (PR #362), #342 smoother gift box (PR #363); earlier 2026-11-22: #338 Banane photo sharp (PR #358), #339 hit area ring (PR #359), #336 Space no longer dashes after the gift box (PR #355), #337 longer banners (PR #356), CI split into 4 parallel jobs (PR #354, longest ~11 min); earlier: #323 (PR #353), #324 (PR #335), #325 (#343), #326 music (#345), #327 boss slips (#346), #328 Raincoat puddle (#349), #329 Stuffing Cloud (#348), #330 dash display (#350); next: #373 town loadout page; #333 evolutions spec; P-22 … P-37 answers still open. **M6 done**: all 13 tickets merged (M6-13 = PR #351), worktree `Game-m6` removed 2026-11-22; M6 playtest P-38 … P-41 waits for the PO)_
 
 ## Where we are
 
@@ -989,3 +989,8 @@ _Last updated: 2026-11-25 (#332 loadout view: spec 04b drafted, spec PR #368 wai
   with `ScreenMotion.flow_out(parts, offsets, ...)` using `Wobbly.drift` (offsets from
   `GiftBoxScreen.card_start_offsets`). Time to the cards is still `opening_seconds`.
   Test: `test_10_gift_box_opening.gd`.
+- Loadout page (#372, spec 04b §2, AC-117): `pause_menu.loadout_page` (`LoadoutPage`, `src/ui/loadout/`), one
+  `LoadoutColumn` per `Players.all` hero (`weapon_rows`, `item_rows`, `gear_lines`, `empty_slots`, `heading.label`),
+  `LevelDots`, texts `data/ui/loadout_view.tres` (`LoadoutTexts`, `LoadoutPage.TEXTS`). Hint rule is static
+  `LoadoutColumn.evolution_hint` ("Ready" = weapon maxed + partner owned at any level; "?" until seen). Fit check
+  37 screens. #373 (town page) should reuse `LoadoutColumn`'s pieces. Test: `test_11_loadout_view.gd`.
