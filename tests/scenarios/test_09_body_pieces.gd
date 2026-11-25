@@ -159,6 +159,24 @@ func test_ac99_patch_vest_catches_one_hit_then_grows_back() -> void:
 	assert_eq(vest.blocks, 1)
 
 
+func test_patch_icon_skips_a_sliver_just_after_a_hit() -> void:
+	_wear(PATCH_VEST, 3)
+	await _quiet_run()
+	var hero: Player = first_player()
+	disarm(hero)
+	var vest: PatchVest = hero.get_node("PatchVest") as PatchVest
+	var overlay: Node = hero.get_node("Overlay")
+	hero.take_hit(20.0, "Zombie")
+	# A sliver of the patch is back: on Linux CI filling it failed ("triangulation failed").
+	vest.set(&"_regrow_left", PATCH_VEST.amount(3) * 0.99999)
+	var sliver: float = overlay.call(&"patch_fill_half", vest.ready_share())
+	assert_eq(sliver, 0.0, "a sliver is not filled yet")
+	var half_way: float = overlay.call(&"patch_fill_half", 0.5)
+	assert_gt(half_way, 1.0, "half regrown is filled")
+	(overlay as CanvasItem).queue_redraw()
+	await wait_process_frames(3)
+
+
 func test_ac99_patch_vest_regrow_time_at_each_level() -> void:
 	var run: Run = await _quiet_run()
 	var spot: Vector2 = first_player().global_position + Vector2(0.0, 300.0)
