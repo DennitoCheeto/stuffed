@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-11-25 (#332 loadout view: spec 04b approved (PO merged PR #368, yes to both open questions); tickets #372 run page: merged (PR #374), #373 town page (corkboard by the door + Esc menu button): next; flaky Patch Vest icon fixed (#370, PR #371); earlier 2026-11-23: #331 gear off the heroes: PO picked option C after two look rounds on the real puppets; spec 09 change PR #366 merged by the PO, ticket 11 = PR for #331; milestone **Playtest fixes (Nov 2026)**: #340 toy / elite callouts (PR #361), #341 real banana peels (PR #362), #342 smoother gift box (PR #363); earlier 2026-11-22: #338 Banane photo sharp (PR #358), #339 hit area ring (PR #359), #336 Space no longer dashes after the gift box (PR #355), #337 longer banners (PR #356), CI split into 4 parallel jobs (PR #354, longest ~11 min); earlier: #323 (PR #353), #324 (PR #335), #325 (#343), #326 music (#345), #327 boss slips (#346), #328 Raincoat puddle (#349), #329 Stuffing Cloud (#348), #330 dash display (#350); next: #373 town loadout page; #333 evolutions spec; P-22 … P-37 answers still open. **M6 done**: all 13 tickets merged (M6-13 = PR #351), worktree `Game-m6` removed 2026-11-22; M6 playtest P-38 … P-41 waits for the PO)_
+_Last updated: 2026-11-26 (#332 loadout view done: #373 town page (corkboard by the door + "My loadout" in the Esc menu): merged (PR #376); 2026-11-25: spec 04b approved (PO merged PR #368, yes to both open questions); #372 run page: merged (PR #374); flaky Patch Vest icon fixed (#370, PR #371); earlier 2026-11-23: #331 gear off the heroes: PO picked option C after two look rounds on the real puppets; spec 09 change PR #366 merged by the PO, ticket 11 = PR for #331; milestone **Playtest fixes (Nov 2026)**: #340 toy / elite callouts (PR #361), #341 real banana peels (PR #362), #342 smoother gift box (PR #363); earlier 2026-11-22: #338 Banane photo sharp (PR #358), #339 hit area ring (PR #359), #336 Space no longer dashes after the gift box (PR #355), #337 longer banners (PR #356), CI split into 4 parallel jobs (PR #354, longest ~11 min); earlier: #323 (PR #353), #324 (PR #335), #325 (#343), #326 music (#345), #327 boss slips (#346), #328 Raincoat puddle (#349), #329 Stuffing Cloud (#348), #330 dash display (#350); next: #333 evolutions spec (6 more evolutions); P-22 … P-37 answers still open. **M6 done**: all 13 tickets merged (M6-13 = PR #351), worktree `Game-m6` removed 2026-11-22; M6 playtest P-38 … P-41 waits for the PO)_
 
 ## Where we are
 
@@ -993,4 +993,15 @@ _Last updated: 2026-11-25 (#332 loadout view: spec 04b approved (PO merged PR #3
   `LoadoutColumn` per `Players.all` hero (`weapon_rows`, `item_rows`, `gear_lines`, `empty_slots`, `heading.label`),
   `LevelDots`, texts `data/ui/loadout_view.tres` (`LoadoutTexts`, `LoadoutPage.TEXTS`). Hint rule is static
   `LoadoutColumn.evolution_hint` ("Ready" = weapon maxed + partner owned at any level; "?" until seen). Fit check
-  37 screens. #373 (town page) should reuse `LoadoutColumn`'s pieces. Test: `test_11_loadout_view.gd`.
+  37 screens. Test: `test_11_loadout_view.gd`.
+- Town loadout page (#373, spec 04b §3, AC-118): `town.menu.loadout_page` (`TownLoadoutPage`: `columns` =
+  `TownLoadoutColumn` (`hero_id`, `passive_text`, `start_weapon` / `start_level` / `start_source`, `gear_rows`),
+  `bonuses` = `TownBonuses` (`shown_tricks`, `trick_tags`, `bonus_lines`; static `lines_for(perks, texts)`)).
+  Opened by the Esc menu's `loadout_button` (`loadout_requested` → `Town._open_loadout(false)`) or the corkboard
+  `town.loadout_board` (`LoadoutBoard`, `layout.loadout_board_rect`, look `LoadoutBoardLook`, palette `cork`) →
+  `menu.show_loadout(save, layout, players, true)`: Back / Esc / any player's interact closes it all. Town reads
+  keys *before* the hero's #336 guard ticks, so the E that closes a page at a prop reopens it: the menu swallows
+  that press once (`menu.swallows_press()`). Same trap for any new town prop whose page closes on E. Texts in
+  `loadout_view.tres` ("Town page"). Fit check 39 screens. Tests: `test_11_town_loadout.gd`,
+  `test_town_bonus_lines.gd`. Before writing a new test file, check the name is free (Write overwrote
+  `test_town_bonuses.gd` once).
