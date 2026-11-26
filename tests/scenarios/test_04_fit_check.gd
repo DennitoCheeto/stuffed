@@ -106,6 +106,9 @@ func _visit_all(window: Vector2i) -> void:
 	town.menu.show_settings()
 	await _check("settings (town)")
 	town.menu.settings.close()
+	town.menu.loadout_button.pressed.emit()
+	await _check("town loadout (1 player)")
+	town.menu.loadout_page.back_pressed.emit()
 	town.menu.close()
 	town.open_scrapbook()
 	await _check("scrapbook")
@@ -138,13 +141,14 @@ func _visit_all(window: Vector2i) -> void:
 	title.start_button.pressed.emit()
 	await _frames()
 	town = main.current_screen as Town
+	await _visit_town_loadout(town)
 	# Four of a Kind: the level-up shows 4 cards (AC-72).
 	main.town.tricks.append("four_of_a_kind")
 	town.enter_bedroom()
 	await _frames()
 	await _visit_run(main.current_screen as Run)
 	await _visit_siege()
-	assert_eq(checked.size(), 37, "every screen checked: %s" % [checked])
+	assert_eq(checked.size(), 39, "every screen checked: %s" % [checked])
 
 
 func _visit_run(run: Run) -> void:
@@ -347,6 +351,28 @@ func _max_the_town(town: Town) -> void:
 		town.save.materials[material] = 99999
 	town.refresh()
 	await wait_seconds(2.0)
+
+
+## The town loadout page (spec 04b §4, AC-119) at its fullest: two players, every trick bought,
+## all nine pieces worn at the top stitch level (one copy of each: player 1 the first three).
+func _visit_town_loadout(town: Town) -> void:
+	for trick: TrickDef in TrickBook.all_tricks(town.layout):
+		if not town.save.has_trick(String(trick.id)):
+			town.save.tricks.append(String(trick.id))
+	var worn: Array[PackedStringArray] = [
+		PackedStringArray(["propeller_cap", "picnic_apron", "wind_up_key"]),
+		PackedStringArray(["pin_cushion_hat", "raincoat", "lucky_button"]),
+	]
+	for player: int in worn.size():
+		for slot: int in 3:
+			var id: String = worn[player][slot]
+			town.save.gear.add_pattern(id)
+			town.save.gear.stitches[id] = 3
+			town.save.gear.put_on(player, GearDef.SLOT_NAMES[slot], id)
+	town.open_menu()
+	town.menu.loadout_button.pressed.emit()
+	await _check("town loadout (2 players, full)")
+	town.menu.close()
 
 
 ## The sewing table (spec 09 §6, AC-104) with every kind of tile: sewn and worn at the top

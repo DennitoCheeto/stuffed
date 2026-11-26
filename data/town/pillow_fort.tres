@@ -120,6 +120,7 @@ door_rect = Rect2(1205, 800, 90, 100)
 scrapbook_rect = Rect2(1560, 955, 140, 90)
 wardrobe_rect = Rect2(960, 880, 84, 100)
 calendar_position = Vector2(880, 995)
+loadout_board_rect = Rect2(1395, 905, 80, 70)
 reach = 90.0
 spawn_position = Vector2(1250, 975)
 spawn_spacing = 90.0
