@@ -34,6 +34,8 @@ const WORLD_ART_SCRIPTS: Array[String] = [
 	"res://src/town/town_life.gd",
 	"res://src/siege/moon_calendar_look.gd",
 	"res://src/siege/moon_calendar.gd",
+	"res://src/town/art/loadout_board_look.gd",
+	"res://src/town/loadout_board.gd",
 ]
 ## A colour written into the code: Color("#..."), Color(0.1, ...) or a named one like Color.RED.
 ## Color(some_colour, alpha) and Color.TRANSPARENT are fine.

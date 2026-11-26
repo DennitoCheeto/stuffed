@@ -170,6 +170,9 @@ static var _current: WorldPalette
 @export var calendar_sky_dark: Color = Color.WHITE
 @export var moon: Color = Color.WHITE
 @export var moon_spent: Color = Color.WHITE
+## The "My loadout" corkboard by the door (spec 04b §3): cork and its speckles.
+@export var cork: Color = Color.WHITE
+@export var cork_dark: Color = Color.WHITE
 ## Dusk before and during the night siege (spec 07 §7): a warm evening tint over the whole
 ## town (never dark), and the soft glow around each fairy light.
 @export var dusk_tint: Color = Color.WHITE

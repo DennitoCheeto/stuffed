@@ -47,6 +47,8 @@ var scrapbook: ScrapbookStand
 var wardrobe: TownWardrobe
 ## Nights until the horde, next to the door (spec 07 §2).
 var calendar: MoonCalendar
+## The "My loadout" corkboard by the door (spec 04b §3).
+var loadout_board: LoadoutBoard
 ## Dusk (warm tint + fairy lights) while the night siege is due (null otherwise).
 var dusk: TownDusk
 ## A banner to show on arrival (title, subtitle), e.g. how the siege ended. Set by Main.
@@ -115,6 +117,8 @@ func _ready() -> void:
 	holder.add_child(wardrobe)
 	calendar = MoonCalendar.new(layout.calendar_position)
 	holder.add_child(calendar)
+	loadout_board = LoadoutBoard.new(layout.loadout_board_rect)
+	holder.add_child(loadout_board)
 	for spot: TownSpot in layout.spots:
 		var level: int = save.building_level(String(spot.id))
 		var building: TownBuilding = TownBuilding.new(spot, level, _is_open(spot))
@@ -159,6 +163,7 @@ func _ready() -> void:
 	menu.resumed.connect(func() -> void: process_mode = Node.PROCESS_MODE_INHERIT)
 	menu.title_requested.connect(title_requested.emit)
 	menu.quit_requested.connect(quit_requested.emit)
+	menu.loadout_requested.connect(_open_loadout.bind(false))
 	add_child(picker)
 	picker.chosen.connect(_on_start_weapon_chosen)
 	picker.closed.connect(func() -> void: process_mode = Node.PROCESS_MODE_INHERIT)
@@ -171,8 +176,9 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	var prompt: String = ""
 	var shown: TownBuilding = null
+	var swallowed: bool = menu.swallows_press()
 	for player: Player in Players.all(get_tree()):
-		var pressed: bool = player.just_pressed("interact")
+		var pressed: bool = player.just_pressed("interact") and not swallowed
 		if is_at_door(player):
 			prompt = _door_prompt()
 			if pressed:
@@ -181,6 +187,11 @@ func _physics_process(delta: float) -> void:
 			prompt = "{interact}   Open the Scrapbook"
 			if pressed:
 				open_scrapbook()
+		elif loadout_board.is_near(player.global_position, layout.reach):
+			prompt = TownLoadoutPage.TEXTS.board_prompt
+			if pressed:
+				_hide_banner()
+				_open_loadout(true)
 		elif wardrobe.is_near(player):
 			prompt = wardrobe.rules.prompt
 			if pressed:
@@ -228,6 +239,13 @@ func _unhandled_input(event: InputEvent) -> void:
 func open_menu() -> void:
 	process_mode = Node.PROCESS_MODE_DISABLED
 	menu.open()
+
+
+## The "My loadout" page (spec 04b §3) for every hero in town: `board` = opened at the
+## corkboard (Back closes it), else from the Esc menu (Back returns to the menu).
+func _open_loadout(board: bool) -> void:
+	process_mode = Node.PROCESS_MODE_DISABLED
+	menu.show_loadout(save, layout, Players.all(get_tree()), board)
 
 
 ## Adds a hero for player `index` (0 = player 1) in front of the door. Unarmed: it's home.

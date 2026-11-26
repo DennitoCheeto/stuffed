@@ -20,6 +20,8 @@ const SMOOTH_STEPS: int = 10
 @export var wardrobe_rect: Rect2 = Rect2(960, 880, 84, 100)
 ## The moon calendar's post (its bottom middle, spec 07 §2). It doesn't block walking.
 @export var calendar_position: Vector2 = Vector2(880, 995)
+## The "My loadout" corkboard right of the door (spec 04b §3). It doesn't block walking.
+@export var loadout_board_rect: Rect2 = Rect2(1395, 905, 80, 70)
 ## A player closer than this to the door or the stand can press E there.
 @export var reach: float = 90.0
 ## Where Banane appears: right at the door, so E goes straight out again. Player 2+ stand
