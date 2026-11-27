@@ -49,6 +49,10 @@ extends Resource
 @export var snowmen: Snowmen
 ## Bear Slam only: the ground slam every few swats (spec 10 §3; null = none).
 @export var ground_slam: GroundSlam
+## Cat's Cradle only: the threads its ball leaves between bounces (spec 11 §4.1; null = none).
+@export var yarn_cradle: YarnCradle
+## Bowling Buttons only: hit zombies tumble and knock over others (spec 11 §4.2; null = none).
+@export var zombie_bowling: ZombieBowling
 ## Level 1 first.
 @export var levels: Array[WeaponLevel] = []
 

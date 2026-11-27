@@ -1,0 +1,57 @@
+[gd_resource type="Resource" script_class="WeaponStats" load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://src/weapons/weapon_stats.gd" id="1_stats"]
+[ext_resource type="Script" path="res://src/weapons/weapon_level.gd" id="2_level"]
+[ext_resource type="Script" path="res://src/weapons/cats_cradle.gd" id="3_behaviour"]
+[ext_resource type="Script" path="res://src/weapons/shot_look.gd" id="4_look"]
+[ext_resource type="Script" path="res://src/weapons/yarn_cradle.gd" id="5_cradle"]
+
+[sub_resource type="Resource" id="Resource_level1"]
+script = ExtResource("2_level")
+damage = 16.0
+cooldown = 1.4
+reach = 220.0
+count = 3
+speed = 400.0
+pierce = 9
+area = 0.0
+duration = 4.0
+spread_degrees = 25.0
+card_text = "3 balls that bounce between 10 zombies and unwind: each bounce leaves a yarn thread that cuts zombies."
+
+[sub_resource type="Resource" id="Resource_look"]
+script = ExtResource("4_look")
+part = &"shot/cradle_yarn"
+size = 1.25
+trail_color = Color(0.91, 0.82, 0.97, 0.5)
+trail_amount = 12
+trail_seconds = 0.4
+flash_color = Color(0.94, 0.88, 0.99, 0.5)
+flash_radius = 24.0
+
+[sub_resource type="Resource" id="Resource_cradle"]
+script = ExtResource("5_cradle")
+thread_seconds = 2.5
+thread_damage = 4.0
+thread_interval = 0.5
+max_threads = 20
+thread_reach = 6.0
+thread_width = 3.0
+thread_color = Color(0.86, 0.74, 0.95, 0.6)
+fade_seconds = 0.4
+snag_radius = 28.0
+
+[resource]
+script = ExtResource("1_stats")
+sound = &"cradle"
+sting = &"sting_cradle"
+id = &"cats_cradle"
+display_name = "Cat's Cradle"
+run_title = "String Figure"
+behaviour = ExtResource("3_behaviour")
+knockback = 80.0
+hit_radius = 12.0
+evolved_from = &"bouncy_yarn_ball"
+shot_look = SubResource("Resource_look")
+yarn_cradle = SubResource("Resource_cradle")
+levels = Array[ExtResource("2_level")]([SubResource("Resource_level1")])

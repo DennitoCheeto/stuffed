@@ -4,7 +4,7 @@ extends GutTest
 
 const POOL: UpgradePool = preload("res://data/upgrade_pool.tres")
 const RULES: GiftBoxRules = preload("res://data/gift_box_rules.tres")
-## Spec 02 §5 (+ spec 10 §3): evolved weapon id → [weapon, partner item].
+## Spec 02 §5 (+ spec 10 §3, spec 11 §3): evolved weapon id → [weapon, partner item].
 const RECIPES: Dictionary[StringName, Array] = {
 	&"banana_split": [&"peel_boomerang", &"quick_feet"],
 	&"sewing_storm": [&"orbiting_needles", &"long_thread"],
@@ -13,6 +13,9 @@ const RECIPES: Dictionary[StringName, Array] = {
 	# Spec 10 §3: the heroes' weapons evolve too.
 	&"snow_day": [&"snowball_toss", &"thick_felt"],
 	&"bear_slam": [&"paw_swat", &"extra_stuffing"],
+	# Spec 11 §3: every weapon evolves.
+	&"cats_cradle": [&"bouncy_yarn_ball", &"magnet_pocket"],
+	&"bowling_buttons": [&"button_shotgun", &"quick_hands"],
 }
 
 
@@ -26,8 +29,8 @@ func _evolution(evolved_id: StringName) -> EvolutionDef:
 	return POOL.evolution_into(evolved_id)
 
 
-func test_ac7_the_six_recipes_of_the_specs() -> void:
-	assert_eq(POOL.evolutions.size(), 6)
+func test_ac7_ac120_the_recipes_of_the_specs() -> void:
+	assert_eq(POOL.evolutions.size(), RECIPES.size())
 	for evolved_id: StringName in RECIPES:
 		var evolution: EvolutionDef = _evolution(evolved_id)
 		assert_not_null(evolution, String(evolved_id))

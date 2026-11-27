@@ -39,6 +39,7 @@ func launch(from: Weapon, direction: Vector2) -> void:
 	_time_left = _numbers.duration
 	global_position = from.origin()
 	size_to(from.area_scale())
+	dress(from)
 
 
 ## How many zombies one ball may hit.
@@ -65,7 +66,8 @@ func advance(delta: float) -> bool:
 		_already_hit[id] = true
 		hits += 1
 		var push: Vector2 = _direction * weapon.stats.knockback
-		manager.enemies.damage(zombie, _numbers.damage, push, weapon)
+		hurt(zombie, _numbers.damage, push)
+		_bounced(global_position)
 		if hits >= max_hits():
 			return false
 		_direction = _next_direction(zombie)
@@ -98,6 +100,7 @@ func _bounce_off_walls() -> void:
 	if walls.size == Vector2.ZERO:
 		return
 	var inside: Vector2 = global_position.clamp(walls.position, walls.end)
+	var wall_bounced: bool = inside != global_position
 	if inside.x != global_position.x:
 		_direction.x = -_direction.x
 		wall_bounces += 1
@@ -105,3 +108,10 @@ func _bounce_off_walls() -> void:
 		_direction.y = -_direction.y
 		wall_bounces += 1
 	global_position = inside
+	if wall_bounced:
+		_bounced(inside)
+
+
+## Called at every bounce point (a zombie or a wall). Cat's Cradle stretches a thread there.
+func _bounced(_at: Vector2) -> void:
+	pass

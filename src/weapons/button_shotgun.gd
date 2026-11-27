@@ -20,6 +20,11 @@ func attack() -> bool:
 	var spread: float = deg_to_rad(numbers.spread_degrees)
 	for i: int in numbers.count:
 		var offset: float = (i - (numbers.count - 1) / 2.0) * spread
-		var button: ButtonProjectile = shots.spawn(ButtonProjectile) as ButtonProjectile
+		var button: ButtonProjectile = shots.spawn(_button_kind()) as ButtonProjectile
 		button.launch(self, aim.rotated(offset))
 	return true
+
+
+## The button it fires (Bowling Buttons fires its own).
+func _button_kind() -> GDScript:
+	return ButtonProjectile

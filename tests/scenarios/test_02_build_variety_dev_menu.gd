@@ -78,7 +78,10 @@ func test_ac22_max_everything() -> void:
 		assert_true(weapon.is_maxed(), "%s maxed" % weapon.stats.display_name)
 		if weapon.stats.evolved_from != &"":
 			evolved += 1
-	assert_eq(evolved, pool.evolutions.size(), "every evolution happened")
+		else:
+			var name: String = weapon.stats.display_name
+			assert_null(pool.evolution_of(weapon.stats.id), "%s evolved" % name)
+	assert_gt(evolved, 0, "every evolution it has the weapon for happened")
 	for item: UpgradeDef in banane.items:
 		assert_eq(banane.item_levels[item.id], item.top_level(), "%s maxed" % item.display_name)
 	run.dev_menu.press("100 shamblers")
