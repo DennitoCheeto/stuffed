@@ -44,6 +44,11 @@ const LENGTHS: Dictionary[StringName, float] = {
 	&"strike": 0.3,
 	&"comfy": 0.4,
 	&"hopscotch": 0.3,
+	&"lasso": 0.26,
+	&"lasso_rope": 0.5,
+	&"lasso_snip": 0.22,
+	&"unzipper": 0.42,
+	&"zip_shut": 0.22,
 	# Moments.
 	&"elite": 0.7,
 	&"gift_open": 0.8,
@@ -95,6 +100,8 @@ const LENGTHS: Dictionary[StringName, float] = {
 	&"sting_bowling": 0.9,
 	&"sting_comfy": 0.9,
 	&"sting_hopscotch": 0.9,
+	&"sting_lasso": 0.9,
+	&"sting_unzipper": 0.9,
 }
 
 ## The frequent sounds get a soft felt "thump" under their click (spec 10 §4.2): sound → how
@@ -125,6 +132,8 @@ const FELT_THUMP: Dictionary[StringName, float] = {
 	&"bowling": 0.12,
 	&"comfy": 0.08,
 	&"hopscotch": 0.1,
+	&"lasso": 0.1,
+	&"unzipper": 0.08,
 }
 
 

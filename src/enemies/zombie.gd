@@ -37,6 +37,9 @@ var stun_guard_left: float = 0.0
 var ice_left: float = 0.0
 ## Seconds it still tumbles or flies (Bowling Buttons, spec 11 §7): it never hurts siege buildings.
 var tumble_left: float = 0.0
+## Roped and swung or thrown by a Lasso Lash (spec 11 §4.5): whoever holds it moves it; it doesn't
+## walk, attack or hurt anyone by touch (buildings and the fort neither).
+var held: bool = false
 ## Sticky yarn (Yarn Bomb): seconds it stays slowed, and by how much (0.5 = half speed).
 var slow_left: float = 0.0
 var slow_amount: float = 0.0

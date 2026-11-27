@@ -57,6 +57,10 @@ extends Resource
 @export var comfy_fluff: ComfyFluff
 ## Hopscotch Mortar only: its thimbles hop onward after landing (spec 11 §4.4; null = none).
 @export var hopscotch: HopscotchHops
+## Lasso Lash only: it ropes, swings and throws a zombie (spec 11 §4.5; null = none).
+@export var lasso_throw: LassoThrow
+## Unzipper only: its beam splits, sweeps open and snaps shut (spec 11 §4.6; null = none).
+@export var zipper_sweep: ZipperSweep
 ## Level 1 first.
 @export var levels: Array[WeaponLevel] = []
 

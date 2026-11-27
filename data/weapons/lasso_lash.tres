@@ -1,0 +1,64 @@
+[gd_resource type="Resource" script_class="WeaponStats" load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://src/weapons/weapon_stats.gd" id="1_stats"]
+[ext_resource type="Script" path="res://src/weapons/weapon_level.gd" id="2_level"]
+[ext_resource type="Script" path="res://src/weapons/lasso_lash.gd" id="3_behaviour"]
+[ext_resource type="Script" path="res://src/weapons/shot_look.gd" id="4_look"]
+[ext_resource type="Script" path="res://src/weapons/lasso_throw.gd" id="5_lasso"]
+
+[sub_resource type="Resource" id="Resource_level1"]
+script = ExtResource("2_level")
+damage = 30.0
+cooldown = 1.0
+reach = 0.0
+count = 2
+speed = 0.0
+pierce = 0
+area = 170.0
+duration = 0.0
+spread_degrees = 120.0
+card_text = "Longer, harder lashes; every 3rd one ropes the toughest zombie and throws it."
+
+[sub_resource type="Resource" id="Resource_look"]
+script = ExtResource("4_look")
+part = &"shot/lasso"
+size = 1.1
+trail_color = Color(0.9, 0.86, 0.98, 0.45)
+trail_amount = 8
+trail_seconds = 0.3
+flash_color = Color(0.92, 0.88, 1, 0.5)
+flash_radius = 22.0
+
+[sub_resource type="Resource" id="Resource_lasso"]
+script = ExtResource("5_lasso")
+every_lashes = 3
+swing_seconds = 0.5
+swing_radius = 95.0
+swing_damage = 20.0
+swing_push = 240.0
+swing_reach = 10.0
+throw_seconds = 0.3
+throw_reach = 360.0
+snip_factor = 3.0
+rope_sound = &"lasso_rope"
+snip_sound = &"lasso_snip"
+rope_color = Color(0.93, 0.9, 0.98, 0.75)
+rope_width = 3.0
+streak_length = 50.0
+streak_width = 8.0
+streak_color = Color(0.95, 0.93, 0.99, 0.45)
+
+[resource]
+script = ExtResource("1_stats")
+sound = &"lasso"
+sting = &"sting_lasso"
+id = &"lasso_lash"
+display_name = "Lasso Lash"
+run_title = "Rodeo Rider"
+behaviour = ExtResource("3_behaviour")
+knockback = 170.0
+hit_radius = 0.0
+evolved_from = &"thread_whip"
+shot_look = SubResource("Resource_look")
+lasso_throw = SubResource("Resource_lasso")
+levels = Array[ExtResource("2_level")]([SubResource("Resource_level1")])

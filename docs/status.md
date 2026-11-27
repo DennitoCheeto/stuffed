@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-11-27 (spec 11 approved (PO merged PR #378); Evo-1 #379 Cat's Cradle + Bowling Buttons merged (PR #383); Evo-2 #380 Comfy Cloud + Hopscotch Mortar merged (PR #384); next: Evo-3 #381 Lasso Lash + Unzipper, then Evo-4 #382; 2026-11-26: #333 spec 11 "Every weapon evolves" drafted: research `docs/research/05-evolution-research.md`, spec PR waits for the PO (AC-120 … AC-129, P-43/P-44); #332 loadout view done: #373 town page (corkboard by the door + "My loadout" in the Esc menu): merged (PR #376); 2026-11-25: spec 04b approved (PO merged PR #368, yes to both open questions); #372 run page: merged (PR #374); flaky Patch Vest icon fixed (#370, PR #371); earlier 2026-11-23: #331 gear off the heroes: PO picked option C after two look rounds on the real puppets; spec 09 change PR #366 merged by the PO, ticket 11 = PR for #331; milestone **Playtest fixes (Nov 2026)**: #340 toy / elite callouts (PR #361), #341 real banana peels (PR #362), #342 smoother gift box (PR #363); earlier 2026-11-22: #338 Banane photo sharp (PR #358), #339 hit area ring (PR #359), #336 Space no longer dashes after the gift box (PR #355), #337 longer banners (PR #356), CI split into 4 parallel jobs (PR #354, longest ~11 min); earlier: #323 (PR #353), #324 (PR #335), #325 (#343), #326 music (#345), #327 boss slips (#346), #328 Raincoat puddle (#349), #329 Stuffing Cloud (#348), #330 dash display (#350); next: PO approves spec 11, then issues + tickets 1-4; P-22 … P-37 answers still open. **M6 done**: all 13 tickets merged (M6-13 = PR #351), worktree `Game-m6` removed 2026-11-22; M6 playtest P-38 … P-41 waits for the PO)_
+_Last updated: 2026-11-27 (spec 11 approved (PO merged PR #378); Evo-1 #379 Cat's Cradle + Bowling Buttons merged (PR #383); Evo-2 #380 Comfy Cloud + Hopscotch Mortar merged (PR #384); Evo-3 #381 Lasso Lash + Unzipper: PR open; next: Evo-4 #382; 2026-11-26: #333 spec 11 "Every weapon evolves" drafted: research `docs/research/05-evolution-research.md`, spec PR waits for the PO (AC-120 … AC-129, P-43/P-44); #332 loadout view done: #373 town page (corkboard by the door + "My loadout" in the Esc menu): merged (PR #376); 2026-11-25: spec 04b approved (PO merged PR #368, yes to both open questions); #372 run page: merged (PR #374); flaky Patch Vest icon fixed (#370, PR #371); earlier 2026-11-23: #331 gear off the heroes: PO picked option C after two look rounds on the real puppets; spec 09 change PR #366 merged by the PO, ticket 11 = PR for #331; milestone **Playtest fixes (Nov 2026)**: #340 toy / elite callouts (PR #361), #341 real banana peels (PR #362), #342 smoother gift box (PR #363); earlier 2026-11-22: #338 Banane photo sharp (PR #358), #339 hit area ring (PR #359), #336 Space no longer dashes after the gift box (PR #355), #337 longer banners (PR #356), CI split into 4 parallel jobs (PR #354, longest ~11 min); earlier: #323 (PR #353), #324 (PR #335), #325 (#343), #326 music (#345), #327 boss slips (#346), #328 Raincoat puddle (#349), #329 Stuffing Cloud (#348), #330 dash display (#350); next: PO approves spec 11, then issues + tickets 1-4; P-22 … P-37 answers still open. **M6 done**: all 13 tickets merged (M6-13 = PR #351), worktree `Game-m6` removed 2026-11-22; M6 playtest P-38 … P-41 waits for the PO)_
 
 ## Where we are
 
@@ -1028,3 +1028,17 @@ _Last updated: 2026-11-27 (spec 11 approved (PO merged PR #378); Evo-1 #379 Cat'
   Scenario tests disable `run.pickups` so the cloud's kills don't open level-ups. Scrapbook grid is now
   6 columns (`ScrapbookBook.COLUMNS`): 22 weapon tiles in 5 rows ran off the screen; 6 × 4 fits 24.
   Test: `test_12_comfy_and_hopscotch.gd`.
+- Lasso Lash + Unzipper (Evo-3 #381, spec 11 §4.5-4.6, AC-120/125/126): numbers in
+  `WeaponStats.lasso_throw` (`LassoThrow`) and `zipper_sweep` (`ZipperSweep`). `LassoLash.rope`
+  (`LassoRope`: `rope_in(direction)`, `phase` IDLE / SWING / THROW, `roped`, `release()`,
+  `swing_point`, `landing_from`; counts `ropes`, `swing_hits`, `snips`, `boss_doubles`);
+  `LassoLash.lashes` counts attacks (every 3rd ropes, waits while the rope is busy). A roped zombie
+  has **`Zombie.held`**: `EnemyManager` skips its whole turn (no walk, touch, attack, siege damage);
+  whoever sets it moves it and must clear it. Unzipper fires two `UnzipperProjectile` halves
+  (`side` -1/1, `spread_angle()`), extending `BeamProjectile` via the new `_touched(zombie)` hook;
+  they report to `Unzipper.seam` (`ZipperSeam`, found by node name: `sweep`, `swept()`,
+  `zip_shut`, `shuts`, `shut_hits`); the right half zips it shut. `current().damage` already
+  includes the hero's damage multiplier: only multiply data-only numbers (swing, zip-shut) by
+  `damage_scale()`. After this ticket no weapon is left without an evolution: tests that used
+  Thread Whip / Zipper Ray as "no evolution yet" now check their partner. Scrapbook counts 24.
+  Test: `test_12_lasso_and_unzipper.gd`.

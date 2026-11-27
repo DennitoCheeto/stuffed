@@ -17,6 +17,13 @@ static func voice(sound: StringName) -> Callable:
 		&"hopscotch": _hopscotch,
 		&"sting_comfy": _sting_comfy,
 		&"sting_hopscotch": _sting_hopscotch,
+		&"lasso": _lasso,
+		&"lasso_rope": _lasso_rope,
+		&"lasso_snip": _lasso_snip,
+		&"unzipper": _unzipper,
+		&"zip_shut": _zip_shut,
+		&"sting_lasso": _sting_lasso,
+		&"sting_unzipper": _sting_unzipper,
 	}
 	return voices.get(sound, Callable())
 
@@ -129,3 +136,71 @@ static func _sting_hopscotch(t: float) -> float:
 	if t >= 0.5:
 		landing = bells(t - 0.5, PackedFloat32Array([76.0, 84.0]), 0.08, 5.0)
 	return 0.1 * value + 0.1 * landing
+
+
+## Lasso Lash: the whip's swish, rounder, with a soft rope "thwip" at the end.
+static func _lasso(t: float) -> float:
+	var swish: float = Synth.noise(t) * Synth.sine(Synth.sweep(t, 500.0, 2000.0, 0.16))
+	swish *= sin(PI * minf(t / 0.18, 1.0))
+	var thwip: float = 0.0
+	if t > 0.15:
+		var local: float = t - 0.15
+		thwip = Synth.sine(Synth.sweep(local, 700.0, 380.0, 0.08)) * exp(-30.0 * local)
+	return 0.22 * swish + 0.16 * thwip
+
+
+## The lasso catches: a whirring "woo-woo" going round once.
+static func _lasso_rope(t: float) -> float:
+	var whirl: float = 0.5 + 0.5 * sin(TAU * 4.0 * t)
+	var air: float = Synth.noise(t) * Synth.sine(Synth.sweep(t, 300.0, 900.0, 0.5))
+	return 0.12 * air * whirl * sin(PI * minf(t / 0.5, 1.0))
+
+
+## The thrown zombie lands and the thread is snipped: a scissor "snip-snip".
+static func _lasso_snip(t: float) -> float:
+	var value: float = 0.0
+	for start: float in [0.0, 0.09]:
+		if t >= start:
+			var local: float = t - start
+			value += Synth.noise(t) * Synth.sine(3200.0 * local) * exp(-60.0 * local)
+	return 0.2 * value
+
+
+## Unzipper: the zipper's clicks running up and opening wider.
+static func _unzipper(t: float) -> float:
+	var clicks: float = 0.5 + 0.5 * Synth.square(Synth.sweep(t, 50.0, 190.0, 0.42))
+	var shape: float = minf(t / 0.03, 1.0) * clampf((0.42 - t) / 0.08, 0.0, 1.0)
+	var hum: float = Synth.sine(Synth.sweep(t, 220.0, 330.0, 0.42)) * shape
+	return 0.2 * Synth.noise(t) * clicks * shape + 0.06 * hum
+
+
+## The halves zip shut: a quick tight run of clicks and a soft "zup".
+static func _zip_shut(t: float) -> float:
+	var clicks: float = 0.5 + 0.5 * Synth.square(Synth.sweep(t, 220.0, 60.0, 0.16))
+	var shape: float = clampf((0.18 - t) / 0.05, 0.0, 1.0)
+	var zup: float = Synth.sine(Synth.sweep(t, 300.0, 600.0, 0.12)) * exp(-18.0 * t)
+	return 0.18 * Synth.noise(t) * clicks * shape + 0.1 * zup
+
+
+## Lasso Lash: a rope whirling round twice, then a bright "yee-haw" two-note call.
+static func _sting_lasso(t: float) -> float:
+	var whirl: float = Synth.noise(t) * (0.5 + 0.5 * sin(TAU * 5.0 * t)) * exp(-3.0 * t)
+	var notes: float = 0.0
+	if t >= 0.4:
+		notes = bells(t - 0.4, PackedFloat32Array([67.0, 74.0, 79.0]), 0.1, 5.0)
+	return 0.08 * whirl + 0.11 * notes
+
+
+## Unzipper: a long zip opening upwards, then a bright chord as it snaps shut.
+static func _sting_unzipper(t: float) -> float:
+	var zip: float = 0.0
+	if t < 0.5:
+		var clicks: float = 0.5 + 0.5 * Synth.square(Synth.sweep(t, 40.0, 220.0, 0.5))
+		zip = Synth.noise(t) * clicks * clampf((0.5 - t) / 0.08, 0.0, 1.0)
+	var chord: float = 0.0
+	if t >= 0.5:
+		var local: float = t - 0.5
+		for note: float in [64.0, 69.0, 73.0]:
+			chord += Synth.sine(Synth.midi_hz(note) * local)
+		chord *= exp(-6.0 * local)
+	return 0.12 * zip + 0.06 * chord
