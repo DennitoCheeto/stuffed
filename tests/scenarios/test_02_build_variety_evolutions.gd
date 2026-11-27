@@ -249,11 +249,17 @@ func test_ac9_recipes_page_lists_all_pairs_unseen_as_question_marks() -> void:
 	var page: RecipesPage = run.pause_menu.recipes_page
 	assert_true(page.is_visible_in_tree(), "the Recipes page opens")
 	assert_false(run.pause_menu.panel.visible)
-	assert_eq(page.rows.size(), 4, "all four pairs")
+	# Snow Day and Bear Slam stay hidden until Pip and the bear are home.
+	var locked: int = run.perks.locked_hero_weapons.size()
+	assert_eq(page.rows.size(), run.upgrade_pool.evolutions.size() - locked, "all pairs")
+	var expected: Array[String] = []
+	for row: RecipeRow in page.rows:
+		expected.append("?")
+	expected[2] = "Pincushion Volley"
 	var shown: Array[String] = []
 	for row: RecipeRow in page.rows:
 		shown.append(row.result_label.text)
-	assert_eq(shown, ["?", "?", "Pincushion Volley", "?"], "only the seen one has a name")
+	assert_eq(shown, expected, "only the seen one has a name")
 	assert_eq(page.rows[2].result_icon.icon, &"volley")
 	assert_eq(page.rows[0].result_icon.icon, &"", "no icon for an unseen one")
 	await tap_action("pause")
