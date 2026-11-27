@@ -20,6 +20,11 @@ func attack() -> bool:
 	var spread: float = deg_to_rad(numbers.spread_degrees)
 	for i: int in numbers.count:
 		var offset: float = (i - (numbers.count - 1) / 2.0) * spread
-		var ball: YarnProjectile = shots.spawn(YarnProjectile) as YarnProjectile
+		var ball: YarnProjectile = shots.spawn(_ball_kind()) as YarnProjectile
 		ball.launch(self, aim.rotated(offset))
 	return true
+
+
+## The ball it throws (Cat's Cradle throws its own).
+func _ball_kind() -> GDScript:
+	return YarnProjectile

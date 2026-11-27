@@ -34,6 +34,8 @@ const PAW: StringName = &"shot/paw"
 const SNOW_DAY_BALL: StringName = &"shot/snow_day_ball"
 const SNOWMAN: StringName = &"shot/snowman"
 const BEAR_PAW: StringName = &"shot/bear_paw"
+const CRADLE_YARN: StringName = &"shot/cradle_yarn"
+const BOWLING_BUTTON: StringName = &"shot/bowling_button"
 const BULLET: StringName = &"bullet/stuffing"
 const HAZARD: StringName = &"bullet/cloud"
 ## On-screen radius of the stuffing ball part; bigger bullets scale it.
@@ -130,6 +132,12 @@ const SNOWMAN_SCARF_COLOR: Color = Color("#9fcdeb")
 ## Bear Slam (spec 10 §3): a bigger honey-cream paw swipe.
 const BEAR_PAW_COLOR: Color = Color("#f2e2bd")
 const BEAR_PAW_CLAW_COLOR: Color = Color("#a49882")
+## Cat's Cradle (spec 11 §4.1): a bigger lilac yarn ball.
+const CRADLE_YARN_COLOR: Color = Color("#d9b0f0")
+const CRADLE_STRAND_COLOR: Color = Color("#8e66b4")
+## Bowling Buttons (spec 11 §4.2): a periwinkle button with dark blue holes.
+const BOWLING_BUTTON_COLOR: Color = Color("#a9b9f2")
+const BOWLING_HOLE_COLOR: Color = Color("#55639e")
 
 
 static func make_parts() -> Dictionary[StringName, FeltPiece]:
@@ -160,6 +168,8 @@ static func make_parts() -> Dictionary[StringName, FeltPiece]:
 		SNOW_DAY_BALL: _snowball(SNOW_DAY_RADIUS, SNOW_DAY_SHADE_COLOR),
 		SNOWMAN: _snowman(),
 		BEAR_PAW: _paw(BEAR_PAW_COLOR, BEAR_PAW_CLAW_COLOR),
+		CRADLE_YARN: _yarn(CRADLE_YARN_COLOR, CRADLE_STRAND_COLOR),
+		BOWLING_BUTTON: _button(BOWLING_BUTTON_COLOR, BOWLING_HOLE_COLOR),
 		BULLET: _bullet(),
 		HAZARD: _hazard(),
 	}
@@ -290,13 +300,15 @@ static func _needle(color: Color = NEEDLE_COLOR, eye_color: Color = BUTTON_HOLE_
 	return needle
 
 
-static func _button() -> FeltPiece:
+static func _button(
+	color: Color = BUTTON_COLOR, hole_color: Color = BUTTON_HOLE_COLOR
+) -> FeltPiece:
 	var button: FeltPiece = FeltPiece.new()
 	var radius: float = BUTTON_RADIUS * UNITS
 	button.polygon = FeltShapes.circle(Vector2.ZERO, radius, 20)
-	button.color = BUTTON_COLOR
+	button.color = color
 	for hole: Vector2 in [Vector2(-1, -1), Vector2(1, -1), Vector2(-1, 1), Vector2(1, 1)]:
-		button.add_layer(FeltShapes.circle(hole * radius * 0.28, radius * 0.14), BUTTON_HOLE_COLOR)
+		button.add_layer(FeltShapes.circle(hole * radius * 0.28, radius * 0.14), hole_color)
 	return button
 
 

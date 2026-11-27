@@ -35,6 +35,8 @@ var stun_guard_left: float = 0.0
 ## Seconds it stays frozen in place by a bursting snowman (Snow Day, spec 10 §3): icy tint, no
 ## walking, attacking or touching.
 var ice_left: float = 0.0
+## Seconds it still tumbles or flies (Bowling Buttons, spec 11 §7): it never hurts siege buildings.
+var tumble_left: float = 0.0
 ## Sticky yarn (Yarn Bomb): seconds it stays slowed, and by how much (0.5 = half speed).
 var slow_left: float = 0.0
 var slow_amount: float = 0.0
@@ -190,6 +192,7 @@ func tick(delta: float) -> void:
 	stun_left = maxf(stun_left - delta, 0.0)
 	stun_guard_left = maxf(stun_guard_left - delta, 0.0)
 	ice_left = maxf(ice_left - delta, 0.0)
+	tumble_left = maxf(tumble_left - delta, 0.0)
 	slow_left = maxf(slow_left - delta, 0.0)
 	if slow_left <= 0.0:
 		slow_amount = 0.0

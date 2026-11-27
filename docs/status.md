@@ -1005,3 +1005,15 @@ _Last updated: 2026-11-26 (#332 loadout view done: #373 town page (corkboard by 
   `loadout_view.tres` ("Town page"). Fit check 39 screens. Tests: `test_11_town_loadout.gd`,
   `test_town_bonus_lines.gd`. Before writing a new test file, check the name is free (Write overwrote
   `test_town_bonuses.gd` once).
+- Cat's Cradle + Bowling Buttons (Evo-1 #379, spec 11 §4.1-4.2, AC-120 … 122): numbers in
+  `WeaponStats.yarn_cradle` (`YarnCradle`) and `zombie_bowling` (`ZombieBowling`). `CatsCradle.threads`
+  (`CradleThreads`: `add(from, to)`, `count()`, `segments()`, `hits`; one `draw_multiline_colors`),
+  balls are `CradleProjectile` (`YarnProjectile._bounced(at)` hook at every zombie/wall bounce,
+  `snagged` via `pickups.attract_near`). `BowlingButtons.lane` (`BowlingLane`: `tumble(zombie, dir)`,
+  `tumbling()`, `is_tumbling`, `bumps`, `strikes`), buttons are `BowlingButtonProjectile` (tumble in
+  `hurt`). `Zombie.tumble_left` > 0 = never hurts siege buildings (Lasso Lash's throw can reuse it).
+  Base weapons pick their shot via `BouncyYarnBall._ball_kind()` / `ButtonShotgun._button_kind()`.
+  Shots find their weapon's helper node by name (`CradleThreads.NAME`, `BowlingLane.NAME`), never the
+  weapon class (Snow Day cycle trap). New evolution sounds live in `EvolvedSfx` (lengths still in
+  `SfxBank.LENGTHS`; `sfx_bank.gd` is ~920 lines). Scrapbook weapon counts are hardcoded in
+  `test_scrapbook.gd` / `test_03_scrapbook.gd` (now 20; +2 per Evo ticket). Test: `test_12_cradle_and_bowling.gd`.

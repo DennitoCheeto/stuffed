@@ -39,6 +39,9 @@ const LENGTHS: Dictionary[StringName, float] = {
 	&"bear_slam": 0.32,
 	&"snowman_burst": 0.45,
 	&"slam": 0.4,
+	&"cradle": 0.34,
+	&"bowling": 0.24,
+	&"strike": 0.3,
 	# Moments.
 	&"elite": 0.7,
 	&"gift_open": 0.8,
@@ -86,6 +89,8 @@ const LENGTHS: Dictionary[StringName, float] = {
 	&"sting_bomb": 0.9,
 	&"sting_snow": 0.9,
 	&"sting_slam": 0.9,
+	&"sting_cradle": 0.9,
+	&"sting_bowling": 0.9,
 }
 
 ## The frequent sounds get a soft felt "thump" under their click (spec 10 §4.2): sound → how
@@ -112,6 +117,8 @@ const FELT_THUMP: Dictionary[StringName, float] = {
 	&"sticky": 0.12,
 	&"snow_day": 0.1,
 	&"bear_slam": 0.14,
+	&"cradle": 0.11,
+	&"bowling": 0.12,
 }
 
 
@@ -228,7 +235,9 @@ static func _weapon_or_moment(sound: StringName) -> Callable:
 		&"sting_snow": _sting_snow,
 		&"sting_slam": _sting_slam,
 	}
-	return voices[sound]
+	if voices.has(sound):
+		return voices[sound]
+	return EvolvedSfx.voice(sound)
 
 
 ## Pip's level-up: a bright little penguin "squeak-eek", up and up.

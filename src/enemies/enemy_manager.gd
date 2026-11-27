@@ -292,7 +292,8 @@ func _take_turn(zombie: Zombie, players: Array[Player], delta: float) -> void:
 	var grounded: bool = zombie.brain == null or not zombie.brain.is_airborne()
 	if grounded and zombie.ice_left <= 0.0:
 		_touch_players(zombie, players)
-		if siege != null:
+		# A tumbling or thrown zombie (spec 11 §7) never hurts buildings or the fort.
+		if siege != null and zombie.tumble_left <= 0.0:
 			siege.touch(zombie, delta)
 	if zombie.attack != null:
 		_attack(zombie, target, delta)

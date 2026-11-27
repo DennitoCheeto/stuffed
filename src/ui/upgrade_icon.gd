@@ -6,11 +6,13 @@ const BACK_COLOR: Color = Color("#2a2633")
 const RING_COLOR: Color = Color("#4a4358")
 ## Evolved weapons get a gold ring.
 const EVOLVED_RING_COLOR: Color = Color("#f2c230")
-const EVOLVED: Array[StringName] = [&"split", &"storm", &"volley", &"bomb", &"snow_day", &"slam"]
+const EVOLVED: Array[StringName] = [
+	&"split", &"storm", &"volley", &"bomb", &"snow_day", &"slam", &"cradle", &"bowling"
+]
 
 ## Which icon to draw: boomerang, pin, needles, buttons, cloud, yarn, thimble, snowball, paw,
 ## cannon, whip, zipper, feet, stuffing, magnet, hands, scissors, thread, spool, felt, snack, dice,
-## arrow; evolved: split, storm, volley, bomb, snow_day, slam.
+## arrow; evolved: split, storm, volley, bomb, snow_day, slam, cradle, bowling.
 ## "" draws only the empty round back (an empty HUD slot).
 var icon: StringName = &"":
 	set(value):
@@ -88,6 +90,10 @@ func _draw() -> void:
 			_snow_day()
 		&"slam":
 			_slam()
+		&"cradle":
+			_cradle()
+		&"bowling":
+			_bowling()
 		&"dice":
 			_dice()
 		&"arrow":
@@ -305,3 +311,26 @@ func _slam() -> void:
 	for toe: Vector2 in [Vector2(-14, -12), Vector2(-5, -19), Vector2(5, -19), Vector2(14, -12)]:
 		draw_circle(toe, 6.0, Color("#f2e2bd"))
 	draw_circle(Vector2(0, 6), 7.0, Color("#a49882"))
+
+
+## Cat's Cradle: a lilac yarn ball with a criss-cross string figure around it.
+func _cradle() -> void:
+	var string: Color = Color("#e8d2f6")
+	var corners: Array[Vector2] = [Vector2(-26, -14), Vector2(24, -22), Vector2(26, 16)]
+	corners.append(Vector2(-22, 24))
+	for i: int in corners.size():
+		draw_line(corners[i], corners[(i + 2) % corners.size()], string, 2.5)
+	draw_circle(Vector2.ZERO, 15.0, Color("#d9b0f0"))
+	for x: float in [-7.0, 0.0, 7.0]:
+		draw_arc(Vector2(x * 2.4, 0), 15.0, PI - 0.9, PI + 0.9, 10, Color("#8e66b4"), 2.0)
+
+
+## Bowling Buttons: a big periwinkle button rolling into two small pins.
+func _bowling() -> void:
+	for pin: Vector2 in [Vector2(14, -16), Vector2(24, -4)]:
+		draw_circle(pin + Vector2(0, -6), 4.5, Color("#f2f0ea"))
+		draw_circle(pin + Vector2(0, 2), 6.0, Color("#f2f0ea"))
+	var center: Vector2 = Vector2(-6, 8)
+	draw_circle(center, 18.0, Color("#a9b9f2"))
+	for hole: Vector2 in [Vector2(-1, -1), Vector2(1, -1), Vector2(-1, 1), Vector2(1, 1)]:
+		draw_circle(center + hole * 5.0, 2.6, Color("#55639e"))
