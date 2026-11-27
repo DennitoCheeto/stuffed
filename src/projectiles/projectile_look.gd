@@ -38,6 +38,8 @@ const CRADLE_YARN: StringName = &"shot/cradle_yarn"
 const BOWLING_BUTTON: StringName = &"shot/bowling_button"
 const COMFY_PUFF: StringName = &"shot/comfy_puff"
 const HOPSCOTCH_THIMBLE: StringName = &"shot/hopscotch_thimble"
+const LASSO: StringName = &"shot/lasso"
+const UNZIPPER: StringName = &"shot/unzipper"
 const BULLET: StringName = &"bullet/stuffing"
 const HAZARD: StringName = &"bullet/cloud"
 ## On-screen radius of the stuffing ball part; bigger bullets scale it.
@@ -145,6 +147,12 @@ const COMFY_PUFF_COLOR: Color = Color("#dfe9f6")
 ## Hopscotch Mortar (spec 11 §4.4): a bigger mint thimble with deeper dimples.
 const HOPSCOTCH_COLOR: Color = Color("#b4dccf")
 const HOPSCOTCH_DOT_COLOR: Color = Color("#6c968a")
+## Lasso Lash (spec 11 §4.5): a lilac thread crescent with a lasso loop at its tip.
+const LASSO_COLOR: Color = Color("#c6b6ec")
+const LASSO_LOOP_COLOR: Color = Color("#8b79c2")
+## Unzipper (spec 11 §4.6): a sea-green zipper with pale teeth.
+const UNZIPPER_COLOR: Color = Color("#8fd1c1")
+const UNZIPPER_TEETH_COLOR: Color = Color("#e4f5f0")
 
 
 static func make_parts() -> Dictionary[StringName, FeltPiece]:
@@ -179,6 +187,8 @@ static func make_parts() -> Dictionary[StringName, FeltPiece]:
 		BOWLING_BUTTON: _button(BOWLING_BUTTON_COLOR, BOWLING_HOLE_COLOR),
 		COMFY_PUFF: _cloud(COMFY_PUFF_COLOR),
 		HOPSCOTCH_THIMBLE: _thimble(HOPSCOTCH_COLOR, HOPSCOTCH_DOT_COLOR),
+		LASSO: _lasso(),
+		UNZIPPER: _zipper(UNZIPPER_COLOR, UNZIPPER_TEETH_COLOR),
 		BULLET: _bullet(),
 		HAZARD: _hazard(),
 	}
@@ -466,7 +476,7 @@ static func _burst() -> FeltPiece:
 
 
 ## A crescent of thread around the pivot, centred on +x, WHIP_ARC wide; thickest in the middle.
-static func _whip() -> FeltPiece:
+static func _whip(color: Color = WHIP_COLOR) -> FeltPiece:
 	var whip: FeltPiece = FeltPiece.new()
 	whip.soft = false
 	var radius: float = WHIP_RADIUS * UNITS
@@ -481,8 +491,18 @@ static func _whip() -> FeltPiece:
 	inner.reverse()
 	outer.append_array(inner)
 	whip.polygon = outer
-	whip.color = WHIP_COLOR
+	whip.color = color
 	return whip
+
+
+## Lasso Lash: the whip's crescent in lilac with a little lasso loop of thread at its tip.
+static func _lasso() -> FeltPiece:
+	var lasso: FeltPiece = _whip(LASSO_COLOR)
+	var tip: Vector2 = Vector2(WHIP_RADIUS * UNITS * 0.92, 0.0)
+	var loop: PackedVector2Array = FeltShapes.ellipse(tip, Vector2(6, 9) * UNITS)
+	loop.append(loop[0])
+	lasso.add_line(loop, LASSO_LOOP_COLOR, 2.5 * UNITS)
+	return lasso
 
 
 ## A fat crescent around the pivot (like the whip's, thicker), with three claw marks across it.
@@ -514,7 +534,9 @@ static func _paw(color: Color = PAW_COLOR, claw_color: Color = PAW_CLAW_COLOR) -
 
 
 ## A zipper from the pivot along +x, ZIPPER_LENGTH long, with teeth and a pull tab at the end.
-static func _zipper() -> FeltPiece:
+static func _zipper(
+	color: Color = ZIPPER_COLOR, teeth_color: Color = ZIPPER_TEETH_COLOR
+) -> FeltPiece:
 	var zipper: FeltPiece = FeltPiece.new()
 	zipper.soft = false
 	var length: float = ZIPPER_LENGTH * UNITS
@@ -522,15 +544,15 @@ static func _zipper() -> FeltPiece:
 	zipper.polygon = FeltShapes.points(
 		PackedFloat32Array([0, -half_width, length, -half_width, length, half_width, 0, half_width])
 	)
-	zipper.color = ZIPPER_COLOR
+	zipper.color = color
 	var tooth: float = 4.0 * UNITS
 	for i: int in int(length / (tooth * 2.0)):
 		var x: float = i * tooth * 2.0 + (tooth if i % 2 == 1 else 0.0)
 		var side: float = -1.0 if i % 2 == 0 else 1.0
 		var box: Rect2 = Rect2(x, minf(0.0, side * half_width * 0.8), tooth, half_width * 0.8)
-		zipper.add_layer(_rect_points(box), ZIPPER_TEETH_COLOR)
+		zipper.add_layer(_rect_points(box), teeth_color)
 	var tab: PackedVector2Array = FeltShapes.ellipse(Vector2(length, 0.0), Vector2(4, 7) * UNITS)
-	zipper.add_layer(tab, ZIPPER_TEETH_COLOR)
+	zipper.add_layer(tab, teeth_color)
 	return zipper
 
 

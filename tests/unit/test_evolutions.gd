@@ -18,6 +18,8 @@ const RECIPES: Dictionary[StringName, Array] = {
 	&"bowling_buttons": [&"button_shotgun", &"quick_hands"],
 	&"comfy_cloud": [&"stuffing_cloud", &"extra_stuffing"],
 	&"hopscotch_mortar": [&"thimble_mortar", &"big_spool"],
+	&"lasso_lash": [&"thread_whip", &"sharp_scissors"],
+	&"unzipper": [&"zipper_ray", &"long_thread"],
 }
 
 
@@ -121,7 +123,8 @@ func test_ac7_a_gift_box_with_a_ready_weapon_evolves_it() -> void:
 func test_ac9_weapon_cards_carry_their_partner() -> void:
 	assert_eq(POOL.partner_of(POOL.find(&"sewing_pin_sniper")), POOL.find(&"sharp_scissors"))
 	assert_null(POOL.partner_of(POOL.find(&"quick_feet")), "items have no partner")
-	assert_null(POOL.partner_of(POOL.find(&"thread_whip")), "no evolution yet, no partner shown")
+	var whip_partner: UpgradeDef = POOL.partner_of(POOL.find(&"thread_whip"))
+	assert_eq(whip_partner, POOL.find(&"sharp_scissors"), "every weapon evolves (spec 11)")
 	for seed_value: int in 30:
 		for offer: UpgradeOffer in POOL.roll({&"peel_boomerang": 1}, _rng(seed_value)):
 			assert_eq(offer.partner, POOL.partner_of(offer.upgrade))

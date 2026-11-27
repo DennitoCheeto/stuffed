@@ -258,7 +258,10 @@ func _physics_process(delta: float) -> void:
 	var frozen: bool = is_frozen()
 	var shake: float = thaw_shake()
 	for zombie: Zombie in zombies:
-		if calm:
+		if zombie.held:
+			_hold_still(zombie)
+			zombie.tick(delta)
+		elif calm:
 			zombie.heading = Vector2.ZERO
 			zombie.windup_left = -1.0
 			if zombie.brain != null:
@@ -324,6 +327,13 @@ func thaw_shake() -> float:
 func _hold_frozen(zombie: Zombie, shake: float) -> void:
 	zombie.frozen = true
 	zombie.thaw_shake = shake
+	zombie.heading = Vector2.ZERO
+	zombie.knockback = Vector2.ZERO
+	zombie.windup_left = -1.0
+
+
+## A held zombie (Lasso Lash) is moved by whoever holds it: no walk, push, wind-up or touch.
+func _hold_still(zombie: Zombie) -> void:
 	zombie.heading = Vector2.ZERO
 	zombie.knockback = Vector2.ZERO
 	zombie.windup_left = -1.0

@@ -17,12 +17,14 @@ const EVOLVED: Array[StringName] = [
 	&"bowling",
 	&"comfy",
 	&"hopscotch",
+	&"lasso",
+	&"unzipper",
 ]
 
 ## Which icon to draw: boomerang, pin, needles, buttons, cloud, yarn, thimble, snowball, paw,
 ## cannon, whip, zipper, feet, stuffing, magnet, hands, scissors, thread, spool, felt, snack, dice,
 ## arrow; evolved: split, storm, volley, bomb, snow_day, slam, cradle, bowling, comfy,
-## hopscotch.
+## hopscotch, lasso, unzipper.
 ## "" draws only the empty round back (an empty HUD slot).
 var icon: StringName = &"":
 	set(value):
@@ -108,6 +110,10 @@ func _draw() -> void:
 			_comfy()
 		&"hopscotch":
 			_hopscotch()
+		&"lasso":
+			_lasso()
+		&"unzipper":
+			_unzipper()
 		&"dice":
 			_dice()
 		&"arrow":
@@ -374,3 +380,22 @@ func _hopscotch() -> void:
 	FeltDraw.fill(self, body, Color("#b4dccf"))
 	for x: float in [10.0, 14.0, 18.0]:
 		draw_circle(Vector2(x, -8), 1.6, square)
+
+
+## Lasso Lash: a lilac thread swinging off its handle into a lasso loop.
+func _lasso() -> void:
+	draw_line(Vector2(-24, 26), Vector2(-12, 8), Color("#8d6a4f"), 6.0)
+	draw_arc(Vector2(-4, -2), 14.0, 2.4, 6.0, 18, Color("#c6b6ec"), 4.0)
+	draw_arc(Vector2(10, -10), 11.0, 0.0, TAU, 20, Color("#c6b6ec"), 4.0)
+	draw_arc(Vector2(10, -10), 11.0, 0.0, TAU, 20, Color("#8b79c2"), 1.5)
+
+
+## Unzipper: two sea-green zipper halves opening into a V from the pull tab.
+func _unzipper() -> void:
+	var tab: Vector2 = Vector2(-22, 18)
+	for end: Vector2 in [Vector2(24, -8), Vector2(6, -26)]:
+		draw_line(tab, end, Color("#8fd1c1"), 7.0)
+		for i: int in 4:
+			var at: Vector2 = tab.lerp(end, (i + 1) / 5.0)
+			draw_circle(at, 2.0, Color("#e4f5f0"))
+	draw_circle(tab, 6.0, Color("#e4f5f0"))

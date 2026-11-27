@@ -59,12 +59,18 @@ func advance(delta: float) -> bool:
 		var reach: float = width + zombie.radius()
 		if closest.distance_squared_to(zombie.position) > reach * reach:
 			continue
+		_touched(zombie)
 		var id: int = zombie.get_instance_id()
 		if _cooldowns.has(id):
 			continue
 		_cooldowns[id] = weapon.stats.hit_interval
 		manager.enemies.damage(zombie, _numbers.damage, push, weapon)
 	return true
+
+
+## Called every frame for each zombie on the line (before the hit interval is checked).
+func _touched(_zombie: Zombie) -> void:
+	pass
 
 
 func _aim() -> void:
