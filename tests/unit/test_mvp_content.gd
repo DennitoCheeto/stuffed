@@ -1,7 +1,8 @@
 extends GutTest
 ## M6-13 (spec 10 §12, vision §11, AC-116): the MVP has enough to play. At least 3 heroes, 10
 ## weapons, 3 evolutions, one area with a boss, 6 buildings, 8 gear pieces and a siege with
-## waves; each count only includes things that can really show up in the game.
+## waves; each count only includes things that can really show up in the game. Spec 11: every
+## weapon on the cards evolves.
 
 const ROSTER: HeroRoster = preload("res://data/heroes/hero_roster.tres")
 const POOL: UpgradePool = preload("res://data/upgrade_pool.tres")
@@ -66,3 +67,14 @@ func test_a_siege_with_waves() -> void:
 		if wave.boss != null:
 			bosses += 1
 	assert_gte(bosses, 1, "the siege ends with a boss")
+
+
+## Spec 11 §1, AC-127: no weapon on the cards is a dead end at level 5.
+func test_ac127_every_weapon_on_the_cards_has_an_evolution() -> void:
+	for upgrade: UpgradeDef in POOL.upgrades:
+		if upgrade.kind != UpgradeDef.Kind.WEAPON or upgrade.weapon == null:
+			continue
+		var evolution: EvolutionDef = POOL.evolution_of(upgrade.id)
+		assert_not_null(evolution, "%s evolves" % upgrade.id)
+		if evolution != null:
+			assert_not_null(POOL.find(evolution.partner), "%s: partner on the cards" % upgrade.id)

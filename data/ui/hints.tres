@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="HintRules" load_steps=18 format=3]
+[gd_resource type="Resource" script_class="HintRules" load_steps=19 format=3]
 
 [ext_resource type="Script" path="res://src/hints/hint_rules.gd" id="1_rules"]
 [ext_resource type="Script" path="res://src/hints/hint_def.gd" id="2_def"]
@@ -38,6 +38,12 @@ place = 1
 script = ExtResource("2_def")
 id = "evolution_ready"
 text = "Maxed! The next gift box can evolve it"
+place = 1
+
+[sub_resource type="Resource" id="Hint_evolution_how"]
+script = ExtResource("2_def")
+id = "evolution_how"
+text = "Maxed! Its partner item (icon on the card) evolves it"
 place = 1
 
 [sub_resource type="Resource" id="Hint_boss"]
@@ -96,5 +102,5 @@ place = 1
 
 [resource]
 script = ExtResource("1_rules")
-hints = Array[ExtResource("2_def")]([SubResource("Hint_move"), SubResource("Hint_xp"), SubResource("Hint_level_up"), SubResource("Hint_gift_box"), SubResource("Hint_floor_pickup"), SubResource("Hint_evolution_ready"), SubResource("Hint_boss"), SubResource("Hint_way_home"), SubResource("Hint_town"), SubResource("Hint_can_build"), SubResource("Hint_tricks"), SubResource("Hint_siege_warning"), SubResource("Hint_siege"), SubResource("Hint_wardrobe"), SubResource("Hint_sewing")])
+hints = Array[ExtResource("2_def")]([SubResource("Hint_move"), SubResource("Hint_xp"), SubResource("Hint_level_up"), SubResource("Hint_gift_box"), SubResource("Hint_floor_pickup"), SubResource("Hint_evolution_ready"), SubResource("Hint_evolution_how"), SubResource("Hint_boss"), SubResource("Hint_way_home"), SubResource("Hint_town"), SubResource("Hint_can_build"), SubResource("Hint_tricks"), SubResource("Hint_siege_warning"), SubResource("Hint_siege"), SubResource("Hint_wardrobe"), SubResource("Hint_sewing")])
 basics = PackedStringArray("move", "xp", "level_up", "gift_box", "floor_pickup", "evolution_ready", "boss", "way_home", "town", "can_build")

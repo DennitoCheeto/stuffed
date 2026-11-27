@@ -10,6 +10,9 @@ extends SceneTree
 ## Add `-- --gear` to wear a Lv 3 Lookout Cap, Picnic Apron and Jingle Bell (spec 09 §12: compare
 ## with the same run without gear; within ~5% fps, at most +3 draw calls).
 ## Add `-- --evolutions` to carry all evolved weapons at once (spec 10 §11: at most +15 draw calls
+## Add `-- --new-evolutions` to carry the six spec 11 evolutions at once, and `-- --new-bases` for
+## the same six base weapons at level 5 (spec 11 §10: the evolutions at most +15 draw calls
+## over the bases, no new hitches in the worst frame).
 ## compared to `main` before M6, no frame over 16 ms). Every mode prints its worst frame time.
 
 const MAIN_SCENE: PackedScene = preload("res://src/main/main.tscn")
@@ -26,6 +29,15 @@ const BENCH_SAVE: String = "user://benchmark_save.json"
 const BENCH_SETTINGS: String = "user://benchmark_settings.json"
 const LAYOUT: TownLayout = preload("res://data/town/pillow_fort.tres")
 const PLUSHIES: Array[String] = ["pip", "bobo", "bambam", "robbar"]
+## The six evolutions of spec 11 (`--new-evolutions`; `--new-bases` uses their base weapons).
+const NEW_EVOLUTIONS: Array[StringName] = [
+	&"cats_cradle",
+	&"bowling_buttons",
+	&"comfy_cloud",
+	&"hopscotch_mortar",
+	&"lasso_lash",
+	&"unzipper",
+]
 ## Head, Body, Charm worn with `--gear`: pieces whose effects keep drawing while the hero stands.
 const GEAR: Dictionary[String, String] = {
 	"head": "lookout_cap", "body": "picnic_apron", "charm": "jingle_bell"
@@ -68,6 +80,8 @@ func _start() -> void:
 		main.town.set_hero(0, hero)
 	var geared: bool = OS.get_cmdline_user_args().has("--gear")
 	var evolved: bool = OS.get_cmdline_user_args().has("--evolutions")
+	var new_evolutions: bool = OS.get_cmdline_user_args().has("--new-evolutions")
+	var new_bases: bool = OS.get_cmdline_user_args().has("--new-bases")
 	if geared:
 		_dress(main)
 	(main.current_screen as TitleScreen).start_button.pressed.emit()
@@ -99,6 +113,17 @@ func _start() -> void:
 	if evolved:
 		for evolution: EvolutionDef in POOL.evolutions:
 			banane.add_weapon(evolution.evolved)
+	# `--only=cats_cradle` measures one of the six.
+	var only: String = _arg("--only=")
+	for evolved_id: StringName in NEW_EVOLUTIONS:
+		if not only.is_empty() and String(evolved_id) != only:
+			continue
+		var recipe: EvolutionDef = POOL.evolution_into(evolved_id)
+		if new_evolutions:
+			banane.add_weapon(recipe.evolved)
+		elif new_bases:
+			var base: UpgradeDef = POOL.find(recipe.weapon)
+			banane.add_weapon(base.weapon).level = base.top_level()
 	physics_frame.connect(_top_up)
 	if _siege:
 		# Only once the crowd is in: a siege with no waves and nobody left is won at once.
@@ -127,6 +152,7 @@ func _start() -> void:
 	var fps: float = (Engine.get_frames_drawn() - frames_before) / seconds
 	var mode: String = "siege" if _siege else "bedroom"
 	mode += (" gear" if geared else "") + (" evolutions" if evolved else "")
+	mode += (" new_evolutions" if new_evolutions else "") + (" new_bases" if new_bases else "")
 	print(
 		(
 			"BENCHMARK %s zombies=%d shots=%d bullets=%d fps=%.1f draw_calls=%.0f process_ms=%.1f physics_ms=%.1f"

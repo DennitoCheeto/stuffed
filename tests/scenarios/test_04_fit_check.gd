@@ -33,6 +33,7 @@ func before_each() -> void:
 
 func after_each() -> void:
 	GameSettings.reduced_motion = false
+	RecipeBook.seen.clear()
 
 
 func test_ac55_every_screen_fits_at_1920x1080() -> void:
@@ -169,7 +170,13 @@ func _visit_run(run: Run) -> void:
 	run.pause_menu.show_settings()
 	await _check("settings (pause)")
 	run.pause_menu.settings.close()
+	# Every recipe listed, all seen (spec 11 §5, AC-127: 12 rows with the longest names).
+	var none_hidden: Array[StringName] = []
+	run.pause_menu.set_recipes(run.upgrade_pool, none_hidden)
+	for evolution: EvolutionDef in run.upgrade_pool.evolutions:
+		RecipeBook.mark_seen(evolution.evolved.id)
 	run.pause_menu.show_recipes()
+	assert_eq(run.pause_menu.recipes_page.rows.size(), 12, "all 12 recipes")
 	await _check("recipes")
 	# Two heroes with every weapon and item slot full (spec 04b §4, AC-119).
 	run.pause_menu.show_loadout()
