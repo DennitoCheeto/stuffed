@@ -1,8 +1,9 @@
 class_name RunHints
 extends HintBoard
 ## The run's first-time hints (spec 10 §6): move, xp, level_up, gift_box, floor_pickup,
-## evolution_ready, boss, way_home. Main adds it to the run with the town save; it only looks at
-## the run (nothing in the run calls it). Hints follow player 1 (until M7's co-op joining).
+## evolution_ready, evolution_how, boss, way_home. Main adds it to the run with the town save;
+## it only looks at the run (nothing in the run calls it). Hints follow player 1 (until M7's
+## co-op joining).
 
 ## The player has walked this far (px) from where the move note appeared: done.
 const WALKED: float = 80.0
@@ -103,9 +104,15 @@ func _watch_floor_pickup() -> void:
 
 
 func _watch_evolution(player: Player) -> void:
-	_offer("evolution_ready", run.upgrade_pool.ready_evolution(player.upgrade_levels()) != null)
+	var levels: Dictionary[StringName, int] = player.upgrade_levels()
+	_offer("evolution_ready", run.upgrade_pool.ready_evolution(levels) != null)
 	if is_showing("evolution_ready") and not run.evolution_log.is_empty():
 		finish("evolution_ready")
+	# Spec 11 §5: a maxed weapon without its partner item tells how evolving works.
+	var missing: bool = run.upgrade_pool.missing_partner(levels) != null
+	_offer("evolution_how", missing)
+	if is_showing("evolution_how") and not missing:
+		finish("evolution_how")
 
 
 func _watch_boss() -> void:

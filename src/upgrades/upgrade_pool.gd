@@ -114,6 +114,19 @@ func ready_evolution(levels: Dictionary[StringName, int]) -> EvolutionDef:
 	return null
 
 
+## The first evolution whose weapon is at the top level at `levels` but whose partner item is
+## not owned yet (and not evolved). Null if none is (spec 11 §5, `evolution_how` hint).
+func missing_partner(levels: Dictionary[StringName, int]) -> EvolutionDef:
+	for evolution: EvolutionDef in evolutions:
+		var base: UpgradeDef = find(evolution.weapon)
+		if base == null or levels.has(evolution.evolved.id):
+			continue
+		var weapon_level: int = levels.get(evolution.weapon, 0)
+		if weapon_level >= base.top_level() and levels.get(evolution.partner, 0) <= 0:
+			return evolution
+	return null
+
+
 ## Upgrades that could be offered at `levels`: not maxed, weighted, and new ones only while a
 ## slot of their kind is free.
 func _open(levels: Dictionary[StringName, int]) -> Array[UpgradeDef]:

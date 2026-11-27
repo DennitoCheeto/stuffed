@@ -9,6 +9,8 @@ const RUN_HINTS: PackedStringArray = [
 const TOWN_HINTS: PackedStringArray = [
 	"town", "can_build", "tricks", "siege_warning", "siege", "wardrobe", "sewing"
 ]
+## Spec 11 §5: added after the basics, so a returning player sees it once too.
+const LATER_RUN_HINTS: PackedStringArray = ["evolution_how"]
 
 var _hints_were_on: bool = true
 
@@ -27,7 +29,7 @@ func after_each() -> void:
 
 
 func test_every_hint_has_a_text_and_no_written_out_key() -> void:
-	var ids: PackedStringArray = RUN_HINTS + TOWN_HINTS
+	var ids: PackedStringArray = RUN_HINTS + TOWN_HINTS + LATER_RUN_HINTS
 	assert_eq(RULES.hints.size(), ids.size(), "every hint of spec 10 §6 is listed")
 	for id: String in ids:
 		var hint: HintDef = RULES.find(id)
@@ -41,6 +43,8 @@ func test_every_hint_has_a_text_and_no_written_out_key() -> void:
 			)
 	assert_eq(RULES.basics.slice(0, RUN_HINTS.size()), RUN_HINTS, "the basics are move … can_build")
 	assert_true(RULES.basics.has("town") and RULES.basics.has("can_build"))
+	for id: String in LATER_RUN_HINTS:
+		assert_false(RULES.basics.has(id), "%s still shows for a returning player" % id)
 
 
 func test_keys_next_to_each_other_share_one_tag() -> void:

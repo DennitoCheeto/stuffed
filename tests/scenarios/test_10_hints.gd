@@ -113,6 +113,34 @@ func test_each_run_hint_shows_at_its_moment_and_goes_when_done() -> void:
 		assert_true(main.town.hints_seen.has(id), "%s is remembered" % id)
 
 
+## Player 1's `weapon_id` at its top level (no partner item).
+func _max_weapon(current: Run, weapon_id: StringName) -> void:
+	var base: UpgradeDef = current.upgrade_pool.find(weapon_id)
+	var weapon: Weapon = first_player().weapon(weapon_id)
+	if weapon == null:
+		weapon = first_player().add_weapon(base.weapon)
+	weapon.level = base.top_level()
+
+
+func test_ac128_a_maxed_weapon_without_its_partner_tells_how_to_evolve_once_per_save() -> void:
+	_only("evolution_how")
+	var hints: RunHints = await _calm_run()
+	var current: Run = hints.run
+	_max_weapon(current, &"button_shotgun")
+	assert_true(await _wait_for_note(hints, "evolution_how"), "maxed without Quick Hands")
+	assert_true(hints.note.shown_text().contains("partner"), hints.note.shown_text())
+	var partner: UpgradeDef = current.upgrade_pool.find(&"quick_hands")
+	first_player().apply_upgrade(UpgradeOffer.new(partner, 1))
+	assert_true(await _wait_until_gone(hints), "gone once the partner item is owned")
+	assert_true(main.town.hints_seen.has("evolution_how"), "the save remembers it")
+	await _quit_run(current)
+	await go_to_town()
+	hints = await _calm_run()
+	_max_weapon(hints.run, &"thimble_mortar")
+	await wait_seconds(1.0)
+	assert_null(hints.note, "once per save: another maxed weapon shows nothing")
+
+
 func test_the_level_up_note_waits_while_the_cards_show() -> void:
 	_only("level_up")
 	var hints: RunHints = await _calm_run()

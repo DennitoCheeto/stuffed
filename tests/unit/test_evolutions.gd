@@ -1,9 +1,11 @@
 extends GutTest
 ## Evolutions (spec 02 §5, AC-7, AC-9, AC-24): which pairs evolve, when an evolution is ready,
-## that a gift box gives it, and that an evolved weapon is never offered again.
+## that a gift box gives it, that an evolved weapon is never offered again, and (spec 11 §5) that
+## each one shows on Recipes, the loadout page, its sting and run title.
 
 const POOL: UpgradePool = preload("res://data/upgrade_pool.tres")
 const RULES: GiftBoxRules = preload("res://data/gift_box_rules.tres")
+const LOADOUT_TEXTS: LoadoutTexts = preload("res://data/ui/loadout_view.tres")
 ## Spec 02 §5 (+ spec 10 §3, spec 11 §3): evolved weapon id → [weapon, partner item].
 const RECIPES: Dictionary[StringName, Array] = {
 	&"banana_split": [&"peel_boomerang", &"quick_feet"],
@@ -100,6 +102,18 @@ func test_not_ready_twice() -> void:
 	assert_null(POOL.ready_evolution(levels))
 
 
+func test_ac128_a_maxed_weapon_without_its_partner_is_missing_it() -> void:
+	var levels: Dictionary[StringName, int] = {&"button_shotgun": 5, &"long_thread": 2}
+	assert_eq(POOL.missing_partner(levels), _evolution(&"bowling_buttons"))
+	levels[&"quick_hands"] = 1
+	assert_null(POOL.missing_partner(levels), "with Quick Hands it's ready, not missing")
+	assert_null(POOL.missing_partner({&"button_shotgun": 4}), "not maxed yet")
+	var evolved: Dictionary[StringName, int] = {
+		&"button_shotgun": Player.EVOLVED_LEVEL, &"bowling_buttons": 1
+	}
+	assert_null(POOL.missing_partner(evolved), "already evolved")
+
+
 func test_ac7_a_gift_box_with_a_ready_weapon_evolves_it() -> void:
 	var levels: Dictionary[StringName, int] = {
 		&"yarn_cannon": 5, &"big_spool": 2, &"peel_boomerang": 1
@@ -140,3 +154,27 @@ func test_an_evolved_weapon_is_never_offered_or_levelled_again() -> void:
 		var gift: GiftContents = RULES.contents(levels, POOL, _rng(seed_value))
 		for offer: UpgradeOffer in gift.level_ups:
 			assert_eq(offer.upgrade.id, &"quick_feet", "only the item can level up")
+
+
+## Spec 11 §5, AC-127: every evolution has its own sting and run title, a Recipes row, and the
+## loadout page says "Ready" once its weapon is maxed with the partner owned.
+func test_ac127_every_evolution_shows_everywhere() -> void:
+	var stings: Array[StringName] = []
+	var titles: PackedStringArray = []
+	var hidden: Array[StringName] = []
+	for evolution: EvolutionDef in POOL.evolutions:
+		var evolved: WeaponStats = evolution.evolved
+		assert_true(SfxBank.LENGTHS.has(evolved.sting), "%s has a sting" % evolved.id)
+		assert_does_not_have(stings, evolved.sting, "%s's sting is its own" % evolved.id)
+		stings.append(evolved.sting)
+		assert_ne(evolved.run_title, "", "%s has a run title" % evolved.id)
+		assert_does_not_have(titles, evolved.run_title, "%s's title is its own" % evolved.id)
+		titles.append(evolved.run_title)
+		var row: RecipeRow = autofree(RecipeRow.new())
+		row.show_recipe(evolution, POOL, true)
+		assert_eq(row.result_label.text, evolved.display_name, "%s on Recipes" % evolved.id)
+		var items: Dictionary[StringName, int] = {evolution.partner: 1}
+		var hint: Dictionary = LoadoutColumn.evolution_hint(
+			evolution.weapon, true, items, POOL, hidden, LOADOUT_TEXTS
+		)
+		assert_eq(hint.get("text"), LOADOUT_TEXTS.ready, "%s: loadout says Ready" % evolved.id)
