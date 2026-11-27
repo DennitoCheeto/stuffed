@@ -13,6 +13,10 @@ static func voice(sound: StringName) -> Callable:
 		&"strike": _strike,
 		&"sting_cradle": _sting_cradle,
 		&"sting_bowling": _sting_bowling,
+		&"comfy": _comfy,
+		&"hopscotch": _hopscotch,
+		&"sting_comfy": _sting_comfy,
+		&"sting_hopscotch": _sting_hopscotch,
 	}
 	return voices.get(sound, Callable())
 
@@ -81,3 +85,47 @@ static func _sting_bowling(t: float) -> float:
 	if t >= 0.55:
 		notes = bells(t - 0.55, PackedFloat32Array([72.0, 79.0]), 0.1, 5.0)
 	return 0.2 * roll + hit + 0.1 * notes
+
+
+## Comfy Cloud: the cloud's soft breath of fluff, rounder, with a warm low hum under it.
+static func _comfy(t: float) -> float:
+	var breath: float = Synth.noise(t) * Synth.sine(Synth.sweep(t, 240.0, 100.0, 0.4))
+	breath *= sin(PI * minf(t / 0.4, 1.0))
+	var hum: float = Synth.sine(Synth.midi_hz(52.0) * t) * sin(PI * minf(t / 0.4, 1.0))
+	return 0.12 * breath + 0.05 * hum
+
+
+## Hopscotch Mortar: the mortar's hollow "thoonk", then a light little hop note.
+static func _hopscotch(t: float) -> float:
+	var hollow: float = Synth.sine(Synth.sweep(t, 320.0, 190.0, 0.1)) * exp(-14.0 * t)
+	hollow += 0.4 * Synth.sine(Synth.sweep(t, 780.0, 470.0, 0.1)) * exp(-20.0 * t)
+	var hop: float = 0.0
+	if t >= 0.12:
+		var local: float = t - 0.12
+		hop = Synth.sine(Synth.sweep(local, 500.0, 900.0, 0.12)) * exp(-18.0 * local)
+	return 0.27 * hollow + 0.08 * hop
+
+
+## Comfy Cloud: a warm, slow chord swelling in like a pillow, with a soft breath on top.
+static func _sting_comfy(t: float) -> float:
+	var swell: float = minf(t / 0.35, 1.0) * exp(-2.5 * maxf(t - 0.35, 0.0))
+	var chord: float = 0.0
+	for note: float in [60.0, 64.0, 67.0, 72.0]:
+		chord += Synth.sine(Synth.midi_hz(note) * t)
+	var breath: float = Synth.noise(t) * exp(-6.0 * t)
+	return 0.05 * chord * swell + 0.04 * breath
+
+
+## Hopscotch Mortar: three hops going up the squares, then a happy landing note.
+static func _sting_hopscotch(t: float) -> float:
+	var value: float = 0.0
+	for i: int in 3:
+		var start: float = i * 0.16
+		if t >= start:
+			var local: float = t - start
+			var base: float = 400.0 + 120.0 * i
+			value += Synth.sine(Synth.sweep(local, base, base * 1.6, 0.12)) * exp(-14.0 * local)
+	var landing: float = 0.0
+	if t >= 0.5:
+		landing = bells(t - 0.5, PackedFloat32Array([76.0, 84.0]), 0.08, 5.0)
+	return 0.1 * value + 0.1 * landing

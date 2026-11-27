@@ -53,6 +53,10 @@ extends Resource
 @export var yarn_cradle: YarnCradle
 ## Bowling Buttons only: hit zombies tumble and knock over others (spec 11 §4.2; null = none).
 @export var zombie_bowling: ZombieBowling
+## Comfy Cloud only: its fluff trail and the mend (spec 11 §4.3; null = none).
+@export var comfy_fluff: ComfyFluff
+## Hopscotch Mortar only: its thimbles hop onward after landing (spec 11 §4.4; null = none).
+@export var hopscotch: HopscotchHops
 ## Level 1 first.
 @export var levels: Array[WeaponLevel] = []
 

@@ -7,12 +7,22 @@ const RING_COLOR: Color = Color("#4a4358")
 ## Evolved weapons get a gold ring.
 const EVOLVED_RING_COLOR: Color = Color("#f2c230")
 const EVOLVED: Array[StringName] = [
-	&"split", &"storm", &"volley", &"bomb", &"snow_day", &"slam", &"cradle", &"bowling"
+	&"split",
+	&"storm",
+	&"volley",
+	&"bomb",
+	&"snow_day",
+	&"slam",
+	&"cradle",
+	&"bowling",
+	&"comfy",
+	&"hopscotch",
 ]
 
 ## Which icon to draw: boomerang, pin, needles, buttons, cloud, yarn, thimble, snowball, paw,
 ## cannon, whip, zipper, feet, stuffing, magnet, hands, scissors, thread, spool, felt, snack, dice,
-## arrow; evolved: split, storm, volley, bomb, snow_day, slam, cradle, bowling.
+## arrow; evolved: split, storm, volley, bomb, snow_day, slam, cradle, bowling, comfy,
+## hopscotch.
 ## "" draws only the empty round back (an empty HUD slot).
 var icon: StringName = &"":
 	set(value):
@@ -94,6 +104,10 @@ func _draw() -> void:
 			_cradle()
 		&"bowling":
 			_bowling()
+		&"comfy":
+			_comfy()
+		&"hopscotch":
+			_hopscotch()
 		&"dice":
 			_dice()
 		&"arrow":
@@ -334,3 +348,29 @@ func _bowling() -> void:
 	draw_circle(center, 18.0, Color("#a9b9f2"))
 	for hole: Vector2 in [Vector2(-1, -1), Vector2(1, -1), Vector2(-1, 1), Vector2(1, 1)]:
 		draw_circle(center + hole * 5.0, 2.6, Color("#55639e"))
+
+
+## Comfy Cloud: a sky-blue cloud with a trail of three small puffs and a green mend cross.
+func _comfy() -> void:
+	var puff: Color = Color("#dfe9f6")
+	for i: int in 3:
+		draw_circle(Vector2(-24 + i * 9, 20 - i * 3), 4.0 + i * 1.5, puff)
+	for at: Vector2 in [Vector2(-6, -2), Vector2(8, -8), Vector2(18, 2), Vector2(4, 6)]:
+		draw_circle(at, 11.0, Color("#e9e2f2"))
+	var cross: Color = Color("#bfe8c4")
+	draw_line(Vector2(20, -24), Vector2(20, -12), cross, 3.0)
+	draw_line(Vector2(14, -18), Vector2(26, -18), cross, 3.0)
+
+
+## Hopscotch Mortar: a mint thimble over three hopscotch squares, one hop arc between them.
+func _hopscotch() -> void:
+	var square: Color = Color("#6c968a")
+	for i: int in 3:
+		draw_rect(Rect2(Vector2(-26 + i * 18, 14), Vector2(14, 10)), square, false, 2.0)
+	draw_arc(Vector2(-10, 14), 10.0, PI, TAU, 10, Color("#e8f4ef"), 2.0)
+	var body: PackedVector2Array = PackedVector2Array(
+		[Vector2(4, 4), Vector2(7, -16), Vector2(14, -20), Vector2(21, -16), Vector2(24, 4)]
+	)
+	FeltDraw.fill(self, body, Color("#b4dccf"))
+	for x: float in [10.0, 14.0, 18.0]:
+		draw_circle(Vector2(x, -8), 1.6, square)
