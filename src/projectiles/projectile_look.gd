@@ -36,6 +36,8 @@ const SNOWMAN: StringName = &"shot/snowman"
 const BEAR_PAW: StringName = &"shot/bear_paw"
 const CRADLE_YARN: StringName = &"shot/cradle_yarn"
 const BOWLING_BUTTON: StringName = &"shot/bowling_button"
+const COMFY_PUFF: StringName = &"shot/comfy_puff"
+const HOPSCOTCH_THIMBLE: StringName = &"shot/hopscotch_thimble"
 const BULLET: StringName = &"bullet/stuffing"
 const HAZARD: StringName = &"bullet/cloud"
 ## On-screen radius of the stuffing ball part; bigger bullets scale it.
@@ -138,6 +140,11 @@ const CRADLE_STRAND_COLOR: Color = Color("#8e66b4")
 ## Bowling Buttons (spec 11 §4.2): a periwinkle button with dark blue holes.
 const BOWLING_BUTTON_COLOR: Color = Color("#a9b9f2")
 const BOWLING_HOLE_COLOR: Color = Color("#55639e")
+## Comfy Cloud (spec 11 §4.3): a pale sky-blue fluff puff for its trail.
+const COMFY_PUFF_COLOR: Color = Color("#dfe9f6")
+## Hopscotch Mortar (spec 11 §4.4): a bigger mint thimble with deeper dimples.
+const HOPSCOTCH_COLOR: Color = Color("#b4dccf")
+const HOPSCOTCH_DOT_COLOR: Color = Color("#6c968a")
 
 
 static func make_parts() -> Dictionary[StringName, FeltPiece]:
@@ -170,6 +177,8 @@ static func make_parts() -> Dictionary[StringName, FeltPiece]:
 		BEAR_PAW: _paw(BEAR_PAW_COLOR, BEAR_PAW_CLAW_COLOR),
 		CRADLE_YARN: _yarn(CRADLE_YARN_COLOR, CRADLE_STRAND_COLOR),
 		BOWLING_BUTTON: _button(BOWLING_BUTTON_COLOR, BOWLING_HOLE_COLOR),
+		COMFY_PUFF: _cloud(COMFY_PUFF_COLOR),
+		HOPSCOTCH_THIMBLE: _thimble(HOPSCOTCH_COLOR, HOPSCOTCH_DOT_COLOR),
 		BULLET: _bullet(),
 		HAZARD: _hazard(),
 	}
@@ -313,14 +322,14 @@ static func _button(
 
 
 ## A round puff of stuffing with smaller puffs around its edge; fills CLOUD_RADIUS.
-static func _cloud() -> FeltPiece:
+static func _cloud(color: Color = CLOUD_COLOR) -> FeltPiece:
 	var cloud: FeltPiece = FeltPiece.new()
 	var radius: float = CLOUD_RADIUS * UNITS
 	cloud.polygon = FeltShapes.circle(Vector2.ZERO, radius * 0.8, 28)
-	cloud.color = CLOUD_COLOR
+	cloud.color = color
 	for i: int in 7:
 		var at: Vector2 = Vector2.from_angle(TAU * i / 7.0) * radius * 0.62
-		cloud.add_layer(FeltShapes.circle(at, radius * 0.36), CLOUD_COLOR.lightened(0.15))
+		cloud.add_layer(FeltShapes.circle(at, radius * 0.36), color.lightened(0.15))
 	return cloud
 
 
@@ -338,19 +347,21 @@ static func _yarn(color: Color = YARN_COLOR, strand_color: Color = YARN_STRAND_C
 
 
 ## Upside down like a little bucket: wide rim at the bottom, dimples on the side.
-static func _thimble() -> FeltPiece:
+static func _thimble(
+	color: Color = THIMBLE_COLOR, dot_color: Color = THIMBLE_DOT_COLOR
+) -> FeltPiece:
 	var unit: float = THIMBLE_SIZE * UNITS
 	var thimble: FeltPiece = FeltPiece.new()
 	thimble.polygon = _scaled(
 		FeltShapes.points(PackedFloat32Array([-7, 8, -5, -6, 0, -9, 5, -6, 7, 8])), unit
 	)
-	thimble.color = THIMBLE_COLOR
+	thimble.color = color
 	for y: float in [-3.0, 2.0]:
 		for x: float in [-2.5, 0.0, 2.5]:
 			var dimple: PackedVector2Array = FeltShapes.circle(Vector2(x, y) * unit, 0.9 * unit, 8)
-			thimble.add_layer(dimple, THIMBLE_DOT_COLOR)
+			thimble.add_layer(dimple, dot_color)
 	var rim: PackedVector2Array = FeltShapes.ellipse(Vector2(0, 8) * unit, Vector2(8, 2) * unit)
-	thimble.add_layer(rim, THIMBLE_COLOR.darkened(0.15))
+	thimble.add_layer(rim, color.darkened(0.15))
 	return thimble
 
 

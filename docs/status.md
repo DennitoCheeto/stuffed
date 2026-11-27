@@ -3,7 +3,7 @@
 > Read this at the start of every session. Update it at the end of every work block
 > (what changed, what's next). Keep it short; details live in specs, issues and PRs.
 
-_Last updated: 2026-11-26 (#333 spec 11 "Every weapon evolves" drafted: research `docs/research/05-evolution-research.md`, spec PR waits for the PO (AC-120 … AC-129, P-43/P-44); #332 loadout view done: #373 town page (corkboard by the door + "My loadout" in the Esc menu): merged (PR #376); 2026-11-25: spec 04b approved (PO merged PR #368, yes to both open questions); #372 run page: merged (PR #374); flaky Patch Vest icon fixed (#370, PR #371); earlier 2026-11-23: #331 gear off the heroes: PO picked option C after two look rounds on the real puppets; spec 09 change PR #366 merged by the PO, ticket 11 = PR for #331; milestone **Playtest fixes (Nov 2026)**: #340 toy / elite callouts (PR #361), #341 real banana peels (PR #362), #342 smoother gift box (PR #363); earlier 2026-11-22: #338 Banane photo sharp (PR #358), #339 hit area ring (PR #359), #336 Space no longer dashes after the gift box (PR #355), #337 longer banners (PR #356), CI split into 4 parallel jobs (PR #354, longest ~11 min); earlier: #323 (PR #353), #324 (PR #335), #325 (#343), #326 music (#345), #327 boss slips (#346), #328 Raincoat puddle (#349), #329 Stuffing Cloud (#348), #330 dash display (#350); next: PO approves spec 11, then issues + tickets 1-4; P-22 … P-37 answers still open. **M6 done**: all 13 tickets merged (M6-13 = PR #351), worktree `Game-m6` removed 2026-11-22; M6 playtest P-38 … P-41 waits for the PO)_
+_Last updated: 2026-11-27 (spec 11 approved (PO merged PR #378); Evo-1 #379 Cat's Cradle + Bowling Buttons merged (PR #383); Evo-2 #380 Comfy Cloud + Hopscotch Mortar = PR #384; next: Evo-3 #381 Lasso Lash + Unzipper, then Evo-4 #382; 2026-11-26: #333 spec 11 "Every weapon evolves" drafted: research `docs/research/05-evolution-research.md`, spec PR waits for the PO (AC-120 … AC-129, P-43/P-44); #332 loadout view done: #373 town page (corkboard by the door + "My loadout" in the Esc menu): merged (PR #376); 2026-11-25: spec 04b approved (PO merged PR #368, yes to both open questions); #372 run page: merged (PR #374); flaky Patch Vest icon fixed (#370, PR #371); earlier 2026-11-23: #331 gear off the heroes: PO picked option C after two look rounds on the real puppets; spec 09 change PR #366 merged by the PO, ticket 11 = PR for #331; milestone **Playtest fixes (Nov 2026)**: #340 toy / elite callouts (PR #361), #341 real banana peels (PR #362), #342 smoother gift box (PR #363); earlier 2026-11-22: #338 Banane photo sharp (PR #358), #339 hit area ring (PR #359), #336 Space no longer dashes after the gift box (PR #355), #337 longer banners (PR #356), CI split into 4 parallel jobs (PR #354, longest ~11 min); earlier: #323 (PR #353), #324 (PR #335), #325 (#343), #326 music (#345), #327 boss slips (#346), #328 Raincoat puddle (#349), #329 Stuffing Cloud (#348), #330 dash display (#350); next: PO approves spec 11, then issues + tickets 1-4; P-22 … P-37 answers still open. **M6 done**: all 13 tickets merged (M6-13 = PR #351), worktree `Game-m6` removed 2026-11-22; M6 playtest P-38 … P-41 waits for the PO)_
 
 ## Where we are
 
@@ -1016,4 +1016,15 @@ _Last updated: 2026-11-26 (#333 spec 11 "Every weapon evolves" drafted: research
   Shots find their weapon's helper node by name (`CradleThreads.NAME`, `BowlingLane.NAME`), never the
   weapon class (Snow Day cycle trap). New evolution sounds live in `EvolvedSfx` (lengths still in
   `SfxBank.LENGTHS`; `sfx_bank.gd` is ~920 lines). Scrapbook weapon counts are hardcoded in
-  `test_scrapbook.gd` / `test_03_scrapbook.gd` (now 20; +2 per Evo ticket). Test: `test_12_cradle_and_bowling.gd`.
+  `test_scrapbook.gd` / `test_03_scrapbook.gd` (now 22; +2 per Evo ticket). Test: `test_12_cradle_and_bowling.gd`.
+- Comfy Cloud + Hopscotch Mortar (Evo-2 #380, spec 11 §4.3-4.4, AC-120/123/124): numbers in
+  `WeaponStats.comfy_fluff` (`ComfyFluff`) and `hopscotch` (`HopscotchHops`). `ComfyCloud.trail`
+  (`FluffTrail`: `drop(at)`, `count()`, `spots()`, `hurt_all()` on the cloud's beat, `hits`, `mended`;
+  puffs = pooled sprites of `ProjectileLook.COMFY_PUFF`, mend sparkles one `draw_multiline_colors`).
+  Mend listens to `EnemyManager.killed_by` (connected lazily on the first physics frame) and heals
+  only the weapon's own hero, budget `mend_per_second`. `HopscotchProjectile` (extends
+  `ThimbleProjectile`): `hop` (0 = the throw), `hop_from(weapon, start, dir, index)`, `hops_left()`,
+  `direction()`; each hop is a new pooled shot spawned in `_land` (its ring sits on the next spot).
+  Scenario tests disable `run.pickups` so the cloud's kills don't open level-ups. Scrapbook grid is now
+  6 columns (`ScrapbookBook.COLUMNS`): 22 weapon tiles in 5 rows ran off the screen; 6 × 4 fits 24.
+  Test: `test_12_comfy_and_hopscotch.gd`.

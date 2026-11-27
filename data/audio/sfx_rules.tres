@@ -16,7 +16,7 @@ voices = Dictionary[StringName, int]({
 default_voices = 3
 starts_per_frame = 2
 pitch_variation = 0.08
-varied = Array[StringName]([&"hit", &"pop", &"pickup", &"quack", &"squeak", &"grumble", &"trill", &"bark", &"dash", &"coin", &"hurt", &"throw", &"pin", &"buttons", &"boing", &"whip", &"cannon", &"zip", &"mortar", &"snowball", &"paw", &"needles", &"fluff", &"volley", &"storm", &"split", &"sticky", &"snow_day", &"bear_slam", &"cradle", &"bowling"])
+varied = Array[StringName]([&"hit", &"pop", &"pickup", &"quack", &"squeak", &"grumble", &"trill", &"bark", &"dash", &"coin", &"hurt", &"throw", &"pin", &"buttons", &"boing", &"whip", &"cannon", &"zip", &"mortar", &"snowball", &"paw", &"needles", &"fluff", &"volley", &"storm", &"split", &"sticky", &"snow_day", &"bear_slam", &"cradle", &"bowling", &"comfy", &"hopscotch"])
 varied_pitch = 0.12
 pitch_overrides = Dictionary[StringName, float]({
 &"pickup": 0.03

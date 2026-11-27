@@ -16,6 +16,8 @@ const RECIPES: Dictionary[StringName, Array] = {
 	# Spec 11 §3: every weapon evolves.
 	&"cats_cradle": [&"bouncy_yarn_ball", &"magnet_pocket"],
 	&"bowling_buttons": [&"button_shotgun", &"quick_hands"],
+	&"comfy_cloud": [&"stuffing_cloud", &"extra_stuffing"],
+	&"hopscotch_mortar": [&"thimble_mortar", &"big_spool"],
 }
 
 

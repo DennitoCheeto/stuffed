@@ -12,7 +12,7 @@ extends CanvasLayer
 signal closed
 
 const RULES: ScrapbookRules = preload("res://data/scrapbook.tres")
-const COLUMNS: int = 5
+const COLUMNS: int = 6
 ## Rows the grid always makes room for, so the book keeps its size on every page.
 const ROWS: int = 3
 const GAP: int = 14
